@@ -1,4 +1,4 @@
-import '../styles/global.css'
+import './styles/global.css'
 import './components/x-tv-chart.js'
 
 const routes = {
