@@ -1,4 +1,4 @@
-// 安全加载 TradingView 脚本（只加载一次）
+// --- lazy load tv.js（只加载一次）
 let tvLoading = null;
 function loadTvScript () {
   if (window.TradingView) return Promise.resolve();
@@ -13,64 +13,79 @@ function loadTvScript () {
   return tvLoading;
 }
 
-export default class XTvChart extends HTMLElement {
-  constructor(){
+class XTvChart extends HTMLElement {
+  static get observedAttributes() { return ['symbol','interval']; }
+
+  constructor() {
     super();
     this.attachShadow({mode:'open'});
-    this._containerId = 'tv_' + Math.random().toString(36).slice(2);
-    this._themeHandler = () => this.initWidget(true);
+    this._cid = 'tv_' + Math.random().toString(36).slice(2);
+    this._onTheme = () => this._init(true);
   }
-  connectedCallback(){
-    this.render();
-    window.addEventListener('ttl:theme-changed', this._themeHandler);
-    this.initWidget();
-  }
-  disconnectedCallback(){
-    window.removeEventListener('ttl:theme-changed', this._themeHandler);
-  }
+  connectedCallback() {
+    this._render();
+    window.addEventListener('ttl:theme-changed', this._onTheme);
 
-  render(){
+    // 监听容器尺寸，动态重建
+    this._ro = new ResizeObserver(() => this._init(true));
+    this._ro.observe(this);
+
+    this._init();
+  }
+  disconnectedCallback() {
+    window.removeEventListener('ttl:theme-changed', this._onTheme);
+    this._ro && this._ro.disconnect();
+  }
+  attributeChangedCallback() { this._init(true); }
+
+  _render() {
     this.shadowRoot.innerHTML = `
       <style>
         :host{display:block}
-        .wrap{height:420px;border-radius:12px;overflow:hidden}
+        .wrap{
+          height:480px;
+          border-radius:12px; overflow:hidden;
+          background: var(--bg-card);
+          border:1px solid var(--border-color);
+        }
+        @media (max-width: 768px){
+          .wrap{ height:58vh; } /* 手机更高些 */
+        }
       </style>
-      <div class="wrap"><div id="${this._containerId}" style="height:100%"></div></div>
+      <div class="wrap"><div id="${this._cid}" style="height:100%"></div></div>
     `;
   }
 
-  async initWidget(rebuild=false){
+  async _init(rebuild=false){
     await loadTvScript();
+    const el = this.shadowRoot.getElementById(this._cid);
+    if (!el) return;
+    el.innerHTML = ''; // 防重叠
 
     const symbol   = this.getAttribute('symbol')   || 'OANDA:XAUUSD';
     const interval = this.getAttribute('interval') || '15';
-    const isDark = (document.documentElement.dataset.theme || 'light') === 'dark';
-    const theme  = isDark ? 'DARK' : 'LIGHT';
-    const autosize = this.hasAttribute('autosize');
-
-    // 清空容器（重建时避免重叠）
-    const el = this.shadowRoot.getElementById(this._containerId);
-    if (!el) return;
-    el.innerHTML = '';
+    const isDark   = (document.documentElement.dataset.theme || 'light') === 'dark';
 
     const opts = {
       symbol,
       interval,
       timezone: 'Etc/UTC',
-      theme,
+      theme: isDark ? 'DARK' : 'LIGHT',
       locale: 'en',
       container_id: el,
       withdateranges: true,
       allow_symbol_change: true,
-      details: true,
-      calendar: true,
-      hide_side_toolbar: false
+      details: true, calendar: true,
+      hide_side_toolbar: false,
+      autosize: true
     };
-    if (autosize) opts.autosize = true; else { opts.width = '100%'; opts.height = 420; }
-
-    // TradingView 会把容器当 id 或元素都支持，这里传元素最稳
     // eslint-disable-next-line no-new
     new window.TradingView.widget(opts);
   }
+
+  // 外部可调用
+  setSymbol(sym){ this.setAttribute('symbol', sym); }
+  setInterval(iv){ this.setAttribute('interval', iv); }
 }
 customElements.define('x-tv-chart', XTvChart);
+export default XTvChart;
