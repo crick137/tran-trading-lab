@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "xauusd-2025-10-16",
+    "title": "XAUUSD 每日结构观察",
+    "symbol": "FX:XAUUSD",
+    "tf": "1H",
+    "date": "2025-10-16",
+    "tags": ["gold","macro"],
+    "bias": "neutral"
+  },
+  {
+    "slug": "aapl-2025-10-15",
+    "title": "AAPL 区间上沿的反应",
+    "symbol": "NASDAQ:AAPL",
+    "tf": "1H",
+    "date": "2025-10-15",
+    "tags": ["equity","tech"],
+    "bias": "bullish"
+  }
+]

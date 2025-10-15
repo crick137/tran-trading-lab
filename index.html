@@ -1,110 +1,134 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TRAN TRADING LAB</title>
   </head>
   <body>
+    <!-- 상단 내비게이션 -->
     <nav class="nav">
       <strong>TRAN TRADING LAB</strong>
-      <a href="#/daily-brief">Daily Brief</a>
-      <a href="#/trade-journal">Trade Journal</a>
-      <a href="#/knowledge-lab">Knowledge Lab</a>
-      <a href="#/market-news">Market News</a>
-      <a href="#/articles">Trading Articles</a>
+      <a href="#/daily-brief">데일리 브리프</a>
+      <a href="#/trade-journal">분석 아카이브</a>
+      <a href="#/knowledge-lab">지식 연구소</a>
+      <a href="#/market-news">마켓 뉴스</a>
+      <a href="#/articles">아티클</a>
       <a href="#/about">About</a>
     </nav>
 
     <main class="container">
 
-      <!-- 首页（卡片入口） -->
+      <!-- 홈 (카드 진입) -->
       <section data-route="home" class="grid">
-        <a class="card" style="grid-column: span 6;" href="#/daily-brief"><h2>Daily Brief</h2><p class="muted">매일 아침 시장을 읽는 시간</p></a>
-        <a class="card" style="grid-column: span 6;" href="#/trade-journal"><h2>Trade Journal</h2><p class="muted">하루의 거래와 사고를 기록하는 시간</p></a>
-        <a class="card" style="grid-column: span 6;" href="#/knowledge-lab"><h2>Knowledge Lab</h2><p class="muted">초보에서 프로까지, 구조적 학습의 길</p></a>
-        <a class="card" style="grid-column: span 6;" href="#/market-news"><h2>Market News</h2><p class="muted">글로벌 주요 이슈와 경제 흐름 요약</p></a>
-        <a class="card" style="grid-column: span 6;" href="#/articles"><h2>Trading Articles</h2><p class="muted">시장 통찰과思考</p></a>
-        <a class="card" style="grid-column: span 6;" href="#/about"><h2>About</h2><p class="muted">트레이딩 철학, 여정, 그리고 나</p></a>
+        <a class="card" style="grid-column: span 6;" href="#/daily-brief">
+          <h2>데일리 브리프</h2>
+          <p class="muted">매일 아침 시장을 읽는 시간</p>
+        </a>
+        <a class="card" style="grid-column: span 6;" href="#/trade-journal">
+          <h2>분석 아카이브</h2>
+          <p class="muted">지지/저항과 관점 중심의 공개 분석</p>
+        </a>
+        <a class="card" style="grid-column: span 6;" href="#/knowledge-lab">
+          <h2>지식 연구소</h2>
+          <p class="muted">초보에서 프로까지, 구조적 학습의 길</p>
+        </a>
+        <a class="card" style="grid-column: span 6;" href="#/market-news">
+          <h2>마켓 뉴스</h2>
+          <p class="muted">글로벌 주요 이슈와 경제 흐름 요약</p>
+        </a>
+        <a class="card" style="grid-column: span 6;" href="#/articles">
+          <h2>아티클</h2>
+          <p class="muted">시장 통찰과 사고의 기록</p>
+        </a>
+        <a class="card" style="grid-column: span 6;" href="#/about">
+          <h2>About</h2>
+          <p class="muted">트레이딩 철학, 여정, 그리고 나</p>
+        </a>
       </section>
 
-      <!-- Daily Brief -->
-      <section data-route="daily-brief" class="hidden">
+      <!-- 데일리 브리프: 목록 -->
+      <section data-route="daily-brief" id="daily-brief-list" class="hidden">
+        <div class="card">
+          <h2>데일리 브리프 — 목록</h2>
+          <ul id="brief-list"></ul>
+          <p class="muted" style="margin-top:8px">각 날짜를 클릭하면 개별 페이지로 이동합니다.</p>
+        </div>
+      </section>
+
+      <!-- 데일리 브리프: 상세 -->
+      <section data-route="daily-brief-detail" id="daily-brief-detail" class="hidden"></section>
+
+      <!-- 분석 아카이브 (공개용) -->
+      <section data-route="trade-journal" class="hidden">
         <div class="grid">
-          <section class="card" style="grid-column: span 8;">
-            <h2>Daily Brief</h2>
-            <p class="muted">매일 아침 시장을 읽는 시간</p>
-            <div id="brief-feed"></div>
+          <!-- 좌: 필터 + 목록 -->
+          <section class="card" style="grid-column: span 7;">
+            <div class="toolbar">
+              <h2 style="margin:0">분석 목록</h2>
+              <input id="anal-search" class="search" placeholder="심볼/태그/제목 검색">
+              <select id="anal-bias" class="search">
+                <option value="">전체 관점</option>
+                <option value="bullish">상승</option>
+                <option value="bearish">하락</option>
+                <option value="neutral">중립</option>
+              </select>
+            </div>
+            <div id="anal-list"></div>
           </section>
-          <aside class="card" style="grid-column: span 4;">
-            <h2>Quick Chart</h2>
-            <x-tv-chart symbol="FX:XAUUSD" interval="60" autosize="true" theme="dark"></x-tv-chart>
+
+          <!-- 우: 상세 -->
+          <aside class="card" style="grid-column: span 5;">
+            <div id="anal-detail">
+              <p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>
+            </div>
           </aside>
         </div>
       </section>
 
-      <!-- Trade Journal -->
-      <section data-route="trade-journal" class="hidden">
-        <div class="card">
-          <h2>Trade Journal</h2>
-          <p class="muted">하루의 거래와 사고를 기록하는 시간</p>
-          <form id="journal" style="display:grid;gap:8px;grid-template-columns:repeat(2,1fr)">
-            <label>Symbol <input name="symbol" required placeholder="XAUUSD"></label>
-            <label>Direction <select name="side"><option>Long</option><option>Short</option></select></label>
-            <label>Entry <input name="entry" type="number" step="0.00001" required></label>
-            <label>SL <input name="sl" type="number" step="0.00001"></label>
-            <label>TP <input name="tp" type="number" step="0.00001"></label>
-            <label style="grid-column:1/-1">Notes <textarea name="notes" rows="4" placeholder="구조/유동성/트리거"></textarea></label>
-            <button type="submit" style="grid-column:1/-1">Save</button>
-          </form>
-          <hr>
-          <div id="journal-list"></div>
-        </div>
-      </section>
-
-      <!-- Knowledge Lab -->
+      <!-- 지식 연구소 -->
       <section data-route="knowledge-lab" class="hidden">
         <div class="grid">
           <section class="card" style="grid-column: span 8;">
-            <h2>Knowledge Lab</h2>
+            <h2>지식 연구소</h2>
             <p class="muted">초보에서 프로까지, 구조적 학습의 길</p>
-            <details open><summary>📚 结构 (Structure)</summary>
-              <ul><li>BOS / CHoCH 基本定义</li><li>高低点标注规则</li></ul>
+            <details open><summary>📚 구조 (Structure)</summary>
+              <ul><li>BOS / CHoCH 기본 정의</li><li>고저점 표기 규칙</li></ul>
             </details>
-            <details><summary>🧪 流动性 (Liquidity)</summary>
-              <ul><li>EQH/EQL 含义</li><li>诱多与扫流行为</li></ul>
+            <details><summary>🧪 유동성 (Liquidity)</summary>
+              <ul><li>EQH/EQL 개념</li><li>유인·세척 동작</li></ul>
             </details>
-            <details><summary>⚙️ 风控 (Risk)</summary>
-              <ul><li>2% 固定风险</li><li>25/25/25/25 分批</li></ul>
+            <details><summary>⚙️ 리스크 (Risk)</summary>
+              <ul><li>계좌당 2% 고정 리스크</li><li>25/25/25/25 분할</li></ul>
             </details>
           </section>
           <aside class="card" style="grid-column: span 4;">
-            <h2>Reference Chart</h2>
-            <x-tv-chart symbol="FX:AUDUSD" interval="15" autosize="true"></x-tv-chart>
+            <h2>참고 차트</h2>
+            <x-tv-chart symbol="FX:AUDUSD" interval="15" ratio="16:9" min_height="420"></x-tv-chart>
           </aside>
         </div>
       </section>
 
-      <!-- Market News -->
+      <!-- 마켓 뉴스 -->
       <section data-route="market-news" class="hidden">
         <div class="grid">
           <section class="card" style="grid-column: span 8;">
-            <h2>Market News</h2>
+            <h2>마켓 뉴스</h2>
             <div id="news"></div>
           </section>
           <aside class="card" style="grid-column: span 4;">
-            <h2>Watchlist</h2>
-            <x-tv-chart symbol="OANDA:NAS100USD" interval="60" autosize="true"></x-tv-chart>
+            <h2>워치리스트</h2>
+            <x-tv-chart symbol="OANDA:NAS100USD" interval="60" ratio="16:9" min_height="420"></x-tv-chart>
           </aside>
         </div>
       </section>
 
-      <!-- Articles -->
+      <!-- 아티클 -->
       <section data-route="articles" class="hidden">
         <div class="card">
-          <h2>Trading Articles</h2>
-          <article class="card"><h3>结构与风控的边界</h3><p class="muted">一次失败交易的复盘与原则校准……</p></article>
-          <article class="card"><h3>为什么分批更理性</h3><p class="muted">25/25/25/25 的心理与数学</p></article>
+          <h2>아티클</h2>
+          <article class="card"><h3>구조와 리스크의 경계</h3><p class="muted">실패한 거래의 복기와 원칙 교정…</p></article>
+          <article class="card"><h3>왜 분할이 더 합리적인가</h3><p class="muted">25/25/25/25의 심리와 수학</p></article>
         </div>
       </section>
 
@@ -113,12 +137,13 @@
         <div class="card">
           <h2>About</h2>
           <p class="muted">트레이딩 철학, 여정, 그리고 나의 이야기</p>
-          <p>TRAN TRADING LAB — 专注结构化交易与内容创作的个人实验室。</p>
+          <p>TRAN TRADING LAB — 구조적 트레이딩과 콘텐츠 실험실.</p>
         </div>
       </section>
 
     </main>
 
+    <!-- 앱 스크립트 -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
