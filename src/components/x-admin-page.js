@@ -1,90 +1,151 @@
-import './x-signal-admin.js';   // 中文录入面板
-import './x-publisher.js';      // 一键发布中心
+import './x-signal-admin.js';
+import './x-publisher.js';
 
-const PASS_KEY = 'ttl_pass_ok';
-const PASS = localStorage.getItem('ttl_admin_pass') || 'ttl123'; // 你可以提前改
+// 本地存储键
+const PASS_FLAG_KEY = 'ttl_pass_ok';
+const PASS_STORE_KEY = 'ttl_admin_pass';
+// 默认口令（可在界面里改）
+const DEFAULT_PASS = 'tranlab2025';
 
 class XAdminPage extends HTMLElement {
   connectedCallback() {
-    this.innerHTML = `
-      <section class="admin-container">
-        <h2 class="admin-title">관리자 패널 / 管理面板</h2>
+    this.render();
+  }
 
-        <div class="admin-box">
-          <label>🔑 访问口令 / Access Key</label>
-          <input id="admin-pass" type="password" placeholder="请输入后台密码…" />
-          <button id="login-btn">进入后台</button>
+  get currentPass() {
+    return localStorage.getItem(PASS_STORE_KEY) || DEFAULT_PASS;
+  }
+
+  render() {
+    const authed = localStorage.getItem(PASS_FLAG_KEY) === '1';
+    this.innerHTML = authed ? this.authedTpl() : this.lockTpl();
+    this.bind(authed);
+  }
+
+  lockTpl() {
+    return `
+      <section class="admin-wrap">
+        <div class="admin-card">
+          <h2 class="title">后台登录</h2>
+          <label class="lbl">🔑 访问口令</label>
+          <input id="pw" type="password" class="inp" placeholder="请输入后台密码…" />
+          <button id="login" class="btn">进入后台</button>
+          <p class="hint">默认口令：<code>${DEFAULT_PASS}</code></p>
+
+          <details class="mt12">
+            <summary class="lbl">修改口令（可选）</summary>
+            <div class="row">
+              <input id="newpw" class="inp" placeholder="新口令…" />
+              <button id="setpw" class="btn ghost">保存新口令</button>
+            </div>
+          </details>
+        </div>
+      </section>
+      ${this.styles()}
+    `;
+  }
+
+  authedTpl() {
+    return `
+      <section class="admin-wrap">
+        <div class="admin-card">
+          <div class="row space">
+            <h2 class="title">后台 · 仅站长可见</h2>
+            <button id="logout" class="btn warn">退出</button>
+          </div>
+          <p class="hint">口令可在“登录页 → 修改口令”里更改。</p>
         </div>
 
-        <p class="admin-hint">提示：默认密码为 <code>tranlab2025</code></p>
+        <div class="admin-card mt12">
+          <h3 class="subtitle">① 每日录入</h3>
+          <x-signal-admin></x-signal-admin>
+        </div>
 
-        <style>
-          :host {
-            display: block;
-            background: #111;               /* 深底 */
-            color: #f2f2f2;                 /* 亮字 */
-            min-height: 100vh;
-            font-family: 'Segoe UI', 'Noto Sans KR', sans-serif;
-          }
-          .admin-container {
-            max-width: 420px;
-            margin: 80px auto;
-            padding: 32px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-          }
-          .admin-title {
-            text-align: center;
-            font-size: 1.6rem;
-            color: #fff;
-            margin-bottom: 24px;
-          }
-          .admin-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-          }
-          label {
-            color: #ccc;
-            font-weight: 500;
-          }
-          input {
-            background: #222;
-            border: 1px solid #555;
-            color: #fff;
-            padding: 10px 14px;
-            border-radius: 8px;
-            outline: none;
-          }
-          input:focus {
-            border-color: #0af;
-            box-shadow: 0 0 8px #0af;
-          }
-          button {
-            background: linear-gradient(135deg, #0078ff, #00bcd4);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.25s;
-          }
-          button:hover {
-            background: linear-gradient(135deg, #00bcd4, #0078ff);
-          }
-          .admin-hint {
-            text-align: center;
-            color: #aaa;
-            font-size: 0.85rem;
-            margin-top: 20px;
-          }
-          code {
-            color: #0af;
-          }
-        </style>
+        <div class="admin-card mt12">
+          <h3 class="subtitle">② 一键发布中心</h3>
+          <x-publisher></x-publisher>
+        </div>
       </section>
+      ${this.styles()}
+    `;
+  }
+
+  bind(authed) {
+    if (authed) {
+      this.querySelector('#logout')?.addEventListener('click', () => {
+        localStorage.removeItem(PASS_FLAG_KEY);
+        this.render();
+      });
+      return;
+    }
+    const $ = s => this.querySelector(s);
+    $('#login')?.addEventListener('click', () => {
+      const input = ($('#pw')?.value || '').trim();
+      if (!input) return alert('请输入口令');
+      if (input === this.currentPass) {
+        localStorage.setItem(PASS_FLAG_KEY, '1');
+        this.render();
+      } else {
+        alert('口令错误');
+      }
+    });
+    $('#setpw')?.addEventListener('click', () => {
+      const v = ($('#newpw')?.value || '').trim();
+      if (!v) return alert('请输入新口令');
+      localStorage.setItem(PASS_STORE_KEY, v);
+      alert('已保存新口令：' + v);
+    });
+  }
+
+  styles() {
+    // 亮度对比充足，深底亮字；输入/按钮更易读
+    return `
+      <style>
+        :host { display:block; }
+        .admin-wrap { max-width: 1200px; margin: 32px auto; padding: 0 20px; }
+        .admin-card {
+          background: #141824;
+          border: 1px solid #22283a;
+          border-radius: 14px;
+          padding: 16px;
+          color: #e9eef7;
+          box-shadow: 0 6px 18px rgba(0,0,0,.35);
+        }
+        .title { margin: 0 0 8px; color: #ffffff; letter-spacing:.3px; }
+        .subtitle { margin: 0 0 8px; color: #ffffff; }
+        .lbl { color: #c4ccdd; font-size: 14px; }
+        .hint { color: #9aa3b2; font-size: 13px; margin: 8px 0 0; }
+        code { color: #7ab8ff; }
+
+        .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .space { justify-content: space-between; }
+
+        .inp {
+          width: 100%;
+          background: #1b2030;
+          border: 1px solid #2a3146;
+          color: #f2f6ff;
+          border-radius: 10px;
+          padding: 10px 12px;
+          outline: none;
+          margin: 6px 0 10px;
+        }
+        .inp:focus { border-color:#6ea8fe; box-shadow: 0 0 0 2px rgba(110,168,254,.25); }
+
+        .btn {
+          background: linear-gradient(135deg, #4f9cff, #3dd5f3);
+          color: #081018;
+          border: none;
+          border-radius: 10px;
+          padding: 10px 14px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .btn:hover { filter: brightness(1.05); }
+        .btn.ghost { background: #243048; color:#d9e6ff; }
+        .btn.warn { background: #ff6b6b; color: #1a0f0f; }
+        .mt12 { margin-top: 12px; }
+      </style>
     `;
   }
 }
