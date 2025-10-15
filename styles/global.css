@@ -1,0 +1,76 @@
+/* === Theme variables ================================================== */
+/* 默认：跟随系统是通过 JS 设置 data-theme。这里提供两套变量 */
+:root {
+  /* Light */
+  --bg-main: #f7f8fa;
+  --bg-card: #ffffff;
+  --text-primary: #0b1220;
+  --text-secondary: #2f3b59;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --accent: #0ea5e9;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg-main: #0d1117;
+  --bg-card: #161b22;
+  --text-primary: #f2f6ff;
+  --text-secondary: #cfd6e5;
+  --text-muted: #9ca3af;
+  --border-color: #2e3440;
+  --accent: #58a6ff;
+  color-scheme: dark;
+}
+
+/* === Base ============================================================= */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  font-family: 'Noto Sans KR', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+}
+
+h1,h2,h3,h4,h5,strong,b { color: var(--text-primary); }
+p,span,li,label,input,textarea,select { color: var(--text-secondary); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.card, section, article {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  padding: 16px;
+}
+
+input, textarea, select {
+  background: color-mix(in oklab, var(--bg-card), black 6%);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+button {
+  background: linear-gradient(135deg, color-mix(in oklab, var(--accent), white 10%), var(--accent));
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.05); }
+
+/* 小徽章保持统一 */
+.badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background: color-mix(in oklab, var(--bg-card), black 6%);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 10px; border-radius: 999px; font-size: 12px;
+}

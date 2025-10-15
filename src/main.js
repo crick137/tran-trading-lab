@@ -1,3 +1,9 @@
+import './styles/global.css';
+import { loadTheme, watchSystem } from './utils/theme.js';
+
+loadTheme();   // 启动时应用用户或系统主题
+watchSystem(); // 如果选择了“系统”，跟随系统变化
+import './styles/global.css';
 import './components/app-shell.js';
 import './components/x-header.js';
 import './components/x-dashboard.js';
