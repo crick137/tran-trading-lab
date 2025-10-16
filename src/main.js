@@ -1,3 +1,14 @@
+window.addEventListener('DOMContentLoaded', () => {
+  console.log('[main] DOM ready. hash =', location.hash);
+  const home = document.querySelector('section[data-route="home"]');
+  if (!home) {
+    alert('找不到 home section');
+  } else {
+    // 强制露出首页，证明 JS 在接管（排错时打开）
+    // home.style.display = 'block';
+  }
+});
+
 // JS 已加载，移除 no-js，交给路由控制显示
 document.documentElement.classList.remove('no-js');
 console.log('[main] loaded');
