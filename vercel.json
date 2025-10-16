@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/daily-brief/index.json", "destination": "/api/daily-brief" },
+    { "source": "/daily-brief/:slug.json", "destination": "/api/daily-brief/:slug" },
+
+    { "source": "/analyses/index.json", "destination": "/api/analyses" },
+    { "source": "/analyses/:slug.json", "destination": "/api/analyses/:slug" },
+
+    { "source": "/market-news/index.json", "destination": "/api/market-news" },
+    { "source": "/market-news/:id.json", "destination": "/api/market-news/:id" },
+
+    { "source": "/research/syllabus.json", "destination": "/api/research/syllabus" }
+  ]
+}
