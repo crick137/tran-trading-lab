@@ -367,3 +367,57 @@ body{ position: relative; }
 .kl-item .kl-name {
   line-height: 1.3;
 }
+/* ======= Mobile-only tweaks (≤768px) ======= */
+@media (max-width: 768px){
+
+  /* 容器内边距更紧凑 */
+  .container{ padding:16px }
+
+  /* 顶部导航：链接自动换行，点击区域更大 */
+  .nav{
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 12px;
+  }
+  .nav a{ padding:10px 6px }
+
+  /* 首页/通用网格：12列→6列已在你原样式，保证卡片不挤 */
+  .grid{ gap:14px }
+
+  /* Trade Journal 主从两栏在手机端改为一列堆叠 */
+  section[data-route="trade-journal"] .grid{
+    grid-template-columns: 1fr; /* 强制一列 */
+  }
+  /* 把内联的 grid-column: span 7 / span 5 覆盖为整行 */
+  section[data-route="trade-journal"] .grid > .card{
+    grid-column: 1 / -1 !important;
+  }
+
+  /* 工具条可换行，输入控件占满一行 */
+  .toolbar{
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .search{
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* 卡片留白稍减，标题字号略小 */
+  .card{ padding:18px; border-radius:14px }
+  .card h2{ font-size:18px }
+
+  /* 文字弱化行高更舒适 */
+  .muted{ font-size:13px }
+
+  /* 图表高度：手机上更扁一点，避免占满屏 */
+  x-tv-chart, .tv-embed, .chart-wrap{
+    height: 56vh;
+    min-height: 300px;
+    border-radius: 12px;
+  }
+
+  /* Hero/口号区域在手机端分两行显示更好读 */
+  .tagline{ display:block; }
+  .tagline-kr{ display:block; margin:4px 0 0; }
+}
