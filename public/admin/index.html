@@ -38,6 +38,8 @@
         <button class="tab-btn" data-tab="analyses">Analyses</button>
         <button class="tab-btn" data-tab="news">Market News</button>
         <button class="tab-btn" data-tab="research">Research</button>
+        <!-- 新增：知识文章后台 -->
+        <button class="tab-btn" data-tab="r-articles">Articles</button>
       </div>
 
       <!-- ========== Daily Brief ========== -->
@@ -163,7 +165,7 @@
         </div>
       </div>
 
-      <!-- ========== Research ========== -->
+      <!-- ========== Research（Syllabus） ========== -->
       <div class="tab" id="tab-research">
         <div class="split">
           <div>
@@ -190,6 +192,61 @@
           </div>
         </div>
       </div>
+
+      <!-- ========== Research Articles（知识文章后台） ========== -->
+      <div class="tab" id="tab-r-articles">
+        <div class="split">
+          <div>
+            <div class="form-grid">
+              <label>Slug（唯一，必填）
+                <input id="ra-slug" placeholder="smc-order-blocks" />
+              </label>
+              <label class="full">标题
+                <input id="ra-title" placeholder="Order Blocks 全解析" />
+              </label>
+              <label class="full">摘要（用于列表/SEO）
+                <textarea id="ra-excerpt"></textarea>
+              </label>
+              <label class="full">标签（逗号分隔）
+                <input id="ra-tags" placeholder="smc, ob, liquidity" />
+              </label>
+              <label class="full">主图 URL（可选）
+                <input id="ra-hero" placeholder="https://…" />
+              </label>
+              <label class="full">正文（Markdown）
+                <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
+              </label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="ra-publish" class="primary">发布 / 更新</button>
+              <button id="ra-reuse" class="icon-btn">昨日复用</button>
+              <button id="ra-clear" class="icon-btn">清空草稿</button>
+              <button id="ra-preview" class="icon-btn">一键预览</button>
+            </div>
+            <p class="muted" id="ra-msg" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">说明</h3>
+            <ul class="muted">
+              <li>发布到 <code>/research/articles/{slug}.json</code></li>
+              <li>并维护索引 <code>/research/articles/index.json</code></li>
+              <li>预览先打开 JSON（前端接入文章渲染后可跳到页面）</li>
+            </ul>
+            <p class="muted">示例 JSON：</p>
+<pre class="muted" style="white-space:pre-wrap;background:#0f1115;border:1px solid #23262b;padding:10px;border-radius:10px">
+{
+  "slug": "smc-order-blocks",
+  "title": "Order Blocks 全解析",
+  "excerpt": "结构与流动性的锚点……",
+  "tags": ["smc","ob","liquidity"],
+  "hero": "https://…/cover.png",
+  "date": "2025-10-16T09:00:00Z",
+  "body": "# 标题\\n支持 **Markdown** 正文"
+}
+</pre>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 
@@ -201,7 +258,8 @@
       brief: 'draft.brief.v1',
       analyses: 'draft.analyses.v1',
       news: 'draft.news.v1',
-      research: 'draft.research.v1'
+      research: 'draft.research.v1',
+      rArticles: 'draft.research.articles.v1' // 新增：文章草稿
     };
 
     // ---------- Tabs ----------
@@ -219,7 +277,6 @@
       const v = localStorage.getItem(LS.token)||'';
       if (v) tokenEl.value = v;
     })();
-    // 首次未记住口令时自动聚焦
     if (!localStorage.getItem(LS.token)) tokenEl.focus();
 
     $('#remember-token').onclick = ()=> localStorage.setItem(LS.token, tokenEl.value.trim());
@@ -231,7 +288,6 @@
     }
     function today(){ return new Date().toISOString().slice(0,10); }
 
-    // 统一：发布前检查是否填写口令
     function ensureTokenOrMsg(msgEl){
       const t = tokenEl.value.trim();
       if (!t){
@@ -247,266 +303,148 @@
     function loadDraft(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch{return{}} }
     function clearDraft(key){ localStorage.removeItem(key); }
 
-    // ========== Brief ==========
-    const B = {
-      slug: $('#b-slug'), title: $('#b-title'),
-      bullets: $('#b-bullets'), schedule: $('#b-schedule'),
-      symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg')
-    };
-    function bGet(){
-      return {
-        slug: B.slug.value.trim() || undefined,
-        title: B.title.value.trim() || undefined,
-        bullets: B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean),
-        schedule: B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean),
-        chart:{ symbol: B.symbol.value.trim() || undefined, interval: B.interval.value }
-      };
-    }
-    function bSet(d){
-      B.slug.value = d.slug||'';
-      B.title.value = d.title||'';
-      B.bullets.value = (d.bullets||[]).join('\n');
-      B.schedule.value = (d.schedule||[]).join('\n');
-      B.symbol.value = (d.chart?.symbol)||d.symbol||'';
-      B.interval.value = (d.chart?.interval)||d.interval||'60';
-    }
-    function bMsg(s){ B.msg.textContent = s; }
-
-    // autosave
-    $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=>{
-      el.addEventListener('input', ()=> saveDraft(LS.brief, bGet()));
-    });
-    (function bLoadDraft(){
-      const d = loadDraft(LS.brief); if (Object.keys(d).length) bSet(d);
-    })();
-
+    /* ===== Brief ===== */
+    const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
+    function bGet(){ return { slug:B.slug.value.trim()||undefined, title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
+    function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||d.interval||'60'; }
+    function bMsg(s){ B.msg.textContent=s; }
+    $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=>{ el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())); });
+    (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
     $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
     $('#b-reuse').onclick = async ()=>{
       bMsg('拉取最新一条…');
       try{
-        const r = await fetch('/daily-brief/index.json?_=' + Date.now());
-        const arr = await r.json();
+        const arr = await (await fetch('/daily-brief/index.json?_=' + Date.now())).json();
         if (!Array.isArray(arr) || !arr.length) return bMsg('没有历史记录');
-        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].slug : arr[0]; // 兼容对象/字符串
+        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].slug : arr[0];
         const d = await (await fetch(`/daily-brief/${latest}.json?_=${Date.now()}`)).json();
-        d.slug = today(); // 日期改成今天
-        bSet(d); saveDraft(LS.brief, bGet());
-        bMsg('已载入最近一条，并把日期改为今天');
+        d.slug = today(); bSet(d); saveDraft(LS.brief, bGet()); bMsg('已载入最近一条，并把日期改为今天');
       }catch{ bMsg('拉取失败'); }
     };
     $('#b-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(B.msg)) return;
       try{
-        const res = await fetch('/daily-brief/index.json', {
-          method:'POST', headers: authHeader(), body: JSON.stringify(bGet())
-        });
-        const data = await res.json();
-        if (!res.ok) throw data?.error || res.statusText;
-        bMsg('✅ 发布成功');
+        const res = await fetch('/daily-brief/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(bGet()) });
+        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; bMsg('✅ 发布成功');
       }catch(e){ bMsg('❌ 发布失败：' + (e||'Unknown')); }
     };
-    $('#b-preview').onclick = ()=>{
-      const slug = B.slug.value.trim() || today();
-      window.open(`/#/daily-brief/${slug}`,'_blank','noopener');
-    };
+    $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
 
-    // ========== Analyses ==========
-    const A = {
-      slug: $('#a-slug'), title: $('#a-title'), symbol: $('#a-symbol'), tf: $('#a-tf'),
-      date: $('#a-date'), bias: $('#a-bias'), tags: $('#a-tags'), supports: $('#a-supports'),
-      resistances: $('#a-resistances'), context: $('#a-context'), view: $('#a-view'),
-      invalidation: $('#a-invalidation'), chartSymbol: $('#a-chart-symbol'), chartInterval: $('#a-chart-interval'),
-      msg: $('#a-msg')
-    };
-    function aGet(){
-      return {
-        slug: A.slug.value.trim(),
-        title: A.title.value.trim(),
-        symbol: A.symbol.value.trim(),
-        tf: A.tf.value.trim(),
-        date: A.date.value.trim() || today(),
-        bias: A.bias.value,
-        tags: A.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
-        supports: A.supports.value.split('\n').map(s=>s.trim()).filter(Boolean),
-        resistances: A.resistances.value.split('\n').map(s=>s.trim()).filter(Boolean),
-        context: A.context.value.trim(),
-        view: A.view.value.trim(),
-        invalidation: A.invalidation.value.trim(),
-        chart: { symbol: A.chartSymbol.value.trim() || A.symbol.value.trim(), interval: A.chartInterval.value }
-      };
-    }
-    function aSet(d){
-      A.slug.value = d.slug||'';
-      A.title.value = d.title||'';
-      A.symbol.value = d.symbol||'';
-      A.tf.value = d.tf||'';
-      A.date.value = d.date||'';
-      A.bias.value = d.bias||'neutral';
-      A.tags.value = (d.tags||[]).join(', ');
-      A.supports.value = (d.supports||[]).join('\n');
-      A.resistances.value = (d.resistances||[]).join('\n');
-      A.context.value = d.context||'';
-      A.view.value = d.view||'';
-      A.invalidation.value = d.invalidation||'';
-      A.chartSymbol.value = (d.chart?.symbol)||'';
-      A.chartInterval.value = (d.chart?.interval)||'60';
-    }
-    function aMsg(s){ A.msg.textContent = s; }
-
-    $$('#tab-analyses input, #tab-analyses textarea, #tab-analyses select').forEach(el=>{
-      el.addEventListener('input', ()=> saveDraft(LS.analyses, aGet()));
-    });
-    (function aLoadDraft(){
-      const d = loadDraft(LS.analyses); if (Object.keys(d).length) aSet(d);
-    })();
-
+    /* ===== Analyses ===== */
+    const A = { slug: $('#a-slug'), title: $('#a-title'), symbol: $('#a-symbol'), tf: $('#a-tf'), date: $('#a-date'), bias: $('#a-bias'), tags: $('#a-tags'), supports: $('#a-supports'), resistances: $('#a-resistances'), context: $('#a-context'), view: $('#a-view'), invalidation: $('#a-invalidation'), chartSymbol: $('#a-chart-symbol'), chartInterval: $('#a-chart-interval'), msg: $('#a-msg') };
+    function aGet(){ return { slug:A.slug.value.trim(), title:A.title.value.trim(), symbol:A.symbol.value.trim(), tf:A.tf.value.trim(), date:A.date.value.trim()||today(), bias:A.bias.value, tags:A.tags.value.split(',').map(s=>s.trim()).filter(Boolean), supports:A.supports.value.split('\n').map(s=>s.trim()).filter(Boolean), resistances:A.resistances.value.split('\n').map(s=>s.trim()).filter(Boolean), context:A.context.value.trim(), view:A.view.value.trim(), invalidation:A.invalidation.value.trim(), chart:{ symbol:A.chartSymbol.value.trim()||A.symbol.value.trim(), interval:A.chartInterval.value } }; }
+    function aSet(d){ A.slug.value=d.slug||''; A.title.value=d.title||''; A.symbol.value=d.symbol||''; A.tf.value=d.tf||''; A.date.value=d.date||''; A.bias.value=d.bias||'neutral'; A.tags.value=(d.tags||[]).join(', '); A.supports.value=(d.supports||[]).join('\n'); A.resistances.value=(d.resistances||[]).join('\n'); A.context.value=d.context||''; A.view.value=d.view||''; A.invalidation.value=d.invalidation||''; A.chartSymbol.value=(d.chart?.symbol)||''; A.chartInterval.value=(d.chart?.interval)||'60'; }
+    function aMsg(s){ A.msg.textContent=s; }
+    $$('#tab-analyses input, #tab-analyses textarea, #tab-analyses select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.analyses, aGet())));
+    (function(){ const d=loadDraft(LS.analyses); if(Object.keys(d).length) aSet(d); })();
     $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
     $('#a-reuse').onclick = async ()=>{
       aMsg('拉取最新一条…');
       try{
-        const r = await fetch('/analyses/index.json?_=' + Date.now());
-        const arr = await r.json();
+        const arr = await (await fetch('/analyses/index.json?_=' + Date.now())).json();
         if (!Array.isArray(arr) || !arr.length) return aMsg('没有历史记录');
-        const latest = arr[0].slug || arr[0]; // 兼容仅 slug 的实现
+        const latest = arr[0].slug || arr[0];
         const d = await (await fetch(`/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
-        // 建议把 slug 改成 “symbol-今天”
-        const base = (d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,'');
-        d.slug = `${base}-${today()}`;
-        d.date = today();
-        aSet(d); saveDraft(LS.analyses, aGet());
-        aMsg('已载入最近一条，slug/日期已更新为今天');
+        const base = (d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,''); d.slug = `${base}-${today()}`; d.date = today();
+        aSet(d); saveDraft(LS.analyses, aGet()); aMsg('已载入最近一条，slug/日期已更新为今天');
       }catch{ aMsg('拉取失败'); }
     };
     $('#a-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(A.msg)) return;
-      const payload = aGet();
-      if (!payload.slug) return aMsg('请填写 slug');
+      const payload=aGet(); if (!payload.slug) return aMsg('请填写 slug');
       try{
-        const res = await fetch('/analyses/index.json', {
-          method:'POST', headers: authHeader(), body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw data?.error || res.statusText;
-        aMsg('✅ 发布成功');
+        const res = await fetch('/analyses/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
+        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; aMsg('✅ 发布成功');
       }catch(e){ aMsg('❌ 发布失败：' + (e||'Unknown')); }
     };
-    $('#a-preview').onclick = ()=>{
-      const slug = A.slug.value.trim();
-      if (!slug) return aMsg('请先填写 slug');
-      window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener');
-    };
+    $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
 
-    // ========== News ==========
-    const N = {
-      id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'),
-      date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets'),
-      msg: $('#n-msg')
-    };
-    function nGet(){
-      return {
-        id: N.id.value.trim(),
-        title: N.title.value.trim(),
-        source: N.source.value.trim(),
-        url: N.url.value.trim(),
-        date: N.date.value.trim() || new Date().toISOString(),
-        tags: N.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
-        summary: N.summary.value.trim(),
-        bullets: N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean)
-      };
-    }
-    function nSet(d){
-      N.id.value = d.id||'';
-      N.title.value = d.title||'';
-      N.source.value = d.source||'';
-      N.url.value = d.url||'';
-      N.date.value = d.date||'';
-      N.tags.value = (d.tags||[]).join(', ');
-      N.summary.value = d.summary||'';
-      N.bullets.value = (d.bullets||[]).join('\n');
-    }
-    function nMsg(s){ N.msg.textContent = s; }
-
-    $$('#tab-news input, #tab-news textarea').forEach(el=>{
-      el.addEventListener('input', ()=> saveDraft(LS.news, nGet()));
-    });
-    (function nLoadDraft(){
-      const d = loadDraft(LS.news); if (Object.keys(d).length) nSet(d);
-    })();
-
+    /* ===== News ===== */
+    const N = { id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets'), msg: $('#n-msg') };
+    function nGet(){ return { id:N.id.value.trim(), title:N.title.value.trim(), source:N.source.value.trim(), url:N.url.value.trim(), date:N.date.value.trim()||new Date().toISOString(), tags:N.tags.value.split(',').map(s=>s.trim()).filter(Boolean), summary:N.summary.value.trim(), bullets:N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean) }; }
+    function nSet(d){ N.id.value=d.id||''; N.title.value=d.title||''; N.source.value=d.source||''; N.url.value=d.url||''; N.date.value=d.date||''; N.tags.value=(d.tags||[]).join(', '); N.summary.value=d.summary||''; N.bullets.value=(d.bullets||[]).join('\n'); }
+    function nMsg(s){ N.msg.textContent=s; }
+    $$('#tab-news input, #tab-news textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.news, nGet())));
+    (function(){ const d=loadDraft(LS.news); if(Object.keys(d).length) nSet(d); })();
     $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清空'); };
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
-        const r = await fetch('/market-news/index.json?_=' + Date.now());
-        const arr = await r.json();
+        const arr = await (await fetch('/market-news/index.json?_=' + Date.now())).json();
         if (!Array.isArray(arr) || !arr.length) return nMsg('没有历史记录');
-        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].id : arr[0]; // 兼容对象/字符串
+        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].id : arr[0];
         const d = await (await fetch(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
-        // 建议把 id 改成 “今天-序号”
-        const base = today();
-        d.id = `${base}-1`;
-        d.date = new Date().toISOString();
-        nSet(d); saveDraft(LS.news, nGet());
-        nMsg('已载入最近一条，已建议新的 id');
+        const base=today(); d.id=`${base}-1`; d.date=new Date().toISOString();
+        nSet(d); saveDraft(LS.news, nGet()); nMsg('已载入最近一条，已建议新的 id');
       }catch{ nMsg('拉取失败'); }
     };
     $('#n-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(N.msg)) return;
-      const payload = nGet();
-      if (!payload.id) return nMsg('请填写 id');
+      const payload=nGet(); if (!payload.id) return nMsg('请填写 id');
       try{
-        const res = await fetch('/market-news/index.json', {
-          method:'POST', headers: authHeader(), body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw data?.error || res.statusText;
-        nMsg('✅ 发布成功');
+        const res = await fetch('/market-news/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
+        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; nMsg('✅ 发布成功');
       }catch(e){ nMsg('❌ 发布失败：' + (e||'Unknown')); }
     };
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
 
-    // ========== Research ==========
+    /* ===== Research (syllabus) ===== */
     const R = { json: $('#r-json'), msg: $('#r-msg') };
     function rMsg(s){ R.msg.textContent = s; }
-    function rGet(){ 
-      let syllabus;
-      try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; }
-      return syllabus;
-    }
-    $$('#tab-research textarea').forEach(el=>{
-      el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value}));
-    });
-    (function rLoadDraft(){
-      const d = loadDraft(LS.research);
-      if (d && typeof d.text==='string') R.json.value = d.text;
-    })();
-
+    function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
+    $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value})));
+    (function(){ const d = loadDraft(LS.research); if (d && typeof d.text==='string') R.json.value = d.text; })();
     $('#r-load').onclick = async ()=>{
       rMsg('加载线上大纲…');
       try{
-        const r = await fetch('/research/syllabus.json?_=' + Date.now());
-        if (!r.ok) throw 0;
-        const j = await r.json();
+        const j = await (await fetch('/research/syllabus.json?_=' + Date.now())).json();
         R.json.value = JSON.stringify(j.syllabus||[], null, 2);
-        saveDraft(LS.research, {text: R.json.value});
-        rMsg('已载入线上版本到编辑框');
+        saveDraft(LS.research, {text: R.json.value}); rMsg('已载入线上版本到编辑框');
       }catch{ rMsg('加载失败'); }
     };
     $('#r-save').onclick = async ()=>{
-      const syllabus = rGet();
-      if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
+      const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
       if (!ensureTokenOrMsg(R.msg)) return;
       try{
-        const res = await fetch('/research/syllabus.json', {
-          method:'POST', headers: authHeader(), body: JSON.stringify({ syllabus })
-        });
-        const data = await res.json();
-        if (!res.ok) throw data?.error || res.statusText;
-        rMsg('✅ 保存成功');
+        const res = await fetch('/research/syllabus.json', { method:'POST', headers: authHeader(), body: JSON.stringify({ syllabus }) });
+        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; rMsg('✅ 保存成功');
       }catch(e){ rMsg('❌ 保存失败：' + (e||'Unknown')); }
     };
     $('#r-clear').onclick = ()=>{ clearDraft(LS.research); R.json.value=''; rMsg('草稿已清空'); };
     $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
+
+    /* ===== Research Articles ===== */
+    const RA = { slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body'), msg: $('#ra-msg') };
+    const raMsg = s => RA.msg.textContent = s;
+    const raGet = () => ({ slug:(RA.slug.value||'').trim(), title:(RA.title.value||'').trim(), excerpt:(RA.excerpt.value||'').trim(), tags:(RA.tags.value||'').split(',').map(s=>s.trim()).filter(Boolean), hero:(RA.hero.value||'').trim(), date:new Date().toISOString(), body: RA.body.value || '' });
+    const raSet = d => { RA.slug.value=d.slug||''; RA.title.value=d.title||''; RA.excerpt.value=d.excerpt||''; RA.tags.value=(d.tags||[]).join(', '); RA.hero.value=d.hero||''; RA.body.value=d.body||''; };
+    $$('#tab-r-articles input, #tab-r-articles textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.rArticles, JSON.stringify(raGet()))));
+    (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.rArticles)||'{}'); if (Object.keys(d).length) raSet(d); }catch{} })();
+    $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清空'); };
+    $('#ra-reuse').onclick = async ()=>{
+      raMsg('拉取最新一篇…');
+      try{
+        const list = await (await fetch('/research/articles/index.json?_=' + Date.now())).json();
+        if (!Array.isArray(list) || !list.length) return raMsg('没有历史记录');
+        const latestSlug = list[0].slug || list[0];
+        const d = await (await fetch(`/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`)).json();
+        const base = (d.slug||'article').replace(/[^a-z0-9\-]+/gi,''); d.slug = base + '-' + (new Date().toISOString().slice(0,10)); d.date = new Date().toISOString();
+        raSet(d); localStorage.setItem(LS.rArticles, JSON.stringify(raGet())); raMsg('已载入最近一篇，已建议新的 slug');
+      }catch{ raMsg('拉取失败'); }
+    };
+    $('#ra-publish').onclick = async ()=>{
+      if (!ensureTokenOrMsg(RA.msg)) return;
+      const payload = raGet(); if (!payload.slug) return raMsg('请填写 slug');
+      try{
+        const res = await fetch('/research/articles/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
+        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; raMsg('✅ 发布成功');
+      }catch(e){ raMsg('❌ 发布失败：' + (e||'Unknown')); }
+    };
+    $('#ra-preview').onclick = ()=>{
+      const slug = (RA.slug.value||'').trim(); if (!slug) return raMsg('请先填写 slug');
+      window.open(`/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
+      // 以后接好前端文章渲染：window.open('/#/knowledge-lab?article=' + encodeURIComponent(slug), '_blank', 'noopener');
+    };
 
     // ---------- 快捷发布 ----------
     document.addEventListener('keydown', e=>{
@@ -515,70 +453,29 @@
       if ($('#tab-analyses').classList.contains('active')) return $('#a-publish').click();
       if ($('#tab-news').classList.contains('active')) return $('#n-publish').click();
       if ($('#tab-research').classList.contains('active')) return $('#r-save').click();
+      if ($('#tab-r-articles').classList.contains('active')) return $('#ra-publish').click(); // 新增
     });
   </script>
 </body>
 </html>
+
 <style>
   /* ===== 深色主题兜底（不依赖全站 CSS 也能黑） ===== */
   :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
-
   html,body{height:100%}
   body{
-    margin:0;
-    background:var(--bg);
-    color:var(--fg);
+    margin:0; background:var(--bg); color:var(--fg);
     font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
     -webkit-font-smoothing:antialiased;
   }
-
-  .card{
-    background:var(--card);
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
-    color:var(--fg);
-  }
+  .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
   .muted{ color:var(--muted); }
-
-  /* 表单控件深色 */
-  input,select,textarea{
-    background:#0f1115;
-    border:1px solid #23262b;
-    color:var(--fg);
-    padding:8px 10px;
-    border-radius:10px;
-    outline:none;
-  }
-  input:focus,select:focus,textarea:focus{
-    border-color:#3b82f6;
-    box-shadow:0 0 0 3px rgba(59,130,246,.2);
-  }
-
-  /* 按钮深色 */
-  .icon-btn{
-    background:transparent;
-    border:1px solid #2a2f36;
-    color:var(--fg);
-    padding:6px 10px;
-    border-radius:8px;
-    cursor:pointer;
-  }
-  .icon-btn:hover{ background:#1b1f24; }
-
-  button.primary{
-    padding:10px 14px;
-    border-radius:12px;
-    border:0;
-    background:#3b82f6;
-    color:#fff;
-    font-weight:700;
-    cursor:pointer;
-  }
-  button.primary:hover{ filter:brightness(1.05); }
-
-  /* 让“搜索/输入”类看起来一致 */
-  .search{ background:#0f1115; border:1px solid #23262b; color:var(--fg); border-radius:10px; }
-
-  /* Tab 按钮本来就是深色，但补一条 hover */
-  .tab-btn:hover{ background:#171a20; }
+  input,select,textarea{ background:#0f1115; border:1px solid #23262b; color:var(--fg); padding:8px 10px; border-radius:10px; outline:none; }
+  input:focus,select:focus,textarea:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2); }
+  .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
+  .icon-btn:hover{ background:#1b1f24 }
+  button.primary{ padding:10px 14px; border-radius:12px; border:0; background:#3b82f6; color:#fff; font-weight:700; cursor:pointer }
+  button.primary:hover{ filter:brightness(1.05) }
+  .search{ background:#0f1115; border:1px solid #23262b; color:var(--fg); border-radius:10px }
+  .tab-btn:hover{ background:#171a20 }
 </style>
