@@ -1,8 +1,9 @@
-// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons) =====
+// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons, improved a11y & bg toggle) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 
 const routes = {
+  '#/': 'home',
   '': 'home',
   '#/daily-brief': 'daily-brief',
   '#/trade-journal': 'trade-journal',   // 공개 분석
@@ -13,20 +14,36 @@ const routes = {
 };
 
 function setActive(){
+  const h = location.hash || '#/';
   document.querySelectorAll('.nav a').forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href')===location.hash);
+    const href = a.getAttribute('href') || '#/';
+    a.classList.toggle('active', href===h);
   });
 }
+
 function show(routeId){
   document.querySelectorAll('section[data-route]').forEach(s=>{
-    s.classList.toggle('hidden', s.dataset.route!==routeId);
+    const on = s.dataset.route===routeId;
+    s.classList.toggle('hidden', !on);
+    if (on){
+      // 可访问性：切页后将主标题送入焦点
+      const labelledBy = s.getAttribute('aria-labelledby');
+      const heading = labelledBy ? document.getElementById(labelledBy) : s.querySelector('h1,h2');
+      if (heading){
+        heading.setAttribute('tabindex','-1');
+        // 轻微延迟避免与 hashchange 冲突
+        setTimeout(()=>heading.focus(),0);
+      }
+    }
   });
   setActive();
+  // 切页回到顶部
+  window.scrollTo({top:0, behavior:'instant'});
 }
 
 // -------- Daily Brief 라우팅 ----------
 function matchRoute() {
-  const h = location.hash;
+  const h = location.hash || '#/';
   const m = h.match(/^#\/daily-brief\/([\w-]+)$/);
   if (m) return { id: 'daily-brief-detail', slug: m[1] };
   return { id: (routes[h] || 'home') };
@@ -100,7 +117,7 @@ async function loadAnalysesList(){
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
-    // 👉 자동으로 첫 항목 열기 & 미리보기 차트 활성화 (URL에 slug가 없을 때)
+    // 👉 URL 无 slug 时自动打开第一个并展开预览图表
     const slugInUrl = currentSlugFromQuery();
     if (!slugInUrl && items.length){
       await renderAnalysisDetailBySlug(items[0].slug);
@@ -118,9 +135,10 @@ async function loadAnalysesList(){
   }
 }
 
-// 목록 + 미리보기 차트 버튼
+// 목록 + 미리보기 차트按钮
 function renderAnalysesListFiltered(){
   const list = document.getElementById('anal-list');
+  if (!list) return;
   const q = (document.getElementById('anal-search')?.value||'').toLowerCase();
   const bias = (document.getElementById('anal-bias')?.value||'');
   const raw = JSON.parse(list.dataset.raw||'[]');
@@ -147,7 +165,7 @@ function renderAnalysesListFiltered(){
     </article>
   `).join('') || `<p class="muted">검색 결과가 없습니다</p>`;
 
-  // 미리보기 차트 토글 (on-demand 로드/해제)
+  // 预览图表开关
   list.querySelectorAll('.pv-btn').forEach(btn=>{
     btn.onclick = ()=>{
       const slug = btn.dataset.slug;
@@ -166,7 +184,7 @@ function renderAnalysesListFiltered(){
   });
 }
 
-// 상세(우측 패널) + 주기 선택
+// 详情(右侧) + 周期选择
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
@@ -238,7 +256,7 @@ function currentSlugFromQuery(){
   if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
-  // 1) 카드 계단식 입장
+  // 1) 卡片阶梯式入场
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
     c.classList.add('reveal');
@@ -256,11 +274,19 @@ function currentSlugFromQuery(){
 
   cards.forEach(c => revealObserver.observe(c));
 
-  // 2) 배경 캔들/그리드 저부하 애니메이션
+  // 2) 背景 Canvas：当 data-enabled="false" 时彻底禁用并隐藏
   const cvs = document.getElementById('bgfx');
-  if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
+  if (!cvs) return;
+  if (cvs.dataset.enabled !== 'true') {
+    cvs.width = 0;
+    cvs.height = 0;
+    cvs.style.display = 'none';
+    return;
+  }
+  if (cvs.__inited) return;
   cvs.__inited = true;
 
+  // 低负载网格+烛形元素动画（如需彻底关闭，将 data-enabled 设为 false 即可）
   const ctx = cvs.getContext('2d');
   let w, h, dpr;
 
@@ -509,7 +535,7 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
-  // 분류 접기/펼치기
+  // 折叠/展开
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
       const sec = document.querySelector(h.dataset.toggle);
@@ -517,7 +543,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 완료 체크: 왼쪽 점 버튼만 토글
+  // 完成勾选
   host.querySelectorAll('.kl-dot-btn').forEach(btn=>{
     btn.onclick = (e)=>{
       e.preventDefault();
@@ -530,7 +556,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 진행도 초기화
+  // 进度重置
   const resetBtn = document.getElementById('kl-reset');
   if (resetBtn){
     resetBtn.onclick = ()=>{
@@ -595,6 +621,11 @@ window.addEventListener('hashchange', async ()=>{
 });
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // 首屏淡入：与 global.css 的 body.loaded 配合
+  window.addEventListener('load', () => {
+    document.body.classList.add('loaded');
+  });
+
   const m = matchRoute();
   const routeId = m.id;
   show(routeId);
@@ -624,7 +655,7 @@ function localizeKnowledgeLabKO(){
   if (sub) sub.textContent = 'Preschool부터 Graduation까지, 아래에서 위로 쌓아 가는 체계적 학습 경로.';
   // 进度标题
   const progressTitle = sec.querySelector('.card h2');
-  if (progressTitle && /进度|进度|总体|总体进度|整体|전체 진행도/.test(progressTitle.textContent)) {
+  if (progressTitle && /进度|总体|整体|전체 진행도/.test(progressTitle.textContent)) {
     progressTitle.textContent = '전체 진행도';
   }
   // 重置按钮
