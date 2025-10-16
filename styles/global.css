@@ -443,3 +443,10 @@ section[data-route].active{
 }
 .nav a{ padding:8px 4px; }
 .nav .brand{ margin-right: 8px; }
+
+/* --- Fallback：当 JS 未加载/报错时，显示全部内容或至少显示首页 --- */
+.no-js section[data-route="home"]{
+  display:block !important;
+  opacity:1 !important;
+  transform:none !important;
+}

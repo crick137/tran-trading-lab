@@ -1,3 +1,7 @@
+// JS 已加载，移除 no-js，交给路由控制显示
+document.documentElement.classList.remove('no-js');
+console.log('[main] loaded');
+
 // ===== src/main.js (KO, preview + auto-open 1st, clickable lessons, fixed & enhanced) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
