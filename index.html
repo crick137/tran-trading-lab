@@ -1,138 +1,350 @@
-:root { --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TRAN TRADING LAB</title>
+    <link rel="stylesheet" href="/styles/global.css" />
+    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+  </head>
+  <body>
+    <!-- 배경 동효과 캔버스 (켜기/끄기: data-enabled) -->
+    <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
 
-*{box-sizing:border-box;margin:0;padding:0}
+    <!-- 상단 내비게이션 -->
+    <nav class="nav" aria-label="Primary">
+      <a href="#/" class="brand" aria-label="홈으로">
+        <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
+        TRAN TRADING LAB
+      </a>
+      <a href="#/daily-brief">데일리 브리프</a>
+      <a href="#/trade-journal">분석 아카이브</a>
+      <a href="#/knowledge-lab">지식 연구소</a>
+      <a href="#/market-news">마켓 뉴스</a>
+      <a href="#/articles">아티클</a>
+      <a href="#/about">About</a>
+    </nav>
 
-body{
-  background:var(--bg);
-  color:var(--fg);
-  font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-  -webkit-font-smoothing:antialiased;
-}
+    <main class="container" id="main">
+      <!-- 홈 -->
+      <section data-route="home" aria-labelledby="home-hero-title">
+        <div class="hero">
+          <div class="badge">TRAN TRADING LAB</div>
+          <h1 id="home-hero-title">매일 더 똑똑하게, 더 가볍게 시장을 읽다</h1>
+          <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
+        </div>
 
-a{color:inherit;text-decoration:none;transition:opacity .2s}
-a:hover{opacity:.8}
+        <div class="grid" role="list">
+          <!-- 데일리 브리프 -->
+          <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <g class="float">
+                    <line x1="6" y1="4" x2="6" y2="20" class="stroke" />
+                    <rect x="4.5" y="9" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                  </g>
+                  <g class="float" style="animation-delay:.2s">
+                    <line x1="12" y1="6" x2="12" y2="18" class="stroke" />
+                    <rect x="10.5" y="8" width="3" height="5" rx="1.2" fill="url(#grad)" />
+                  </g>
+                  <g class="float" style="animation-delay:.4s">
+                    <line x1="18" y1="3" x2="18" y2="21" class="stroke" />
+                    <rect x="16.5" y="11" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                  </g>
+                </svg>
+              </span>
+              데일리 브리프
+            </div>
+            <p>매일 아침 시장을 읽는 시간</p>
+          </a>
 
-.container{max-width:1200px;margin:0 auto;padding:24px}
-@media (max-width:768px){ .container{ padding:16px } }
+          <!-- 분석 아카이브 -->
+          <a href="#/trade-journal" class="card" role="listitem" aria-label="분석 아카이브로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <polyline class="stroke" points="2,16 7,10 11,13 15,7 22,12" />
+                  <circle cx="7" cy="10" r="1.6" fill="url(#grad)" class="pulse" />
+                </svg>
+              </span>
+              분석 아카이브
+            </div>
+            <p>지지/저항과 관점 중심의 공개 분석</p>
+          </a>
 
-.grid{display:grid;gap:20px;grid-template-columns:repeat(12,1fr)}
-@media (max-width:768px){.grid{grid-template-columns:repeat(6,1fr)}}
+          <!-- 지식 연구소 -->
+          <a href="#/knowledge-lab" class="card" role="listitem" aria-label="지식 연구소로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <g class="spin">
+                    <circle cx="12" cy="12" r="6" class="stroke" />
+                    <path d="M12 6v-2M12 20v-2M6 12H4M20 12h-2M16.2 7.8l1.4-1.4M6.4 18.6l1.4-1.4M7.8 7.8 6.4 6.4M17.6 17.6l-1.4-1.4" class="stroke" />
+                  </g>
+                </svg>
+              </span>
+              지식 연구소
+            </div>
+            <p>초보에서 프로까지, 구조적 학습의 길</p>
+          </a>
 
-.card{
-  background:var(--card);
-  border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
-  padding:24px;
-  transition:transform .2s,box-shadow .2s
-}
-.card:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.45)}
-.card h2{margin-bottom:12px;font-size:20px}
+          <!-- 마켓 뉴스 -->
+          <a href="#/market-news" class="card" role="listitem" aria-label="마켓 뉴스로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="3" y="5" width="18" height="14" rx="2" class="stroke" />
+                  <line x1="6" y1="10" x2="18" y2="10" class="stroke" style="animation-delay:.3s" />
+                  <line x1="6" y1="14" x2="15" y2="14" class="stroke" style="animation-delay:.6s" />
+                </svg>
+              </span>
+              마켓 뉴스
+            </div>
+            <p>글로벌 주요 이슈와 경제 흐름 요약</p>
+          </a>
 
-.muted{opacity:.75;font-size:14px}
+          <!-- 아티클 -->
+          <a href="#/articles" class="card" role="listitem" aria-label="아티클로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M3 20l5-1 11-11a2.5 2.5 0 0 0-3.5-3.5L4.5 15l-1.5 5z" class="stroke" />
+                  <circle cx="17.5" cy="6.5" r="1.5" fill="url(#grad)" class="pulse" />
+                </svg>
+              </span>
+              아티클
+            </div>
+            <p>시장 통찰과 사고의 기록</p>
+          </a>
 
-x-tv-chart{display:block;width:100%;border-radius:12px;overflow:hidden}
+          <!-- About -->
+          <a href="#/about" class="card" role="listitem" aria-label="About로 이동">
+            <span class="glow" aria-hidden="true"></span>
+            <div class="title">
+              <span class="icon-wrap" aria-hidden="true">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0" stop-color="#66e0ff" />
+                      <stop offset="1" stop-color="#7a7dff" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="12" cy="12" r="8" class="stroke" />
+                  <polygon points="12,7 9,15 12,13 15,15" fill="url(#grad)" class="float" />
+                </svg>
+              </span>
+              About
+            </div>
+            <p>트레이딩 철학, 여정, 그리고 나</p>
+          </a>
+        </div>
+      </section>
 
-/* 顶部导航 */
-.nav{
-  display:flex;gap:20px;align-items:center;
-  padding:12px 16px;background:#121418;
-  position:sticky;top:0;z-index:10;
-  border-bottom:1px solid rgba(255,255,255,.04); /* 新增：底边线 */
-}
-.nav a{opacity:.8;font-weight:500; position:relative; padding:8px 4px}
-.nav a.active{opacity:1;font-weight:700}
+      <!-- 데일리 브리프: 목록 -->
+      <section data-route="daily-brief" id="daily-brief-list" class="hidden" aria-labelledby="daily-brief-title">
+        <div class="card">
+          <h2 id="daily-brief-title">데일리 브리프 — 목록</h2>
+          <ul id="brief-list" aria-live="polite"></ul>
+          <p class="muted" style="margin-top:8px">각 날짜를 클릭하면 개별 페이지로 이동합니다.</p>
+        </div>
+      </section>
 
-/* --- 下划线动画（含 hover 与 active） --- */
-.nav a::after{
-  content:"";
-  position:absolute; left:0; right:0; bottom:-6px;
-  height:2px; background:#00bfa6; /* 点缀色可自定 */
-  transform:scaleX(0); transform-origin:left;
-  transition:transform .22s ease; border-radius:2px;
-}
-.nav a:hover::after,
-.nav a.active::after{ transform:scaleX(1) }
+      <!-- 데일리 브리프: 상세 -->
+      <section data-route="daily-brief-detail" id="daily-brief-detail" class="hidden" aria-live="polite"></section>
 
-.hidden{display:none}
+      <!-- 분석 아카이브 (공개용) -->
+      <section data-route="trade-journal" class="hidden" aria-labelledby="journal-title">
+        <div class="grid">
+          <section class="card" style="grid-column: span 7;">
+            <div class="toolbar">
+              <h2 id="journal-title" style="margin:0">분석 목록</h2>
+              <input id="anal-search" class="search" placeholder="심볼/태그/제목 검색" aria-label="검색" />
+              <select id="anal-bias" class="search" aria-label="관점 필터">
+                <option value="">전체 관점</option>
+                <option value="bullish">상승</option>
+                <option value="bearish">하락</option>
+                <option value="neutral">중립</option>
+              </select>
+            </div>
+            <div id="anal-list" aria-live="polite"></div>
+          </section>
 
-/* --- Journal form/list UI --- */
-.form-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-}
-.form-grid label{display:flex; flex-direction:column; gap:6px}
-.form-grid label.full{grid-column:1 / -1}
-.form-grid input, .form-grid select, .form-grid textarea{
-  background:#0f1115; border:1px solid #23262b; color:var(--fg);
-  padding:10px 12px; border-radius:10px; outline:none;
-}
-.form-grid input:focus, .form-grid select:focus, .form-grid textarea:focus{
-  border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2);
-}
-button.primary{
-  grid-column:1 / -1; padding:12px; border-radius:12px; border:0;
-  background:#3b82f6; color:white; font-weight:700; cursor:pointer;
-}
-button.primary:hover{filter:brightness(1.05)}
-.toolbar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px}
-.search{background:#0f1115; border:1px solid #23262b; color:var(--fg); padding:8px 12px; border-radius:10px; min-width:240px}
+          <aside class="card" style="grid-column: span 5;">
+            <div id="anal-detail">
+              <p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
 
-/* entry card */
-.entry{border:1px solid #23262b; border-radius:16px; padding:16px; margin-bottom:12px; background:#121418}
-.entry h3{margin:0 0 6px}
-.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-.pill{padding:4px 10px; border-radius:999px; font-size:12px; background:#1b1f24; border:1px solid #2a2f36}
-.pill.level{background:#0d1b16; border-color:#1a3a2d}
-.pill.res{background:#261515; border-color:#4b2a2a}
-.badge{padding:4px 8px; border-radius:6px; font-size:12px; border:1px solid #2a2f36}
-.badge.bullish{background:#0d1b16; border-color:#1a3a2d; color:#7bdcb5}
-.badge.bearish{background:#261515; border-color:#4b2a2a; color:#f78da7}
-.badge.neutral{background:#1b1f24; color:#cbd5e1}
-.meta{opacity:.7; font-size:12px}
-.entry .actions{margin-left:auto; display:flex; gap:8px}
-.icon-btn{background:transparent;border:1px solid #2a2f36;color:var(--fg);padding:6px 10px;border-radius:8px;cursor:pointer}
-.icon-btn:hover{background:#1b1f24}
+      <!-- 지식 연구소（코스형 디렉토리 + 진행도） -->
+      <section data-route="knowledge-lab" class="hidden" aria-labelledby="kl-hero-title">
+        <div class="hero">
+          <div class="badge">Knowledge Lab</div>
+          <h1 id="kl-hero-title">체계적 외환 지식 · 로드맵</h1>
+          <p class="muted">Preschool부터 Graduation까지, 아래에서 위로 쌓아 가는 체계적 학습 경로.</p>
+        </div>
 
-/* modal */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
-.modal.hidden{display:none}
-.modal-body{max-width:980px;width:92%;position:relative}
-#modal-close{position:absolute;right:12px;top:12px}
+        <!-- 진행도 -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <h2 style="margin:0">전체 진행도</h2>
+            <button id="kl-reset" class="btn" style="padding:6px 10px;font-weight:600">진행도 초기화</button>
+          </div>
+          <div class="progress-wrap" aria-label="전체 진행도">
+            <div id="kl-progress" class="progress-bar">
+              <span id="kl-progress-label" aria-live="polite">0%</span>
+            </div>
+          </div>
+          <p class="meta" id="kl-stats" aria-live="polite">0 / 0 강의</p>
+        </div>
 
-/* ========================= */
-/*      追加的增强样式       */
-/* ========================= */
+        <!-- 컨트롤바는 JS에서 삽입(검색/전체펼치기/전체접기/학습시작) -->
+        <!-- 커리큘럼 컨테이너 -->
+        <div id="kl-syllabus" class="kl-grid" aria-live="polite"></div>
+      </section>
 
-/* 分析页（trade-journal）移动端布局：桌面2列/移动1列 */
-section[data-route="trade-journal"] .grid{
-  display:grid; gap:16px;
-  grid-template-columns:repeat(2, minmax(0,1fr));
-}
-@media (max-width:768px){
-  section[data-route="trade-journal"] .grid{ grid-template-columns:1fr }
-}
-section[data-route="trade-journal"] .card{ border:1px solid #23262b }
+      <!-- 마켓 뉴스（차트 제거: 텍스트 버전） -->
+      <section data-route="market-news" class="hidden" aria-labelledby="news-title">
+        <div class="card">
+          <h2 id="news-title">마켓 뉴스</h2>
+          <p class="muted">글로벌 주요 이슈와 경제 흐름 요약</p>
+          <div id="news">
+            <ul>
+              <li>📊 미국 CPI / 고용 지표 발표 일정</li>
+              <li>🏦 주요 중앙은행 발언 및 금리 방향</li>
+              <li>💰 원자재 · 환율 주요 변동 포인트</li>
+              <li>🌏 한국, 일본, 유럽 시장 주요 헤드라인</li>
+            </ul>
+            <p class="muted" style="margin-top:10px">※ 뉴스 데이터는 매일 갱신됩니다.</p>
+          </div>
+        </div>
+      </section>
 
-/* TradingView / 自定义图表容器高度适配 */
-x-tv-chart, .tv-embed, .chart-wrap{
-  display:block; width:100%;
-  height:60vh; min-height:360px;
-  border-radius:12px; overflow:hidden;
-}
-@media (max-width:768px){
-  x-tv-chart, .tv-embed, .chart-wrap{ height:56vh; min-height:300px }
-}
+      <!-- 아티클 -->
+      <section data-route="articles" class="hidden" aria-labelledby="articles-title">
+        <div class="card">
+          <h2 id="articles-title">아티클</h2>
+          <article class="card">
+            <h3>구조와 리스크의 경계</h3>
+            <p class="muted">실패한 거래의 복기와 원칙 교정…</p>
+          </article>
+          <article class="card">
+            <h3>왜 분할이 더 합리적인가</h3>
+            <p class="muted">25/25/25/25의 심리와 수학</p>
+          </article>
+        </div>
+      </section>
 
-/* 品牌语（全站导航下的一行） */
-.hero{ padding:20px 0 8px }
-.tagline{ color:var(--muted); font-size:15px; line-height:1.7 }
-.tagline-kr{ margin-left:8px; opacity:.85 }
-@media (max-width:768px){
-  .tagline{ display:block }
-  .tagline-kr{ display:block; margin:4px 0 0 }
-}
+      <!-- About -->
+      <section data-route="about" class="hidden" aria-labelledby="about-hero-title">
+        <div class="hero">
+          <div class="badge">About</div>
+          <h1 id="about-hero-title">나는 ‘구조로 시장을 읽는 사람’입니다</h1>
+          <p class="muted">숫자보다 ‘맥락’, 운보다 ‘준비’. TRAN TRADING LAB의 출발과 원칙, 그리고 다음 여정.</p>
+        </div>
 
-/* 首屏加载淡入（与 main.js 的 body.loaded 配合） */
-body{ opacity:0; transition:opacity .3s ease-in-out }
-body.loaded{ opacity:1 }
+        <div class="grid">
+          <section class="card" aria-labelledby="about-start">
+            <h2 id="about-start">어디서 시작됐나</h2>
+            <p>
+              시장은 처음엔 ‘정답 맞히기’처럼 보였습니다. 올라갈까? 내려갈까?
+              그러나 수많은 실패가 알려준 건, <strong>가격은 결과</strong>이고 <strong>구조는 이유</strong>라는 사실이었습니다.
+              그래서 나는 차트를 ‘사진’처럼 보지 않고, <em>사건과 흔적</em>의 연속으로 읽기 시작했습니다.
+            </p>
+            <p class="muted">— “가격은 마지막에 오는 문장. 문법은 구조다.”</p>
+          </section>
+
+          <section class="card" aria-labelledby="about-turning">
+            <h2 id="about-turning">전환점</h2>
+            <ul>
+              <li><strong>Loss Journal</strong> — 손실을 감추지 않고 기록. ‘왜’에 집착하기 시작.</li>
+              <li><strong>Structure First</strong> — HH/HL/LL/LH, BOS·CHoCH, FVG·OB로 맥락 정리.</li>
+              <li><strong>Risk Engine</strong> — 1~2% 고정 리스크, 25/25/25/25 분할, 일일 DD 제한.</li>
+              <li><strong>공개 분석</strong> — 기록을 밖으로 내보내자, 피드백이 들어왔다. 더 단단해졌다.</li>
+            </ul>
+          </section>
+
+          <section class="card" aria-labelledby="about-rules">
+            <h2 id="about-rules">내가 지키는 5가지 원칙</h2>
+            <ol>
+              <li><strong>구조 &gt; 시그널</strong> — 신호는 구조 위에서만 의미가 있다.</li>
+              <li><strong>시나리오 2개</strong> — 주 시나리오 + 반대 시나리오, 둘 다 조건을 적는다.</li>
+              <li><strong>트리거는 단순하게</strong> — 엔트리·SL·TP는 미리 숫자로.</li>
+              <li><strong>리스크는 먼저</strong> — 감정은 나중. 규칙은 먼저.</li>
+              <li><strong>기록은 자산</strong> — 좋은 손실은 다음 승리의 선행조건.</li>
+            </ol>
+          </section>
+
+          <section class="card" aria-labelledby="about-next">
+            <h2 id="about-next">지금과 다음</h2>
+            <p>
+              지금 나는 매일 아침 <strong>데일리 브리프</strong>로 시장을 읽고,
+              <strong>분석 아카이브</strong>에 관점과 레벨을 공개합니다.
+              다음 목표는 <strong>자동화된 체크리스트</strong>와 <strong>백테스트-라이브 일체화</strong> 워크플로우를 완성해
+              누구나 따라 할 수 있는 재현 가능한 시스템을 만드는 것입니다.
+            </p>
+          </section>
+
+          <section class="card" aria-labelledby="about-one-line">
+            <h2 id="about-one-line">한 문장으로</h2>
+            <blockquote style="margin:8px 0 0; color:#cfd6e3">
+              “큰돈은 예측이 아니라 <strong>반응</strong>에서 나온다.
+              준비된 원칙으로 <em>천천히</em>, 그러나 <em>끊임없이</em>.”
+            </blockquote>
+          </section>
+
+          <section class="card" aria-labelledby="about-socials">
+            <h2 id="about-socials">채널 & 커뮤니티</h2>
+            <p class="muted" style="margin:6px 0 14px">실시간 브리프, 공개 분석, 투표·Q&A는 여기서 이어집니다.</p>
+            <div class="socials">
+              <a class="btn" href="https://x.com/TranTradingLab" target="_blank" rel="noopener">X / Twitter @TranTradingLab</a>
+              <a class="btn" href="https://t.me/http4477" target="_blank" rel="noopener">Telegram 채널</a>
+              <a class="btn" href="https://whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t" target="_blank" rel="noopener">WhatsApp 채널</a>
+            </div>
+            <p class="muted" style="margin-top:10px">— 하루를 가볍게 시작하는 가장 빠른 길.</p>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <!-- 앱 스크립트 -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
