@@ -8,6 +8,9 @@
     "build": "vite build",
     "preview": "vite preview"
   },
+  "dependencies": {
+    "@vercel/blob": "^0.22.0"
+  },
   "devDependencies": {
     "vite": "npm:rolldown-vite@7.1.14"
   },
