@@ -613,3 +613,36 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   if (routeId === 'knowledge-lab') renderKnowledgeLab();
 });
+
+function localizeKnowledgeLabKO(){
+  const sec = document.querySelector('section[data-route="knowledge-lab"]');
+  if (!sec) return;
+  // 标题/副标题
+  const h1 = sec.querySelector('.hero h1');
+  if (h1) h1.textContent = '체계적 외환 지식 · 로드맵';
+  const sub = sec.querySelector('.hero .muted');
+  if (sub) sub.textContent = 'Preschool부터 Graduation까지, 아래에서 위로 쌓아 가는 체계적 학습 경로.';
+  // 进度标题
+  const progressTitle = sec.querySelector('.card h2');
+  if (progressTitle && /进度|进度|总体|总体进度|整体|전체 진행도/.test(progressTitle.textContent)) {
+    progressTitle.textContent = '전체 진행도';
+  }
+  // 重置按钮
+  const resetBtn = sec.querySelector('#kl-reset, .progress-reset, .kl-reset');
+  if (resetBtn) resetBtn.textContent = '진행도 초기화';
+
+  // 控件区：占位与按钮（以防早期版本）
+  const q = document.getElementById('kl-q');
+  if (q) q.placeholder = '강의 검색…';
+  const exp = document.getElementById('kl-expand');   if (exp) exp.textContent = '전체 펼치기';
+  const col = document.getElementById('kl-collapse'); if (col) col.textContent = '전체 접기';
+  const start = document.getElementById('kl-start');  if (start) start.textContent = '학습 시작';
+}
+
+// 进入知识页时调用一次（以及首次加载时）
+window.addEventListener('hashchange', ()=>{
+  if (location.hash === '#/knowledge-lab') localizeKnowledgeLabKO();
+});
+document.addEventListener('DOMContentLoaded', ()=>{
+  if (!location.hash || location.hash === '#/knowledge-lab') localizeKnowledgeLabKO();
+});
