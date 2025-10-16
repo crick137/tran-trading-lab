@@ -450,3 +450,9 @@ section[data-route].active{
   opacity:1 !important;
   transform:none !important;
 }
+/* JS 未加载时的兜底：至少展示首页 */
+.no-js section[data-route="home"]{
+  display:block !important;
+  opacity:1 !important;
+  transform:none !important;
+}
