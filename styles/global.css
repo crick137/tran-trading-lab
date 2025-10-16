@@ -260,3 +260,24 @@ body{ position: relative; }
   border-color: #ffffff33;
   box-shadow: 0 14px 28px rgba(0,0,0,.45), inset 0 1px 0 #ffffff20;
 }
+
+/* ===== 顶部 Logo 样式 ===== */
+.nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.1rem;
+}
+.nav .brand:hover {
+  opacity: 0.9;
+}
+.nav .logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(255,255,255,0.1);
+}
