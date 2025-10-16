@@ -269,3 +269,108 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await renderAnalysisDetailBySlug(currentSlugFromQuery());
   }
 });
+
+// 卡片入场动效
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.animate(
+        [{opacity:0, transform:'translateY(12px)'},{opacity:1, transform:'translateY(0)'}],
+        {duration:420, easing:'cubic-bezier(.2,.6,.2,1)', fill:'forwards'}
+      );
+      io.unobserve(e.target);
+    }
+  });
+},{ threshold: .12 });
+
+document.querySelectorAll('.card').forEach(c=>io.observe(c));
+
+/* ===== 阶梯入场：对 .card 添加 reveal 类，并按索引错峰 ===== */
+document.querySelectorAll('.card').forEach((c, i) => {
+  c.classList.add('reveal');
+});
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if (e.isIntersecting) {
+      const i = [...e.target.parentElement.children].indexOf(e.target);
+      e.target.style.transitionDelay = (i * 60) + 'ms';
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+},{ threshold: .12 });
+document.querySelectorAll('.card').forEach(c=>io.observe(c));
+
+/* ===== 背景动效：低占用 K 线粒子 + 网格 ===== */
+(function bgfx(){
+  const cvs = document.getElementById('bgfx');
+  if (!cvs || cvs.dataset.enabled !== 'true') return;
+
+  const ctx = cvs.getContext('2d');
+  let w, h, dpr;
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = cvs.width  = Math.floor(innerWidth  * dpr);
+    h = cvs.height = Math.floor(innerHeight * dpr);
+    cvs.style.width = innerWidth + 'px';
+    cvs.style.height = innerHeight + 'px';
+  }
+  resize(); addEventListener('resize', resize);
+
+  const candles = Array.from({length: 32}, (_,i)=>({
+    x: Math.random()*w,
+    y: Math.random()*h,
+    body: 14 + Math.random()*28,
+    w: 3 + Math.random()*3,
+    v: .15 + Math.random()*.25,
+    phase: Math.random()*Math.PI*2
+  }));
+
+  function drawGrid(){
+    const gap = 64 * dpr;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    for (let x=0; x<w; x+=gap){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for (let y=0; y<h; y+=gap){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    ctx.restore();
+  }
+
+  function drawCandles(t){
+    ctx.save();
+    const g1 = ctx.createLinearGradient(0,0,w,h);
+    g1.addColorStop(0,'#66e0ff'); g1.addColorStop(1,'#7a7dff');
+
+    candles.forEach(c=>{
+      const float = Math.sin(t*0.001 + c.phase)*2*dpr;
+      // 烛芯
+      ctx.strokeStyle = 'rgba(150,180,255,.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(c.x, c.y - c.body/2 + float);
+      ctx.lineTo(c.x, c.y + c.body/2 + float);
+      ctx.stroke();
+      // 实体
+      ctx.fillStyle = g1;
+      const x = c.x - c.w/2, y = c.y - (c.body/2)*.6 + float;
+      ctx.globalAlpha = 0.35;
+      ctx.fillRect(x, y, c.w, c.body*.6);
+      // 轻微移动
+      c.x += c.v * dpr;
+      if (c.x > w + 40) c.x = -40;
+    });
+    ctx.restore();
+  }
+
+  let last=0;
+  function tick(t){
+    if (t - last < 1000/30) { requestAnimationFrame(tick); return; } // ~30fps 省电
+    last = t;
+    ctx.clearRect(0,0,w,h);
+    drawGrid();
+    drawCandles(t);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
