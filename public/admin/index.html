@@ -519,3 +519,66 @@
   </script>
 </body>
 </html>
+<style>
+  /* ===== 深色主题兜底（不依赖全站 CSS 也能黑） ===== */
+  :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--fg);
+    font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .card{
+    background:var(--card);
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+    color:var(--fg);
+  }
+  .muted{ color:var(--muted); }
+
+  /* 表单控件深色 */
+  input,select,textarea{
+    background:#0f1115;
+    border:1px solid #23262b;
+    color:var(--fg);
+    padding:8px 10px;
+    border-radius:10px;
+    outline:none;
+  }
+  input:focus,select:focus,textarea:focus{
+    border-color:#3b82f6;
+    box-shadow:0 0 0 3px rgba(59,130,246,.2);
+  }
+
+  /* 按钮深色 */
+  .icon-btn{
+    background:transparent;
+    border:1px solid #2a2f36;
+    color:var(--fg);
+    padding:6px 10px;
+    border-radius:8px;
+    cursor:pointer;
+  }
+  .icon-btn:hover{ background:#1b1f24; }
+
+  button.primary{
+    padding:10px 14px;
+    border-radius:12px;
+    border:0;
+    background:#3b82f6;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.primary:hover{ filter:brightness(1.05); }
+
+  /* 让“搜索/输入”类看起来一致 */
+  .search{ background:#0f1115; border:1px solid #23262b; color:var(--fg); border-radius:10px; }
+
+  /* Tab 按钮本来就是深色，但补一条 hover */
+  .tab-btn:hover{ background:#171a20; }
+</style>
