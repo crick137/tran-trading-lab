@@ -1,7 +1,8 @@
-// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons) =====
+// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons, fixed & enhanced) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 
+/* ========== 路由与导航（已修复拼写错误） ========== */
 const routes = {
   '': 'home',
   '#/daily-brief': 'daily-brief',
@@ -13,26 +14,30 @@ const routes = {
 };
 
 function setActive(){
+  const h = location.hash || '';
   document.querySelectorAll('.nav a').forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href')===location.hash);
+    a.classList.toggle('active', a.getAttribute('href')===h);
   });
 }
 function show(routeId){
   document.querySelectorAll('section[data-route]').forEach(s=>{
-    s.classList.toggle('hidden', s.dataset.route!==routeId);
+    const on = s.dataset.route===routeId;
+    s.classList.toggle('active', on);     // 给 CSS 过渡用
+    s.classList.toggle('hidden', !on);    // 兼容你原有隐藏方式
+    s.style.display = on ? 'block' : 'none';
   });
   setActive();
 }
 
-// -------- Daily Brief 라우팅 ----------
+/* -------- Daily Brief 라우팅 ---------- */
 function matchRoute() {
-  const h = location.hash;
+  const h = location.hash || '';
   const m = h.match(/^#\/daily-brief\/([\w-]+)$/);
   if (m) return { id: 'daily-brief-detail', slug: m[1] };
   return { id: (routes[h] || 'home') };
 }
 
-// 목록
+/* ===== Daily Brief 列表/详情 ===== */
 async function renderDailyBriefList(){
   const ul = document.getElementById('brief-list');
   if (!ul) return;
@@ -46,7 +51,6 @@ async function renderDailyBriefList(){
   }catch{ ul.innerHTML = '<li class="muted">자료가 없습니다</li>'; }
 }
 
-// 상세
 async function renderDailyBriefDetail(slug){
   const wrap = document.getElementById('daily-brief-detail');
   if (!wrap) return;
@@ -75,11 +79,11 @@ async function renderDailyBriefDetail(slug){
   }
 }
 
-// -------- Trade Journal = 공개 “분석 아카이브” ----------
+/* ===== Trade Journal = 공개 “분석 아카이브” ===== */
 const AIDX = '/analyses/index.json';
 
 function koBias(b){
-  return b==='bullish'?'상승':b==='bearish'?'하락':'중립';
+  return b==='bullish'?'상승':b==='bearish'?'하락':'中립';
 }
 function badge(bias){ return `<span class="badge ${bias}">${koBias(bias||'neutral')}</span>`; }
 function pillS(v){ return `<span class="pill level">지지 ${v}</span>`; }
@@ -100,7 +104,7 @@ async function loadAnalysesList(){
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
-    // 👉 자동으로 첫 항목 열기 & 미리보기 차트 활성화 (URL에 slug가 없을 때)
+    // 👉 URL 无 slug 时：自动打开第一条并展示预览图表
     const slugInUrl = currentSlugFromQuery();
     if (!slugInUrl && items.length){
       await renderAnalysisDetailBySlug(items[0].slug);
@@ -118,9 +122,9 @@ async function loadAnalysesList(){
   }
 }
 
-// 목록 + 미리보기 차트 버튼
 function renderAnalysesListFiltered(){
   const list = document.getElementById('anal-list');
+  if (!list) return;
   const q = (document.getElementById('anal-search')?.value||'').toLowerCase();
   const bias = (document.getElementById('anal-bias')?.value||'');
   const raw = JSON.parse(list.dataset.raw||'[]');
@@ -147,7 +151,7 @@ function renderAnalysesListFiltered(){
     </article>
   `).join('') || `<p class="muted">검색 결과가 없습니다</p>`;
 
-  // 미리보기 차트 토글 (on-demand 로드/해제)
+  // 预览图表按需加载/卸载
   list.querySelectorAll('.pv-btn').forEach(btn=>{
     btn.onclick = ()=>{
       const slug = btn.dataset.slug;
@@ -166,7 +170,6 @@ function renderAnalysesListFiltered(){
   });
 }
 
-// 상세(우측 패널) + 주기 선택
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
@@ -233,89 +236,172 @@ function currentSlugFromQuery(){
   return p.get('slug') || '';
 }
 
-/* ===== Reveal & Canvas FX (safe, idempotent) ===== */
+/* ===== Reveal & Background FX: Dynamic K-lines (low CPU) ===== */
 (() => {
-  if (window.__homeFxInit) return;
-  window.__homeFxInit = true;
+  // 避免重复初始化
+  if (window.__homeFxInit) return; window.__homeFxInit = true;
 
-  // 1) 카드 계단식 입장
+  // 1) 卡片入场
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
     c.classList.add('reveal');
     c.style.transitionDelay = (i * 60) + 'ms';
   });
+  const io = ('IntersectionObserver' in window)
+    ? new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold: .12 })
+    : null;
+  if (io) cards.forEach(c => io.observe(c)); else cards.forEach(c=>c.classList.add('in'));
 
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: .12 });
-
-  cards.forEach(c => revealObserver.observe(c));
-
-  // 2) 배경 캔들/그리드 저부하 애니메이션
+  // 2) 背景动态 K 线
   const cvs = document.getElementById('bgfx');
-  if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
-  cvs.__inited = true;
+  if (!cvs || cvs.dataset.enabled !== 'true') return;
 
   const ctx = cvs.getContext('2d');
-  let w, h, dpr;
+  let w=0, h=0, dpr=1;
 
   function resize(){
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(window.devicePixelRatio||1, 2);
     w = cvs.width  = Math.floor(innerWidth  * dpr);
     h = cvs.height = Math.floor(innerHeight * dpr);
-    cvs.style.width = innerWidth + 'px';
+    cvs.style.width  = innerWidth + 'px';
     cvs.style.height = innerHeight + 'px';
+    // 更新与尺寸相关的参数
+    setupSeries();
   }
-  resize(); addEventListener('resize', resize);
+  window.addEventListener('resize', resize); resize();
 
-  const candles = Array.from({length: 32}, () => ({
-    x: Math.random()*w,
-    y: Math.random()*h,
-    body: 14 + Math.random()*28,
-    w: 3 + Math.random()*3,
-    v: .15 + Math.random()*.25,
-    phase: Math.random()*Math.PI*2
-  }));
+  const COL_GRID = 'rgba(255,255,255,0.05)';
+  function cssVar(name, fallback){ 
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+  }
+  function colors(){
+    return {
+      up:   cssVar('--success', '#16c784'),
+      down: cssVar('--danger',  '#ea3943'),
+      wick: 'rgba(200,210,235,0.30)',
+    };
+  }
 
-  function grid(){
-    const gap = 64 * dpr;
+  // 系列参数（随尺寸重算）
+  let cw, gap, step, N, padTop, padBot, minY, maxY, mid, seq;
+  function clamp(v,a,b){ return v<a?a : v>b?b : v; }
+
+  function setupSeries(){
+    cw   = Math.max(6 * dpr, Math.min(10 * dpr, Math.floor(w / 140)));
+    gap  = Math.max(3 * dpr, Math.min(6 * dpr, Math.floor(cw * 0.6)));
+    step = cw + gap;
+    N    = Math.ceil(w / step) + 4;
+
+    padTop = 40 * dpr; padBot = 40 * dpr;
+    minY = padTop; maxY = h - padBot;
+    mid = (minY + maxY)/2;
+
+    // 重新生成序列
+    seq = [];
+    let p0 = mid + (Math.random()-0.5) * 60 * dpr;
+    for (let i=0;i<N;i++){ const c = makeCandle(p0); seq.push(c); p0 = c.c; }
+  }
+
+  function makeCandle(prevClose){
+    const drift = (mid - prevClose) * 0.02;
+    const noise = (Math.random() - 0.5) * 18 * dpr;
+    const open  = prevClose + (Math.random() - 0.5) * 6 * dpr;
+    let close   = open + drift + noise;
+    close = clamp(close, minY+6*dpr, maxY-6*dpr);
+
+    const body  = Math.abs(close - open);
+    const vol   = Math.max(12*dpr, Math.min(38*dpr, body * 2 + 14*dpr));
+    const high  = clamp(Math.max(open, close) + vol * (0.4 + Math.random()*0.6), minY, maxY);
+    const low   = clamp(Math.min(open, close) - vol * (0.4 + Math.random()*0.6), minY, maxY);
+
+    return { o: open, h: high, l: low, c: close };
+  }
+
+  function drawGrid(){
+    const gridGap = 72 * dpr;
     ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.strokeStyle = COL_GRID;
     ctx.lineWidth = 1;
-    for (let x=0; x<w; x+=gap){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-    for (let y=0; y<h; y+=gap){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    for (let x=0; x<=w; x+=gridGap){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for (let y=0; y<=h; y+=gridGap){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
     ctx.restore();
   }
 
-  function drawCandles(t){
-    ctx.save();
-    const g = ctx.createLinearGradient(0,0,w,h);
-    g.addColorStop(0,'#66e0ff'); g.addColorStop(1,'#7a7dff');
-    candles.forEach(c=>{
-      const float = Math.sin(t*0.001 + c.phase)*2*dpr;
-      ctx.strokeStyle = 'rgba(150,180,255,.25)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(c.x, c.y - c.body/2 + float); ctx.lineTo(c.x, c.y + c.body/2 + float); ctx.stroke();
-      ctx.fillStyle = g; ctx.globalAlpha = 0.35;
-      ctx.fillRect(c.x - c.w/2, c.y - (c.body/2)*.6 + float, c.w, c.body*.6);
-      c.x += c.v * dpr; if (c.x > w + 40) c.x = -40;
-    });
-    ctx.restore();
+  function drawCandle(c, x, col){
+    const up = c.c < c.o; // y 轴向下：c < o 表示上涨
+    const bodyTop = Math.min(c.o, c.c);
+    const bodyBot = Math.max(c.o, c.c);
+
+    // wick
+    ctx.strokeStyle = col.wick;
+    ctx.lineWidth = Math.max(1, Math.floor(1 * dpr));
+    ctx.beginPath();
+    ctx.moveTo(x + cw/2, c.h);
+    ctx.lineTo(x + cw/2, c.l);
+    ctx.stroke();
+
+    // body
+    ctx.fillStyle = up ? col.up : col.down;
+    const bh = Math.max(2 * dpr, bodyBot - bodyTop);
+    ctx.globalAlpha = 0.55;
+    ctx.fillRect(Math.floor(x), Math.floor(bodyTop), Math.floor(cw), Math.floor(bh));
+    ctx.globalAlpha = 1;
   }
 
-  let last=0;
-  function tick(t){
-    if (t - last < 1000/30) { requestAnimationFrame(tick); return; }
-    last = t;
+  // 动画参数
+  const barMs = 550;  // 每根新 K 线的时间
+  let offset = 0;     // 当前左移偏移
+  let lastT  = 0;
+  let running = true;
+
+  document.addEventListener('visibilitychange', ()=>{ running = !document.hidden; });
+
+  function frame(t){
+    if (!running){ requestAnimationFrame(frame); return; }
+    if (!lastT) lastT = t;
+    const dt = t - lastT; lastT = t;
+
+    // 左移
+    const pxPerMs = step / barMs;
+    offset += pxPerMs * dt;
+
+    if (offset >= step){
+      offset -= step;
+      // 滚动窗口：移除最左，追加一根
+      seq.shift();
+      const prev = seq[seq.length-1].c;
+      seq.push(makeCandle(prev));
+      // 轻微迁移“均值”让高度缓慢变化
+      mid += (Math.random()-0.5) * 2 * dpr;
+      mid = clamp(mid, minY + (maxY-minY)*0.35, maxY - (maxY-minY)*0.35);
+    }
+
+    // 绘制
     ctx.clearRect(0,0,w,h);
-    grid(); drawCandles(t);
-    requestAnimationFrame(tick);
+    drawGrid();
+
+    // 顶/底渐隐
+    const gradTop = ctx.createLinearGradient(0,0,0,padTop*2);
+    gradTop.addColorStop(0,'rgba(0,0,0,0.45)');
+    gradTop.addColorStop(1,'rgba(0,0,0,0.0)');
+    ctx.fillStyle = gradTop; ctx.fillRect(0,0,w,padTop*2);
+
+    const gradBot = ctx.createLinearGradient(0,h - padBot*2,0,h);
+    gradBot.addColorStop(0,'rgba(0,0,0,0.0)');
+    gradBot.addColorStop(1,'rgba(0,0,0,0.45)');
+    ctx.fillStyle = gradBot; ctx.fillRect(0,h - padBot*2,w,padBot*2);
+
+    const col = colors();
+    let x = -offset;
+    for (let i=0;i<seq.length;i++){
+      drawCandle(seq[i], x + i*step, col);
+    }
+
+    requestAnimationFrame(frame);
   }
-  requestAnimationFrame(tick);
+  requestAnimationFrame(frame);
 })();
 
 /* ===== Knowledge Lab: syllabus + renderer (clickable) ===== */
@@ -509,7 +595,7 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
-  // 분류 접기/펼치기
+  // 分组折叠/展开
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
       const sec = document.querySelector(h.dataset.toggle);
@@ -517,7 +603,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 완료 체크: 왼쪽 점 버튼만 토글
+  // 完成勾选：左侧按钮
   host.querySelectorAll('.kl-dot-btn').forEach(btn=>{
     btn.onclick = (e)=>{
       e.preventDefault();
@@ -530,7 +616,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 진행도 초기화
+  // 进度重置（如存在按钮）
   const resetBtn = document.getElementById('kl-reset');
   if (resetBtn){
     resetBtn.onclick = ()=>{
@@ -573,7 +659,7 @@ function jumpToFirstIncomplete(){
   }
 }
 
-// -------- 라우터 구동 ----------
+/* -------- 라우터 구동 ---------- */
 window.addEventListener('hashchange', async ()=>{
   const m = matchRoute();
   const routeId = m.id;
@@ -614,6 +700,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if (routeId === 'knowledge-lab') renderKnowledgeLab();
 });
 
+/* ===== 本地化微调（保留你的逻辑） ===== */
 function localizeKnowledgeLabKO(){
   const sec = document.querySelector('section[data-route="knowledge-lab"]');
   if (!sec) return;
@@ -624,22 +711,20 @@ function localizeKnowledgeLabKO(){
   if (sub) sub.textContent = 'Preschool부터 Graduation까지, 아래에서 위로 쌓아 가는 체계적 학습 경로.';
   // 进度标题
   const progressTitle = sec.querySelector('.card h2');
-  if (progressTitle && /进度|进度|总体|总体进度|整体|전체 진행도/.test(progressTitle.textContent)) {
+  if (progressTitle && /进度|总体|整体|전체 진행도/.test(progressTitle.textContent)) {
     progressTitle.textContent = '전체 진행도';
   }
   // 重置按钮
   const resetBtn = sec.querySelector('#kl-reset, .progress-reset, .kl-reset');
   if (resetBtn) resetBtn.textContent = '진행도 초기화';
 
-  // 控件区：占位与按钮（以防早期版本）
+  // 控件区：占位与按钮
   const q = document.getElementById('kl-q');
   if (q) q.placeholder = '강의 검색…';
   const exp = document.getElementById('kl-expand');   if (exp) exp.textContent = '전체 펼치기';
   const col = document.getElementById('kl-collapse'); if (col) col.textContent = '전체 접기';
   const start = document.getElementById('kl-start');  if (start) start.textContent = '학습 시작';
 }
-
-// 进入知识页时调用一次（以及首次加载时）
 window.addEventListener('hashchange', ()=>{
   if (location.hash === '#/knowledge-lab') localizeKnowledgeLabKO();
 });
