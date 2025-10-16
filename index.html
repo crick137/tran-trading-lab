@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ko" class="no-js">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,8 +26,8 @@
     </nav>
 
     <main class="container" id="main">
-      <!-- 홈（默认给 active，避免 JS 未加载时首屏空白） -->
-      <section data-route="home" class="active" aria-labelledby="home-hero-title">
+      <!-- 홈 -->
+      <section data-route="home" aria-labelledby="home-hero-title">
         <div class="hero">
           <div class="badge">TRAN TRADING LAB</div>
           <h1 id="home-hero-title">매일 더 똑똑하게, 더 가볍게 시장을 읽다</h1>
@@ -236,10 +236,11 @@
         </div>
 
         <!-- 컨트롤바는 JS에서 삽입(검색/전체펼치기/전체접기/학습시작) -->
+        <!-- 커리큘럼 컨테이너 -->
         <div id="kl-syllabus" class="kl-grid" aria-live="polite"></div>
       </section>
 
-      <!-- 마켓 뉴스 -->
+      <!-- 마켓 뉴스（차트 제거: 텍스트 버전） -->
       <section data-route="market-news" class="hidden" aria-labelledby="news-title">
         <div class="card">
           <h2 id="news-title">마켓 뉴스</h2>
@@ -343,17 +344,7 @@
       </section>
     </main>
 
-    <!-- JS 兜底：禁用脚本时给出提示 -->
-    <noscript>
-      <style>
-        section[data-route]{display:block!important;opacity:1!important;transform:none!important}
-      </style>
-      <div class="card" style="max-width:900px;margin:20px auto">
-        이 사이트는 JavaScript에 의존합니다. 브라우저에서 스크립트를 허용해 주세요.
-      </div>
-    </noscript>
-
-    <!-- 应用脚本（用相对路径，避免子目录部署时 404） -->
-    <script type="module" src="./src/main.js"></script>
+    <!-- 앱 스크립트 -->
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
