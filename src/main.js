@@ -2,11 +2,12 @@
 import './styles/global.css'
 import './components/x-tv-chart.js'
 
-/* ========== 路由与导航（已修复拼写错误） ========== */
+/* ========== 路由与导航（修复拼写 + 兜底防空白） ========== */
 const routes = {
   '': 'home',
+  '#/': 'home',              // ← 新增这一行
   '#/daily-brief': 'daily-brief',
-  '#/trade-journal': 'trade-journal',   // 공개 분석
+  '#/trade-journal': 'trade-journal',
   '#/knowledge-lab': 'knowledge-lab',
   '#/market-news': 'market-news',
   '#/articles': 'articles',
@@ -16,25 +17,48 @@ const routes = {
 function setActive(){
   const h = location.hash || '';
   document.querySelectorAll('.nav a').forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href')===h);
+    a.classList.toggle('active', a.getAttribute('href') === h);
   });
 }
+
 function show(routeId){
-  document.querySelectorAll('section[data-route]').forEach(s=>{
-    const on = s.dataset.route===routeId;
+  const sections = [...document.querySelectorAll('section[data-route]')];
+  if (!sections.length) return;
+
+  const target = sections.find(s => s.dataset.route === routeId)
+              || sections.find(s => s.dataset.route === 'home')
+              || sections[0];
+
+  sections.forEach(s=>{
+    const on = s === target;
     s.classList.toggle('active', on);     // 给 CSS 过渡用
     s.classList.toggle('hidden', !on);    // 兼容你原有隐藏方式
-    s.style.display = on ? 'block' : 'none';
+    s.style.display = on ? '' : 'none';   // 防止布局抖动
   });
   setActive();
 }
 
-/* -------- Daily Brief 라우팅 ---------- */
+/* -------- 路由匹配（含日报详情） ---------- */
 function matchRoute() {
   const h = location.hash || '';
+  // 详情优先
   const m = h.match(/^#\/daily-brief\/([\w-]+)$/);
   if (m) return { id: 'daily-brief-detail', slug: m[1] };
-  return { id: (routes[h] || 'home') };
+
+  // 常规映射
+  let id = routes[h];
+
+  // 兜底：当映射不到或 HTML 中不存在对应 section 时，回退到第一个可用
+  const available = [...document.querySelectorAll('section[data-route]')].map(s=>s.dataset.route);
+  if (!id || !available.includes(id)) {
+    id = available.includes('home') ? 'home' : (available[0] || 'home');
+    // 如果导航里有第一个链接，把地址也修正一下（不会刷新页面）
+    const firstNav = document.querySelector('.nav a[href^="#/"]');
+    if (firstNav && location.hash !== firstNav.getAttribute('href')) {
+      history.replaceState(null, '', firstNav.getAttribute('href'));
+    }
+  }
+  return { id };
 }
 
 /* ===== Daily Brief 列表/详情 ===== */
@@ -83,7 +107,7 @@ async function renderDailyBriefDetail(slug){
 const AIDX = '/analyses/index.json';
 
 function koBias(b){
-  return b==='bullish'?'상승':b==='bearish'?'하락':'中립';
+  return b==='bullish'?'상승':b==='bearish'?'하락':'중립';
 }
 function badge(bias){ return `<span class="badge ${bias}">${koBias(bias||'neutral')}</span>`; }
 function pillS(v){ return `<span class="pill level">지지 ${v}</span>`; }
@@ -104,7 +128,7 @@ async function loadAnalysesList(){
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
-    // 👉 URL 无 slug 时：自动打开第一条并展示预览图表
+    // URL 无 slug 时：自动打开第一条并展示预览图表
     const slugInUrl = currentSlugFromQuery();
     if (!slugInUrl && items.length){
       await renderAnalysisDetailBySlug(items[0].slug);
@@ -238,7 +262,6 @@ function currentSlugFromQuery(){
 
 /* ===== Reveal & Background FX: Dynamic K-lines (low CPU) ===== */
 (() => {
-  // 避免重复初始化
   if (window.__homeFxInit) return; window.__homeFxInit = true;
 
   // 1) 卡片入场
@@ -254,7 +277,7 @@ function currentSlugFromQuery(){
     : null;
   if (io) cards.forEach(c => io.observe(c)); else cards.forEach(c=>c.classList.add('in'));
 
-  // 2) 背景动态 K 线
+  // 2) 背景动态 K 线（本地生成）
   const cvs = document.getElementById('bgfx');
   if (!cvs || cvs.dataset.enabled !== 'true') return;
 
@@ -267,7 +290,6 @@ function currentSlugFromQuery(){
     h = cvs.height = Math.floor(innerHeight * dpr);
     cvs.style.width  = innerWidth + 'px';
     cvs.style.height = innerHeight + 'px';
-    // 更新与尺寸相关的参数
     setupSeries();
   }
   window.addEventListener('resize', resize); resize();
@@ -284,7 +306,6 @@ function currentSlugFromQuery(){
     };
   }
 
-  // 系列参数（随尺寸重算）
   let cw, gap, step, N, padTop, padBot, minY, maxY, mid, seq;
   function clamp(v,a,b){ return v<a?a : v>b?b : v; }
 
@@ -298,7 +319,6 @@ function currentSlugFromQuery(){
     minY = padTop; maxY = h - padBot;
     mid = (minY + maxY)/2;
 
-    // 重新生成序列
     seq = [];
     let p0 = mid + (Math.random()-0.5) * 60 * dpr;
     for (let i=0;i<N;i++){ const c = makeCandle(p0); seq.push(c); p0 = c.c; }
@@ -350,7 +370,6 @@ function currentSlugFromQuery(){
     ctx.globalAlpha = 1;
   }
 
-  // 动画参数
   const barMs = 550;  // 每根新 K 线的时间
   let offset = 0;     // 当前左移偏移
   let lastT  = 0;
@@ -704,21 +723,17 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 function localizeKnowledgeLabKO(){
   const sec = document.querySelector('section[data-route="knowledge-lab"]');
   if (!sec) return;
-  // 标题/副标题
   const h1 = sec.querySelector('.hero h1');
   if (h1) h1.textContent = '체계적 외환 지식 · 로드맵';
   const sub = sec.querySelector('.hero .muted');
   if (sub) sub.textContent = 'Preschool부터 Graduation까지, 아래에서 위로 쌓아 가는 체계적 학습 경로.';
-  // 进度标题
   const progressTitle = sec.querySelector('.card h2');
   if (progressTitle && /进度|总体|整体|전체 진행도/.test(progressTitle.textContent)) {
     progressTitle.textContent = '전체 진행도';
   }
-  // 重置按钮
   const resetBtn = sec.querySelector('#kl-reset, .progress-reset, .kl-reset');
   if (resetBtn) resetBtn.textContent = '진행도 초기화';
 
-  // 控件区：占位与按钮
   const q = document.getElementById('kl-q');
   if (q) q.placeholder = '강의 검색…';
   const exp = document.getElementById('kl-expand');   if (exp) exp.textContent = '전체 펼치기';

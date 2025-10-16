@@ -385,3 +385,61 @@ section[data-route].active{
 
 /* 细节优化 */
 .btn{ cursor:pointer; }
+
+/* ===== 必备：隐藏类（与 JS 的 .hidden 同步） ===== */
+.hidden { display: none !important; }
+
+/* ===== 列表/工具条/按钮的轻样式（可选但推荐） ===== */
+.toolbar{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  margin:-4px 0 12px;
+}
+.row{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+}
+.search{
+  appearance:none; outline:none;
+  background: linear-gradient(180deg, #11161c, #0c1015);
+  color: var(--text);
+  border: 1px solid #ffffff20;
+  border-radius: 10px;
+  padding: 8px 10px;
+  min-width: 180px;
+  box-shadow: inset 0 1px 0 #ffffff10;
+}
+:root[data-theme="light"] .search{
+  background: #f4f7fb;
+  border-color: #00000018;
+  color: #0b0f14;
+  box-shadow: inset 0 1px 0 #ffffff;
+}
+
+.icon-btn{
+  appearance:none; border:1px solid #ffffff1f; background: transparent;
+  color: var(--text); border-radius: 10px; padding: 6px 10px;
+  cursor:pointer; text-decoration:none; display:inline-flex; align-items:center;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+}
+.icon-btn:hover{ transform: translateY(-1px); border-color:#ffffff35; background:#ffffff08; }
+:root[data-theme="light"] .icon-btn:hover{ background:#00000005; }
+
+.pill{
+  display:inline-flex; align-items:center; padding:4px 8px;
+  border-radius:999px; font-size:12px; letter-spacing:.2px;
+  border:1px solid #ffffff24; color:#cfd6e3; background: linear-gradient(180deg,#12161c,#0d1116);
+}
+.pill.level{ border-color:#1ec98a55; color:#a7f0d4; }
+.pill.res{ border-color:#ff6b6b55; color:#ffd1d1; }
+:root[data-theme="light"] .pill{ background:#f3f6fa; border-color:#00000015; color:#46505b; }
+
+.badge.bullish{ color:#a7f0d4; border-color:#1ec98a55; }
+.badge.bearish{ color:#ffd1d1; border-color:#ff6b6b55; }
+.badge.neutral{ color:#cfd6e3; border-color:#ffffff2a; }
+
+/* 导航在有很多链接时更稳一些（可选） */
+.nav{
+  position:sticky; top:0; z-index: 5;
+  display:flex; gap:14px; align-items:center; padding:10px 20px;
+}
+.nav a{ padding:8px 4px; }
+.nav .brand{ margin-right: 8px; }
