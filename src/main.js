@@ -374,3 +374,88 @@ document.querySelectorAll('.card').forEach(c=>io.observe(c));
   }
   requestAnimationFrame(tick);
 })();
+
+/* ===== Reveal & Canvas FX (safe, idempotent) ===== */
+(() => {
+  if (window.__homeFxInit) return;       // 防重复
+  window.__homeFxInit = true;
+
+  // 1) 阶梯入场
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((c, i) => {
+    c.classList.add('reveal');
+    c.style.transitionDelay = (i * 60) + 'ms';
+  });
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: .12 });
+
+  cards.forEach(c => revealObserver.observe(c));
+
+  // 2) 背景画布（低占用 K 线/网格）
+  const cvs = document.getElementById('bgfx');
+  if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
+  cvs.__inited = true;
+
+  const ctx = cvs.getContext('2d');
+  let w, h, dpr;
+
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = cvs.width  = Math.floor(innerWidth  * dpr);
+    h = cvs.height = Math.floor(innerHeight * dpr);
+    cvs.style.width = innerWidth + 'px';
+    cvs.style.height = innerHeight + 'px';
+  }
+  resize(); addEventListener('resize', resize);
+
+  const candles = Array.from({length: 32}, () => ({
+    x: Math.random()*w,
+    y: Math.random()*h,
+    body: 14 + Math.random()*28,
+    w: 3 + Math.random()*3,
+    v: .15 + Math.random()*.25,
+    phase: Math.random()*Math.PI*2
+  }));
+
+  function grid(){
+    const gap = 64 * dpr;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    for (let x=0; x<w; x+=gap){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for (let y=0; y<h; y+=gap){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    ctx.restore();
+  }
+
+  function drawCandles(t){
+    ctx.save();
+    const g = ctx.createLinearGradient(0,0,w,h);
+    g.addColorStop(0,'#66e0ff'); g.addColorStop(1,'#7a7dff');
+    candles.forEach(c=>{
+      const float = Math.sin(t*0.001 + c.phase)*2*dpr;
+      ctx.strokeStyle = 'rgba(150,180,255,.25)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(c.x, c.y - c.body/2 + float); ctx.lineTo(c.x, c.y + c.body/2 + float); ctx.stroke();
+      ctx.fillStyle = g; ctx.globalAlpha = 0.35;
+      ctx.fillRect(c.x - c.w/2, c.y - (c.body/2)*.6 + float, c.w, c.body*.6);
+      c.x += c.v * dpr; if (c.x > w + 40) c.x = -40;
+    });
+    ctx.restore();
+  }
+
+  let last=0;
+  function tick(t){
+    if (t - last < 1000/30) { requestAnimationFrame(tick); return; } // ~30fps
+    last = t;
+    ctx.clearRect(0,0,w,h);
+    grid(); drawCandles(t);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
