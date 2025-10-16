@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "rewrites": [
     { "source": "/daily-brief/index.json", "destination": "/api/daily-brief" },
     { "source": "/daily-brief/:slug.json", "destination": "/api/daily-brief/:slug" },
