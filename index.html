@@ -216,27 +216,25 @@
       </section>
 
       <!-- 지식 연구소 -->
-      <section data-route="knowledge-lab" class="hidden">
-        <div class="grid">
-          <section class="card" style="grid-column: span 8;">
-            <h2>지식 연구소</h2>
-            <p class="muted">초보에서 프로까지, 구조적 학습의 길</p>
-            <details open><summary>📚 구조 (Structure)</summary>
-              <ul><li>BOS / CHoCH 기본 정의</li><li>고저점 표기 규칙</li></ul>
-            </details>
-            <details><summary>🧪 유동성 (Liquidity)</summary>
-              <ul><li>EQH/EQL 개념</li><li>유인·세척 동작</li></ul>
-            </details>
-            <details><summary>⚙️ 리스크 (Risk)</summary>
-              <ul><li>계좌당 2% 고정 리스크</li><li>25/25/25/25 분할</li></ul>
-            </details>
-          </section>
-          <aside class="card" style="grid-column: span 4;">
-            <h2>참고 차트</h2>
-            <x-tv-chart symbol="FX:AUDUSD" interval="15" ratio="16:9" min_height="420"></x-tv-chart>
-          </aside>
-        </div>
-      </section>
+     <!-- 마켓 뉴스 -->
+<!-- 마켓 뉴스 -->
+<section data-route="market-news" class="hidden">
+  <div class="card">
+    <h2>마켓 뉴스</h2>
+    <p class="muted">글로벌 주요 이슈와 경제 흐름 요약</p>
+    <div id="news">
+      <ul>
+        <li>📊 미국 CPI / 고용 지표 발표 일정</li>
+        <li>🏦 주요 중앙은행 발언 및 금리 방향</li>
+        <li>💰 원자재 · 환율 주요 변동 포인트</li>
+        <li>🌏 한국, 일본, 유럽 시장 주요 헤드라인</li>
+      </ul>
+      <p class="muted" style="margin-top:10px">
+        ※ 뉴스 데이터는 매일 갱신됩니다.
+      </p>
+    </div>
+  </div>
+</section>
 
       <!-- 마켓 뉴스 -->
       <section data-route="market-news" class="hidden">
