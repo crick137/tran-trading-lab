@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Console · TRAN TRADING LAB</title>
+  <link rel="stylesheet" href="/styles/global.css" />
+  <style>
+    .admin { max-width: 1040px; margin: 24px auto; }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
+    .tab-btn { border:1px solid #23262b; background:#121418; color:var(--fg); padding:10px 14px; border-radius:10px; cursor:pointer }
+    .tab-btn.active { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2) }
+    .tab { display:none }
+    .tab.active { display:block }
+    textarea { min-height: 120px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    .hint { font-size:12px; opacity:.75 }
+    .split { display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; }
+    @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
+    .kbd { border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
+  </style>
+</head>
+<body class="loaded">
+  <main class="admin container">
+    <section class="card">
+      <h2 style="margin:0 0 10px">Admin Console</h2>
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <label class="hint">发布口令</label>
+          <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px" />
+          <button id="remember-token" class="icon-btn">记住</button>
+          <button id="forget-token" class="icon-btn">清除</button>
+        </div>
+        <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="brief">Daily Brief</button>
+        <button class="tab-btn" data-tab="analyses">Analyses</button>
+        <button class="tab-btn" data-tab="news">Market News</button>
+        <button class="tab-btn" data-tab="research">Research</button>
+      </div>
+
+      <!-- ========== Daily Brief ========== -->
+      <div class="tab active" id="tab-brief">
+        <div class="split">
+          <div>
+            <div class="form-grid">
+              <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-16" /></label>
+              <label class="full">标题<input id="b-title" placeholder="Daily Brief 标题（可选）" /></label>
+              <label class="full">核心要点（每行一条）<textarea id="b-bullets"></textarea></label>
+              <label class="full">今日日程（每行一条）<textarea id="b-schedule"></textarea></label>
+              <label>图表符号<input id="b-symbol" placeholder="FX:XAUUSD" /></label>
+              <label>图表周期
+                <select id="b-interval">
+                  <option value="15">15m</option>
+                  <option value="60" selected>1H</option>
+                  <option value="240">4H</option>
+                  <option value="1D">1D</option>
+                </select>
+              </label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="b-publish" class="primary">发布</button>
+              <button id="b-reuse" class="icon-btn">昨日复用</button>
+              <button id="b-clear" class="icon-btn">清空草稿</button>
+              <button id="b-preview" class="icon-btn">一键预览</button>
+            </div>
+            <p class="muted" id="b-msg" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">说明</h3>
+            <ul class="muted">
+              <li>发布到 <code>/daily-brief/YYYY-MM-DD.json</code></li>
+              <li>“昨日复用”：抓取最新一条，自动把日期改成今天</li>
+              <li>预览跳转：<code>#/daily-brief/YYYY-MM-DD</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Analyses ========== -->
+      <div class="tab" id="tab-analyses">
+        <div class="split">
+          <div>
+            <div class="form-grid">
+              <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-16" /></label>
+              <label class="full">标题<input id="a-title" placeholder="XAUUSD — Range to Trend" /></label>
+              <label>符号<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
+              <label>时间框架<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
+              <label>日期<input id="a-date" placeholder="2025-10-16" /></label>
+              <label>观点
+                <select id="a-bias">
+                  <option value="bullish">bullish</option>
+                  <option value="bearish">bearish</option>
+                  <option value="neutral" selected>neutral</option>
+                </select>
+              </label>
+              <label class="full">标签（逗号分隔）<input id="a-tags" placeholder="gold, FX, liquidity" /></label>
+              <label class="full">支撑（每行一条）<textarea id="a-supports"></textarea></label>
+              <label class="full">阻力（每行一条）<textarea id="a-resistances"></textarea></label>
+              <label class="full">背景（context）<textarea id="a-context"></textarea></label>
+              <label class="full">观点（view）<textarea id="a-view"></textarea></label>
+              <label class="full">无效条件（invalidation）<textarea id="a-invalidation"></textarea></label>
+              <label>图表符号<input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
+              <label>图表周期
+                <select id="a-chart-interval">
+                  <option value="15">15m</option>
+                  <option value="60" selected>1H</option>
+                  <option value="240">4H</option>
+                  <option value="1D">1D</option>
+                </select>
+              </label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="a-publish" class="primary">发布 / 更新</button>
+              <button id="a-reuse" class="icon-btn">昨日复用</button>
+              <button id="a-clear" class="icon-btn">清空草稿</button>
+              <button id="a-preview" class="icon-btn">一键预览</button>
+            </div>
+            <p class="muted" id="a-msg" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">说明</h3>
+            <ul class="muted">
+              <li>发布到 <code>/analyses/{slug}.json</code></li>
+              <li>“昨日复用”：抓取最新一条 → 建议把 <code>slug</code> 改为今天</li>
+              <li>预览跳转：<code>#/trade-journal?slug=你的slug</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Market News ========== -->
+      <div class="tab" id="tab-news">
+        <div class="split">
+          <div>
+            <div class="form-grid">
+              <label>ID（唯一）<input id="n-id" placeholder="2025-10-16-1 或自定义" /></label>
+              <label class="full">标题<input id="n-title" placeholder="美国CPI不及预期" /></label>
+              <label>来源<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
+              <label>外链URL<input id="n-url" placeholder="https://..." /></label>
+              <label>时间（ISO）<input id="n-date" placeholder="2025-10-16T12:34:00Z" /></label>
+              <label class="full">标签（逗号分隔）<input id="n-tags" placeholder="cpi, usd, gold" /></label>
+              <label class="full">摘要<textarea id="n-summary"></textarea></label>
+              <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="n-publish" class="primary">发布 / 更新</button>
+              <button id="n-reuse" class="icon-btn">昨日复用</button>
+              <button id="n-clear" class="icon-btn">清空草稿</button>
+              <button id="n-preview" class="icon-btn">一键预览</button>
+            </div>
+            <p class="muted" id="n-msg" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">说明</h3>
+            <ul class="muted">
+              <li>发布到 <code>/market-news/{id}.json</code></li>
+              <li>“昨日复用”：抓取最新一条 → 建议把 <code>id</code> 改为今天/新序号</li>
+              <li>预览跳转：<code>#/market-news</code>（列表页）</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== Research ========== -->
+      <div class="tab" id="tab-research">
+        <div class="split">
+          <div>
+            <div class="form-grid">
+              <label class="full">Syllabus JSON（数组）
+                <textarea id="r-json" style="min-height:420px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
+              </label>
+            </div>
+            <div class="row" style="margin-top:10px">
+              <button id="r-load" class="icon-btn">载入线上版本</button>
+              <button id="r-save" class="primary">保存</button>
+              <button id="r-clear" class="icon-btn">清空草稿</button>
+              <button id="r-preview" class="icon-btn">一键预览</button>
+            </div>
+            <p class="muted" id="r-msg" style="margin-top:10px"></p>
+          </div>
+          <div class="card">
+            <h3 style="margin-top:0">说明</h3>
+            <ul class="muted">
+              <li>保存到 <code>/research/syllabus.json</code></li>
+              <li>“载入线上版本”：把当前线上 syllabus 拉下来到编辑框</li>
+              <li>预览跳转：<code>#/knowledge-lab</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    const $  = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+    const LS = {
+      token: 'admin.token',
+      brief: 'draft.brief.v1',
+      analyses: 'draft.analyses.v1',
+      news: 'draft.news.v1',
+      research: 'draft.research.v1'
+    };
+
+    // ---------- Tabs ----------
+    $$('.tab-btn').forEach(b=>{
+      b.onclick = ()=>{
+        $$('.tab-btn').forEach(x=>x.classList.toggle('active', x===b));
+        $$('.tab').forEach(t=>t.classList.remove('active'));
+        $('#tab-' + b.dataset.tab).classList.add('active');
+      };
+    });
+
+    // ---------- Token Remember ----------
+    const tokenEl = $('#token');
+    (function loadToken(){
+      const v = localStorage.getItem(LS.token)||'';
+      if (v) tokenEl.value = v;
+    })();
+    // 首次未记住口令时自动聚焦
+    if (!localStorage.getItem(LS.token)) tokenEl.focus();
+
+    $('#remember-token').onclick = ()=> localStorage.setItem(LS.token, tokenEl.value.trim());
+    $('#forget-token').onclick   = ()=> localStorage.removeItem(LS.token);
+
+    function authHeader(){
+      const t = tokenEl.value.trim();
+      return { 'authorization': 'Bearer ' + t, 'content-type': 'application/json' };
+    }
+    function today(){ return new Date().toISOString().slice(0,10); }
+
+    // 统一：发布前检查是否填写口令
+    function ensureTokenOrMsg(msgEl){
+      const t = tokenEl.value.trim();
+      if (!t){
+        msgEl.textContent = '请先在顶部输入发布口令（ADMIN_TOKEN）并点击“记住”。';
+        tokenEl.focus();
+        return false;
+      }
+      return true;
+    }
+
+    // ---------- Draft helpers ----------
+    function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
+    function loadDraft(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch{return{}} }
+    function clearDraft(key){ localStorage.removeItem(key); }
+
+    // ========== Brief ==========
+    const B = {
+      slug: $('#b-slug'), title: $('#b-title'),
+      bullets: $('#b-bullets'), schedule: $('#b-schedule'),
+      symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg')
+    };
+    function bGet(){
+      return {
+        slug: B.slug.value.trim() || undefined,
+        title: B.title.value.trim() || undefined,
+        bullets: B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        schedule: B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        chart:{ symbol: B.symbol.value.trim() || undefined, interval: B.interval.value }
+      };
+    }
+    function bSet(d){
+      B.slug.value = d.slug||'';
+      B.title.value = d.title||'';
+      B.bullets.value = (d.bullets||[]).join('\n');
+      B.schedule.value = (d.schedule||[]).join('\n');
+      B.symbol.value = (d.chart?.symbol)||d.symbol||'';
+      B.interval.value = (d.chart?.interval)||d.interval||'60';
+    }
+    function bMsg(s){ B.msg.textContent = s; }
+
+    // autosave
+    $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=>{
+      el.addEventListener('input', ()=> saveDraft(LS.brief, bGet()));
+    });
+    (function bLoadDraft(){
+      const d = loadDraft(LS.brief); if (Object.keys(d).length) bSet(d);
+    })();
+
+    $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
+    $('#b-reuse').onclick = async ()=>{
+      bMsg('拉取最新一条…');
+      try{
+        const r = await fetch('/daily-brief/index.json?_=' + Date.now());
+        const arr = await r.json();
+        if (!Array.isArray(arr) || !arr.length) return bMsg('没有历史记录');
+        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].slug : arr[0]; // 兼容对象/字符串
+        const d = await (await fetch(`/daily-brief/${latest}.json?_=${Date.now()}`)).json();
+        d.slug = today(); // 日期改成今天
+        bSet(d); saveDraft(LS.brief, bGet());
+        bMsg('已载入最近一条，并把日期改为今天');
+      }catch{ bMsg('拉取失败'); }
+    };
+    $('#b-publish').onclick = async ()=>{
+      if (!ensureTokenOrMsg(B.msg)) return;
+      try{
+        const res = await fetch('/daily-brief/index.json', {
+          method:'POST', headers: authHeader(), body: JSON.stringify(bGet())
+        });
+        const data = await res.json();
+        if (!res.ok) throw data?.error || res.statusText;
+        bMsg('✅ 发布成功');
+      }catch(e){ bMsg('❌ 发布失败：' + (e||'Unknown')); }
+    };
+    $('#b-preview').onclick = ()=>{
+      const slug = B.slug.value.trim() || today();
+      window.open(`/#/daily-brief/${slug}`,'_blank','noopener');
+    };
+
+    // ========== Analyses ==========
+    const A = {
+      slug: $('#a-slug'), title: $('#a-title'), symbol: $('#a-symbol'), tf: $('#a-tf'),
+      date: $('#a-date'), bias: $('#a-bias'), tags: $('#a-tags'), supports: $('#a-supports'),
+      resistances: $('#a-resistances'), context: $('#a-context'), view: $('#a-view'),
+      invalidation: $('#a-invalidation'), chartSymbol: $('#a-chart-symbol'), chartInterval: $('#a-chart-interval'),
+      msg: $('#a-msg')
+    };
+    function aGet(){
+      return {
+        slug: A.slug.value.trim(),
+        title: A.title.value.trim(),
+        symbol: A.symbol.value.trim(),
+        tf: A.tf.value.trim(),
+        date: A.date.value.trim() || today(),
+        bias: A.bias.value,
+        tags: A.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
+        supports: A.supports.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        resistances: A.resistances.value.split('\n').map(s=>s.trim()).filter(Boolean),
+        context: A.context.value.trim(),
+        view: A.view.value.trim(),
+        invalidation: A.invalidation.value.trim(),
+        chart: { symbol: A.chartSymbol.value.trim() || A.symbol.value.trim(), interval: A.chartInterval.value }
+      };
+    }
+    function aSet(d){
+      A.slug.value = d.slug||'';
+      A.title.value = d.title||'';
+      A.symbol.value = d.symbol||'';
+      A.tf.value = d.tf||'';
+      A.date.value = d.date||'';
+      A.bias.value = d.bias||'neutral';
+      A.tags.value = (d.tags||[]).join(', ');
+      A.supports.value = (d.supports||[]).join('\n');
+      A.resistances.value = (d.resistances||[]).join('\n');
+      A.context.value = d.context||'';
+      A.view.value = d.view||'';
+      A.invalidation.value = d.invalidation||'';
+      A.chartSymbol.value = (d.chart?.symbol)||'';
+      A.chartInterval.value = (d.chart?.interval)||'60';
+    }
+    function aMsg(s){ A.msg.textContent = s; }
+
+    $$('#tab-analyses input, #tab-analyses textarea, #tab-analyses select').forEach(el=>{
+      el.addEventListener('input', ()=> saveDraft(LS.analyses, aGet()));
+    });
+    (function aLoadDraft(){
+      const d = loadDraft(LS.analyses); if (Object.keys(d).length) aSet(d);
+    })();
+
+    $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
+    $('#a-reuse').onclick = async ()=>{
+      aMsg('拉取最新一条…');
+      try{
+        const r = await fetch('/analyses/index.json?_=' + Date.now());
+        const arr = await r.json();
+        if (!Array.isArray(arr) || !arr.length) return aMsg('没有历史记录');
+        const latest = arr[0].slug || arr[0]; // 兼容仅 slug 的实现
+        const d = await (await fetch(`/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
+        // 建议把 slug 改成 “symbol-今天”
+        const base = (d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,'');
+        d.slug = `${base}-${today()}`;
+        d.date = today();
+        aSet(d); saveDraft(LS.analyses, aGet());
+        aMsg('已载入最近一条，slug/日期已更新为今天');
+      }catch{ aMsg('拉取失败'); }
+    };
+    $('#a-publish').onclick = async ()=>{
+      if (!ensureTokenOrMsg(A.msg)) return;
+      const payload = aGet();
+      if (!payload.slug) return aMsg('请填写 slug');
+      try{
+        const res = await fetch('/analyses/index.json', {
+          method:'POST', headers: authHeader(), body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw data?.error || res.statusText;
+        aMsg('✅ 发布成功');
+      }catch(e){ aMsg('❌ 发布失败：' + (e||'Unknown')); }
+    };
+    $('#a-preview').onclick = ()=>{
+      const slug = A.slug.value.trim();
+      if (!slug) return aMsg('请先填写 slug');
+      window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener');
+    };
+
+    // ========== News ==========
+    const N = {
+      id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'),
+      date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets'),
+      msg: $('#n-msg')
+    };
+    function nGet(){
+      return {
+        id: N.id.value.trim(),
+        title: N.title.value.trim(),
+        source: N.source.value.trim(),
+        url: N.url.value.trim(),
+        date: N.date.value.trim() || new Date().toISOString(),
+        tags: N.tags.value.split(',').map(s=>s.trim()).filter(Boolean),
+        summary: N.summary.value.trim(),
+        bullets: N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean)
+      };
+    }
+    function nSet(d){
+      N.id.value = d.id||'';
+      N.title.value = d.title||'';
+      N.source.value = d.source||'';
+      N.url.value = d.url||'';
+      N.date.value = d.date||'';
+      N.tags.value = (d.tags||[]).join(', ');
+      N.summary.value = d.summary||'';
+      N.bullets.value = (d.bullets||[]).join('\n');
+    }
+    function nMsg(s){ N.msg.textContent = s; }
+
+    $$('#tab-news input, #tab-news textarea').forEach(el=>{
+      el.addEventListener('input', ()=> saveDraft(LS.news, nGet()));
+    });
+    (function nLoadDraft(){
+      const d = loadDraft(LS.news); if (Object.keys(d).length) nSet(d);
+    })();
+
+    $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清空'); };
+    $('#n-reuse').onclick = async ()=>{
+      nMsg('拉取最新一条…');
+      try{
+        const r = await fetch('/market-news/index.json?_=' + Date.now());
+        const arr = await r.json();
+        if (!Array.isArray(arr) || !arr.length) return nMsg('没有历史记录');
+        const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].id : arr[0]; // 兼容对象/字符串
+        const d = await (await fetch(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
+        // 建议把 id 改成 “今天-序号”
+        const base = today();
+        d.id = `${base}-1`;
+        d.date = new Date().toISOString();
+        nSet(d); saveDraft(LS.news, nGet());
+        nMsg('已载入最近一条，已建议新的 id');
+      }catch{ nMsg('拉取失败'); }
+    };
+    $('#n-publish').onclick = async ()=>{
+      if (!ensureTokenOrMsg(N.msg)) return;
+      const payload = nGet();
+      if (!payload.id) return nMsg('请填写 id');
+      try{
+        const res = await fetch('/market-news/index.json', {
+          method:'POST', headers: authHeader(), body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw data?.error || res.statusText;
+        nMsg('✅ 发布成功');
+      }catch(e){ nMsg('❌ 发布失败：' + (e||'Unknown')); }
+    };
+    $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
+
+    // ========== Research ==========
+    const R = { json: $('#r-json'), msg: $('#r-msg') };
+    function rMsg(s){ R.msg.textContent = s; }
+    function rGet(){ 
+      let syllabus;
+      try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; }
+      return syllabus;
+    }
+    $$('#tab-research textarea').forEach(el=>{
+      el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value}));
+    });
+    (function rLoadDraft(){
+      const d = loadDraft(LS.research);
+      if (d && typeof d.text==='string') R.json.value = d.text;
+    })();
+
+    $('#r-load').onclick = async ()=>{
+      rMsg('加载线上大纲…');
+      try{
+        const r = await fetch('/research/syllabus.json?_=' + Date.now());
+        if (!r.ok) throw 0;
+        const j = await r.json();
+        R.json.value = JSON.stringify(j.syllabus||[], null, 2);
+        saveDraft(LS.research, {text: R.json.value});
+        rMsg('已载入线上版本到编辑框');
+      }catch{ rMsg('加载失败'); }
+    };
+    $('#r-save').onclick = async ()=>{
+      const syllabus = rGet();
+      if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
+      if (!ensureTokenOrMsg(R.msg)) return;
+      try{
+        const res = await fetch('/research/syllabus.json', {
+          method:'POST', headers: authHeader(), body: JSON.stringify({ syllabus })
+        });
+        const data = await res.json();
+        if (!res.ok) throw data?.error || res.statusText;
+        rMsg('✅ 保存成功');
+      }catch(e){ rMsg('❌ 保存失败：' + (e||'Unknown')); }
+    };
+    $('#r-clear').onclick = ()=>{ clearDraft(LS.research); R.json.value=''; rMsg('草稿已清空'); };
+    $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
+
+    // ---------- 快捷发布 ----------
+    document.addEventListener('keydown', e=>{
+      if (!(e.key === 'Enter' && (e.ctrlKey||e.metaKey))) return;
+      if ($('#tab-brief').classList.contains('active')) return $('#b-publish').click();
+      if ($('#tab-analyses').classList.contains('active')) return $('#a-publish').click();
+      if ($('#tab-news').classList.contains('active')) return $('#n-publish').click();
+      if ($('#tab-research').classList.contains('active')) return $('#r-save').click();
+    });
+  </script>
+</body>
+</html>
