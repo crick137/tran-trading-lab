@@ -1,4 +1,4 @@
-// ===== src/main.js (KO, preview + auto-open 1st) =====
+// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 
@@ -166,11 +166,11 @@ function renderAnalysesListFiltered(){
   });
 }
 
-// 상세(우측 패널) + 주기选择
+// 상세(우측 패널) + 주기 선택
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
-  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다。</p>`; return; }
+  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>`; return; }
 
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
@@ -233,13 +233,12 @@ function currentSlugFromQuery(){
   return p.get('slug') || '';
 }
 
-/* ===== Reveal & Canvas FX (safe, idempotent) =====
-   合并动效：卡片阶梯入场 + 背景K线/网格；避免重复初始化 */
+/* ===== Reveal & Canvas FX (safe, idempotent) ===== */
 (() => {
   if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
-  // 1) 卡片阶梯入场
+  // 1) 카드 계단식 입장
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
     c.classList.add('reveal');
@@ -257,7 +256,7 @@ function currentSlugFromQuery(){
 
   cards.forEach(c => revealObserver.observe(c));
 
-  // 2) 背景画布（低占用 K 线/网格）
+  // 2) 배경 캔들/그리드 저부하 애니메이션
   const cvs = document.getElementById('bgfx');
   if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
   cvs.__inited = true;
@@ -319,50 +318,104 @@ function currentSlugFromQuery(){
   requestAnimationFrame(tick);
 })();
 
-/* ===== Knowledge Lab: syllabus + renderer (with controls) ===== */
+/* ===== Knowledge Lab: syllabus + renderer (clickable) ===== */
 
 const KL_KEY = 'kl.progress.v1';
-let KL_QUERY = '';   // 搜索词（增强）
+let KL_QUERY = '';   // 검색어
+
+// ——— 커리큘럼（韩文 + 可点击示例，按需补充 link）———
 const SYLLABUS = [
-  { level:'Preschool', icon:'🎓', desc:'入门准备',
+  { level:'Preschool', icon:'🎓', desc:'입문 준비',
     lessons:[
-      'What is Forex?',
-      'How Do You Trade Forex?',
-      'When Can You Trade Forex?',
-      'Who Trades Forex?',
-      'Why Trade Forex?',
-      'Margin Trading 101: Understand How Your Margin Account Works'
+      { name:'외환거래란 무엇인가?', link:'#/articles/what-is-forex' },
+      { name:'외환은 어떻게 거래하나?', link:'#/articles/how-to-trade-forex' },
+      { name:'언제 거래할 수 있나?', link:'#/articles/when-to-trade-forex' },
+      { name:'누가 외환을 거래하나?', link:'#/articles/who-trades-forex' },
+      { name:'왜 외환을 거래하나?', link:'#/articles/why-trade-forex' },
+      { name:'마진거래 101: 마진계좌의 동작 원리', link:'#/articles/margin-101' }
     ]
   },
-  { level:'Kindergarten', icon:'🧩', desc:'基础概念',
-    lessons:[ 'Forex Brokers 101', 'Three Types of Analysis', 'Types of Charts' ]
+  { level:'Kindergarten', icon:'🧩', desc:'기초 개념',
+    lessons:[
+      { name:'포렉스 브로커 101', link:'#/articles/forex-brokers-101' },
+      { name:'세 가지 분석 방법', link:'#/articles/three-types-of-analysis' },
+      { name:'차트의 종류', link:'#/articles/types-of-charts' }
+    ]
   },
-  { level:'Elementary', icon:'📘', desc:'技术分析 I',
-    lessons:[ 'Support and Resistance Levels', 'Grade 2 Japanese Candlesticks', 'Grade 3 Fibonacci', 'Grade 4 Moving Averages', 'Grade 5 Popular Chart Indicators' ]
+  { level:'Elementary', icon:'📘', desc:'기술적 분석 I',
+    lessons:[
+      { name:'지지와 저항 레벨', link:'#/articles/support-resistance' },
+      { name:'일본식 캔들', link:'#/articles/japanese-candlesticks' },
+      { name:'피보나치', link:'#/articles/fibonacci' },
+      { name:'이동평균', link:'#/articles/moving-averages' },
+      { name:'인기 보조지표', link:'#/articles/popular-indicators' }
+    ]
   },
-  { level:'Middle School', icon:'🏫', desc:'技术分析 II',
-    lessons:[ 'Grade 6 Oscillators and Momentum Indicators', 'Grade 7 Important Chart Patterns', 'Grade 8 Pivot Points' ]
+  { level:'Middle School', icon:'🏫', desc:'기술적 분석 II',
+    lessons:[
+      { name:'오실레이터와 모멘텀 지표', link:'#/articles/oscillators' },
+      { name:'중요 차트 패턴', link:'#/articles/chart-patterns' },
+      { name:'피벗 포인트', link:'#/articles/pivot-points' }
+    ]
   },
-  { level:'Summer School', icon:'🌞', desc:'进阶工具',
-    lessons:[ 'Heikin Ashi', 'Elliott Wave Theory', 'Harmonic Price Patterns' ]
+  { level:'Summer School', icon:'🌞', desc:'심화 도구',
+    lessons:[
+      { name:'헤이킨 아시', link:'#/articles/heikin-ashi' },
+      { name:'엘리엇 파동이론', link:'#/articles/elliott-wave' },
+      { name:'하모닉 패턴', link:'#/articles/harmonic-patterns' }
+    ]
   },
-  { level:'High School', icon:'🎯', desc:'交易策略 I',
-    lessons:[ 'Trading Divergences', 'Grade 10 Market Environment', 'Grade 11 Trading Breakouts and Fakeouts', 'Grade 12 Fundamental Analysis', 'Grade 13 Currency Crosses', 'Grade 14 Multiple Time Frame Analysis' ]
+  { level:'High School', icon:'🎯', desc:'거래 전략 I',
+    lessons:[
+      { name:'다이버전스 트레이딩', link:'#/articles/divergences' },
+      { name:'시장 환경', link:'#/articles/market-environment' },
+      { name:'돌파와 페이크아웃', link:'#/articles/breakouts-fakeouts' },
+      { name:'펀더멘털 분석', link:'#/articles/fundamental-analysis' },
+      { name:'통화 크로스', link:'#/articles/currency-crosses' },
+      { name:'멀티 타임프레임 분석', link:'#/articles/mtf-analysis' }
+    ]
   },
-  { level:'Undergraduate · Freshman', icon:'🧠', desc:'交易与情绪',
-    lessons:[ 'Market Sentiment', 'Trading the News', 'Carry Trade' ]
+  { level:'대학 1학년', icon:'🧠', desc:'심리와 뉴스',
+    lessons:[
+      { name:'시장 심리', link:'#/articles/market-sentiment' },
+      { name:'뉴스 트레이딩', link:'#/articles/trading-the-news' },
+      { name:'캐리 트레이드', link:'#/articles/carry-trade' }
+    ]
   },
-  { level:'Undergraduate · Sophomore', icon:'🧭', desc:'市场联动',
-    lessons:[ 'The U.S. Dollar Index', 'Intermarket Correlations', 'Using Equities to Trade FX', 'Country Profiles' ]
+  { level:'대학 2학년', icon:'🧭', desc:'시장 연동',
+    lessons:[
+      { name:'달러 인덱스', link:'#/articles/us-dollar-index' },
+      { name:'인터마켓 상관관계', link:'#/articles/intermarket-correlations' },
+      { name:'주식으로 FX 읽기', link:'#/articles/equities-to-trade-fx' },
+      { name:'국가별 프로필', link:'#/articles/country-profiles' }
+    ]
   },
-  { level:'Undergraduate · Junior', icon:'🛠️', desc:'系统构建',
-    lessons:[ 'Developing Your Own Trading Plan', 'Which Type of Trader Are You?', 'Create Your Own Trading System', 'Keeping a Trading Journal', 'How to Use MetaTrader 4' ]
+  { level:'대학 3학년', icon:'🛠️', desc:'시스템 구축',
+    lessons:[
+      { name:'트레이딩 계획 수립', link:'#/articles/trading-plan' },
+      { name:'나는 어떤 유형의 트레이더인가?', link:'#/articles/trader-types' },
+      { name:'나만의 트레이딩 시스템 만들기', link:'#/articles/build-your-system' },
+      { name:'트레이딩 저널 작성', link:'#/articles/trading-journal' },
+      { name:'MetaTrader 4 사용법', link:'#/articles/mt4-howto' }
+    ]
   },
-  { level:'Undergraduate · Senior', icon:'🧮', desc:'风险与仓位',
-    lessons:[ 'Risk Management', 'The Number 1 Cause of Death of Forex Traders', 'Position Sizing', 'Setting Stop Losses', 'Scaling In and Out', 'Currency Correlations' ]
+  { level:'대학 4학년', icon:'🧮', desc:'리스크와 포지션',
+    lessons:[
+      { name:'리스크 관리', link:'#/articles/risk-management' },
+      { name:'트레이더 파산의 1순위 원인', link:'#/articles/cause-of-death' },
+      { name:'포지션 사이징', link:'#/articles/position-sizing' },
+      { name:'손절(Stop Loss) 설정', link:'#/articles/stop-loss' },
+      { name:'분할 진입·분할 청산', link:'#/articles/scaling' },
+      { name:'통화 상관관계', link:'#/articles/currency-correlations' }
+    ]
   },
-  { level:'Graduation', icon:'🏆', desc:'收官与检核',
-    lessons:[ 'The Most Common Trading Mistakes New Traders Make', 'Forex Trading Scams', 'Personality Quizzes', 'Graduation Speech' ]
+  { level:'Graduation', icon:'🏆', desc:'마무리와 점검',
+    lessons:[
+      { name:'초보자가 가장 많이 하는 실수', link:'#/articles/common-mistakes' },
+      { name:'포렉스 사기 유형', link:'#/articles/forex-scams' },
+      { name:'성향 테스트', link:'#/articles/personality-quizzes' },
+      { name:'졸업 연설', link:'#/articles/graduation-speech' }
+    ]
   },
 ];
 
@@ -370,7 +423,6 @@ function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }
 function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }
 
 function ensureKLControls(){
-  // 如果没有控制条，创建到 #kl-syllabus 前面
   const host = document.getElementById('kl-syllabus');
   if (!host) return;
   if (document.getElementById('kl-controls')) return;
@@ -381,15 +433,14 @@ function ensureKLControls(){
   bar.style.marginBottom = '14px';
   bar.innerHTML = `
     <div class="toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <input id="kl-q" class="search" placeholder="搜索课程…" style="min-width:220px">
-      <button id="kl-expand" class="btn">全部展开</button>
-      <button id="kl-collapse" class="btn">全部收起</button>
-      <button id="kl-start" class="btn" style="font-weight:700">开始学习</button>
+      <input id="kl-q" class="search" placeholder="강의 검색…" style="min-width:220px">
+      <button id="kl-expand" class="btn">전체 펼치기</button>
+      <button id="kl-collapse" class="btn">전체 접기</button>
+      <button id="kl-start" class="btn" style="font-weight:700">학습 시작</button>
     </div>
   `;
   host.parentElement.insertBefore(bar, host);
 
-  // 事件
   document.getElementById('kl-q').oninput = (e)=>{ KL_QUERY = (e.target.value||'').toLowerCase(); renderKnowledgeLab(); };
   document.getElementById('kl-expand').onclick = ()=>{ document.querySelectorAll('.kl-level').forEach(s=>s.classList.remove('collapsed')); };
   document.getElementById('kl-collapse').onclick = ()=>{ document.querySelectorAll('.kl-level').forEach(s=>s.classList.add('collapsed')); };
@@ -402,9 +453,7 @@ function renderKnowledgeLab(){
 
   ensureKLControls();
 
-  const progress = klLoad(); // { "Level:Lesson": true, ... }
-
-  // 统计
+  const progress = klLoad();
   const total = SYLLABUS.reduce((acc,g)=>acc+g.lessons.length,0);
   const done  = Object.values(progress).filter(Boolean).length;
   const pct   = total? Math.round(done/total*100) : 0;
@@ -414,23 +463,37 @@ function renderKnowledgeLab(){
   const stats = document.getElementById('kl-stats');
   if (bar){ bar.style.width = pct+'%'; }
   if (label){ label.textContent = pct+'%'; }
-  if (stats){ stats.textContent = `${done} / ${total} lessons`; }
+  if (stats){ stats.textContent = `${done} / ${total} 강의`; }
 
   host.innerHTML = SYLLABUS.map(group=>{
     const lid = group.level.replace(/\s+/g,'-').toLowerCase();
-    const list = group.lessons.map(name=>{
-      // 搜索过滤
+    const list = group.lessons.map(item=>{
+      const obj = typeof item === 'string' ? { name:item, link:'' } : item;
+      const name = obj.name;
+      const link = obj.link || '';
       const visible = !KL_QUERY || name.toLowerCase().includes(KL_QUERY) || group.level.toLowerCase().includes(KL_QUERY);
       const key = `${group.level}:${name}`;
       const isDone = !!progress[key];
+
+      const start = link
+        ? `<a class="kl-item ${isDone?'done':''}" href="${link}" ${link.startsWith('#')?'':'target="_blank" rel="noopener"'} data-key="${key}" style="${visible?'':'display:none'}">`
+        : `<div class="kl-item ${isDone?'done':''}" data-key="${key}" style="${visible?'':'display:none'}">`;
+
+      const end = link ? `</a>` : `</div>`;
+
       return `
-        <div class="kl-item ${isDone?'done':''}" data-key="${key}" style="${visible?'':'display:none'}">
-          <span class="kl-dot">${isDone?'✓':''}</span>
-          <div class="kl-name">${name}</div>
-          <span class="kl-tag">Lesson</span>
+        <div class="kl-item-row" style="${visible?'':'display:none'}">
+          <button class="kl-dot-btn" data-key="${key}" aria-label="완료 표시" title="완료 표시" style="all:unset">
+            <span class="kl-dot">${isDone?'✓':''}</span>
+          </button>
+          ${start}
+            <div class="kl-name">${name}</div>
+            <span class="kl-tag">Lesson</span>
+          ${end}
         </div>
       `;
     }).join('');
+
     return `
       <section class="card kl-level" id="lv-${lid}">
         <div class="lv-head" data-toggle="#lv-${lid}">
@@ -446,7 +509,7 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
-  // 折叠
+  // 분류 접기/펼치기
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
       const sec = document.querySelector(h.dataset.toggle);
@@ -454,18 +517,20 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 勾选进度
-  host.querySelectorAll('.kl-item').forEach(it=>{
-    it.onclick = ()=>{
-      const key = it.dataset.key;
+  // 완료 체크: 왼쪽 점 버튼만 토글
+  host.querySelectorAll('.kl-dot-btn').forEach(btn=>{
+    btn.onclick = (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const key = btn.dataset.key;
       const p = klLoad();
       p[key] = !p[key];
       klSave(p);
-      renderKnowledgeLab(); // 重新渲染（刷新进度条与样式）
+      renderKnowledgeLab();
     };
   });
 
-  // 重置
+  // 진행도 초기화
   const resetBtn = document.getElementById('kl-reset');
   if (resetBtn){
     resetBtn.onclick = ()=>{
@@ -477,21 +542,30 @@ function renderKnowledgeLab(){
 
 function jumpToFirstIncomplete(){
   const progress = klLoad();
-  // 找第一个未完成
   for (const g of SYLLABUS){
-    for (const name of g.lessons){
-      const key = `${g.level}:${name}`;
+    for (const item of g.lessons){
+      const obj = typeof item === 'string' ? { name:item, link:'' } : item;
+      const key = `${g.level}:${obj.name}`;
       if (!progress[key]){
-        // 展开所在分组
         const lid = g.level.replace(/\s+/g,'-').toLowerCase();
         const sec = document.getElementById(`lv-${lid}`);
         if (sec) sec.classList.remove('collapsed');
 
-        // 高亮 & 滚动
-        const el = [...document.querySelectorAll(`#lv-${lid} .kl-item`)].find(e=>e.dataset.key===key);
-        if (el){
-          el.scrollIntoView({behavior:'smooth', block:'center'});
-          el.animate([{boxShadow:'0 0 0 rgba(0,0,0,0)'},{boxShadow:'0 0 0 6px rgba(122,125,255,.25)'}],{duration:600, direction:'alternate', iterations:2});
+        const row = [...document.querySelectorAll(`#lv-${lid} .kl-item-row`)]
+          .find(e=>e.querySelector('[data-key]')?.dataset.key===key);
+        if (row){
+          row.scrollIntoView({behavior:'smooth', block:'center'});
+          row.animate(
+            [{boxShadow:'0 0 0 rgba(0,0,0,0)'},{boxShadow:'0 0 0 6px rgba(122,125,255,.25)'}],
+            {duration:600, direction:'alternate', iterations:2}
+          );
+        }
+        if (obj.link){
+          if (obj.link.startsWith('#')) {
+            location.hash = obj.link;
+          } else {
+            window.open(obj.link, '_blank', 'noopener');
+          }
         }
         return;
       }
@@ -517,7 +591,7 @@ window.addEventListener('hashchange', async ()=>{
     await renderAnalysisDetailBySlug(currentSlugFromQuery());
   }
 
-  if (routeId === 'knowledge-lab') renderKnowledgeLab();   // ✅ 调用知识区渲染
+  if (routeId === 'knowledge-lab') renderKnowledgeLab();
 });
 
 document.addEventListener('DOMContentLoaded', async ()=>{
@@ -537,5 +611,5 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await renderAnalysisDetailBySlug(currentSlugFromQuery());
   }
 
-  if (routeId === 'knowledge-lab') renderKnowledgeLab();   // ✅ 首次加载时也渲染
+  if (routeId === 'knowledge-lab') renderKnowledgeLab();
 });

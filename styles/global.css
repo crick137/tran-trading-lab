@@ -347,3 +347,23 @@ body{ position: relative; }
 
 /* 细节优化 */
 .btn{ cursor:pointer; }
+
+/* ----- Lesson item as link + check button ----- */
+.kl-item {
+  text-decoration: none;
+  color: inherit;
+}
+.kl-item .kl-dot{
+  cursor: pointer;
+  user-select: none;
+}
+.kl-item:hover .kl-name{
+  text-decoration: none;
+  opacity: .95;
+}
+.kl-item.done .kl-name{
+  opacity: .8;
+}
+.kl-item .kl-name {
+  line-height: 1.3;
+}
