@@ -9,6 +9,8 @@
     { "source": "/market-news/index.json", "destination": "/api/market-news" },
     { "source": "/market-news/:id.json", "destination": "/api/market-news/:id" },
 
-    { "source": "/research/syllabus.json", "destination": "/api/research/syllabus" }
+    { "source": "/research/syllabus.json", "destination": "/api/research/syllabus" },
+    { "source": "/research/articles/index.json", "destination": "/api/research/articles" },
+    { "source": "/research/articles/:slug.json", "destination": "/api/research/articles/:slug" }
   ]
 }

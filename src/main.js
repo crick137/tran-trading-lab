@@ -1,4 +1,4 @@
-// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons) =====
+// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons + News + Remote Syllabus) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 
@@ -323,8 +323,8 @@ function currentSlugFromQuery(){
 const KL_KEY = 'kl.progress.v1';
 let KL_QUERY = '';   // 검색어
 
-// ——— 커리큘럼（韩文 + 可点击示例，按需补充 link）———
-const SYLLABUS = [
+// ★ 改为 let，后面可被远程覆盖
+let SYLLABUS = [
   { level:'Preschool', icon:'🎓', desc:'입문 준비',
     lessons:[
       { name:'외환거래란 무엇인가?', link:'#/articles/what-is-forex' },
@@ -421,6 +421,21 @@ const SYLLABUS = [
 
 function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
 function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }
+
+// ★ 远程覆盖本地 SYLLABUS（存在且为数组才覆盖）
+let __syllabusLoaded = false;
+async function tryLoadRemoteSyllabus(){
+  if (__syllabusLoaded) return;
+  __syllabusLoaded = true;
+  try{
+    const r = await fetch('/research/syllabus.json?_=' + Date.now());
+    if (!r.ok) return;
+    const j = await r.json();
+    if (Array.isArray(j.syllabus) && j.syllabus.length){
+      SYLLABUS = j.syllabus;
+    }
+  }catch{}
+}
 
 function ensureKLControls(){
   const host = document.getElementById('kl-syllabus');
@@ -573,6 +588,42 @@ function jumpToFirstIncomplete(){
   }
 }
 
+/* ===== Market News: render list (text version) ===== */
+async function renderMarketNews(){
+  const host = document.querySelector('section[data-route="market-news"] #news');
+  if (!host) return;
+  host.innerHTML = '<p class="muted">불러오는 중…</p>';
+  try{
+    const res = await fetch('/market-news/index.json?_=' + Date.now());
+    const rows = await res.json(); // [{id}]
+    if (!Array.isArray(rows) || !rows.length) {
+      host.innerHTML = '<p class="muted">뉴스가 없습니다</p>';
+      return;
+    }
+    const html = await Promise.all(rows.map(async r=>{
+      try{
+        const dres = await fetch(`/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
+        const d = await dres.json();
+        const bullets = (d.bullets||[]).map(b=>`<li>${b}</li>`).join('');
+        const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문</a>` : '';
+        const when = d.date ? new Date(d.date).toLocaleString() : '';
+        return `
+          <li class="card">
+            <h3 style="margin:0 0 6px">${d.title||r.id}</h3>
+            <p class="meta">${[d.source||'', when].filter(Boolean).join(' · ')}</p>
+            ${d.summary?`<p style="margin:8px 0">${d.summary}</p>`:''}
+            ${bullets?`<ul style="margin-top:6px">${bullets}</ul>`:''}
+            <p class="muted" style="margin-top:8px">${(d.tags||[]).map(t=>`#${t}`).join(' ')}</p>
+            ${link}
+          </li>`;
+      }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }
+    }));
+    host.innerHTML = `<ul style="display:grid;gap:12px">${html.join('')}</ul>`;
+  }catch{
+    host.innerHTML = '<p class="muted">加载失败</p>';
+  }
+}
+
 // -------- 라우터 구동 ----------
 window.addEventListener('hashchange', async ()=>{
   const m = matchRoute();
@@ -591,7 +642,12 @@ window.addEventListener('hashchange', async ()=>{
     await renderAnalysisDetailBySlug(currentSlugFromQuery());
   }
 
-  if (routeId === 'knowledge-lab') renderKnowledgeLab();
+  if (routeId === 'market-news') renderMarketNews();
+
+  if (routeId === 'knowledge-lab'){
+    await tryLoadRemoteSyllabus();
+    renderKnowledgeLab();
+  }
 });
 
 document.addEventListener('DOMContentLoaded', async ()=>{
@@ -611,7 +667,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await renderAnalysisDetailBySlug(currentSlugFromQuery());
   }
 
-  if (routeId === 'knowledge-lab') renderKnowledgeLab();
+  if (routeId === 'market-news') renderMarketNews();
+
+  if (routeId === 'knowledge-lab'){
+    await tryLoadRemoteSyllabus();
+    renderKnowledgeLab();
+  }
 });
 
 function localizeKnowledgeLabKO(){

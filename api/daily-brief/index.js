@@ -1,62 +1,59 @@
 // api/daily-brief/index.js
-import { list, put } from '@vercel/blob';
+import { writeJSON, readList, readJSONViaFetch } from '../_lib/blob.js';
+import { jsonOK, badRequest, requireAuth } from '../_lib/http.js';
 
-const BUCKET_PREFIX = 'daily-brief/';
+const PREFIX = 'daily-brief'; // 存储目录
+const INDEX = `${PREFIX}/index.json`;
 
-function authOk(req) {
-  const token = process.env.ADMIN_TOKEN;
-  const h = req.headers.get('authorization') || '';
-  const m = h.match(/^Bearer\s+(.+)$/i);
-  return token && m && m[1] === token;
-}
+export default async function handler(req) {
+  const { method } = req;
 
-// GET  -> 返回 ["2025-10-16", "2025-10-15", ...]（倒序）
-export async function GET() {
-  const items = [];
-  const it = await list({ prefix: BUCKET_PREFIX });
-  for (const f of it.blobs) {
-    if (!f.pathname.endsWith('.json')) continue;
-    if (f.pathname === `${BUCKET_PREFIX}index.json`) continue;
-    const slug = f.pathname.replace(BUCKET_PREFIX, '').replace(/\.json$/, '');
-    items.push(slug);
-  }
-  items.sort().reverse();
-  return new Response(JSON.stringify(items, null, 2), {
-    headers: { 'content-type': 'application/json; charset=utf-8' }
-  });
-}
+  // GET /daily-brief/index.json  —— 返回所有 slug（按时间倒序）
+  if (method === 'GET') {
+    const blobs = await readList(`${PREFIX}/`);
+    // 只要 *.json 且不是 index.json
+    const items = blobs
+      .filter(b => b.pathname.endsWith('.json') && b.pathname !== INDEX)
+      .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json',''));
 
-// POST -> 创建/更新指定 slug（默认今天）
-export async function POST(req) {
-  if (!authOk(req)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+    // 自定义排序：尝试按 YYYY-MM-DD 倒排
+    const sorted = items.sort((a,b) => (a>b?-1:1));
+    return jsonOK(sorted);
   }
 
-  const data = await req.json();
-  const slug = (data.slug || new Date().toISOString().slice(0,10)).trim();
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(slug)) {
-    return new Response(JSON.stringify({ error: 'Invalid slug, expect YYYY-MM-DD' }), { status: 400 });
+  // POST /daily-brief/index.json —— 新建/更新一条
+  if (method === 'POST') {
+    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
+
+    let body;
+    try { body = await req.json(); } catch { return badRequest('INVALID_JSON'); }
+
+    // body 结构：{ slug, title?, bullets[], schedule[], chart:{symbol?, interval?} }
+    const slug = (body.slug || new Date().toISOString().slice(0,10)).trim();
+    if (!slug) return badRequest('MISSING_SLUG');
+
+    // 写入实际内容
+    await writeJSON(`${PREFIX}/${slug}.json`, {
+      title: body.title || '',
+      bullets: body.bullets || [],
+      schedule: body.schedule || [],
+      chart: body.chart || {},
+    });
+
+    // 维护 index.json（存储数组，避免反复 list）
+    let idx = [];
+    try { idx = await readJSONViaFetch(INDEX); } catch {}
+    // 可能已有：去重
+    idx = Array.isArray(idx) ? idx.filter(s => s !== slug) : [];
+    idx.unshift(slug);
+    await writeJSON(INDEX, idx);
+
+    return jsonOK({ ok: true, slug });
   }
 
-  const payload = {
-    slug,
-    title: data.title || `Daily Brief ${slug}`,
-    bullets: Array.isArray(data.bullets) ? data.bullets : [],
-    schedule: Array.isArray(data.schedule) ? data.schedule : [],
-    chart: {
-      symbol: data.chart?.symbol || data.symbol || 'FX:XAUUSD',
-      interval: data.chart?.interval || data.interval || '60'
-    },
-    updatedAt: new Date().toISOString()
-  };
-
-  const path = `${BUCKET_PREFIX}${slug}.json`;
-  const putRes = await put(path, JSON.stringify(payload, null, 2), {
-    access: 'public',
-    contentType: 'application/json'
-  });
-
-  return new Response(JSON.stringify({ ok: true, url: putRes.url }), {
-    headers: { 'content-type': 'application/json; charset=utf-8' }
-  });
+  return badRequest('NOT_ALLOWED', 405);
 }
+
+export const config = {
+  runtime: 'edge',
+};
