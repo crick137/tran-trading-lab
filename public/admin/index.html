@@ -327,7 +327,8 @@
       if (!ensureTokenOrMsg(B.msg)) return;
       try{
         const res = await fetch(`/daily-brief/${slug}.json`, { method:'DELETE', headers: authHeader() });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; bMsg('🗑️ 已删除');
+        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        bMsg('🗑️ 已删除');
       }catch(e){ bMsg('删除失败：' + (e||'Unknown')); }
     };
 
@@ -366,7 +367,8 @@
       if (!ensureTokenOrMsg(A.msg)) return;
       try{
         const res = await fetch(`/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE', headers: authHeader() });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; aMsg('🗑️ 已删除');
+        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        aMsg('🗑️ 已删除');
       }catch(e){ aMsg('删除失败：' + (e||'Unknown')); }
     };
 
@@ -405,7 +407,8 @@
       if (!ensureTokenOrMsg(N.msg)) return;
       try{
         const res = await fetch(`/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE', headers: authHeader() });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; nMsg('🗑️ 已删除');
+        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        nMsg('🗑️ 已删除');
       }catch(e){ nMsg('删除失败：' + (e||'Unknown')); }
     };
 
@@ -472,7 +475,8 @@
       if (!ensureTokenOrMsg(RA.msg)) return;
       try{
         const res = await fetch(`/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE', headers: authHeader() });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; raMsg('🗑️ 已删除');
+        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        raMsg('🗑️ 已删除');
       }catch(e){ raMsg('删除失败：' + (e||'Unknown')); }
     };
 
