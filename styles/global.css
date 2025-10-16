@@ -232,3 +232,31 @@ body{ position: relative; }
   .reveal{ opacity:1; transform:none; }
   #bgfx{ display:none; }
 }
+
+/* About buttons */
+.socials{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #1a1c22, #121418);
+  border: 1px solid #ffffff22;
+  color: #e9edf1;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: .2px;
+  box-shadow: 0 8px 16px rgba(0,0,0,.35), inset 0 1px 0 #ffffff18;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.btn:hover{
+  transform: translateY(-2px);
+  border-color: #ffffff33;
+  box-shadow: 0 14px 28px rgba(0,0,0,.45), inset 0 1px 0 #ffffff20;
+}
