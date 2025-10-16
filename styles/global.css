@@ -281,3 +281,69 @@ body{ position: relative; }
   border-radius: 4px;
   box-shadow: 0 0 4px rgba(255,255,255,0.1);
 }
+
+/* ===== Knowledge Lab ===== */
+.kl-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap:14px;
+}
+.kl-level{
+  position:relative;
+  overflow:hidden;
+}
+.kl-level .lv-head{
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer;
+}
+.lv-badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:10px;
+  background: linear-gradient(180deg,#1a1f28,#12151a);
+  border:1px solid #ffffff22; box-shadow: inset 0 1px 0 #ffffff18;
+  font-size:18px;
+}
+.lv-title{ font-weight:800; font-size:18px; letter-spacing:.2px; }
+.lv-sub{ color:#aeb6c5; font-size:13px; margin-left:auto; }
+
+.kl-list{ margin-top:10px; display:grid; gap:8px; }
+.kl-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:12px;
+  background: linear-gradient(180deg,#0f1216,#0b0e12);
+  border:1px solid #ffffff16;
+  transition: background .2s ease, border-color .2s ease;
+}
+.kl-item:hover{ border-color:#ffffff2a; background: linear-gradient(180deg,#131821,#0e1218); }
+.kl-dot{
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid #7a7dff; box-shadow:0 0 0 2px #7a7dff22 inset;
+  display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+.kl-item.done .kl-dot{ background:#7a7dff; box-shadow:0 0 0 2px #7a7dff44 inset; }
+.kl-name{ flex:1; }
+.kl-tag{
+  font-size:12px; color:#aeb6c5; padding:4px 8px; border-radius:999px;
+  border:1px solid #ffffff22;
+}
+
+.progress-wrap{
+  width:100%; height:12px; background:#0e1217; border:1px solid #ffffff16;
+  border-radius:999px; overflow:hidden; margin-top:10px;
+}
+.progress-bar{
+  height:100%; width:0%;
+  background: linear-gradient(90deg,#66e0ff,#7a7dff);
+  border-radius:999px; position:relative; transition:width .4s cubic-bezier(.2,.6,.2,1);
+}
+.progress-bar span{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:#0c0f14; font-weight:800;
+}
+
+.kl-toggle{ transform:rotate(0); transition: transform .2s ease; }
+.kl-level.collapsed .kl-toggle{ transform:rotate(-90deg); }
+.kl-level.collapsed .kl-list{ display:none; }
+
+/* 细节优化 */
+.btn{ cursor:pointer; }

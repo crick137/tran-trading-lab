@@ -212,40 +212,29 @@
         </div>
       </section>
 
-      <!-- 지식 연구소（去掉图表，文字版） -->
-      <section data-route="knowledge-lab" class="hidden">
-        <div class="card">
-          <h2>지식 연구소</h2>
-          <p class="muted">초보에서 프로까지, 구조적 학습의 길</p>
+      <!-- 지식 연구소（课程式目录 + 进度） -->
+<section data-route="knowledge-lab" class="hidden">
+  <div class="hero">
+    <div class="badge">Knowledge Lab</div>
+    <h1>结构化外汇知识 · 路线图</h1>
+    <p class="muted">从 Preschool 到 Graduation，一条自下而上的系统学习路径。</p>
+  </div>
 
-          <details open>
-            <summary>📚 구조 (Structure)</summary>
-            <ul>
-              <li>BOS / CHoCH 기본 정의</li>
-              <li>고저점 표기 규칙</li>
-              <li>시장 구조 전환 실전 사례</li>
-            </ul>
-          </details>
+  <div class="card" style="margin-bottom:14px">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2 style="margin:0">总体进度</h2>
+      <button id="kl-reset" class="btn" style="padding:6px 10px;font-weight:600">重置进度</button>
+    </div>
+    <div class="progress-wrap">
+      <div id="kl-progress" class="progress-bar"><span id="kl-progress-label">0%</span></div>
+    </div>
+    <p class="meta" id="kl-stats">0 / 0 lessons</p>
+  </div>
 
-          <details>
-            <summary>🧪 유동성 (Liquidity)</summary>
-            <ul>
-              <li>EQH / EQL 개념</li>
-              <li>유인·세척 동작의 이해</li>
-              <li>유동성 수집 이후 전개 패턴</li>
-            </ul>
-          </details>
+  <!-- 课程容器（JS 注入） -->
+  <div id="kl-syllabus" class="kl-grid"></div>
+</section>
 
-          <details>
-            <summary>⚙️ 리스크 (Risk)</summary>
-            <ul>
-              <li>계좌당 2% 고정 리스크</li>
-              <li>25/25/25/25 분할 청산</li>
-              <li>일일 DD 4% 제한 원칙</li>
-            </ul>
-          </details>
-        </div>
-      </section>
 
       <!-- 마켓 뉴스（去掉图表，文字版） -->
       <section data-route="market-news" class="hidden">

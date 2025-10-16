@@ -166,11 +166,11 @@ function renderAnalysesListFiltered(){
   });
 }
 
-// 상세(우측 패널) + 주기 선택
+// 상세(우측 패널) + 주기选择
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
-  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>`; return; }
+  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다。</p>`; return; }
 
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
@@ -233,47 +233,10 @@ function currentSlugFromQuery(){
   return p.get('slug') || '';
 }
 
-// -------- 라우터 구동 ----------
-window.addEventListener('hashchange', async ()=>{
-  const m = matchRoute();
-  const routeId = m.id;
-  show(routeId);
-
-  if (routeId === 'daily-brief') renderDailyBriefList();
-  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
-
-  if (routeId === 'trade-journal'){
-    await loadAnalysesList();
-    const s = document.getElementById('anal-search');
-    const b = document.getElementById('anal-bias');
-    if (s) s.oninput = renderAnalysesListFiltered;
-    if (b) b.onchange = renderAnalysesListFiltered;
-    await renderAnalysisDetailBySlug(currentSlugFromQuery());
-  }
-});
-
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const m = matchRoute();
-  const routeId = m.id;
-  show(routeId);
-
-  if (routeId === 'daily-brief') renderDailyBriefList();
-  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
-
-  if (routeId === 'trade-journal'){
-    await loadAnalysesList();
-    const s = document.getElementById('anal-search');
-    const b = document.getElementById('anal-bias');
-    if (s) s.oninput = renderAnalysesListFiltered;
-    if (b) b.onchange = renderAnalysesListFiltered;
-    await renderAnalysisDetailBySlug(currentSlugFromQuery());
-  }
-});
-
 /* ===== Reveal & Canvas FX (safe, idempotent) =====
    合并动效：卡片阶梯入场 + 背景K线/网格；避免重复初始化 */
 (() => {
-  if (window.__homeFxInit) return;       // 防重复
+  if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
   // 1) 卡片阶梯入场
@@ -347,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   let last=0;
   function tick(t){
-    if (t - last < 1000/30) { requestAnimationFrame(tick); return; } // ~30fps
+    if (t - last < 1000/30) { requestAnimationFrame(tick); return; }
     last = t;
     ctx.clearRect(0,0,w,h);
     grid(); drawCandles(t);
@@ -355,3 +318,224 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   }
   requestAnimationFrame(tick);
 })();
+
+/* ===== Knowledge Lab: syllabus + renderer (with controls) ===== */
+
+const KL_KEY = 'kl.progress.v1';
+let KL_QUERY = '';   // 搜索词（增强）
+const SYLLABUS = [
+  { level:'Preschool', icon:'🎓', desc:'入门准备',
+    lessons:[
+      'What is Forex?',
+      'How Do You Trade Forex?',
+      'When Can You Trade Forex?',
+      'Who Trades Forex?',
+      'Why Trade Forex?',
+      'Margin Trading 101: Understand How Your Margin Account Works'
+    ]
+  },
+  { level:'Kindergarten', icon:'🧩', desc:'基础概念',
+    lessons:[ 'Forex Brokers 101', 'Three Types of Analysis', 'Types of Charts' ]
+  },
+  { level:'Elementary', icon:'📘', desc:'技术分析 I',
+    lessons:[ 'Support and Resistance Levels', 'Grade 2 Japanese Candlesticks', 'Grade 3 Fibonacci', 'Grade 4 Moving Averages', 'Grade 5 Popular Chart Indicators' ]
+  },
+  { level:'Middle School', icon:'🏫', desc:'技术分析 II',
+    lessons:[ 'Grade 6 Oscillators and Momentum Indicators', 'Grade 7 Important Chart Patterns', 'Grade 8 Pivot Points' ]
+  },
+  { level:'Summer School', icon:'🌞', desc:'进阶工具',
+    lessons:[ 'Heikin Ashi', 'Elliott Wave Theory', 'Harmonic Price Patterns' ]
+  },
+  { level:'High School', icon:'🎯', desc:'交易策略 I',
+    lessons:[ 'Trading Divergences', 'Grade 10 Market Environment', 'Grade 11 Trading Breakouts and Fakeouts', 'Grade 12 Fundamental Analysis', 'Grade 13 Currency Crosses', 'Grade 14 Multiple Time Frame Analysis' ]
+  },
+  { level:'Undergraduate · Freshman', icon:'🧠', desc:'交易与情绪',
+    lessons:[ 'Market Sentiment', 'Trading the News', 'Carry Trade' ]
+  },
+  { level:'Undergraduate · Sophomore', icon:'🧭', desc:'市场联动',
+    lessons:[ 'The U.S. Dollar Index', 'Intermarket Correlations', 'Using Equities to Trade FX', 'Country Profiles' ]
+  },
+  { level:'Undergraduate · Junior', icon:'🛠️', desc:'系统构建',
+    lessons:[ 'Developing Your Own Trading Plan', 'Which Type of Trader Are You?', 'Create Your Own Trading System', 'Keeping a Trading Journal', 'How to Use MetaTrader 4' ]
+  },
+  { level:'Undergraduate · Senior', icon:'🧮', desc:'风险与仓位',
+    lessons:[ 'Risk Management', 'The Number 1 Cause of Death of Forex Traders', 'Position Sizing', 'Setting Stop Losses', 'Scaling In and Out', 'Currency Correlations' ]
+  },
+  { level:'Graduation', icon:'🏆', desc:'收官与检核',
+    lessons:[ 'The Most Common Trading Mistakes New Traders Make', 'Forex Trading Scams', 'Personality Quizzes', 'Graduation Speech' ]
+  },
+];
+
+function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
+function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }
+
+function ensureKLControls(){
+  // 如果没有控制条，创建到 #kl-syllabus 前面
+  const host = document.getElementById('kl-syllabus');
+  if (!host) return;
+  if (document.getElementById('kl-controls')) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'kl-controls';
+  bar.className = 'card';
+  bar.style.marginBottom = '14px';
+  bar.innerHTML = `
+    <div class="toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input id="kl-q" class="search" placeholder="搜索课程…" style="min-width:220px">
+      <button id="kl-expand" class="btn">全部展开</button>
+      <button id="kl-collapse" class="btn">全部收起</button>
+      <button id="kl-start" class="btn" style="font-weight:700">开始学习</button>
+    </div>
+  `;
+  host.parentElement.insertBefore(bar, host);
+
+  // 事件
+  document.getElementById('kl-q').oninput = (e)=>{ KL_QUERY = (e.target.value||'').toLowerCase(); renderKnowledgeLab(); };
+  document.getElementById('kl-expand').onclick = ()=>{ document.querySelectorAll('.kl-level').forEach(s=>s.classList.remove('collapsed')); };
+  document.getElementById('kl-collapse').onclick = ()=>{ document.querySelectorAll('.kl-level').forEach(s=>s.classList.add('collapsed')); };
+  document.getElementById('kl-start').onclick = jumpToFirstIncomplete;
+}
+
+function renderKnowledgeLab(){
+  const host = document.getElementById('kl-syllabus');
+  if (!host) return;
+
+  ensureKLControls();
+
+  const progress = klLoad(); // { "Level:Lesson": true, ... }
+
+  // 统计
+  const total = SYLLABUS.reduce((acc,g)=>acc+g.lessons.length,0);
+  const done  = Object.values(progress).filter(Boolean).length;
+  const pct   = total? Math.round(done/total*100) : 0;
+
+  const bar = document.getElementById('kl-progress');
+  const label = document.getElementById('kl-progress-label');
+  const stats = document.getElementById('kl-stats');
+  if (bar){ bar.style.width = pct+'%'; }
+  if (label){ label.textContent = pct+'%'; }
+  if (stats){ stats.textContent = `${done} / ${total} lessons`; }
+
+  host.innerHTML = SYLLABUS.map(group=>{
+    const lid = group.level.replace(/\s+/g,'-').toLowerCase();
+    const list = group.lessons.map(name=>{
+      // 搜索过滤
+      const visible = !KL_QUERY || name.toLowerCase().includes(KL_QUERY) || group.level.toLowerCase().includes(KL_QUERY);
+      const key = `${group.level}:${name}`;
+      const isDone = !!progress[key];
+      return `
+        <div class="kl-item ${isDone?'done':''}" data-key="${key}" style="${visible?'':'display:none'}">
+          <span class="kl-dot">${isDone?'✓':''}</span>
+          <div class="kl-name">${name}</div>
+          <span class="kl-tag">Lesson</span>
+        </div>
+      `;
+    }).join('');
+    return `
+      <section class="card kl-level" id="lv-${lid}">
+        <div class="lv-head" data-toggle="#lv-${lid}">
+          <span class="lv-badge">${group.icon}</span>
+          <div class="lv-title">${group.level}</div>
+          <div class="lv-sub">${group.desc}</div>
+          <svg class="kl-toggle" width="14" height="14" viewBox="0 0 24 24" style="margin-left:8px;opacity:.8">
+            <path d="M7 10l5 5 5-5" fill="none" stroke="#cfd6e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="kl-list">${list}</div>
+      </section>
+    `;
+  }).join('');
+
+  // 折叠
+  host.querySelectorAll('.lv-head').forEach(h=>{
+    h.onclick = ()=>{
+      const sec = document.querySelector(h.dataset.toggle);
+      if (sec) sec.classList.toggle('collapsed');
+    };
+  });
+
+  // 勾选进度
+  host.querySelectorAll('.kl-item').forEach(it=>{
+    it.onclick = ()=>{
+      const key = it.dataset.key;
+      const p = klLoad();
+      p[key] = !p[key];
+      klSave(p);
+      renderKnowledgeLab(); // 重新渲染（刷新进度条与样式）
+    };
+  });
+
+  // 重置
+  const resetBtn = document.getElementById('kl-reset');
+  if (resetBtn){
+    resetBtn.onclick = ()=>{
+      localStorage.removeItem(KL_KEY);
+      renderKnowledgeLab();
+    };
+  }
+}
+
+function jumpToFirstIncomplete(){
+  const progress = klLoad();
+  // 找第一个未完成
+  for (const g of SYLLABUS){
+    for (const name of g.lessons){
+      const key = `${g.level}:${name}`;
+      if (!progress[key]){
+        // 展开所在分组
+        const lid = g.level.replace(/\s+/g,'-').toLowerCase();
+        const sec = document.getElementById(`lv-${lid}`);
+        if (sec) sec.classList.remove('collapsed');
+
+        // 高亮 & 滚动
+        const el = [...document.querySelectorAll(`#lv-${lid} .kl-item`)].find(e=>e.dataset.key===key);
+        if (el){
+          el.scrollIntoView({behavior:'smooth', block:'center'});
+          el.animate([{boxShadow:'0 0 0 rgba(0,0,0,0)'},{boxShadow:'0 0 0 6px rgba(122,125,255,.25)'}],{duration:600, direction:'alternate', iterations:2});
+        }
+        return;
+      }
+    }
+  }
+}
+
+// -------- 라우터 구동 ----------
+window.addEventListener('hashchange', async ()=>{
+  const m = matchRoute();
+  const routeId = m.id;
+  show(routeId);
+
+  if (routeId === 'daily-brief') renderDailyBriefList();
+  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
+
+  if (routeId === 'trade-journal'){
+    await loadAnalysesList();
+    const s = document.getElementById('anal-search');
+    const b = document.getElementById('anal-bias');
+    if (s) s.oninput = renderAnalysesListFiltered;
+    if (b) b.onchange = renderAnalysesListFiltered;
+    await renderAnalysisDetailBySlug(currentSlugFromQuery());
+  }
+
+  if (routeId === 'knowledge-lab') renderKnowledgeLab();   // ✅ 调用知识区渲染
+});
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  const m = matchRoute();
+  const routeId = m.id;
+  show(routeId);
+
+  if (routeId === 'daily-brief') renderDailyBriefList();
+  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
+
+  if (routeId === 'trade-journal'){
+    await loadAnalysesList();
+    const s = document.getElementById('anal-search');
+    const b = document.getElementById('anal-bias');
+    if (s) s.oninput = renderAnalysesListFiltered;
+    if (b) b.onchange = renderAnalysesListFiltered;
+    await renderAnalysisDetailBySlug(currentSlugFromQuery());
+  }
+
+  if (routeId === 'knowledge-lab') renderKnowledgeLab();   // ✅ 首次加载时也渲染
+});
