@@ -1,58 +1,62 @@
-// api/market-news/index.js
-import { list, put } from '@vercel/blob';
-const PREFIX = 'market-news/';
+// /api/market-news/index.js
+import { writeJSON, readJSONViaFetch } from '../_lib/blob.js';
+import { jsonOK, badRequest, requireAuth, withCORS } from '../_lib/http.js';
 
-function authOK(req){
-  const token = process.env.ADMIN_TOKEN;
-  const h = req.headers.get('authorization') || '';
-  const m = h.match(/^Bearer\s+(.+)$/i);
-  return token && m && m[1] === token;
-}
+const PREFIX = 'market-news';
+const INDEX  = `${PREFIX}/index.json`;
 
-// GET -> 返回 [{id}, ...]（倒序）; 详情用 /market-news/:id.json 再取
-export async function GET() {
-  const rows = [];
-  const it = await list({ prefix: PREFIX });
-  for (const f of it.blobs) {
-    if (!f.pathname.endsWith('.json')) continue;
-    if (f.pathname === `${PREFIX}index.json`) continue;
-    const id = f.pathname.replace(PREFIX,'').replace(/\.json$/,'');
-    rows.push({ id });
-  }
-  rows.sort((a,b)=> a.id>b.id?1:-1).reverse();
-  return new Response(JSON.stringify(rows, null, 2), {
-    headers: { 'content-type': 'application/json; charset=utf-8' }
-  });
-}
-
-/**
- * POST body:
- * { id, title, source, url, date, tags:[], summary, bullets:[] }
- */
-export async function POST(req){
-  if (!authOK(req)) return new Response(JSON.stringify({error:'Unauthorized'}), { status:401 });
-  const d = await req.json();
-  const id = (d.id||'').trim();
-  if (!id) return new Response(JSON.stringify({error:'id required'}), { status:400 });
-
-  const item = {
-    id,
-    title: d.title || id,
-    source: d.source || '',
-    url: d.url || '',
-    date: d.date || new Date().toISOString(),
-    tags: Array.isArray(d.tags) ? d.tags : [],
-    summary: d.summary || '',
-    bullets: Array.isArray(d.bullets) ? d.bullets : [],
-    updatedAt: new Date().toISOString()
+function normalize(item) {
+  return {
+    id: item.id,
+    title: item.title || '',
+    source: item.source || '',
+    url: item.url || '',
+    date: item.date || new Date().toISOString(),
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    summary: item.summary || '',
+    bullets: Array.isArray(item.bullets) ? item.bullets : [],
   };
+}
 
-  const path = `${PREFIX}${id}.json`;
-  const res = await put(path, JSON.stringify(item, null, 2), {
-    access: 'public',
-    contentType: 'application/json'
-  });
-  return new Response(JSON.stringify({ ok:true, url: res.url }), {
-    headers: { 'content-type': 'application/json; charset=utf-8' }
-  });
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') return new Response('', withCORS({ status: 204 }));
+
+  // GET 列表
+  if (req.method === 'GET') {
+    try {
+      const idx = await readJSONViaFetch(INDEX);
+      return jsonOK(Array.isArray(idx) ? idx : []);
+    } catch {
+      return jsonOK([]); // 初次为空
+    }
+  }
+
+  // POST 写入/更新一条并维护 index.json
+  if (req.method === 'POST') {
+    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
+    let payload; try { payload = await req.json(); } catch { return badRequest('INVALID_JSON'); }
+    if (!payload || !payload.id) return badRequest('MISSING_ID');
+
+    const item = normalize(payload);
+
+    // 写正文
+    await writeJSON(`${PREFIX}/${item.id}.json`, item);
+
+    // 更新索引：去重，按 date 或 id 逆序
+    let idx = [];
+    try { idx = await readJSONViaFetch(INDEX); } catch {}
+    idx = Array.isArray(idx) ? idx : [];
+    const map = new Map(idx.map(x => [x.id || x, x]));
+    map.set(item.id, { id: item.id, title: item.title, date: item.date });
+    const newIdx = Array.from(map.values()).sort((a,b)=>{
+      const da = new Date(a.date||a.id).getTime();
+      const db = new Date(b.date||b.id).getTime();
+      return isNaN(db-da) ? String(b.id).localeCompare(String(a.id)) : db - da;
+    });
+    await writeJSON(INDEX, newIdx);
+
+    return jsonOK({ ok: true, id: item.id });
+  }
+
+  return badRequest('METHOD_NOT_ALLOWED', 405);
 }

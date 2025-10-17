@@ -1,30 +1,31 @@
-// api/_lib/blob.js
+// /api/_lib/blob.js
 import { put, list, del } from '@vercel/blob';
 
-export async function writeJSON(path, data) {
+export async function writeJSON(pathname, data) {
   const body = JSON.stringify(data, null, 2);
-  // public 方便前端直接 GET 读取；也可改成 'private'
-  const { url, pathname } = await put(path, body, {
+  const res = await put(pathname, body, {
     access: 'public',
-    contentType: 'application/json; charset=utf-8',
+    contentType: 'application/json; charset=utf-8'
   });
-  return { url, pathname };
+  return res;
 }
 
-export async function readList(prefix) {
-  // 列出某目录下的所有对象
-  const { blobs } = await list({ prefix });
-  return blobs;
+export async function deleteObject(pathname) {
+  return await del(pathname);
 }
 
-export async function deleteObject(path) {
-  // 删除单个对象
-  await del(path);
+export async function readJSONViaFetch(pathname) {
+  // 先列一下拿 URL
+  const dir = pathname.includes('/') ? pathname.slice(0, pathname.lastIndexOf('/') + 1) : '';
+  const items = await list({ prefix: dir });
+  const hit = items.blobs.find(b => b.pathname === pathname);
+  if (!hit) throw new Error('NOT_FOUND');
+  const r = await fetch(hit.url, { cache: 'no-store' });
+  if (!r.ok) throw new Error('FETCH_FAILED');
+  return await r.json();
 }
 
-export async function readJSONViaFetch(publicPath) {
-  // public 对象可以直接 fetch
-  const res = await fetch(`https://blob.vercel-storage.com/${publicPath}`);
-  if (!res.ok) throw new Error('NOT_FOUND');
-  return res.json();
+export async function listByPrefix(prefix) {
+  const it = await list({ prefix });
+  return it.blobs;
 }

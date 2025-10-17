@@ -1,73 +1,54 @@
-import { writeJSON, readList, readJSONViaFetch } from '../_lib/blob.js';
-import { jsonOK, badRequest, requireAuth } from '../_lib/http.js';
+// /api/daily-brief/index.js
+import { writeJSON, readJSONViaFetch } from '../_lib/blob.js';
+import { jsonOK, badRequest, requireAuth, withCORS } from '../_lib/http.js';
 
 const PREFIX = 'daily-brief';
-const INDEX = `${PREFIX}/index.json`;
-
-// 更新索引辅助函数
-async function updateIndex(slug, remove = false) {
-  let idx = [];
-  try {
-    idx = await readJSONViaFetch(INDEX);
-    if (!Array.isArray(idx)) idx = [];
-  } catch {}
-
-  let changed = false;
-
-  if (remove) {
-    const filtered = idx.filter(item => item !== slug);
-    changed = filtered.length !== idx.length;
-    if (changed) await writeJSON(INDEX, filtered);
-  } else {
-    idx = Array.isArray(idx) ? idx.filter(s => s !== slug) : [];
-    idx.unshift(slug);
-    changed = true;
-    await writeJSON(INDEX, idx);
-  }
-
-  return changed;
-}
+const INDEX  = `${PREFIX}/index.json`;
 
 export default async function handler(req) {
-  const { method } = req;
+  if (req.method === 'OPTIONS') return new Response('', withCORS({ status: 204 }));
 
-  try {
-    if (method === 'GET') {
-      const blobs = await readList(`${PREFIX}/`);
-      const items = blobs
-        .filter(b => b.pathname.endsWith('.json') && b.pathname !== INDEX)
-        .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json',''));
-      const sorted = items.sort((a,b) => (a > b ? -1 : 1));
-      return jsonOK(sorted);
+  if (req.method === 'GET') {
+    try {
+      const arr = await readJSONViaFetch(INDEX);
+      return jsonOK(Array.isArray(arr) ? arr : []);
+    } catch {
+      return jsonOK([]);
     }
-
-    if (method === 'POST') {
-      const unauthorized = requireAuth(req);
-      if (unauthorized) return unauthorized;
-
-      let body;
-      try { body = await req.json(); } catch {
-        return badRequest('INVALID_JSON');
-      }
-
-      const slug = (body.slug || new Date().toISOString().slice(0,10)).trim();
-      if (!slug) return badRequest('MISSING_SLUG');
-
-      await writeJSON(`${PREFIX}/${slug}.json`, {
-        title: body.title || '',
-        bullets: body.bullets || [],
-        schedule: body.schedule || [],
-        chart: body.chart || {},
-      });
-
-      await updateIndex(slug);
-
-      return jsonOK({ ok: true, slug, saved: true });
-    }
-
-    return badRequest('NOT_ALLOWED', 405);
-  } catch (err) {
-    console.error('index handler error:', err);
-    return badRequest('INTERNAL_ERROR', 500);
   }
+
+  if (req.method === 'POST') {
+    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
+    let payload; try { payload = await req.json(); } catch { return badRequest('INVALID_JSON'); }
+    const slug = payload.slug || new Date().toISOString().slice(0,10);
+    const item = {
+      slug,
+      title: payload.title || '',
+      bullets: Array.isArray(payload.bullets) ? payload.bullets : [],
+      schedule: Array.isArray(payload.schedule) ? payload.schedule : [],
+      chart: payload.chart || { symbol: payload.symbol || '', interval: payload.interval || '60' }
+    };
+
+    await writeJSON(`${PREFIX}/${slug}.json`, item);
+
+    let idx = [];
+    try { idx = await readJSONViaFetch(INDEX); } catch {}
+    idx = Array.isArray(idx) ? idx : [];
+    const map = new Map(idx.map(s => [typeof s==='string'?s:s.slug, s]));
+    map.set(slug, (typeof idx[0]==='string') ? slug : { slug });
+    const list = Array.from(map.values()).sort((a,b)=>{
+      const sa = typeof a==='string'?a:a.slug, sb = typeof b==='string'?b:b.slug;
+      return sb.localeCompare(sa);
+    });
+    await writeJSON(INDEX, list);
+
+    return jsonOK({ ok: true, slug });
+  }
+
+  if (req.method === 'DELETE') {
+    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
+    return badRequest('DELETE_SINGLE_USE /daily-brief/:slug.json', 405);
+  }
+
+  return badRequest('METHOD_NOT_ALLOWED', 405);
 }

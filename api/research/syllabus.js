@@ -1,34 +1,29 @@
-// api/research/syllabus.js
-import { get, put } from '@vercel/blob';
+// /api/research/syllabus.js
+import { writeJSON, readJSONViaFetch } from '../_lib/blob.js';
+import { jsonOK, badRequest, requireAuth, withCORS } from '../_lib/http.js';
 
 const PATH = 'research/syllabus.json';
 
-function authOK(req){
-  const token = process.env.ADMIN_TOKEN;
-  const h = req.headers.get('authorization') || '';
-  const m = h.match(/^Bearer\s+(.+)$/i);
-  return token && m && m[1] === token;
-}
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') return new Response('', withCORS({ status: 204 }));
 
-// GET -> 302 到线上 JSON；不存在则 404
-export async function GET(){
-  try{
-    const res = await get(PATH);
-    if (!res?.downloadUrl) throw 0;
-    return Response.redirect(res.downloadUrl, 302);
-  }catch{
-    return new Response(JSON.stringify({ error:'Not found' }), { status:404 });
+  if (req.method === 'GET') {
+    try {
+      const j = await readJSONViaFetch(PATH);
+      return jsonOK(j);
+    } catch {
+      return jsonOK({ syllabus: [] });
+    }
   }
-}
 
-// POST -> { syllabus: [...] }
-export async function POST(req){
-  if (!authOK(req)) return new Response(JSON.stringify({error:'Unauthorized'}), { status:401 });
-  const d = await req.json();
-  if (!Array.isArray(d.syllabus)) {
-    return new Response(JSON.stringify({ error:'syllabus must be array' }), { status:400 });
+  if (req.method === 'POST') {
+    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
+    let payload; try { payload = await req.json(); } catch { return badRequest('INVALID_JSON'); }
+    const syllabus = Array.isArray(payload?.syllabus) ? payload.syllabus : null;
+    if (!Array.isArray(syllabus)) return badRequest('SYLLABUS_MUST_BE_ARRAY');
+    await writeJSON(PATH, { syllabus });
+    return jsonOK({ ok: true });
   }
-  const payload = { syllabus: d.syllabus, updatedAt: new Date().toISOString() };
-  await put(PATH, JSON.stringify(payload, null, 2), { access:'public', contentType:'application/json' });
-  return new Response(JSON.stringify({ ok:true }), { headers:{ 'content-type':'application/json; charset=utf-8' }});
+
+  return badRequest('METHOD_NOT_ALLOWED', 405);
 }

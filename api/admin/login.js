@@ -1,57 +1,22 @@
 // /api/admin/login.js
-import crypto from 'crypto';
+import { withCORS, jsonOK, badRequest, issueLoginCookie } from '../_lib/http.js';
 
-const COOKIE_NAME = 'tran_admin_token';
-const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 天
+export default async function handler(req) {
+  if (req.method === 'OPTIONS') return new Response('', withCORS({ status: 204 }));
 
-function makeToken(password, secret) {
-  return crypto.createHmac('sha256', secret).update(password).digest('hex');
-}
+  if (req.method !== 'POST') return badRequest('METHOD_NOT_ALLOWED', 405);
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('content-type', 'application/json; charset=utf-8');
-    res.setHeader('cache-control', 'no-store');
-    return res.status(405).send(JSON.stringify({ error: 'Method not allowed' }));
-  }
+  let payload = {};
+  try { payload = await req.json(); } catch {}
+  const pwd = (payload.password || '').trim();
+  const { ok, setCookie } = issueLoginCookie(pwd);
+  if (!ok) return badRequest('INVALID_PASSWORD', 401);
 
-  // 解析 JSON body（Node API 没有 req.json()）
-  let body = {};
-  try {
-    body = typeof req.body === 'object' && req.body !== null
-      ? req.body
-      : JSON.parse(req.body || '{}');
-  } catch {}
-
-  const password = body?.password || '';
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
-  const AUTH_SECRET = process.env.AUTH_SECRET || 'please-change-me';
-
-  if (!ADMIN_PASSWORD) {
-    res.setHeader('content-type', 'application/json; charset=utf-8');
-    res.setHeader('cache-control', 'no-store');
-    return res.status(500).send(JSON.stringify({ error: 'Server misconfigured' }));
-  }
-
-  if (password !== ADMIN_PASSWORD) {
-    res.setHeader('content-type', 'application/json; charset=utf-8');
-    res.setHeader('cache-control', 'no-store');
-    return res.status(401).send(JSON.stringify({ error: '密码错误' }));
-  }
-
-  const token = makeToken(ADMIN_PASSWORD, AUTH_SECRET);
-  const cookieParts = [
-    `${COOKIE_NAME}=${token}`,
-    'Path=/',
-    `Max-Age=${TOKEN_TTL_SECONDS}`,
-    `Expires=${new Date(Date.now() + TOKEN_TTL_SECONDS * 1000).toUTCString()}`,
-    'HttpOnly',
-    'SameSite=Strict',
-    process.env.NODE_ENV === 'production' ? 'Secure' : null,
-  ].filter(Boolean);
-
-  res.setHeader('set-cookie', cookieParts.join('; '));
-  res.setHeader('content-type', 'application/json; charset=utf-8');
-  res.setHeader('cache-control', 'no-store');
-  return res.status(200).send(JSON.stringify({ ok: true }));
+  return new Response(JSON.stringify({ ok: true }), withCORS({
+    status: 200,
+    headers: {
+      'content-type': 'application/json; charset=utf-8',
+      ...(setCookie ? { 'set-cookie': setCookie } : {})
+    }
+  }));
 }
