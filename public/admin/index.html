@@ -168,7 +168,7 @@
                 <label class="full">摘要<textarea id="n-summary"></textarea></label>
                 <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
               </div>
-              <div class="row" style="margin-top:10px">
+              <div class="row" style="margin-top:10px)">
                 <button id="n-publish" class="primary">发布 / 更新</button>
                 <button id="n-reuse" class="icon-btn">昨日复用</button>
                 <button id="n-preview" class="icon-btn">一键预览</button>
@@ -289,14 +289,11 @@
         }catch(e){}
         return false;
       }
-
-      // 进页先试 Cookie 验证（只有 ok:true 才放行）
       verify();
 
       btn.addEventListener('click', async ()=>{
         const pw = (input.value||'').trim();
         if(!pw){ input.focus(); return showError('请输入密码'); }
-
         btn.disabled = true;
         try{
           const r = await fetch('/api/admin/login', {
@@ -319,298 +316,52 @@
         }
       });
 
-      // 回车提交 + 初始聚焦
       input.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
       window.addEventListener('load', ()=> input && input.focus());
     })();
   </script>
 
-  <!-- ========== 业务模块脚本（原样保留） ========== -->
+  <!-- ========== 业务模块脚本（稳健请求封装版） ========== -->
   <script type="module">
-  const $  = (s, el=document)=> el.querySelector(s);
-  const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
-  const LS = {
-    token: 'admin.token',
-    brief: 'draft.brief.v1',
-    analyses: 'draft.analyses.v1',
-    news: 'draft.news.v1',
-    research: 'draft.research.v1',
-    rArticles: 'draft.research.articles.v1'
-  };
-
-  // ---------------- 请求封装（稳健版） ----------------
-  async function fetchJSON(url, init={}) {
-    const res = await fetch(url, { cache:'no-store', ...init });
-    const text = await res.text();
-    let data = null;
-    try { data = JSON.parse(text); } catch {}
-    return { res, ok: res.ok, status: res.status, data, text };
-  }
-  async function getJSON(url) {
-    const r = await fetchJSON(url);
-    if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
-    if (!r.data) throw ('响应不是 JSON');
-    return r.data;
-  }
-  async function postJSON(url, payload, headers={}) {
-    const r = await fetchJSON(url, {
-      method: 'POST',
-      headers: { 'content-type':'application/json', ...headers },
-      body: JSON.stringify(payload)
-    });
-    if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
-    return r.data || {};
-  }
-  async function del(url, headers={}) {
-    const r = await fetchJSON(url, { method:'DELETE', headers });
-    if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
-    return r.data || {};
-  }
-
-  // ---------------- Tabs ----------------
-  $$('.tab-btn').forEach(b=>{
-    b.onclick = ()=>{
-      $$('.tab-btn').forEach(x=>x.classList.toggle('active', x===b));
-      $$('.tab').forEach(t=>t.classList.remove('active'));
-      $('#tab-' + b.dataset.tab).classList.add('active');
+    const $  = (s, el=document)=> el.querySelector(s);
+    const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+    const LS = {
+      token: 'admin.token',
+      brief: 'draft.brief.v1',
+      analyses: 'draft.analyses.v1',
+      news: 'draft.news.v1',
+      research: 'draft.research.v1',
+      rArticles: 'draft.research.articles.v1'
     };
-  });
 
-  // ---------------- Token ----------------
-  const tokenEl = $('#token');
-  (function loadToken(){
-    const v = localStorage.getItem(LS.token)||'';
-    if (v) tokenEl.value = v;
-  })();
-  if (!localStorage.getItem(LS.token)) tokenEl.focus();
-
-  $('#remember-token').onclick = ()=> localStorage.setItem(LS.token, tokenEl.value.trim());
-  $('#forget-token').onclick   = ()=> localStorage.removeItem(LS.token);
-
-  function authHeader(){
-    const t = tokenEl.value.trim();
-    return { 'authorization': 'Bearer ' + t };
-  }
-  function today(){ return new Date().toISOString().slice(0,10); }
-  function ensureTokenOrMsg(msgEl){
-    const t = tokenEl.value.trim();
-    if (!t){
-      msgEl.textContent = '请先在顶部输入发布口令（ADMIN_TOKEN）并点击“记住”。';
-      tokenEl.focus();
-      return false;
+    // ---- fetch 封装（先 text 再尝试 JSON，避免 JSON.parse 崩溃） ----
+    async function fetchJSON(url, init={}) {
+      const res = await fetch(url, { cache:'no-store', ...init });
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch {}
+      return { res, ok: res.ok, status: res.status, data, text };
     }
-    return true;
-  }
-
-  // ---------------- Draft helpers ----------------
-  function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
-  function loadDraft(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch{return{}} }
-  function clearDraft(key){ localStorage.removeItem(key); }
-
-  /* ===== Daily Brief ===== */
-  const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
-  const bMsg = s => B.msg.textContent = s;
-  function bGet(){ return { slug:B.slug.value.trim()||undefined, title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
-  function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||'60'; }
-  $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())));
-  (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
-  $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
-  $('#b-reuse').onclick = async ()=>{
-    bMsg('拉取最新一条…');
-    try{
-      const arr = await getJSON('/daily-brief/index.json?_=' + Date.now());
-      if (!Array.isArray(arr) || !arr.length) return bMsg('没有历史记录');
-      const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].slug : arr[0];
-      const d = await getJSON(`/daily-brief/${latest}.json?_=${Date.now()}`);
-      d.slug = today(); bSet(d); saveDraft(LS.brief, bGet()); bMsg('已载入最近一条，并把日期改为今天');
-    }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
-  };
-  $('#b-publish').onclick = async ()=>{
-    if (!ensureTokenOrMsg(B.msg)) return;
-    try{
-      await postJSON('/daily-brief/index.json', bGet(), { ...authHeader() });
-      bMsg('✅ 发布成功');
-    }catch(e){ bMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
-  };
-  $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
-  $('#b-delete').onclick = async ()=>{
-    const slug = B.slug.value.trim();
-    if (!slug) return bMsg('请先填写日期');
-    if (!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
-    if (!ensureTokenOrMsg(B.msg)) return;
-    try{
-      await del(`/daily-brief/${slug}.json`, { ...authHeader() });
-      bMsg('🗑️ 已删除');
-    }catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
-  };
-
-  /* ===== Analyses ===== */
-  const A = { slug: $('#a-slug'), title: $('#a-title'), symbol: $('#a-symbol'), tf: $('#a-tf'), date: $('#a-date'), bias: $('#a-bias'), tags: $('#a-tags'), supports: $('#a-supports'), resistances: $('#a-resistances'), context: $('#a-context'), view: $('#a-view'), invalidation: $('#a-invalidation'), chartSymbol: $('#a-chart-symbol'), chartInterval: $('#a-chart-interval'), msg: $('#a-msg') };
-  const aMsg = s => A.msg.textContent = s;
-  function aGet(){ return { slug:A.slug.value.trim(), title:A.title.value.trim(), symbol:A.symbol.value.trim(), tf:A.tf.value.trim(), date:A.date.value.trim()||today(), bias:A.bias.value, tags:A.tags.value.split(',').map(s=>s.trim()).filter(Boolean), supports:A.supports.value.split('\n').map(s=>s.trim()).filter(Boolean), resistances:A.resistances.value.split('\n').map(s=>s.trim()).filter(Boolean), context:A.context.value.trim(), view:A.view.value.trim(), invalidation:A.invalidation.value.trim(), chart:{ symbol:A.chartSymbol.value.trim()||A.symbol.value.trim(), interval:A.chartInterval.value } }; }
-  function aSet(d){ A.slug.value=d.slug||''; A.title.value=d.title||''; A.symbol.value=d.symbol||''; A.tf.value=d.tf||''; A.date.value=d.date||''; A.bias.value=d.bias||'neutral'; A.tags.value=(d.tags||[]).join(', '); A.supports.value=(d.supports||[]).join('\n'); A.resistances.value=(d.resistances||[]).join('\n'); A.context.value=d.context||''; A.view.value=d.view||''; A.invalidation.value=d.invalidation||''; A.chartSymbol.value=(d.chart?.symbol)||''; A.chartInterval.value=(d.chart?.interval)||'60'; }
-  $$('#tab-analyses input, #tab-analyses textarea, #tab-analyses select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.analyses, aGet())));
-  (function(){ const d=loadDraft(LS.analyses); if(Object.keys(d).length) aSet(d); })();
-  $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
-  $('#a-reuse').onclick = async ()=>{
-    aMsg('拉取最新一条…');
-    try{
-      const arr = await getJSON('/analyses/index.json?_=' + Date.now());
-      if (!Array.isArray(arr) || !arr.length) return aMsg('没有历史记录');
-      const latest = arr[0].slug || arr[0];
-      const d = await getJSON(`/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
-      const base = (d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,''); d.slug = `${base}-${today()}`; d.date = today();
-      aSet(d); saveDraft(LS.analyses, aGet()); aMsg('已载入最近一条，slug/日期已更新为今天');
-    }catch{ aMsg('拉取失败'); }
-  };
-  $('#a-publish').onclick = async ()=>{
-    if (!ensureTokenOrMsg(A.msg)) return;
-    const payload=aGet(); if (!payload.slug) return aMsg('请填写 slug');
-    try{
-      await postJSON('/analyses/index.json', payload, { ...authHeader() });
-      aMsg('✅ 发布成功');
-    }catch(e){ aMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
-  };
-  $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
-  $('#a-delete').onclick = async ()=>{
-    const slug = A.slug.value.trim();
-    if (!slug) return aMsg('请先填写 slug');
-    if (!confirm(`确定删除分析：${slug} ?`)) return;
-    if (!ensureTokenOrMsg(A.msg)) return;
-    try{
-      await del(`/analyses/${encodeURIComponent(slug)}.json`, { ...authHeader() });
-      aMsg('🗑️ 已删除');
-    }catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
-  };
-
-  /* ===== News ===== */
-  const N = { id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets'), msg: $('#n-msg') };
-  const nMsg = s => N.msg.textContent = s;
-  function nGet(){ return { id:N.id.value.trim(), title:N.title.value.trim(), source:N.source.value.trim(), url:N.url.value.trim(), date:N.date.value.trim()||new Date().toISOString(), tags:N.tags.value.split(',').map(s=>s.trim()).filter(Boolean), summary:N.summary.value.trim(), bullets:N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean) }; }
-  function nSet(d){ N.id.value=d.id||''; N.title.value=d.title||''; N.source.value=d.source||''; N.url.value=d.url||''; N.date.value=d.date||''; N.tags.value=(d.tags||[]).join(', '); N.summary.value=d.summary||''; N.bullets.value=(d.bullets||[]).join('\n'); }
-  $$('#tab-news input, #tab-news textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.news, nGet())));
-  (function(){ const d=loadDraft(LS.news); if(Object.keys(d).length) nSet(d); })();
-  $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清空'); };
-  $('#n-reuse').onclick = async ()=>{
-    nMsg('拉取最新一条…');
-    try{
-      const arr = await getJSON('/market-news/index.json?_=' + Date.now());
-      if (!Array.isArray(arr) || !arr.length) return nMsg('没有历史记录');
-      const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].id : arr[0];
-      const d = await getJSON(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
-      const base=today(); d.id=`${base}-1`; d.date=new Date().toISOString();
-      nSet(d); saveDraft(LS.news, nGet()); nMsg('已载入最近一条，已建议新的 id');
-    }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
-  };
-  $('#n-publish').onclick = async ()=>{
-    if (!ensureTokenOrMsg(N.msg)) return;
-    const payload=nGet(); if (!payload.id) return nMsg('请填写 id');
-    try{
-      await postJSON('/market-news/index.json', payload, { ...authHeader() });
-      nMsg('✅ 发布成功');
-    }catch(e){ nMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
-  };
-  $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
-  $('#n-delete').onclick = async ()=>{
-    const id = N.id.value.trim();
-    if (!id) return nMsg('请先填写 id');
-    if (!confirm(`确定删除快讯：${id} ?`)) return;
-    if (!ensureTokenOrMsg(N.msg)) return;
-    try{
-      await del(`/market-news/${encodeURIComponent(id)}.json`, { ...authHeader() });
-      nMsg('🗑️ 已删除');
-    }catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
-  };
-
-  /* ===== Research (syllabus) ===== */
-  const R = { json: $('#r-json'), msg: $('#r-msg') };
-  function rMsg(s){ R.msg.textContent = s; }
-  function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
-  $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value})));
-  (function(){ const d = loadDraft(LS.research); if (d && typeof d.text==='string') R.json.value = d.text; })();
-  $('#r-load').onclick = async ()=>{
-    rMsg('加载线上大纲…');
-    try{
-      const j = await getJSON('/research/syllabus.json?_=' + Date.now());
-      R.json.value = JSON.stringify(j.syllabus||[], null, 2);
-      saveDraft(LS.research, {text: R.json.value}); rMsg('已载入线上版本到编辑框');
-    }catch(e){ rMsg('加载失败：' + (e?.message || e)); }
-  };
-  $('#r-save').onclick = async ()=>{
-    const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
-    if (!ensureTokenOrMsg(R.msg)) return;
-    try{
-      await postJSON('/research/syllabus.json', { syllabus }, { ...authHeader() });
-      rMsg('✅ 保存成功');
-    }catch(e){ rMsg('❌ 保存失败：' + (e?.message || e || 'Unknown')); }
-  };
-  $('#r-clear').onclick = ()=>{ clearDraft(LS.research); R.json.value=''; rMsg('草稿已清空'); };
-  $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
-
-  /* ===== Research Articles ===== */
-  const RA = { slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body'), msg: $('#ra-msg') };
-  const raMsg = s => RA.msg.textContent = s;
-  const raGet = () => ({ slug:(RA.slug.value||'').trim(), title:(RA.title.value||'').trim(), excerpt:(RA.excerpt.value||'').trim(), tags:(RA.tags.value||'').split(',').map(s=>s.trim()).filter(Boolean), hero:(RA.hero.value||'').trim(), date:new Date().toISOString(), body: RA.body.value || '' });
-  const raSet = d => { RA.slug.value=d.slug||''; RA.title.value=d.title||''; RA.excerpt.value=d.excerpt||''; RA.tags.value=(d.tags||[]).join(', '); RA.hero.value=d.hero||''; RA.body.value=d.body||''; };
-  $$('#tab-r-articles input, #tab-r-articles textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.rArticles, JSON.stringify(raGet()))));
-  (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.rArticles)||'{}'); if (Object.keys(d).length) raSet(d); }catch{} })();
-  $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清空'); };
-  $('#ra-reuse').onclick = async ()=>{
-    raMsg('拉取最新一篇…');
-    try{
-      const list = await getJSON('/research/articles/index.json?_=' + Date.now());
-      if (!Array.isArray(list) || !list.length) return raMsg('没有历史记录');
-      const latestSlug = list[0].slug || list[0];
-      const d = await getJSON(`/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`);
-      const base = (d.slug||'article').replace(/[^a-z0-9\-]+/gi,''); d.slug = base + '-' + (new Date().toISOString().slice(0,10)); d.date = new Date().toISOString();
-      raSet(d); localStorage.setItem(LS.rArticles, JSON.stringify(raGet())); raMsg('已载入最近一篇，已建议新的 slug');
-    }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
-  };
-  $('#ra-publish').onclick = async ()=>{
-    if (!ensureTokenOrMsg(RA.msg)) return;
-    const payload = raGet(); if (!payload.slug) return raMsg('请填写 slug');
-    try{
-      await postJSON('/research/articles/index.json', payload, { ...authHeader() });
-      raMsg('✅ 发布成功');
-    }catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
-  };
-  $('#ra-preview').onclick = ()=>{
-    const slug = (RA.slug.value||'').trim(); if (!slug) return raMsg('请先填写 slug');
-    window.open(`/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
-  };
-  $('#ra-delete').onclick = async ()=>{
-    const slug = RA.slug.value.trim();
-    if (!slug) return raMsg('请先填写 slug');
-    if (!confirm(`确定删除文章：${slug} ?`)) return;
-    if (!ensureTokenOrMsg(RA.msg)) return;
-    try{
-      await del(`/research/articles/${encodeURIComponent(slug)}.json`, { ...authHeader() });
-      raMsg('🗑️ 已删除');
-    }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
-  };
-
-  // ---------- 快捷发布 ----------
-  document.addEventListener('keydown', e=>{
-    if (!(e.key === 'Enter' && (e.ctrlKey||e.metaKey))) return;
-    if ($('#tab-brief').classList.contains('active')) return $('#b-publish').click();
-    if ($('#tab-analyses').classList.contains('active')) return $('#a-publish').click();
-    if ($('#tab-news').classList.contains('active')) return $('#n-publish').click();
-    if ($('#tab-research').classList.contains('active')) return $('#r-save').click();
-    if ($('#tab-r-articles').classList.contains('active')) return $('#ra-publish').click();
-  });
-
-  // ---------- 退出登录 ----------
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      if (!confirm('确定要退出管理员模式吗？')) return;
-      try { await fetch('/api/admin/logout', { method: 'POST' }); } catch(e) {}
-      localStorage.removeItem('admin.token'); // 防误发
-      location.reload();
-    });
-  }
-</script>
-
+    async function getJSON(url) {
+      const r = await fetchJSON(url);
+      if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
+      if (!r.data) throw ('响应不是 JSON');
+      return r.data;
+    }
+    async function postJSON(url, payload, headers={}) {
+      const r = await fetchJSON(url, {
+        method: 'POST',
+        headers: { 'content-type':'application/json', ...headers },
+        body: JSON.stringify(payload)
+      });
+      if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
+      return r.data || {};
+    }
+    async function del(url, headers={}) {
+      const r = await fetchJSON(url, { method:'DELETE', headers });
+      if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
+      return r.data || {};
+    }
 
     // ---------- Tabs ----------
     $$('.tab-btn').forEach(b=>{
@@ -634,7 +385,7 @@
 
     function authHeader(){
       const t = tokenEl.value.trim();
-      return { 'authorization': 'Bearer ' + t, 'content-type': 'application/json' };
+      return { 'authorization': 'Bearer ' + t };
     }
     function today(){ return new Date().toISOString().slice(0,10); }
     function ensureTokenOrMsg(msgEl){
@@ -663,19 +414,19 @@
     $('#b-reuse').onclick = async ()=>{
       bMsg('拉取最新一条…');
       try{
-        const arr = await (await fetch('/daily-brief/index.json?_=' + Date.now())).json();
+        const arr = await getJSON('/daily-brief/index.json?_=' + Date.now());
         if (!Array.isArray(arr) || !arr.length) return bMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].slug : arr[0];
-        const d = await (await fetch(`/daily-brief/${latest}.json?_=${Date.now()}`)).json();
+        const d = await getJSON(`/daily-brief/${latest}.json?_=${Date.now()}`);
         d.slug = today(); bSet(d); saveDraft(LS.brief, bGet()); bMsg('已载入最近一条，并把日期改为今天');
-      }catch{ bMsg('拉取失败'); }
+      }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#b-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(B.msg)) return;
       try{
-        const res = await fetch('/daily-brief/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(bGet()) });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; bMsg('✅ 发布成功');
-      }catch(e){ bMsg('❌ 发布失败：' + (e||'Unknown')); }
+        await postJSON('/daily-brief/index.json', bGet(), { ...authHeader() });
+        bMsg('✅ 发布成功');
+      }catch(e){ bMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
     $('#b-delete').onclick = async ()=>{
@@ -684,10 +435,9 @@
       if (!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
       if (!ensureTokenOrMsg(B.msg)) return;
       try{
-        const res = await fetch(`/daily-brief/${slug}.json`, { method:'DELETE', headers: authHeader() });
-        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        await del(`/daily-brief/${slug}.json`, { ...authHeader() });
         bMsg('🗑️ 已删除');
-      }catch(e){ bMsg('删除失败：' + (e||'Unknown')); }
+      }catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
     /* ===== Analyses ===== */
@@ -701,10 +451,10 @@
     $('#a-reuse').onclick = async ()=>{
       aMsg('拉取最新一条…');
       try{
-        const arr = await (await fetch('/analyses/index.json?_=' + Date.now())).json();
+        const arr = await getJSON('/analyses/index.json?_=' + Date.now());
         if (!Array.isArray(arr) || !arr.length) return aMsg('没有历史记录');
         const latest = arr[0].slug || arr[0];
-        const d = await (await fetch(`/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
+        const d = await getJSON(`/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
         const base = (d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,''); d.slug = `${base}-${today()}`; d.date = today();
         aSet(d); saveDraft(LS.analyses, aGet()); aMsg('已载入最近一条，slug/日期已更新为今天');
       }catch{ aMsg('拉取失败'); }
@@ -713,9 +463,9 @@
       if (!ensureTokenOrMsg(A.msg)) return;
       const payload=aGet(); if (!payload.slug) return aMsg('请填写 slug');
       try{
-        const res = await fetch('/analyses/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; aMsg('✅ 发布成功');
-      }catch(e){ aMsg('❌ 发布失败：' + (e||'Unknown')); }
+        await postJSON('/analyses/index.json', payload, { ...authHeader() });
+        aMsg('✅ 发布成功');
+      }catch(e){ aMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
     $('#a-delete').onclick = async ()=>{
@@ -724,10 +474,9 @@
       if (!confirm(`确定删除分析：${slug} ?`)) return;
       if (!ensureTokenOrMsg(A.msg)) return;
       try{
-        const res = await fetch(`/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE', headers: authHeader() });
-        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        await del(`/analyses/${encodeURIComponent(slug)}.json`, { ...authHeader() });
         aMsg('🗑️ 已删除');
-      }catch(e){ aMsg('删除失败：' + (e||'Unknown')); }
+      }catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
     /* ===== News ===== */
@@ -741,21 +490,21 @@
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
-        const arr = await (await fetch('/market-news/index.json?_=' + Date.now())).json();
+        const arr = await getJSON('/market-news/index.json?_=' + Date.now());
         if (!Array.isArray(arr) || !arr.length) return nMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0] === 'object') ? arr[0].id : arr[0];
-        const d = await (await fetch(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`)).json();
+        const d = await getJSON(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
         const base=today(); d.id=`${base}-1`; d.date=new Date().toISOString();
         nSet(d); saveDraft(LS.news, nGet()); nMsg('已载入最近一条，已建议新的 id');
-      }catch{ nMsg('拉取失败'); }
+      }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#n-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(N.msg)) return;
       const payload=nGet(); if (!payload.id) return nMsg('请填写 id');
       try{
-        const res = await fetch('/market-news/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; nMsg('✅ 发布成功');
-      }catch(e){ nMsg('❌ 发布失败：' + (e||'Unknown')); }
+        await postJSON('/market-news/index.json', payload, { ...authHeader() });
+        nMsg('✅ 发布成功');
+      }catch(e){ nMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
     $('#n-delete').onclick = async ()=>{
@@ -764,33 +513,32 @@
       if (!confirm(`确定删除快讯：${id} ?`)) return;
       if (!ensureTokenOrMsg(N.msg)) return;
       try{
-        const res = await fetch(`/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE', headers: authHeader() });
-        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        await del(`/market-news/${encodeURIComponent(id)}.json`, { ...authHeader() });
         nMsg('🗑️ 已删除');
-      }catch(e){ nMsg('删除失败：' + (e||'Unknown')); }
+      }catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
     /* ===== Research (syllabus) ===== */
     const R = { json: $('#r-json'), msg: $('#r-msg') };
     function rMsg(s){ R.msg.textContent = s; }
     function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
-    $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value})));
+    $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value}));
     (function(){ const d = loadDraft(LS.research); if (d && typeof d.text==='string') R.json.value = d.text; })();
     $('#r-load').onclick = async ()=>{
       rMsg('加载线上大纲…');
       try{
-        const j = await (await fetch('/research/syllabus.json?_=' + Date.now())).json();
+        const j = await getJSON('/research/syllabus.json?_=' + Date.now());
         R.json.value = JSON.stringify(j.syllabus||[], null, 2);
         saveDraft(LS.research, {text: R.json.value}); rMsg('已载入线上版本到编辑框');
-      }catch{ rMsg('加载失败'); }
+      }catch(e){ rMsg('加载失败：' + (e?.message || e)); }
     };
     $('#r-save').onclick = async ()=>{
       const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
       if (!ensureTokenOrMsg(R.msg)) return;
       try{
-        const res = await fetch('/research/syllabus.json', { method:'POST', headers: authHeader(), body: JSON.stringify({ syllabus }) });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; rMsg('✅ 保存成功');
-      }catch(e){ rMsg('❌ 保存失败：' + (e||'Unknown')); }
+        await postJSON('/research/syllabus.json', { syllabus }, { ...authHeader() });
+        rMsg('✅ 保存成功');
+      }catch(e){ rMsg('❌ 保存失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#r-clear').onclick = ()=>{ clearDraft(LS.research); R.json.value=''; rMsg('草稿已清空'); };
     $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
@@ -806,21 +554,21 @@
     $('#ra-reuse').onclick = async ()=>{
       raMsg('拉取最新一篇…');
       try{
-        const list = await (await fetch('/research/articles/index.json?_=' + Date.now())).json();
+        const list = await getJSON('/research/articles/index.json?_=' + Date.now());
         if (!Array.isArray(list) || !list.length) return raMsg('没有历史记录');
         const latestSlug = list[0].slug || list[0];
-        const d = await (await fetch(`/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`)).json();
+        const d = await getJSON(`/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`);
         const base = (d.slug||'article').replace(/[^a-z0-9\-]+/gi,''); d.slug = base + '-' + (new Date().toISOString().slice(0,10)); d.date = new Date().toISOString();
         raSet(d); localStorage.setItem(LS.rArticles, JSON.stringify(raGet())); raMsg('已载入最近一篇，已建议新的 slug');
-      }catch{ raMsg('拉取失败'); }
+      }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#ra-publish').onclick = async ()=>{
       if (!ensureTokenOrMsg(RA.msg)) return;
       const payload = raGet(); if (!payload.slug) return raMsg('请填写 slug');
       try{
-        const res = await fetch('/research/articles/index.json', { method:'POST', headers: authHeader(), body: JSON.stringify(payload) });
-        const data = await res.json(); if (!res.ok) throw data?.error || res.statusText; raMsg('✅ 发布成功');
-      }catch(e){ raMsg('❌ 发布失败：' + (e||'Unknown')); }
+        await postJSON('/research/articles/index.json', payload, { ...authHeader() });
+        raMsg('✅ 发布成功');
+      }catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#ra-preview').onclick = ()=>{
       const slug = (RA.slug.value||'').trim(); if (!slug) return raMsg('请先填写 slug');
@@ -832,10 +580,9 @@
       if (!confirm(`确定删除文章：${slug} ?`)) return;
       if (!ensureTokenOrMsg(RA.msg)) return;
       try{
-        const res = await fetch(`/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE', headers: authHeader() });
-        if (!res.ok) { const err = await res.text(); throw (err || res.statusText); }
+        await del(`/research/articles/${encodeURIComponent(slug)}.json`, { ...authHeader() });
         raMsg('🗑️ 已删除');
-      }catch(e){ raMsg('删除失败：' + (e||'Unknown')); }
+      }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
     // ---------- 快捷发布 ----------
@@ -854,7 +601,7 @@
       logoutBtn.addEventListener('click', async () => {
         if (!confirm('确定要退出管理员模式吗？')) return;
         try { await fetch('/api/admin/logout', { method: 'POST' }); } catch(e) {}
-        localStorage.removeItem('admin.token'); // 防误发
+        localStorage.removeItem('admin.token');
         location.reload();
       });
     }
