@@ -22,226 +22,310 @@
   </style>
 </head>
 <body class="loaded">
-  <main class="admin container">
-    <section class="card">
-      <h2 style="margin:0 0 10px">Admin Console</h2>
-      <div class="row" style="justify-content:space-between">
-        <div class="row">
-          <label class="hint">发布口令</label>
-          <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px" />
-          <button id="remember-token" class="icon-btn">记住</button>
-          <button id="forget-token" class="icon-btn">清除</button>
-        </div>
-        <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
-      </div>
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="brief">Daily Brief</button>
-        <button class="tab-btn" data-tab="analyses">Analyses</button>
-        <button class="tab-btn" data-tab="news">Market News</button>
-        <button class="tab-btn" data-tab="research">Research</button>
-        <button class="tab-btn" data-tab="r-articles">Articles</button>
-      </div>
+  <!-- ========== 前置密码遮罩（验证通过后隐藏） ========== -->
+  <div id="pw-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);z-index:9999;color:#fff;padding:20px">
+    <div style="background:#0f1720;padding:24px;border-radius:12px;width:360px;max-width:90%;box-shadow:0 6px 30px rgba(0,0,0,.6)">
+      <h2 style="margin:0 0 12px;font-size:18px">请输入管理员密码</h2>
+      <input id="pw-input" type="password" placeholder="Admin password" autocomplete="current-password"
+             style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #2b3136;background:#0b0f12;color:#fff" />
+      <button id="pw-submit" style="width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;font-weight:600">进入 Admin Console</button>
+      <div id="pw-hint" style="font-size:12px;color:#9ca3af;margin-top:8px;text-align:center"></div>
+    </div>
+  </div>
 
-      <!-- ========== Daily Brief ========== -->
-      <div class="tab active" id="tab-brief">
-        <div class="split">
-          <div>
-            <div class="form-grid">
-              <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-16" /></label>
-              <label class="full">标题<input id="b-title" placeholder="Daily Brief 标题（可选）" /></label>
-              <label class="full">核心要点（每行一条）<textarea id="b-bullets"></textarea></label>
-              <label class="full">今日日程（每行一条）<textarea id="b-schedule"></textarea></label>
-              <label>图表符号<input id="b-symbol" placeholder="FX:XAUUSD" /></label>
-              <label>图表周期
-                <select id="b-interval">
-                  <option value="15">15m</option>
-                  <option value="60" selected>1H</option>
-                  <option value="240">4H</option>
-                  <option value="1D">1D</option>
-                </select>
-              </label>
-            </div>
-            <div class="row" style="margin-top:10px">
-              <button id="b-publish" class="primary">发布</button>
-              <button id="b-reuse" class="icon-btn">昨日复用</button>
-              <button id="b-preview" class="icon-btn">一键预览</button>
-              <button id="b-delete" class="icon-btn danger">删除该日期</button>
-              <button id="b-clear" class="icon-btn">清空草稿</button>
-            </div>
-            <p class="muted" id="b-msg" style="margin-top:10px"></p>
+  <!-- ========== 验证通过后才展示的后台容器 ========== -->
+  <div id="admin-root" style="display:none">
+    <main class="admin container">
+      <section class="card">
+        <h2 style="margin:0 0 10px">Admin Console</h2>
+
+        <!-- 顶部工具栏：左侧发布口令，右侧提示 + 退出按钮 -->
+        <div class="row" style="justify-content:space-between">
+          <div class="row">
+            <label class="hint">发布口令</label>
+            <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px" />
+            <button id="remember-token" class="icon-btn">记住</button>
+            <button id="forget-token" class="icon-btn">清除</button>
           </div>
-          <div class="card">
-            <h3 style="margin-top:0">说明</h3>
-            <ul class="muted">
-              <li>发布到 <code>/daily-brief/YYYY-MM-DD.json</code></li>
-              <li>“昨日复用”：抓取最新一条，自动把日期改成今天</li>
-              <li>预览跳转：<code>#/daily-brief/YYYY-MM-DD</code></li>
-              <li>删除：<code>DELETE /daily-brief/YYYY-MM-DD.json</code></li>
-            </ul>
+          <div class="row" style="align-items:center; gap:10px">
+            <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
+            <button id="logout-btn" class="icon-btn danger">退出登录</button>
           </div>
         </div>
-      </div>
 
-      <!-- ========== Analyses ========== -->
-      <div class="tab" id="tab-analyses">
-        <div class="split">
-          <div>
-            <div class="form-grid">
-              <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-16" /></label>
-              <label class="full">标题<input id="a-title" placeholder="XAUUSD — Range to Trend" /></label>
-              <label>符号<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
-              <label>时间框架<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
-              <label>日期<input id="a-date" placeholder="2025-10-16" /></label>
-              <label>观点
-                <select id="a-bias">
-                  <option value="bullish">bullish</option>
-                  <option value="bearish">bearish</option>
-                  <option value="neutral" selected>neutral</option>
-                </select>
-              </label>
-              <label class="full">标签（逗号分隔）<input id="a-tags" placeholder="gold, FX, liquidity" /></label>
-              <label class="full">支撑（每行一条）<textarea id="a-supports"></textarea></label>
-              <label class="full">阻力（每行一条）<textarea id="a-resistances"></textarea></label>
-              <label class="full">背景（context）<textarea id="a-context"></textarea></label>
-              <label class="full">观点（view）<textarea id="a-view"></textarea></label>
-              <label class="full">无效条件（invalidation）<textarea id="a-invalidation"></textarea></label>
-              <label>图表符号<input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
-              <label>图表周期
-                <select id="a-chart-interval">
-                  <option value="15">15m</option>
-                  <option value="60" selected>1H</option>
-                  <option value="240">4H</option>
-                  <option value="1D">1D</option>
-                </select>
-              </label>
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="brief">Daily Brief</button>
+          <button class="tab-btn" data-tab="analyses">Analyses</button>
+          <button class="tab-btn" data-tab="news">Market News</button>
+          <button class="tab-btn" data-tab="research">Research</button>
+          <button class="tab-btn" data-tab="r-articles">Articles</button>
+        </div>
+
+        <!-- ========== Daily Brief ========== -->
+        <div class="tab active" id="tab-brief">
+          <div class="split">
+            <div>
+              <div class="form-grid">
+                <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-16" /></label>
+                <label class="full">标题<input id="b-title" placeholder="Daily Brief 标题（可选）" /></label>
+                <label class="full">核心要点（每行一条）<textarea id="b-bullets"></textarea></label>
+                <label class="full">今日日程（每行一条）<textarea id="b-schedule"></textarea></label>
+                <label>图表符号<input id="b-symbol" placeholder="FX:XAUUSD" /></label>
+                <label>图表周期
+                  <select id="b-interval">
+                    <option value="15">15m</option>
+                    <option value="60" selected>1H</option>
+                    <option value="240">4H</option>
+                    <option value="1D">1D</option>
+                  </select>
+                </label>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button id="b-publish" class="primary">发布</button>
+                <button id="b-reuse" class="icon-btn">昨日复用</button>
+                <button id="b-preview" class="icon-btn">一键预览</button>
+                <button id="b-delete" class="icon-btn danger">删除该日期</button>
+                <button id="b-clear" class="icon-btn">清空草稿</button>
+              </div>
+              <p class="muted" id="b-msg" style="margin-top:10px"></p>
             </div>
-            <div class="row" style="margin-top:10px">
-              <button id="a-publish" class="primary">发布 / 更新</button>
-              <button id="a-reuse" class="icon-btn">昨日复用</button>
-              <button id="a-preview" class="icon-btn">一键预览</button>
-              <button id="a-delete" class="icon-btn danger">删除该分析</button>
-              <button id="a-clear" class="icon-btn">清空草稿</button>
+            <div class="card">
+              <h3 style="margin-top:0">说明</h3>
+              <ul class="muted">
+                <li>发布到 <code>/daily-brief/YYYY-MM-DD.json</code></li>
+                <li>“昨日复用”：抓取最新一条，自动把日期改成今天</li>
+                <li>预览跳转：<code>#/daily-brief/YYYY-MM-DD</code></li>
+                <li>删除：<code>DELETE /daily-brief/YYYY-MM-DD.json</code></li>
+              </ul>
             </div>
-            <p class="muted" id="a-msg" style="margin-top:10px"></p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">说明</h3>
-            <ul class="muted">
-              <li>发布到 <code>/analyses/{slug}.json</code></li>
-              <li>预览跳转：<code>#/trade-journal?slug=你的slug</code></li>
-              <li>删除：<code>DELETE /analyses/{slug}.json</code></li>
-            </ul>
           </div>
         </div>
-      </div>
 
-      <!-- ========== Market News ========== -->
-      <div class="tab" id="tab-news">
-        <div class="split">
-          <div>
-            <div class="form-grid">
-              <label>ID（唯一）<input id="n-id" placeholder="2025-10-16-1 或自定义" /></label>
-              <label class="full">标题<input id="n-title" placeholder="美国CPI不及预期" /></label>
-              <label>来源<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
-              <label>外链URL<input id="n-url" placeholder="https://..." /></label>
-              <label>时间（ISO）<input id="n-date" placeholder="2025-10-16T12:34:00Z" /></label>
-              <label class="full">标签（逗号分隔）<input id="n-tags" placeholder="cpi, usd, gold" /></label>
-              <label class="full">摘要<textarea id="n-summary"></textarea></label>
-              <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
+        <!-- ========== Analyses ========== -->
+        <div class="tab" id="tab-analyses">
+          <div class="split">
+            <div>
+              <div class="form-grid">
+                <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-16" /></label>
+                <label class="full">标题<input id="a-title" placeholder="XAUUSD — Range to Trend" /></label>
+                <label>符号<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
+                <label>时间框架<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
+                <label>日期<input id="a-date" placeholder="2025-10-16" /></label>
+                <label>观点
+                  <select id="a-bias">
+                    <option value="bullish">bullish</option>
+                    <option value="bearish">bearish</option>
+                    <option value="neutral" selected>neutral</option>
+                  </select>
+                </label>
+                <label class="full">标签（逗号分隔）<input id="a-tags" placeholder="gold, FX, liquidity" /></label>
+                <label class="full">支撑（每行一条）<textarea id="a-supports"></textarea></label>
+                <label class="full">阻力（每行一条）<textarea id="a-resistances"></textarea></label>
+                <label class="full">背景（context）<textarea id="a-context"></textarea></label>
+                <label class="full">观点（view）<textarea id="a-view"></textarea></label>
+                <label class="full">无效条件（invalidation）<textarea id="a-invalidation"></textarea></label>
+                <label>图表符号<input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
+                <label>图表周期
+                  <select id="a-chart-interval">
+                    <option value="15">15m</option>
+                    <option value="60" selected>1H</option>
+                    <option value="240">4H</option>
+                    <option value="1D">1D</option>
+                  </select>
+                </label>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button id="a-publish" class="primary">发布 / 更新</button>
+                <button id="a-reuse" class="icon-btn">昨日复用</button>
+                <button id="a-preview" class="icon-btn">一键预览</button>
+                <button id="a-delete" class="icon-btn danger">删除该分析</button>
+                <button id="a-clear" class="icon-btn">清空草稿</button>
+              </div>
+              <p class="muted" id="a-msg" style="margin-top:10px"></p>
             </div>
-            <div class="row" style="margin-top:10px">
-              <button id="n-publish" class="primary">发布 / 更新</button>
-              <button id="n-reuse" class="icon-btn">昨日复用</button>
-              <button id="n-preview" class="icon-btn">一键预览</button>
-              <button id="n-delete" class="icon-btn danger">删除该快讯</button>
-              <button id="n-clear" class="icon-btn">清空草稿</button>
+            <div class="card">
+              <h3 style="margin-top:0">说明</h3>
+              <ul class="muted">
+                <li>发布到 <code>/analyses/{slug}.json</code></li>
+                <li>预览跳转：<code>#/trade-journal?slug=你的slug</code></li>
+                <li>删除：<code>DELETE /analyses/{slug}.json</code></li>
+              </ul>
             </div>
-            <p class="muted" id="n-msg" style="margin-top:10px"></p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">说明</h3>
-            <ul class="muted">
-              <li>发布到 <code>/market-news/{id}.json</code></li>
-              <li>列表页：<code>#/market-news</code></li>
-              <li>删除：<code>DELETE /market-news/{id}.json</code></li>
-            </ul>
           </div>
         </div>
-      </div>
 
-      <!-- ========== Research（Syllabus） ========== -->
-      <div class="tab" id="tab-research">
-        <div class="split">
-          <div>
-            <div class="form-grid">
-              <label class="full">Syllabus JSON（数组）
-                <textarea id="r-json" style="min-height:420px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
-              </label>
+        <!-- ========== Market News ========== -->
+        <div class="tab" id="tab-news">
+          <div class="split">
+            <div>
+              <div class="form-grid">
+                <label>ID（唯一）<input id="n-id" placeholder="2025-10-16-1 或自定义" /></label>
+                <label class="full">标题<input id="n-title" placeholder="美国CPI不及预期" /></label>
+                <label>来源<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
+                <label>外链URL<input id="n-url" placeholder="https://..." /></label>
+                <label>时间（ISO）<input id="n-date" placeholder="2025-10-16T12:34:00Z" /></label>
+                <label class="full">标签（逗号分隔）<input id="n-tags" placeholder="cpi, usd, gold" /></label>
+                <label class="full">摘要<textarea id="n-summary"></textarea></label>
+                <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button id="n-publish" class="primary">发布 / 更新</button>
+                <button id="n-reuse" class="icon-btn">昨日复用</button>
+                <button id="n-preview" class="icon-btn">一键预览</button>
+                <button id="n-delete" class="icon-btn danger">删除该快讯</button>
+                <button id="n-clear" class="icon-btn">清空草稿</button>
+              </div>
+              <p class="muted" id="n-msg" style="margin-top:10px"></p>
             </div>
-            <div class="row" style="margin-top:10px">
-              <button id="r-load" class="icon-btn">载入线上版本</button>
-              <button id="r-save" class="primary">保存</button>
-              <button id="r-preview" class="icon-btn">一键预览</button>
-              <button id="r-clear" class="icon-btn">清空草稿</button>
+            <div class="card">
+              <h3 style="margin-top:0">说明</h3>
+              <ul class="muted">
+                <li>发布到 <code>/market-news/{id}.json</code></li>
+                <li>列表页：<code>#/market-news</code></li>
+                <li>删除：<code>DELETE /market-news/{id}.json</code></li>
+              </ul>
             </div>
-            <p class="muted" id="r-msg" style="margin-top:10px"></p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">说明</h3>
-            <ul class="muted">
-              <li>保存到 <code>/research/syllabus.json</code></li>
-              <li>预览跳转：<code>#/knowledge-lab</code></li>
-            </ul>
           </div>
         </div>
-      </div>
 
-      <!-- ========== Research Articles（知识文章后台） ========== -->
-      <div class="tab" id="tab-r-articles">
-        <div class="split">
-          <div>
-            <div class="form-grid">
-              <label>Slug（唯一，必填）
-                <input id="ra-slug" placeholder="smc-order-blocks" />
-              </label>
-              <label class="full">标题
-                <input id="ra-title" placeholder="Order Blocks 全解析" />
-              </label>
-              <label class="full">摘要（用于列表/SEO）
-                <textarea id="ra-excerpt"></textarea>
-              </label>
-              <label class="full">标签（逗号分隔）
-                <input id="ra-tags" placeholder="smc, ob, liquidity" />
-              </label>
-              <label class="full">主图 URL（可选）
-                <input id="ra-hero" placeholder="https://…" />
-              </label>
-              <label class="full">正文（Markdown）
-                <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
-              </label>
+        <!-- ========== Research（Syllabus） ========== -->
+        <div class="tab" id="tab-research">
+          <div class="split">
+            <div>
+              <div class="form-grid">
+                <label class="full">Syllabus JSON（数组）
+                  <textarea id="r-json" style="min-height:420px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
+                </label>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button id="r-load" class="icon-btn">载入线上版本</button>
+                <button id="r-save" class="primary">保存</button>
+                <button id="r-preview" class="icon-btn">一键预览</button>
+                <button id="r-clear" class="icon-btn">清空草稿</button>
+              </div>
+              <p class="muted" id="r-msg" style="margin-top:10px"></p>
             </div>
-            <div class="row" style="margin-top:10px">
-              <button id="ra-publish" class="primary">发布 / 更新</button>
-              <button id="ra-reuse" class="icon-btn">昨日复用</button>
-              <button id="ra-preview" class="icon-btn">一键预览</button>
-              <button id="ra-delete" class="icon-btn danger">删除该文章</button>
-              <button id="ra-clear" class="icon-btn">清空草稿</button>
+            <div class="card">
+              <h3 style="margin-top:0">说明</h3>
+              <ul class="muted">
+                <li>保存到 <code>/research/syllabus.json</code></li>
+                <li>预览跳转：<code>#/knowledge-lab</code></li>
+              </ul>
             </div>
-            <p class="muted" id="ra-msg" style="margin-top:10px"></p>
-          </div>
-          <div class="card">
-            <h3 style="margin-top:0">说明</h3>
-            <ul class="muted">
-              <li>发布到 <code>/research/articles/{slug}.json</code></li>
-              <li>索引：<code>/research/articles/index.json</code></li>
-              <li>删除：<code>DELETE /research/articles/{slug}.json</code></li>
-            </ul>
           </div>
         </div>
-      </div>
-    </section>
-  </main>
 
+        <!-- ========== Research Articles（知识文章后台） ========== -->
+        <div class="tab" id="tab-r-articles">
+          <div class="split">
+            <div>
+              <div class="form-grid">
+                <label>Slug（唯一，必填）
+                  <input id="ra-slug" placeholder="smc-order-blocks" />
+                </label>
+                <label class="full">标题
+                  <input id="ra-title" placeholder="Order Blocks 全解析" />
+                </label>
+                <label class="full">摘要（用于列表/SEO）
+                  <textarea id="ra-excerpt"></textarea>
+                </label>
+                <label class="full">标签（逗号分隔）
+                  <input id="ra-tags" placeholder="smc, ob, liquidity" />
+                </label>
+                <label class="full">主图 URL（可选）
+                  <input id="ra-hero" placeholder="https://…" />
+                </label>
+                <label class="full">正文（Markdown）
+                  <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
+                </label>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button id="ra-publish" class="primary">发布 / 更新</button>
+                <button id="ra-reuse" class="icon-btn">昨日复用</button>
+                <button id="ra-preview" class="icon-btn">一键预览</button>
+                <button id="ra-delete" class="icon-btn danger">删除该文章</button>
+                <button id="ra-clear" class="icon-btn">清空草稿</button>
+              </div>
+              <p class="muted" id="ra-msg" style="margin-top:10px"></p>
+            </div>
+            <div class="card">
+              <h3 style="margin-top:0">说明</h3>
+              <ul class="muted">
+                <li>发布到 <code>/research/articles/{slug}.json</code></li>
+                <li>索引：<code>/research/articles/index.json</code></li>
+                <li>删除：<code>DELETE /research/articles/{slug}.json</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div> <!-- /#admin-root -->
+
+  <!-- ========== 登录/验证脚本（唯一） ========== -->
+  <script>
+    (function(){
+      const overlay = document.getElementById('pw-overlay');
+      const adminRoot = document.getElementById('admin-root');
+      const input = document.getElementById('pw-input');
+      const btn = document.getElementById('pw-submit');
+      const hint = document.getElementById('pw-hint');
+
+      function showAdmin(){
+        overlay.style.display = 'none';
+        adminRoot.style.display = 'block';
+      }
+      function showError(msg){
+        hint.textContent = msg;
+        setTimeout(()=> hint.textContent = '', 2500);
+      }
+
+      async function verify(){
+        try{
+          const r = await fetch('/api/admin/verify', { method:'POST', cache:'no-store' });
+          if (!r.ok) return false;
+          const j = await r.json().catch(()=>null);
+          if (j && j.ok === true) { showAdmin(); return true; }
+        }catch(e){}
+        return false;
+      }
+
+      // 进页先试 Cookie 验证（只有 ok:true 才放行）
+      verify();
+
+      btn.addEventListener('click', async ()=>{
+        const pw = (input.value||'').trim();
+        if(!pw){ input.focus(); return showError('请输入密码'); }
+
+        btn.disabled = true;
+        try{
+          const r = await fetch('/api/admin/login', {
+            method:'POST',
+            headers:{'content-type':'application/json'},
+            body: JSON.stringify({ password: pw })
+          });
+          if (!r.ok) {
+            const j = await r.json().catch(()=>null);
+            input.value = '';
+            input.focus();
+            return showError((j && j.error) || '密码错误');
+          }
+          const j = await r.json().catch(()=>null);
+          if (j && j.ok === true) showAdmin(); else showError('登录失败');
+        }catch(e){
+          showError('网络错误');
+        }finally{
+          btn.disabled = false;
+        }
+      });
+
+      // 回车提交 + 初始聚焦
+      input.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
+      window.addEventListener('load', ()=> input && input.focus());
+    })();
+  </script>
+
+  <!-- ========== 业务模块脚本（原样保留） ========== -->
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
@@ -298,7 +382,7 @@
     const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
     const bMsg = s => B.msg.textContent = s;
     function bGet(){ return { slug:B.slug.value.trim()||undefined, title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
-    function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||d.interval||'60'; }
+    function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||'60'; }
     $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())));
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
     $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
@@ -489,27 +573,38 @@
       if ($('#tab-research').classList.contains('active')) return $('#r-save').click();
       if ($('#tab-r-articles').classList.contains('active')) return $('#ra-publish').click();
     });
+
+    // ---------- 退出登录 ----------
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        if (!confirm('确定要退出管理员模式吗？')) return;
+        try { await fetch('/api/admin/logout', { method: 'POST' }); } catch(e) {}
+        localStorage.removeItem('admin.token'); // 防误发
+        location.reload();
+      });
+    }
   </script>
+
+  <style>
+    :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
+    html,body{height:100%}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+      -webkit-font-smoothing:antialiased;
+    }
+    .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
+    .muted{ color:var(--muted); }
+    input,select,textarea{ background:#0f1115; border:1px solid #23262b; color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
+    input:focus,select:focus,textarea:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2); }
+    .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
+    .icon-btn:hover{ background:#1b1f24 }
+    button.primary{ padding:10px 14px; border-radius:12px; border:0; background:#3b82f6; color:#fff; font-weight:700; cursor:pointer }
+    button.primary:hover{ filter:brightness(1.05) }
+    .search{ background:#0f1115; border:1px solid #23262b; color:#fff; border-radius:10px }
+    .tab-btn:hover{ background:#171a20 }
+    .danger{ color:#f87171; border-color:#f87171 }
+  </style>
 </body>
 </html>
-
-<style>
-  :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
-  html,body{height:100%}
-  body{
-    margin:0; background:var(--bg); color:var(--fg);
-    font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-    -webkit-font-smoothing:antialiased;
-  }
-  .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
-  .muted{ color:var(--muted); }
-  input,select,textarea{ background:#0f1115; border:1px solid #23262b; color:var(--fg); padding:8px 10px; border-radius:10px; outline:none; }
-  input:focus,select:focus,textarea:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2); }
-  .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
-  .icon-btn:hover{ background:#1b1f24 }
-  button.primary{ padding:10px 14px; border-radius:12px; border:0; background:#3b82f6; color:#fff; font-weight:700; cursor:pointer }
-  button.primary:hover{ filter:brightness(1.05) }
-  .search{ background:#0f1115; border:1px solid #23262b; color:var(--fg); border-radius:10px }
-  .tab-btn:hover{ background:#171a20 }
-  .danger{ color:#f87171; border-color:#f87171 }
-</style>
