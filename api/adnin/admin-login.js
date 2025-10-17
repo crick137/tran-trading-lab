@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(405).send(JSON.stringify({ error: 'Method not allowed' }));
   }
 
-  // 解析 JSON body（兼容纯文本和对象）
+  // 解析 JSON body（Node API 没有 req.json()）
   let body = {};
   try {
     body = typeof req.body === 'object' && req.body !== null
