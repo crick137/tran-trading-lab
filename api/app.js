@@ -157,12 +157,24 @@ async function genericHandler(req, pathname, PREFIX) {
     // 列表 / 索引
     if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
       const idx = await readIndexJson(`${PREFIX}/index.json`);
-      if (Array.isArray(idx) && idx.length) return ok(idx);
       const blobs = await listByPrefix(`${PREFIX}/`);
-      const items = blobs
-        .filter(b => b.pathname.endsWith('.json'))
-        .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
-        .sort((a,b)=> (a > b ? -1 : 1));
+      const blobNames = new Set(
+        (blobs || [])
+          .filter(b => b.pathname && b.pathname.endsWith('.json'))
+          .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
+      );
+
+      if (Array.isArray(idx) && idx.length) {
+        const normalized = idx
+          .map(x => (typeof x === 'string') ? x : (x && x.slug) ? x.slug : '')
+          .filter(Boolean);
+        const filtered = normalized.filter(s => blobNames.has(s));
+        const missing = Array.from(blobNames).filter(s => !normalized.includes(s));
+        const items = filtered.concat(missing).sort((a,b)=> (a > b ? -1 : 1));
+        return ok(items);
+      }
+
+      const items = Array.from(blobNames).sort((a,b)=> (a > b ? -1 : 1));
       return ok(items);
     }
   
