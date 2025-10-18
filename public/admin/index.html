@@ -457,13 +457,16 @@
       const payload = bGet();
       const slug = payload.slug || today();
       bMsg('发布中…');
-      try{
-        const { res, data } = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, {
-          method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-        bMsg('✅ 发布成功');
-      }catch(e){ bMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#b-publish');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const { res, data } = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, {
+            method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+          bMsg('✅ 发布成功');
+        }catch(e){ bMsg('❌ 发布失败：' + explainErr(e)); }
+      });
     };
 
     $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
@@ -533,13 +536,16 @@
     $('#a-publish').onclick = async ()=>{
       const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
       aMsg('发布中…');
-      try{
-        const { res, data } = await fetchJSON(`/api/analyses/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-        aMsg('✅ 发布成功');
-      }catch(e){ aMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#a-publish');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const { res, data } = await fetchJSON(`/api/analyses/${encodeURIComponent(payload.slug)}.json`, {
+            method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+          aMsg('✅ 发布成功');
+        }catch(e){ aMsg('❌ 发布失败：' + explainErr(e)); }
+      });
     };
 
     $('#a-preview').onclick = ()=>{
@@ -600,13 +606,16 @@
     $('#n-publish').onclick = async ()=>{
       const payload = nGet(); if(!payload.id) return nMsg('请填写 id');
       nMsg('发布中…');
-      try{
-        const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(payload.id)}.json`, {
-          method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-        nMsg('✅ 发布成功');
-      }catch(e){ nMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#n-publish');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(payload.id)}.json`, {
+            method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+          nMsg('✅ 发布成功');
+        }catch(e){ nMsg('❌ 发布失败：' + explainErr(e)); }
+      });
     };
 
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
@@ -645,13 +654,16 @@
     $('#r-save').onclick = async ()=>{
       const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
       rMsg('保存中…');
-      try{
-        const { res, data } = await fetchJSON('/api/research/syllabus', {
-          method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ syllabus })
-        });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-        rMsg('✅ 保存成功');
-      }catch(e){ rMsg('❌ 保存失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#r-save');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const { res, data } = await fetchJSON('/api/research/syllabus', {
+            method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ syllabus })
+          });
+          if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+          rMsg('✅ 保存成功');
+        }catch(e){ rMsg('❌ 保存失败：' + explainErr(e)); }
+      });
     };
     $('#r-clear').onclick = ()=>{ localStorage.removeItem(LS.research); R.json.value=''; rMsg('草稿已清空'); };
     $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
@@ -691,13 +703,16 @@
     $('#ra-publish').onclick = async ()=>{
       const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
       raMsg('发布中…');
-      try{
-        const { res, data } = await fetchJSON(`/api/research/articles/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
-        });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-        raMsg('✅ 发布成功');
-      }catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#ra-publish');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const { res, data } = await fetchJSON(`/api/research/articles/${encodeURIComponent(payload.slug)}.json`, {
+            method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
+          });
+          if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+          raMsg('✅ 发布成功');
+        }catch(e){ raMsg('❌ 发布失败：' + explainErr(e)); }
+      });
     };
 
     $('#ra-preview').onclick = ()=>{
