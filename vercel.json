@@ -5,8 +5,7 @@
     { "source": "/api/ping", "destination": "/api/ping.js" },
     { "source": "/api/:path*", "destination": "/api/app.js" },
 
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/:path*", "destination": "/admin/index.html" },
+    { "source": "/admin", "destination": "/admin.html" },
 
     { "source": "/(.*)", "destination": "/index.html" }
   ]
