@@ -144,50 +144,72 @@ async function handleAdmin(req, pathname) {
 
 /* ---------- 通用 CRUD ---------- */
 async function genericHandler(req, pathname, PREFIX) {
-  const p = normPath(pathname);
-
-  // 列表 / 索引
-  if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
-    const idx = await readIndexJson(`${PREFIX}/index.json`);
-    if (Array.isArray(idx) && idx.length) return ok(idx);
-    const blobs = await listByPrefix(`${PREFIX}/`);
-    const items = blobs
-      .filter(b => b.pathname.endsWith('.json'))
-      .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
-      .sort((a,b)=> (a > b ? -1 : 1));
-    return ok(items);
+  try {
+    const p = normPath(pathname);
+    
+    // 日志记录
+    console.log(`[API] ${req.method} ${pathname} (PREFIX: ${PREFIX})`);
+    
+    // 列表 / 索引
+    if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
+      const idx = await readIndexJson(`${PREFIX}/index.json`);
+      if (Array.isArray(idx) && idx.length) return ok(idx);
+      const blobs = await listByPrefix(`${PREFIX}/`);
+      const items = blobs
+        .filter(b => b.pathname.endsWith('.json'))
+        .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
+        .sort((a,b)=> (a > b ? -1 : 1));
+      return ok(items);
+    }
+  
+    // 单项
+    const m = p.match(new RegExp(`^/api/${PREFIX}/([^/]+?)(?:\\.json)?$`));
+    if (!m) return err(`${PREFIX.toUpperCase()}_NO_ROUTE`, 404);
+    const slug = m[1];
+    const FILE = `${PREFIX}/${slug}.json`;
+  
+    // 读
+    if (req.method === 'GET') {
+      try { return ok(await readJSONViaFetch(FILE)); }
+      catch { return err('NOT_FOUND', 404); }
+    }
+  
+    // 写操作增强日志
+    if (['PUT','POST'].includes(req.method)) {
+      console.log(`[API] Writing to ${PREFIX}/${slug}.json`);
+      const unauthorized = requireAuthIfConfigured(req); 
+      if (unauthorized) {
+        console.warn(`[API] Unauthorized access attempt`);
+        return unauthorized;
+      }
+      
+      const body = await readBody(req);
+      console.log(`[API] Body received:`, body);
+      
+      try {
+        await writeJSON(FILE, body);
+        await upsertIndex(PREFIX, slug);
+        console.log(`[API] Write successful`);
+        return ok({ saved: true, slug });
+      } catch (e) {
+        console.error(`[API] Write failed:`, e);
+        return err('WRITE_FAILED', 500);
+      }
+    }
+  
+    // 删
+    if (req.method === 'DELETE') {
+      const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
+      try { await deleteObject(FILE); } catch {}
+      await removeFromIndex(PREFIX, slug);
+      return ok({ deleted: true, slug });
+    }
+  
+    return err('METHOD_NOT_ALLOWED', 405);
+  } catch (e) {
+    console.error(`[API] Error in genericHandler:`, e);
+    return err('INTERNAL_ERROR', 500);
   }
-
-  // 单项
-  const m = p.match(new RegExp(`^/api/${PREFIX}/([^/]+?)(?:\\.json)?$`));
-  if (!m) return err(`${PREFIX.toUpperCase()}_NO_ROUTE`, 404);
-  const slug = m[1];
-  const FILE = `${PREFIX}/${slug}.json`;
-
-  // 读
-  if (req.method === 'GET') {
-    try { return ok(await readJSONViaFetch(FILE)); }
-    catch { return err('NOT_FOUND', 404); }
-  }
-
-  // 写
-  if (['PUT','POST'].includes(req.method)) {
-    const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
-    const body = await readBody(req);
-    await writeJSON(FILE, body);
-    await upsertIndex(PREFIX, slug);
-    return ok({ saved: true, slug });
-  }
-
-  // 删
-  if (req.method === 'DELETE') {
-    const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
-    try { await deleteObject(FILE); } catch {}
-    await removeFromIndex(PREFIX, slug);
-    return ok({ deleted: true, slug });
-  }
-
-  return err('METHOD_NOT_ALLOWED', 405);
 }
 
 /* ---------- Research 只读 ---------- */
@@ -253,16 +275,34 @@ export default async function handler(req, res) {
     }
 
     let out;
-    if (pathname.startsWith('/api/admin'))           out = await handleAdmin(req, pathname);
-    else if (pathname.startsWith('/api/daily-brief')) out = await genericHandler(req, pathname, 'daily-brief');
-    else if (pathname.startsWith('/api/analyses'))    out = await genericHandler(req, pathname, 'analyses');
-    else if (pathname.startsWith('/api/market-news')) out = await genericHandler(req, pathname, 'market-news');
-    else if (pathname.startsWith('/api/research'))    out = await handleResearch(req, pathname);
-    else                                              out = err('NO_ROUTE', 404);
+    console.log(`[API] Request received: ${req.method} ${pathname}`);
+    
+    // 增强路由分发日志
+    if (pathname.startsWith('/api/admin')) {
+      console.log(`[API] Handling admin route: ${pathname}`);
+      out = await handleAdmin(req, pathname);
+    }
+    else if (pathname.startsWith('/api/daily-brief')) {
+      console.log(`[API] Handling daily-brief route: ${pathname}`);
+      out = await genericHandler(req, pathname, 'daily-brief');
+    }
+    else if (pathname.startsWith('/api/analyses')) {
+      out = await genericHandler(req, pathname, 'analyses');
+    }
+    else if (pathname.startsWith('/api/market-news')) {
+      out = await genericHandler(req, pathname, 'market-news');
+    }
+    else if (pathname.startsWith('/api/research')) {
+      out = await handleResearch(req, pathname);
+    }
+    else {
+      out = err('NO_ROUTE', 404);
+    }
 
+    console.log(`[API] Response status: ${out?.status || 200}`);
     return sendNodeResponse(res, out);
   } catch (e) {
-    console.error('API_ERROR', e);
+    console.error('[API] Critical error:', e);
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }

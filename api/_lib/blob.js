@@ -28,9 +28,10 @@ async function withRetry(operation, maxRetries = 3, delay = 1000) {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
     try {
+      console.log(`[Blob] Attempt ${i+1} of ${maxRetries}`);
       return await operation();
     } catch (error) {
-      console.warn(`Attempt ${i+1} failed:`, error.message);
+      console.warn(`[Blob] Attempt ${i+1} failed:`, error.message);
       lastError = error;
       if (i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -40,20 +41,9 @@ async function withRetry(operation, maxRetries = 3, delay = 1000) {
   throw lastError;
 }
 
-// 在开发环境中添加简单的本地存储模拟
-const LOCAL_DEV_STORAGE = {};
-const IS_DEV = process.env.NODE_ENV === 'development' || !process.env.VERCEL;
-
 export async function writeJSON(pathname, data) {
   try {
-    // 开发环境使用本地存储
-    if (IS_DEV && !getToken()) {
-      console.log(`[DEV] Writing to ${pathname}`);
-      LOCAL_DEV_STORAGE[pathname] = data;
-      return { pathname, url: `http://localhost:3000/dev/${pathname}` };
-    }
-    
-    // 生产环境使用Vercel Blob
+    console.log(`[Blob] Writing to ${pathname}`);
     const body = JSON.stringify(data, null, 2);
     const res = await withRetry(() => 
       timeoutPromise(
@@ -62,16 +52,18 @@ export async function writeJSON(pathname, data) {
           contentType: 'application/json; charset=utf-8',
           token: getToken()
         }),
-        10000
+        10000 // 10秒超时
       )
     );
+    console.log(`[Blob] Write successful: ${pathname}`);
     return res;
   } catch (e) {
-    console.error('[blob.writeJSON] fail:', e);
+    console.error('[Blob] Write failed:', e);
     throw e;
   }
 }
 
+// 其他函数也类似添加超时、重试和日志记录
 export async function deleteObject(pathname) {
   try {
     return await withRetry(() => 

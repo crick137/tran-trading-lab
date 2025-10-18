@@ -35,6 +35,7 @@ export function methodNotAllowed(message = 'METHOD_NOT_ALLOWED', init = {}) {
   return badRequest(message, 405, init);
 }
 
+// 只保留修改后的版本
 /** 读取 Bearer Token（返回纯 token 字符串或空字符串） */
 export function getBearerToken(req) {
   try {
