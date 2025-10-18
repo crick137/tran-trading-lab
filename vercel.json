@@ -1,12 +1,26 @@
 {
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/api/ping", "destination": "/api/ping.js" },
-    { "source": "/api/:path*", "destination": "/api/app.js" },
 
-    { "source": "/admin", "destination": "/admin.html" },
+  "routes": [
+    { "handle": "filesystem" },
 
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "src": "/admin", "dest": "/admin/index.html" },
+    { "src": "/admin/(.*)", "dest": "/admin/index.html" },
+
+    { "src": "/daily-brief/index.json", "dest": "/api/daily-brief/index.json" },
+    { "src": "/daily-brief/(.*).json", "dest": "/api/daily-brief/$1.json" },
+
+    { "src": "/analyses/index.json", "dest": "/api/analyses/index.json" },
+    { "src": "/analyses/(.*).json", "dest": "/api/analyses/$1.json" },
+
+    { "src": "/market-news/index.json", "dest": "/api/market-news/index.json" },
+    { "src": "/market-news/(.*).json", "dest": "/api/market-news/$1.json" },
+
+    { "src": "/research/syllabus.json", "dest": "/api/research/syllabus" },
+    { "src": "/research/articles/index.json", "dest": "/api/research/articles" },
+    { "src": "/research/articles/(.*).json", "dest": "/api/research/articles/$1.json" },
+
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
