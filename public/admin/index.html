@@ -26,21 +26,7 @@
     .kbd{ border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
     .danger{ color:#f87171; border-color:#f87171 }
 
-    /* 登录遮罩 */
-    #pw-overlay{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index:9999;
-    }
-    .login-box{
-      width:min(92vw,420px); background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px;
-      box-shadow:0 12px 40px rgba(0,0,0,.5)
-    }
-    .login-box h3{ margin:4px 0 10px }
-    .login-box .row{ margin-top:8px }
-  </style>
-
-  <!-- 保险丝#1：隐藏所有可能的旧“发布口令”控件（即使遗留也不显示） -->
-  <style>
+    /* 保险丝：把任何遗留的发布口令相关控件隐藏（就算旧代码还在也看不到） */
     .pw-group,
     .topbar .pw,
     .topbar .remember,
@@ -57,28 +43,15 @@
 </head>
 <body>
 
-  <!-- 登录遮罩：未登录时显示 -->
-  <div id="pw-overlay" style="display:none">
-    <div class="login-box">
-      <h3>管理员登录</h3>
-      <p class="muted" style="margin:0 0 6px">进入后台前输入一次口令；进入后发布无需再填。</p>
-      <div class="row">
-        <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />
-        <button id="pw-enter" class="primary">进入后台</button>
-      </div>
-      <p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>
-    </div>
-  </div>
-
-  <!-- 后台主体：登录后显示 -->
-  <div id="admin-root" style="display:none">
+  <!-- 后台主体：直接显示（无登录） -->
+  <div id="admin-root" style="display:block">
     <main class="admin container">
       <section class="card" style="padding:16px">
         <h2 style="margin:0 0 10px">Admin Console</h2>
 
         <div class="row" style="justify-content:space-between">
           <div class="row">
-            <button id="logout-admin" class="icon-btn">退出登录</button>
+            <!-- 无登录，不显示退出按钮 -->
           </div>
           <div class="row" style="align-items:center; gap:10px">
             <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
@@ -272,7 +245,7 @@
                   <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
                 </label>
               </div>
-              <div class="row" style="margin-top:10px)">
+              <div class="row" style="margin-top:10px">
                 <button id="ra-publish" class="primary">发布 / 更新</button>
                 <button id="ra-reuse" class="icon-btn">昨日复用</button>
                 <button id="ra-preview" class="icon-btn">一键预览</button>
@@ -285,7 +258,7 @@
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
                 <li>发布到 <code>/api/research/articles/{slug}.json</code></li>
-                <li>索引：<code>/api/research/articles/index</code></li>
+                <li>索引：<code>/api/research/articles/index.json</code></li>
                 <li>删除：<code>DELETE /api/research/articles/{slug}.json</code></li>
               </ul>
             </div>
@@ -296,71 +269,10 @@
     </main>
   </div>
 
-  <!-- 业务脚本 -->
+  <!-- 业务脚本（无登录，无 Authorization） -->
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
-
-    // ===== 登录门禁 =====
-    const overlay = $('#pw-overlay');
-    const adminRoot = $('#admin-root');
-    const LS_KEY = 'TRAN_ADMIN_PW';
-
-    const saved = localStorage.getItem(LS_KEY);
-    overlay.style.display = saved ? 'none' : 'flex';
-    adminRoot.style.display = saved ? 'block' : 'none';
-
-    $('#pw-enter')?.addEventListener('click', ()=>{
-      const v = ($('#admin-pw').value||'').trim();
-      if(!v){ $('#pw-err').textContent = '请输入口令'; return; }
-      try{ localStorage.setItem(LS_KEY, v); }catch{}
-      overlay.style.display = 'none';
-      adminRoot.style.display = 'block';
-    });
-
-    $('#logout-admin')?.addEventListener('click', ()=>{
-      if(!confirm('确定退出登录？')) return;
-      try{ localStorage.removeItem(LS_KEY); }catch{}
-      location.reload();
-    });
-
-    // ===== 保险丝#2：运行时彻底移除任何旧口令条 DOM（即使样式名不同也覆盖）=====
-    function removeLegacyPwBar(){
-      const selectors = [
-        '.pw-group', '.topbar .pw', '.topbar .remember', '.topbar .clear',
-        '#publish-pw', 'input[name="publishPassword"]', 'label[for="publish-pw"]',
-        '.publish-password'
-      ];
-      selectors.forEach(sel=>{
-        document.querySelectorAll(sel).forEach(el=> el.remove());
-      });
-      document.querySelectorAll('.topbar').forEach(tb=>{
-        if(!tb.textContent.trim() || tb.children.length === 0) tb.remove();
-      });
-    }
-    removeLegacyPwBar();
-
-    // ===== 通用请求（自动带 Authorization）=====
-    function authHeader(){
-      try{
-        const pw = localStorage.getItem(LS_KEY);
-        return pw ? { 'Authorization': 'Bearer ' + pw } : {};
-      }catch{ return {}; }
-    }
-    async function fetchJSON(url, init={}) {
-      const headers = Object.assign({ }, authHeader(), init.headers||{});
-      const res  = await fetch(url, { cache:'no-store', ...init, headers });
-      const text = await res.text();
-      let data = null; try { data = JSON.parse(text); } catch {}
-      return { res, ok: res.ok, status: res.status, data, text };
-    }
-    async function getJSON(url) {
-      const r = await fetchJSON(url, { method:'GET' });
-      if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
-      if (!r.data) throw '响应不是 JSON';
-      return r.data;
-    }
-    function today(){ return new Date().toISOString().slice(0,10); }
 
     // Tabs
     $$('.tab-btn').forEach(b=>{
@@ -377,19 +289,35 @@
       news: 'draft.news.v1',   research: 'draft.research.v1',
       rArticles: 'draft.research.articles.v1'
     };
-    function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
-    function loadDraft(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch{return{}} }
-    function clearDraft(key){ localStorage.removeItem(key); }
+    const saveDraft = (k,o)=> localStorage.setItem(k, JSON.stringify(o));
+    const loadDraft = k => { try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch{return{}} };
+    const clearDraft = k => localStorage.removeItem(k);
     $('#clear-drafts')?.addEventListener('click', ()=>{
       if(!confirm('确定清空本地草稿缓存？')) return;
       Object.values(LS).forEach(clearDraft);
       alert('本地草稿已清空');
     });
 
+    const today = ()=> new Date().toISOString().slice(0,10);
+
+    async function fetchJSON(url, init={}){
+      const headers = { 'Content-Type':'application/json', ...(init.headers||{}) };
+      const res  = await fetch(url, { cache:'no-store', ...init, headers });
+      const text = await res.text();
+      let data=null; try{ data=JSON.parse(text) }catch{}
+      return { res, ok:res.ok, status:res.status, data, text };
+    }
+    async function getJSON(url){
+      const r = await fetchJSON(url, { method:'GET' });
+      if(!r.ok) throw (r.data?.message || r.text || `HTTP ${r.status}`);
+      if(!r.data) throw '响应不是 JSON';
+      return r.data;
+    }
+
     /* ===== Daily Brief ===== */
     const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
     const bMsg = s => B.msg.textContent = s;
-    function bGet(){ return { slug:B.slug.value.trim()||today(), title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
+    function bGet(){ return { slug:B.slug.value.trim()||today(), title:(B.title.value||'').trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:(B.symbol.value||'').trim()||undefined, interval:B.interval.value } }; }
     function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||'60'; }
     $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())));
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
@@ -398,7 +326,7 @@
     $('#b-reuse').onclick = async ()=>{
       bMsg('拉取最新一条…');
       try{
-        const arr = await getJSON('/api/daily-brief/index?_=' + Date.now());
+        const arr = await getJSON('/api/daily-brief/index.json?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return bMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].slug : arr[0];
         const d = await getJSON(`/api/daily-brief/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
@@ -412,7 +340,7 @@
       bMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, {
-          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+          method:'PUT', body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         bMsg('✅ 发布成功');
@@ -444,9 +372,9 @@
     $('#a-reuse').onclick = async ()=>{
       aMsg('拉取最新一条…');
       try{
-        const arr = await getJSON('/api/analyses/index?_=' + Date.now());
+        const arr = await getJSON('/api/analyses/index.json?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return aMsg('没有历史记录');
-        const latest = arr[0].slug || arr[0];
+        const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].slug : arr[0];
         const d = await getJSON(`/api/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
         const base=(d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,'');
         d.slug=`${base}-${today()}`; d.date=today();
@@ -460,7 +388,7 @@
       aMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/analyses/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+          method:'PUT', body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         aMsg('✅ 发布成功');
@@ -492,7 +420,7 @@
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
-        const arr = await getJSON('/api/market-news/index?_=' + Date.now());
+        const arr = await getJSON('/api/market-news/index.json?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return nMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].id : arr[0];
         const d = await getJSON(`/api/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
@@ -508,7 +436,7 @@
       nMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(payload.id)}.json`, {
-          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+          method:'PUT', body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         nMsg('✅ 发布成功');
@@ -530,8 +458,8 @@
 
     /* ===== Research (syllabus) ===== */
     const R = { json: $('#r-json'), msg: $('#r-msg') };
-    function rMsg(s){ R.msg.textContent = s; }
-    function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
+    const rMsg = s => R.msg.textContent = s;
+    const rGet = ()=> { let syllabus; try{ syllabus=JSON.parse(R.json.value) }catch{ syllabus=null } return syllabus; };
     $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.research, JSON.stringify({text: R.json.value}))));
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.research)||'{}'); if (d && typeof d.text==='string') R.json.value = d.text; }catch{} })();
     $('#r-load').onclick = async ()=>{
@@ -547,7 +475,7 @@
       rMsg('保存中…');
       try{
         const { res, data } = await fetchJSON('/api/research/syllabus', {
-          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ syllabus })
+          method:'PUT', body: JSON.stringify({ syllabus })
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         rMsg('✅ 保存成功');
@@ -568,9 +496,9 @@
     $('#ra-reuse').onclick = async ()=>{
       raMsg('拉取最新一篇…');
       try{
-        const list = await getJSON('/api/research/articles/index?_=' + Date.now());
+        const list = await getJSON('/api/research/articles/index.json?_=' + Date.now());
         if(!Array.isArray(list)||!list.length) return raMsg('没有历史记录');
-        const latestSlug = list[0].slug || list[0];
+        const latestSlug = (list[0] && typeof list[0]==='object') ? list[0].slug : list[0];
         const d = await getJSON(`/api/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`);
         const base=(d.slug||'article').replace(/[^a-z0-9\-]+/gi,'');
         d.slug=base+'-'+today(); d.date=new Date().toISOString();
@@ -583,7 +511,7 @@
       raMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/research/articles/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
+          method:'PUT', body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         raMsg('✅ 发布成功');
