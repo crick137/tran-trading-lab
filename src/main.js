@@ -38,7 +38,7 @@ async function renderDailyBriefList(){
   if (!ul) return;
   ul.innerHTML = '<li class="muted">불러오는 중…</li>';
   try{
-    const res = await fetch('/daily-brief/index.json?_=' + Date.now());
+    const res = await fetch('/api/daily-brief/index.json?_=' + Date.now());
     const items = await res.json();
     ul.innerHTML = Array.isArray(items)&&items.length
       ? items.map(s=>`<li><a href="#/daily-brief/${s}">${s}</a></li>`).join('')
@@ -52,7 +52,7 @@ async function renderDailyBriefDetail(slug){
   if (!wrap) return;
   wrap.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try {
-    const res = await fetch(`/daily-brief/${slug}.json?_=${Date.now()}`);
+    const res = await fetch(`/api/daily-brief/${slug}.json?_=${Date.now()}`);
     if (!res.ok) throw 0;
     const d = await res.json();
     wrap.innerHTML = `
@@ -76,7 +76,7 @@ async function renderDailyBriefDetail(slug){
 }
 
 // -------- Trade Journal = 공개 “분석 아카이브” ----------
-const AIDX = '/analyses/index.json';
+const AIDX = '/api/analyses/index.json';
 
 function koBias(b){
   return b==='bullish'?'상승':b==='bearish'?'하락':'중립';
@@ -174,7 +174,7 @@ async function renderAnalysisDetailBySlug(slug){
 
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
-    const d = await fetchJSON(`/analyses/${slug}.json`);
+    const d = await fetchJSON(`/api/analyses/${slug}.json`);
     const ivl = (d.chart?.interval) || '60';
     const sym  = (d.chart?.symbol)   || d.symbol;
 
@@ -428,7 +428,7 @@ async function tryLoadRemoteSyllabus(){
   if (__syllabusLoaded) return;
   __syllabusLoaded = true;
   try{
-    const r = await fetch('/research/syllabus.json?_=' + Date.now());
+    const r = await fetch('/api/research/syllabus.json?_=' + Date.now());
     if (!r.ok) return;
     const j = await r.json();
     if (Array.isArray(j.syllabus) && j.syllabus.length){
@@ -594,7 +594,7 @@ async function renderMarketNews(){
   if (!host) return;
   host.innerHTML = '<p class="muted">불러오는 중…</p>';
   try{
-    const res = await fetch('/market-news/index.json?_=' + Date.now());
+    const res = await fetch('/api/market-news/index.json?_=' + Date.now());
     const rows = await res.json(); // [{id}]
     if (!Array.isArray(rows) || !rows.length) {
       host.innerHTML = '<p class="muted">뉴스가 없습니다</p>';
@@ -602,7 +602,7 @@ async function renderMarketNews(){
     }
     const html = await Promise.all(rows.map(async r=>{
       try{
-        const dres = await fetch(`/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
+        const dres = await fetch(`/api/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
         const d = await dres.json();
         const bullets = (d.bullets||[]).map(b=>`<li>${b}</li>`).join('');
         const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문</a>` : '';
