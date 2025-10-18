@@ -221,7 +221,8 @@ async function genericHandler(req, pathname, PREFIX) {
         await deleteObject(FILE);
       } catch (e) {
         console.error(`[API] Delete failed for ${FILE}:`, e);
-        return err('DELETE_FAILED', 500);
+        const msg = (e && e.message) ? e.message : 'DELETE_FAILED';
+        return err(msg, 500);
       }
       try { await removeFromIndex(PREFIX, slug); } catch (e) {
         console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
