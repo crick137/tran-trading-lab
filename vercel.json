@@ -1,16 +1,8 @@
 {
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "dist",
-
-  "functions": {
-    "api/**/*.js": { "runtime": "@vercel/node@3.0.0" }
-  },
-
-  "redirects": [
-    { "source": "/:path*/", "destination": "/:path*", "permanent": true }
-  ],
   "rewrites": [
-    { "source": "/api/ping",   "destination": "/api/ping.js" },
+    { "source": "/api/ping", "destination": "/api/ping.js" },
     { "source": "/api/:path*", "destination": "/api/app.js" },
 
     { "source": "/admin/:path*", "destination": "/public/admin/index.html" },

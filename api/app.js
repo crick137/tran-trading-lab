@@ -1,6 +1,5 @@
 export const config = { runtime: 'nodejs22.x' };
 
-
 // api/app.js —— 超稳定总路由版（Node Runtime Safe）
 // 依赖：api/_lib/http.js, api/_lib/blob.js
 
