@@ -38,6 +38,22 @@
     .login-box h3{ margin:4px 0 10px }
     .login-box .row{ margin-top:8px }
   </style>
+
+  <!-- 保险丝#1：隐藏所有可能的旧“发布口令”控件（即使遗留也不显示） -->
+  <style>
+    .pw-group,
+    .topbar .pw,
+    .topbar .remember,
+    .topbar .clear,
+    .publish-password,
+    #publish-pw,
+    input[name="publishPassword"],
+    label[for="publish-pw"] {
+      display:none !important;
+      visibility:hidden !important;
+      height:0 !important; padding:0 !important; margin:0 !important; border:0 !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -256,7 +272,7 @@
                   <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
                 </label>
               </div>
-              <div class="row" style="margin-top:10px">
+              <div class="row" style="margin-top:10px)">
                 <button id="ra-publish" class="primary">发布 / 更新</button>
                 <button id="ra-reuse" class="icon-btn">昨日复用</button>
                 <button id="ra-preview" class="icon-btn">一键预览</button>
@@ -307,6 +323,22 @@
       try{ localStorage.removeItem(LS_KEY); }catch{}
       location.reload();
     });
+
+    // ===== 保险丝#2：运行时彻底移除任何旧口令条 DOM（即使样式名不同也覆盖）=====
+    function removeLegacyPwBar(){
+      const selectors = [
+        '.pw-group', '.topbar .pw', '.topbar .remember', '.topbar .clear',
+        '#publish-pw', 'input[name="publishPassword"]', 'label[for="publish-pw"]',
+        '.publish-password'
+      ];
+      selectors.forEach(sel=>{
+        document.querySelectorAll(sel).forEach(el=> el.remove());
+      });
+      document.querySelectorAll('.topbar').forEach(tb=>{
+        if(!tb.textContent.trim() || tb.children.length === 0) tb.remove();
+      });
+    }
+    removeLegacyPwBar();
 
     // ===== 通用请求（自动带 Authorization）=====
     function authHeader(){
