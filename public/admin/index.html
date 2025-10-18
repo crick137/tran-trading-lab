@@ -454,8 +454,13 @@
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
       bMsg('删除中…');
       try{
-        const { res, data } = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+        const del = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+        // 额外校验：确认已不存在
+        const check = await apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'GET' });
+        if (check.ok) {
+          throw new Error('DELETE_VERIFY_FAILED');
+        }
         bMsg('🗑️ 已删除');
       }catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };

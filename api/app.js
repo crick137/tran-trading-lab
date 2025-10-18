@@ -162,6 +162,7 @@ async function genericHandler(req, pathname, PREFIX) {
         (blobs || [])
           .filter(b => b.pathname && b.pathname.endsWith('.json'))
           .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
+          .filter(s => s && s !== 'index')
       );
 
       if (Array.isArray(idx) && idx.length) {
@@ -170,7 +171,7 @@ async function genericHandler(req, pathname, PREFIX) {
           .filter(Boolean);
         const filtered = normalized.filter(s => blobNames.has(s));
         const missing = Array.from(blobNames).filter(s => !normalized.includes(s));
-        const items = filtered.concat(missing).sort((a,b)=> (a > b ? -1 : 1));
+        const items = filtered.concat(missing).filter(s => s && s !== 'index').sort((a,b)=> (a > b ? -1 : 1));
         return ok(items);
       }
 
