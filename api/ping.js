@@ -1,4 +1,3 @@
-// 让 Vercel 以 Edge Runtime 执行（支持 handler(req) → Response）
 export const config = { runtime: 'edge' };
 
 export default async function handler(req, res) {
