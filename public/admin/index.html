@@ -22,34 +22,26 @@
   </style>
 </head>
 <body class="loaded">
-  <!-- 登录遮罩 -->
-  <div id="pw-overlay" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.8);z-index:9999;color:#fff;padding:20px">
-    <div style="background:#0f1720;padding:24px;border-radius:12px;width:360px;max-width:90%;box-shadow:0 6px 30px rgba(0,0,0,.6)">
-      <h2 style="margin:0 0 12px;font-size:18px">请输入管理员密码</h2>
-      <input id="pw-input" type="password" placeholder="Admin password" autocomplete="current-password"
-             style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #2b3136;background:#0b0f12;color:#fff" />
-      <button id="pw-submit" style="width:100%;padding:10px;border-radius:8px;border:none;cursor:pointer;font-weight:600">进入 Admin Console</button>
-      <div id="pw-hint" style="font-size:12px;color:#9ca3af;margin-top:8px;text-align:center"></div>
-    </div>
-  </div>
+  <!-- 登录遮罩（已默认隐藏/跳过） -->
+  <div id="pw-overlay" style="display:none"></div>
 
   <!-- 后台主体 -->
-  <div id="admin-root" style="display:none">
+  <div id="admin-root" style="display:block">
     <main class="admin container">
       <section class="card">
         <h2 style="margin:0 0 10px">Admin Console</h2>
 
-        <!-- 顶部工具栏 -->
+        <!-- 顶部工具栏（口令相关隐藏） -->
         <div class="row" style="justify-content:space-between">
           <div class="row">
-            <label class="hint">发布口令</label>
-            <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px" />
-            <button id="remember-token" class="icon-btn">记住</button>
-            <button id="forget-token" class="icon-btn">清除</button>
+            <label class="hint" style="display:none">发布口令</label>
+            <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px;display:none" />
+            <button id="remember-token" class="icon-btn" style="display:none">记住</button>
+            <button id="forget-token" class="icon-btn" style="display:none">清除</button>
           </div>
           <div class="row" style="align-items:center; gap:10px">
             <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
-            <button id="logout-btn" class="icon-btn danger">退出登录</button>
+            <button id="logout-btn" class="icon-btn danger">清空本地草稿</button>
           </div>
         </div>
 
@@ -66,7 +58,7 @@
           <div class="split">
             <div>
               <div class="form-grid">
-                <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-16" /></label>
+                <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-18" /></label>
                 <label class="full">标题<input id="b-title" placeholder="Daily Brief 标题（可选）" /></label>
                 <label class="full">核心要点（每行一条）<textarea id="b-bullets"></textarea></label>
                 <label class="full">今日日程（每行一条）<textarea id="b-schedule"></textarea></label>
@@ -106,11 +98,11 @@
           <div class="split">
             <div>
               <div class="form-grid">
-                <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-16" /></label>
+                <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-18" /></label>
                 <label class="full">标题<input id="a-title" placeholder="XAUUSD — Range to Trend" /></label>
                 <label>符号<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
                 <label>时间框架<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
-                <label>日期<input id="a-date" placeholder="2025-10-16" /></label>
+                <label>日期<input id="a-date" placeholder="2025-10-18" /></label>
                 <label>观点
                   <select id="a-bias">
                     <option value="bullish">bullish</option>
@@ -159,16 +151,15 @@
           <div class="split">
             <div>
               <div class="form-grid">
-                <label>ID（唯一）<input id="n-id" placeholder="2025-10-16-1 或自定义" /></label>
+                <label>ID（唯一）<input id="n-id" placeholder="2025-10-18-1 或自定义" /></label>
                 <label class="full">标题<input id="n-title" placeholder="美国CPI不及预期" /></label>
                 <label>来源<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
                 <label>外链URL<input id="n-url" placeholder="https://..." /></label>
-                <label>时间（ISO）<input id="n-date" placeholder="2025-10-16T12:34:00Z" /></label>
+                <label>时间（ISO）<input id="n-date" placeholder="2025-10-18T12:34:00Z" /></label>
                 <label class="full">标签（逗号分隔）<input id="n-tags" placeholder="cpi, usd, gold" /></label>
                 <label class="full">摘要<textarea id="n-summary"></textarea></label>
                 <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
               </div>
-              <!-- 修正：去掉多余的右括号 -->
               <div class="row" style="margin-top:10px">
                 <button id="n-publish" class="primary">发布 / 更新</button>
                 <button id="n-reuse" class="icon-btn">昨日复用</button>
@@ -263,52 +254,11 @@
     </main>
   </div> <!-- /#admin-root -->
 
-  <!-- 登录/验证脚本 -->
-  <script>
-    (function(){
-      const overlay = document.getElementById('pw-overlay');
-      const adminRoot = document.getElementById('admin-root');
-      const input = document.getElementById('pw-input');
-      const btn = document.getElementById('pw-submit');
-      const hint = document.getElementById('pw-hint');
-
-      function showAdmin(){ overlay.style.display='none'; adminRoot.style.display='block'; }
-      function showError(msg){ hint.textContent = msg; setTimeout(()=> hint.textContent='', 2500); }
-
-      async function verify(){
-        try{
-          const r = await fetch('/api/admin/verify', { method:'POST', cache:'no-store' });
-          if(!r.ok) return false;
-          const j = await r.json().catch(()=>null);
-          if(j && j.ok === true){ showAdmin(); return true; }
-        }catch(e){}
-        return false;
-      }
-      verify();
-
-      btn.addEventListener('click', async ()=>{
-        const pw = (input.value||'').trim();
-        if(!pw){ input.focus(); return showError('请输入密码'); }
-        btn.disabled = true;
-        try{
-          const r = await fetch('/api/admin/login', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ password: pw }) });
-          const j = await r.json().catch(()=>null);
-          if(r.ok && j && j.ok===true) showAdmin(); else showError(j?.error || '密码错误');
-        }catch(e){ showError('网络错误'); }
-        finally{ btn.disabled = false; }
-      });
-
-      input.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
-      window.addEventListener('load', ()=> input && input.focus());
-    })();
-  </script>
-
-  <!-- 业务脚本（稳健版） -->
+  <!-- 业务脚本（无鉴权稳健版） -->
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
     const LS = {
-      token: 'admin.token',
       brief: 'draft.brief.v1',
       analyses: 'draft.analyses.v1',
       news: 'draft.news.v1',
@@ -316,7 +266,7 @@
       rArticles: 'draft.research.articles.v1'
     };
 
-    // ---- 稳健 fetch 封装：text -> try JSON ----
+    // ---- fetch helpers ----
     async function fetchJSON(url, init={}) {
       const res  = await fetch(url, { cache:'no-store', ...init });
       const text = await res.text();
@@ -349,19 +299,10 @@
       };
     });
 
-    // Token
-    const tokenEl = $('#token');
-    (function(){ const v=localStorage.getItem(LS.token)||''; if(v) tokenEl.value=v; })();
-    if(!localStorage.getItem(LS.token)) tokenEl.focus();
-    $('#remember-token').onclick=()=> localStorage.setItem(LS.token, tokenEl.value.trim());
-    $('#forget-token').onclick  =()=> localStorage.removeItem(LS.token);
-    function authHeader(){ const t=tokenEl.value.trim(); return { 'authorization':'Bearer '+t }; }
+    // —— 去口令：固定空头，允许发布 ——
+    function authHeader(){ return {}; }
+    function ensureTokenOrMsg(){ return true; }
     function today(){ return new Date().toISOString().slice(0,10); }
-    function ensureTokenOrMsg(msgEl){
-      const t=tokenEl.value.trim();
-      if(!t){ msgEl.textContent='请先在顶部输入发布口令（ADMIN_TOKEN）并点击“记住”。'; tokenEl.focus(); return false; }
-      return true;
-    }
 
     // Draft helpers
     function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
@@ -371,7 +312,7 @@
     /* ===== Daily Brief ===== */
     const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
     const bMsg = s => B.msg.textContent = s;
-    function bGet(){ return { slug:B.slug.value.trim()||undefined, title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
+    function bGet(){ return { slug:B.slug.value.trim()||today(), title:B.title.value.trim()||undefined, bullets:B.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean), schedule:B.schedule.value.split('\n').map(s=>s.trim()).filter(Boolean), chart:{ symbol:B.symbol.value.trim()||undefined, interval:B.interval.value } }; }
     function bSet(d){ B.slug.value=d.slug||''; B.title.value=d.title||''; B.bullets.value=(d.bullets||[]).join('\n'); B.schedule.value=(d.schedule||[]).join('\n'); B.symbol.value=(d.chart?.symbol)||d.symbol||''; B.interval.value=(d.chart?.interval)||'60'; }
     $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())));
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
@@ -387,15 +328,13 @@
       }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#b-publish').onclick = async ()=>{
-      if(!ensureTokenOrMsg(B.msg)) return;
       try{ await postJSON('/daily-brief/index.json', bGet(), { ...authHeader() }); bMsg('✅ 发布成功'); }
       catch(e){ bMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
     $('#b-delete').onclick = async ()=>{
-      const slug=B.slug.value.trim(); if(!slug) return bMsg('请先填写日期');
+      const slug=B.slug.value.trim()||today();
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
-      if(!ensureTokenOrMsg(B.msg)) return;
       try{ await del(`/daily-brief/${slug}.json`, { ...authHeader() }); bMsg('🗑️ 已删除'); }
       catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -420,7 +359,6 @@
       }catch{ aMsg('拉取失败'); }
     };
     $('#a-publish').onclick = async ()=>{
-      if(!ensureTokenOrMsg(A.msg)) return;
       const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
       try{ await postJSON('/analyses/index.json', payload, { ...authHeader() }); aMsg('✅ 发布成功'); }
       catch(e){ aMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
@@ -429,7 +367,6 @@
     $('#a-delete').onclick = async ()=>{
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
       if(!confirm(`确定删除分析：${slug} ?`)) return;
-      if(!ensureTokenOrMsg(A.msg)) return;
       try{ await del(`/analyses/${encodeURIComponent(slug)}.json`, { ...authHeader() }); aMsg('🗑️ 已删除'); }
       catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -454,7 +391,6 @@
       }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#n-publish').onclick = async ()=>{
-      if(!ensureTokenOrMsg(N.msg)) return;
       const payload=nGet(); if(!payload.id) return nMsg('请填写 id');
       try{ await postJSON('/market-news/index.json', payload, { ...authHeader() }); nMsg('✅ 发布成功'); }
       catch(e){ nMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
@@ -463,7 +399,6 @@
     $('#n-delete').onclick = async ()=>{
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
       if(!confirm(`确定删除快讯：${id} ?`)) return;
-      if(!ensureTokenOrMsg(N.msg)) return;
       try{ await del(`/market-news/${encodeURIComponent(id)}.json`, { ...authHeader() }); nMsg('🗑️ 已删除'); }
       catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -472,7 +407,6 @@
     const R = { json: $('#r-json'), msg: $('#r-msg') };
     function rMsg(s){ R.msg.textContent = s; }
     function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
-    // 修正：补齐缺失的右括号
     $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value})));
     (function(){ const d = loadDraft(LS.research); if (d && typeof d.text==='string') R.json.value = d.text; })();
     $('#r-load').onclick = async ()=>{
@@ -485,7 +419,6 @@
     };
     $('#r-save').onclick = async ()=>{
       const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
-      if (!ensureTokenOrMsg(R.msg)) return;
       try{ await postJSON('/research/syllabus.json', { syllabus }, { ...authHeader() }); rMsg('✅ 保存成功'); }
       catch(e){ rMsg('❌ 保存失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -512,7 +445,6 @@
       }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#ra-publish').onclick = async ()=>{
-      if(!ensureTokenOrMsg(RA.msg)) return;
       const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
       try{ await postJSON('/research/articles/index.json', payload, { ...authHeader() }); raMsg('✅ 发布成功'); }
       catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
@@ -524,12 +456,11 @@
     $('#ra-delete').onclick = async ()=>{
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
       if(!confirm(`确定删除文章：${slug} ?`)) return;
-      if(!ensureTokenOrMsg(RA.msg)) return;
-      try{ await del(`/research/articles/${encodeURIComponent(slug)}.json`, { ...authHeader() }); raMsg('🗑️ 已删除'); }
-      catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
+      try{ await del(`/research/articles/${encodeURIComponent(slug)}.json`, { ...authHeader() }); raMsg('🗑️ 已删除');
+      }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
-    // 快捷发布
+    // 快捷键
     document.addEventListener('keydown', e=>{
       if(!(e.key==='Enter'&&(e.ctrlKey||e.metaKey))) return;
       if($('#tab-brief').classList.contains('active')) return $('#b-publish').click();
@@ -539,12 +470,11 @@
       if($('#tab-r-articles').classList.contains('active')) return $('#ra-publish').click();
     });
 
-    // 退出登录
-    document.getElementById('logout-btn')?.addEventListener('click', async ()=>{
-      if(!confirm('确定要退出管理员模式吗？')) return;
-      try{ await fetch('/api/admin/logout',{method:'POST'});}catch(e){}
-      localStorage.removeItem('admin.token');
-      location.reload();
+    // “清空本地草稿”按钮
+    document.getElementById('logout-btn')?.addEventListener('click', ()=>{
+      if(!confirm('确定清空本地草稿缓存？')) return;
+      Object.values(LS).forEach(clearDraft);
+      alert('本地草稿已清空');
     });
   </script>
 

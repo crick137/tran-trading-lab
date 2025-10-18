@@ -1,7 +1,7 @@
-import { writeJSON, readList, readJSONViaFetch } from '../_lib/blob.js';
-import { jsonOK, badRequest } from '../_lib/http.js';
+import { writeJSON, readList, readJSONViaFetch } from '../../_lib/blob.js';
+import { jsonOK, badRequest } from '../../_lib/http.js';
 
-const PREFIX = 'analyses';
+const PREFIX = 'research/articles';
 const INDEX  = `${PREFIX}/index.json`;
 
 export default async function handler(req) {

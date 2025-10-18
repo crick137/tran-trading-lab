@@ -1,53 +1,47 @@
-// /api/daily-brief/index.js
-import { writeJSON, readJSONViaFetch } from '../_lib/blob.js';
-import { jsonOK, badRequest, requireAuth, withCORS } from '../_lib/http.js';
+import { writeJSON, readList, readJSONViaFetch } from '../_lib/blob.js';
+import { jsonOK, badRequest } from '../_lib/http.js';
 
 const PREFIX = 'daily-brief';
 const INDEX  = `${PREFIX}/index.json`;
 
 export default async function handler(req) {
-  if (req.method === 'OPTIONS') return new Response('', withCORS({ status: 204 }));
+  const { method } = req;
 
-  if (req.method === 'GET') {
+  if (method === 'GET') {
     try {
-      const arr = await readJSONViaFetch(INDEX);
-      return jsonOK(Array.isArray(arr) ? arr : []);
-    } catch {
-      return jsonOK([]);
+      const blobs = await readList(`${PREFIX}/`);
+      const items = blobs
+        .filter(b => b.pathname.endsWith('.json') && b.pathname !== INDEX)
+        .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json',''))
+        .sort((a,b) => (a > b ? -1 : 1));
+      return jsonOK(items);
+    } catch (err) {
+      console.error(`[GET] ${PREFIX}`, err);
+      return badRequest('INDEX_READ_ERROR');
     }
   }
 
-  if (req.method === 'POST') {
-    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
-    let payload; try { payload = await req.json(); } catch { return badRequest('INVALID_JSON'); }
-    const slug = payload.slug || new Date().toISOString().slice(0,10);
-    const item = {
-      slug,
-      title: payload.title || '',
-      bullets: Array.isArray(payload.bullets) ? payload.bullets : [],
-      schedule: Array.isArray(payload.schedule) ? payload.schedule : [],
-      chart: payload.chart || { symbol: payload.symbol || '', interval: payload.interval || '60' }
-    };
+  if (method === 'POST') {
+    try {
+      const payload = await req.json();
+      const { slug } = payload || {};
+      if (!slug) return badRequest('MISSING_SLUG');
 
-    await writeJSON(`${PREFIX}/${slug}.json`, item);
+      await writeJSON(`${PREFIX}/${slug}.json`, payload);
 
-    let idx = [];
-    try { idx = await readJSONViaFetch(INDEX); } catch {}
-    idx = Array.isArray(idx) ? idx : [];
-    const map = new Map(idx.map(s => [typeof s==='string'?s:s.slug, s]));
-    map.set(slug, (typeof idx[0]==='string') ? slug : { slug });
-    const list = Array.from(map.values()).sort((a,b)=>{
-      const sa = typeof a==='string'?a:a.slug, sb = typeof b==='string'?b:b.slug;
-      return sb.localeCompare(sa);
-    });
-    await writeJSON(INDEX, list);
+      let idx = [];
+      try {
+        const exist = await readJSONViaFetch(INDEX);
+        if (Array.isArray(exist)) idx = exist;
+      } catch {}
+      if (!idx.includes(slug)) idx.unshift(slug);
 
-    return jsonOK({ ok: true, slug });
-  }
-
-  if (req.method === 'DELETE') {
-    const unauthorized = requireAuth(req); if (unauthorized) return unauthorized;
-    return badRequest('DELETE_SINGLE_USE /daily-brief/:slug.json', 405);
+      await writeJSON(INDEX, idx);
+      return jsonOK({ ok: true, slug });
+    } catch (err) {
+      console.error(`[POST] ${PREFIX}`, err);
+      return badRequest('POST_ERROR');
+    }
   }
 
   return badRequest('METHOD_NOT_ALLOWED', 405);
