@@ -3,8 +3,6 @@
 // 无鉴权 + CORS + 支持 GET/POST/PUT/DELETE/OPTIONS
 // 依赖你已有的 _lib/blob.js / _lib/http.js
 
-export const config = { runtime: 'edge' }; // 建议放到 Edge（更快、也绕开 Serverless 限额）
-
 import {
   writeJSON, readJSONViaFetch, deleteObject, readList,
 } from './_lib/blob.js';
