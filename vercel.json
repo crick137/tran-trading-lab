@@ -1,21 +1,11 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "github": { "enabled": false },
-
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "dist",
-
-  "redirects": [
-    { "source": "/:path*/", "destination": "/:path*", "permanent": true }
-  ],
 
   "rewrites": [
     { "source": "/api/ping", "destination": "/api/ping.js" },
     { "source": "/api/:path*", "destination": "/api/app.js" },
-
-    { "source": "/admin/:path*", "destination": "/admin/index.html" },
-
+    { "source": "/admin/:path*", "destination": "/public/admin/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
-
