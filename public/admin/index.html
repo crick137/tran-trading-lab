@@ -321,6 +321,14 @@
       if (/timeout|AbortError/i.test(m)) return '请求超时，请稍后重试。';
       return m || '操作失败';
     }
+    async function waitForGone(apiPath, tries=8, interval=600){
+      for (let i=0; i<tries; i++){
+        const r = await apiFetch(apiPath + (apiPath.includes('?')?'&':'?') + '_=' + Date.now(), { method:'GET' });
+        if (!r.ok) return true;
+        await new Promise(res=>setTimeout(res, interval));
+      }
+      throw new Error('DELETE_VERIFY_FAILED');
+    }
     const fetchJSON = (url, init={}) => apiFetch(url, init);
     async function getJSON(url){
       const r = await apiFetch(url);
@@ -480,8 +488,7 @@
         try{
           const del = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-          const check = await apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'GET' });
-          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          await waitForGone(`/api/daily-brief/${encodeURIComponent(slug)}.json`);
           bMsg('🗑️ 已删除');
         }catch(e){ bMsg('删除失败：' + explainErr(e)); }
       });
@@ -562,8 +569,7 @@
         try{
           const del = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-          const check = await apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'GET' });
-          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          await waitForGone(`/api/analyses/${encodeURIComponent(slug)}.json`);
           aMsg('🗑️ 已删除');
         }catch(e){ aMsg('删除失败：' + explainErr(e)); }
       });
@@ -629,8 +635,7 @@
         try{
           const del = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-          const check = await apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'GET' });
-          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          await waitForGone(`/api/market-news/${encodeURIComponent(id)}.json`);
           nMsg('🗑️ 已删除');
         }catch(e){ nMsg('删除失败：' + explainErr(e)); }
       });
@@ -729,8 +734,7 @@
         try{
           const del = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-          const check = await apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'GET' });
-          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          await waitForGone(`/api/research/articles/${encodeURIComponent(slug)}.json`);
           raMsg('🗑️ 已删除');
         }catch(e){ raMsg('删除失败：' + explainErr(e)); }
       });
