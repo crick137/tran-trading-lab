@@ -33,6 +33,7 @@ function getHeader(req, name) {
   const key = String(name).toLowerCase();
   return h[key] || h[name] || null;
 }
+
 // 关键修复：Vercel 中 req.url 可能是相对路径，需补 base
 function getURL(req) {
   const proto = getHeader(req, 'x-forwarded-proto') || 'https';
@@ -50,22 +51,25 @@ async function readBody(req) {
     if (ct.includes('application/json')) return await req.json();
     const text = await req.text();
     return text ? JSON.parse(text) : {};
-  } catch { return {}; }
+  } catch {
+    // 解析失败也返回空对象，避免阻塞
+    return {};
+  }
 }
+
 async function listByPrefix(prefix) {
   if (typeof _listByPrefix === 'function') return await _listByPrefix(prefix);
   const it = await _listRaw({ prefix });
   return it?.blobs ?? [];
 }
-function pickTail(pathname) {
-  const seg = pathname.split('/').filter(Boolean).pop() || '';
-  return seg.endsWith('.json') ? seg.slice(0, -5) : seg;
-}
+
 function normPath(pathname) {
   if (pathname.length > 1 && pathname.endsWith('/')) return pathname.slice(0, -1);
   return pathname;
 }
+
 async function readIndexJson(path) { try { return await readJSONViaFetch(path); } catch { return []; } }
+
 async function upsertIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
@@ -73,6 +77,7 @@ async function upsertIndex(prefix, key) {
   arr = [key, ...arr.filter(x => x !== key)];
   await writeJSON(INDEX, arr);
 }
+
 async function removeFromIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
@@ -80,6 +85,7 @@ async function removeFromIndex(prefix, key) {
   arr = arr.filter(x => x !== key);
   await writeJSON(INDEX, arr);
 }
+
 function requireAuthIfConfigured(req) {
   if (!process.env.ADMIN_PASSWORD) return null;
   return _requireAuth(req);
@@ -129,6 +135,7 @@ async function handleDailyBrief(req, pathname) {
   const PREFIX = 'daily-brief';
   const p = normPath(pathname);
 
+  // 列表
   if (p === '/api/daily-brief' || p === '/api/daily-brief/index' || p === '/api/daily-brief/index.json') {
     if (req.method !== 'GET') return err('METHOD_NOT_ALLOWED', 405);
     const fromIndex = await readIndexJson(`${PREFIX}/index.json`);
@@ -150,19 +157,40 @@ async function handleDailyBrief(req, pathname) {
       try { return ok(await readJSONViaFetch(FILE)); }
       catch { return err('NOT_FOUND', 404); }
     }
+
     if (req.method === 'PUT' || req.method === 'POST') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
+
       const body = await readBody(req);
-      await writeJSON(FILE, body);
-      await upsertIndex(PREFIX, slug);
+      console.log('[daily-brief] write start:', FILE);
+
+      try {
+        await writeJSON(FILE, body);
+        console.log('[daily-brief] write ok:', FILE);
+      } catch (e) {
+        console.error('[daily-brief] write error:', e);
+        return err('WRITE_FAILED', 500);
+      }
+
+      try {
+        await upsertIndex(PREFIX, slug);
+        console.log('[daily-brief] index ok:', slug);
+      } catch (e) {
+        console.error('[daily-brief] index error:', e);
+        // 写入已成功，即使索引更新失败也避免前端一直 loading
+        return ok({ saved: true, slug, warn: 'INDEX_UPDATE_FAILED' });
+      }
+
       return ok({ saved: true, slug });
     }
+
     if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
       try { await deleteObject(FILE); } catch {}
       await removeFromIndex(PREFIX, slug);
       return ok({ deleted: true, slug });
     }
+
     return err('METHOD_NOT_ALLOWED', 405);
   }
 
@@ -278,11 +306,16 @@ async function handleResearch(req, pathname) {
 
 /* -------- 总路由入口 -------- */
 export default async function handler(req) {
-  const url = getURL(req);                 // ← 使用兼容版 URL 解析
+  const url = getURL(req);
   const pathname = normPath(url.pathname);
 
   if (req.method === 'OPTIONS') return new Response(null, withHeaders({ status: 204 }));
   if (req.method === 'HEAD')    return new Response(null, withHeaders({ status: 200 }));
+
+  // 健康检查（调试用）：GET /api/ping -> { ok: true }
+  if (req.method === 'GET' && pathname === '/api/ping') {
+    return ok({ ok: true, ts: Date.now() });
+  }
 
   try {
     if (pathname.startsWith('/api/admin'))       return await handleAdmin(req, pathname);
