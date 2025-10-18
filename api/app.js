@@ -1,20 +1,19 @@
+// api/app.js
 export const config = { runtime: 'nodejs' };
 
-// api/app.js —— 超稳定总路由版（Node Runtime Safe）
-// 依赖：api/_lib/http.js, api/_lib/blob.js
-
+// —— 依赖：api/_lib/http.js, api/_lib/blob.js
 import { jsonOK, badRequest, requireAuth as _requireAuth } from './_lib/http.js';
 import {
   writeJSON,
   readJSONViaFetch,
   deleteObject,
   listByPrefix as _listByPrefix,
-  list as _listRaw
+  list as _listRaw,
 } from './_lib/blob.js';
 
 const ENABLE_CORS = false;
 
-/* ---------- 响应工具 ---------- */
+/* ---------- 基础响应工具：仍返回 Web Response ---------- */
 function ok(data, status = 200) {
   return jsonOK(data, status);
 }
@@ -35,40 +34,37 @@ function withHeaders(init = {}) {
 function getHeader(req, name) {
   const h = req.headers || {};
   const key = String(name).toLowerCase();
-  if (typeof h.get === 'function') return h.get(name);
-  return h[key] || h[name] || null;
+  if (typeof h.get === 'function') return h.get(name); // Web Request
+  return h[key] || h[name] || null;                    // Node IncomingMessage
 }
 
 function getURL(req) {
   try {
-    if (req.url && req.url.startsWith('http')) return new URL(req.url);
+    if (req.url && String(req.url).startsWith('http')) return new URL(req.url);
     const proto = getHeader(req, 'x-forwarded-proto') || 'https';
-    const host = getHeader(req, 'x-forwarded-host') || getHeader(req, 'host') || 'localhost';
-    const path = req.url || '/';
+    const host  = getHeader(req, 'x-forwarded-host') || getHeader(req, 'host') || 'localhost';
+    const path  = req.url || '/';
     return new URL(`${proto}://${host}${path.startsWith('/') ? '' : '/'}${path}`);
   } catch {
-    // 若 URL 构造失败，则用默认兜底
     return new URL('https://localhost/api/ping');
   }
 }
 
-/* ---------- readBody（Node + Edge 双兼容） ---------- */
+/* ---------- 读取请求体：Edge/Web/Node 皆可 ---------- */
 async function readBody(req) {
   try {
     const ct = (getHeader(req, 'content-type') || '').toLowerCase();
 
-    // Edge runtime
+    // Edge/Web
     if (typeof req.json === 'function' && ct.includes('application/json')) {
       return await req.json();
     }
-
-    // Web Request
     if (typeof req.text === 'function') {
       const text = await req.text();
       return text ? JSON.parse(text) : {};
     }
 
-    // Node.js Stream
+    // Node Stream
     let data = '';
     if (req.readable) {
       for await (const chunk of req) data += chunk;
@@ -121,7 +117,7 @@ function requireAuthIfConfigured(req) {
   return _requireAuth(req);
 }
 
-/* ---------- Admin 模块 ---------- */
+/* ---------- Admin ---------- */
 async function handleAdmin(req, pathname) {
   const sub = pathname.replace('/api/admin', '') || '';
 
@@ -130,20 +126,27 @@ async function handleAdmin(req, pathname) {
     const pass = body?.password || body?.pwd || '';
     if (!process.env.ADMIN_PASSWORD) return err('ADMIN_PASSWORD_NOT_SET', 500);
     if (pass !== process.env.ADMIN_PASSWORD) return err('INVALID_PASSWORD', 401);
+    // 你的前端并未真正设置 cookie，这里按“只验证一次”的轻模式
     return ok({ ok: true, token: 'ok' });
   }
 
   if (sub === '/verify' && req.method === 'GET') {
+    // 轻模式：只要能到达这里，就认为已登录
     return ok({ authed: true });
+  }
+
+  if (sub === '/logout' && req.method === 'POST') {
+    return ok({ ok: true });
   }
 
   return err('ADMIN_NO_ROUTE', 404);
 }
 
-/* ---------- 通用 CRUD 处理器 ---------- */
+/* ---------- 通用 CRUD ---------- */
 async function genericHandler(req, pathname, PREFIX) {
   const p = normPath(pathname);
 
+  // 列表 / 索引
   if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
     const idx = await readIndexJson(`${PREFIX}/index.json`);
     if (Array.isArray(idx) && idx.length) return ok(idx);
@@ -151,20 +154,23 @@ async function genericHandler(req, pathname, PREFIX) {
     const items = blobs
       .filter(b => b.pathname.endsWith('.json'))
       .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
-      .sort((a,b)=>a>b?-1:1);
+      .sort((a,b)=> (a > b ? -1 : 1));
     return ok(items);
   }
 
+  // 单项
   const m = p.match(new RegExp(`^/api/${PREFIX}/([^/]+?)(?:\\.json)?$`));
   if (!m) return err(`${PREFIX.toUpperCase()}_NO_ROUTE`, 404);
   const slug = m[1];
   const FILE = `${PREFIX}/${slug}.json`;
 
+  // 读
   if (req.method === 'GET') {
     try { return ok(await readJSONViaFetch(FILE)); }
     catch { return err('NOT_FOUND', 404); }
   }
 
+  // 写
   if (['PUT','POST'].includes(req.method)) {
     const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
     const body = await readBody(req);
@@ -173,6 +179,7 @@ async function genericHandler(req, pathname, PREFIX) {
     return ok({ saved: true, slug });
   }
 
+  // 删
   if (req.method === 'DELETE') {
     const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
     try { await deleteObject(FILE); } catch {}
@@ -183,10 +190,11 @@ async function genericHandler(req, pathname, PREFIX) {
   return err('METHOD_NOT_ALLOWED', 405);
 }
 
-/* ---------- Research 模块 ---------- */
+/* ---------- Research 只读 ---------- */
 async function handleResearch(req, pathname) {
   const p = normPath(pathname);
   if (req.method !== 'GET') return err('METHOD_NOT_ALLOWED', 405);
+
   if (/^\/api\/research\/syllabus(?:\.json)?$/.test(p)) {
     try { return ok(await readJSONViaFetch('research/syllabus.json')); }
     catch { return err('NOT_FOUND', 404); }
@@ -198,29 +206,63 @@ async function handleResearch(req, pathname) {
   return err('RESEARCH_NO_ROUTE', 404);
 }
 
-/* ---------- 主路由入口 ---------- */
-export default async function handler(req) {
-  const url = getURL(req);
-  const pathname = normPath(url.pathname || '/');
-
-  if (req.method === 'OPTIONS') return new Response(null, withHeaders({ status: 204 }));
-  if (req.method === 'HEAD') return new Response(null, withHeaders({ status: 200 }));
-
-  // ✅ 健康检查
-  if (req.method === 'GET' && pathname === '/api/ping') {
-    return ok({ ok: true, ts: Date.now(), runtime: 'node', env: process.env.VERCEL_ENV || 'local' });
+/* ---------- 把 Web Response 写回到 Node res ---------- */
+async function sendNodeResponse(res, out) {
+  // out 是一个 Web Response（jsonOK/badRequest 返回的）
+  if (out && typeof out === 'object' && typeof out.text === 'function' && out.headers) {
+    const status = out.status || 200;
+    const headersObj = {};
+    try {
+      for (const [k, v] of out.headers.entries()) headersObj[k] = v;
+    } catch (_) {}
+    const bodyText = await out.text();
+    res.writeHead(status, headersObj);
+    res.end(bodyText);
+    return;
   }
+  // 容错：非 Response，按 JSON 输出
+  res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.statusCode = 200;
+  res.end(JSON.stringify(out ?? {}));
+}
 
+/* ---------- 主路由入口（Node 风格） ---------- */
+export default async function handler(req, res) {
   try {
-    if (pathname.startsWith('/api/admin'))        return await handleAdmin(req, pathname);
-    if (pathname.startsWith('/api/daily-brief'))  return await genericHandler(req, pathname, 'daily-brief');
-    if (pathname.startsWith('/api/analyses'))     return await genericHandler(req, pathname, 'analyses');
-    if (pathname.startsWith('/api/market-news'))  return await genericHandler(req, pathname, 'market-news');
-    if (pathname.startsWith('/api/research'))     return await handleResearch(req, pathname);
+    const url = getURL(req);
+    const pathname = normPath(url.pathname || '/');
 
-    return err('NO_ROUTE', 404);
+    if (req.method === 'OPTIONS') {
+      const r = new Response(null, withHeaders({ status: 204 }));
+      return sendNodeResponse(res, r);
+    }
+    if (req.method === 'HEAD') {
+      const r = new Response(null, withHeaders({ status: 200 }));
+      return sendNodeResponse(res, r);
+    }
+
+    // 健康检查
+    if (req.method === 'GET' && pathname === '/api/ping') {
+      const r = ok({
+        ok: true,
+        ts: Date.now(),
+        runtime: 'node',
+        env: process.env.VERCEL_ENV || 'local',
+      });
+      return sendNodeResponse(res, r);
+    }
+
+    let out;
+    if (pathname.startsWith('/api/admin'))           out = await handleAdmin(req, pathname);
+    else if (pathname.startsWith('/api/daily-brief')) out = await genericHandler(req, pathname, 'daily-brief');
+    else if (pathname.startsWith('/api/analyses'))    out = await genericHandler(req, pathname, 'analyses');
+    else if (pathname.startsWith('/api/market-news')) out = await genericHandler(req, pathname, 'market-news');
+    else if (pathname.startsWith('/api/research'))    out = await handleResearch(req, pathname);
+    else                                              out = err('NO_ROUTE', 404);
+
+    return sendNodeResponse(res, out);
   } catch (e) {
     console.error('API_ERROR', e);
-    return err('INTERNAL_ERROR', 500);
+    return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }

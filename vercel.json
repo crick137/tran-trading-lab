@@ -3,21 +3,22 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
-
   "rewrites": [
-    
     { "source": "/api/daily-brief",       "destination": "/api/app" },
     { "source": "/api/daily-brief/(.*)",  "destination": "/api/app" },
+
     { "source": "/api/analyses",          "destination": "/api/app" },
     { "source": "/api/analyses/(.*)",     "destination": "/api/app" },
+
     { "source": "/api/market-news",       "destination": "/api/app" },
     { "source": "/api/market-news/(.*)",  "destination": "/api/app" },
+
     { "source": "/api/research",          "destination": "/api/app" },
     { "source": "/api/research/(.*)",     "destination": "/api/app" },
 
-    { "source": "/admin",      "destination": "/admin/index.html" },
-    { "source": "/admin/(.*)", "destination": "/admin/index.html" },
-    
-    { "source": "/(.*)",       "destination": "/index.html" }
+    { "source": "/admin",                 "destination": "/admin/index.html" },
+    { "source": "/admin/(.*)",            "destination": "/admin/index.html" },
+
+    { "source": "/(.*)",                  "destination": "/index.html" }
   ]
 }
