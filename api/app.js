@@ -26,16 +26,27 @@ function withHeaders(init = {}) {
 function ok(data, status = 200) { return jsonOK(data, status); }
 function err(message = 'BAD_REQUEST', status = 400) { return badRequest(message, status); }
 
+// ---- 兼容 Node IncomingMessage.headers 与 Web Headers ----
+function getHeader(req, name) {
+  const h = req.headers || {};
+  if (h && typeof h.get === 'function') return h.get(name);
+  const key = String(name).toLowerCase();
+  return h[key] || h[name] || null;
+}
 // 关键修复：Vercel 中 req.url 可能是相对路径，需补 base
 function getURL(req) {
-  const proto = req.headers.get('x-forwarded-proto') || 'https';
-  const host  = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'localhost';
-  return new URL(req.url, `${proto}://${host}`);
+  const proto = getHeader(req, 'x-forwarded-proto') || 'https';
+  const host  = getHeader(req, 'x-forwarded-host') || getHeader(req, 'host') || 'localhost';
+  const raw   = req.url || '/';
+  const abs   = /^https?:\/\//i.test(raw)
+    ? raw
+    : `${proto}://${host}${raw.startsWith('/') ? '' : '/'}${raw}`;
+  return new URL(abs);
 }
 
 async function readBody(req) {
   try {
-    const ct = (req.headers.get('content-type') || '').toLowerCase();
+    const ct = (getHeader(req, 'content-type') || '').toLowerCase();
     if (ct.includes('application/json')) return await req.json();
     const text = await req.text();
     return text ? JSON.parse(text) : {};
@@ -95,7 +106,7 @@ async function handleAdmin(req, pathname) {
   }
 
   if (sub === '/verify' && req.method === 'GET') {
-    const cookie = req.headers.get('cookie') || '';
+    const cookie = getHeader(req, 'cookie') || '';
     const authed = /(^|;\s*)admintoken=/.test(cookie);
     return ok({ authed });
   }
@@ -267,8 +278,8 @@ async function handleResearch(req, pathname) {
 
 /* -------- 总路由入口 -------- */
 export default async function handler(req) {
-  const url = getURL(req);                 // ← 修复点
-  const pathname = normPath(url.pathname); // ← 修复点
+  const url = getURL(req);                 // ← 使用兼容版 URL 解析
+  const pathname = normPath(url.pathname);
 
   if (req.method === 'OPTIONS') return new Response(null, withHeaders({ status: 204 }));
   if (req.method === 'HEAD')    return new Response(null, withHeaders({ status: 200 }));
