@@ -35,21 +35,6 @@ export function methodNotAllowed(message = 'METHOD_NOT_ALLOWED', init = {}) {
   return badRequest(message, 405, init);
 }
 
-// 修改前
-/** 读取 Bearer Token（返回纯 token 字符串或空字符串） */
-export function getBearerToken(req) {
-  try {
-    const h = req?.headers?.get?.('authorization') || req?.headers?.get?.('Authorization') || '';
-    if (!h) return '';
-    if (/^bearer\s/i.test(h)) return h.replace(/^bearer\s/i, '').trim();
-    // 兼容 "Authorization: <token>" 的非常规写法
-    return h.trim();
-  } catch {
-    return '';
-  }
-}
-
-// 修改后
 /** 读取 Bearer Token（返回纯 token 字符串或空字符串） */
 export function getBearerToken(req) {
   try {
