@@ -4,14 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Console · TRAN TRADING LAB</title>
-  <link rel="stylesheet" href="/styles/global.css" />
+
+  <!-- 纯内联样式：不依赖 /styles/global.css -->
   <style>
     :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; --bd:#23262b; --primary:#3b82f6; }
     html,body{height:100%; margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
     .container{max-width:1080px; margin:24px auto; padding:0 16px}
     .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
     .muted{ color:var(--muted); }
-    input,select,textarea{ background:#0f1115; border:1px solid var(--bd); color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
+    input,select,textarea{ background:#0f1115; border:1px solid var(--bd); color:#fff; padding:8px 10px; border-radius:10px; outline:none; width:100%; box-sizing:border-box }
     input:focus,select:focus,textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.2); }
     .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
     .icon-btn:hover{ background:#1b1f24 }
@@ -25,34 +26,19 @@
     .split{ display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; } @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
     .kbd{ border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
     .danger{ color:#f87171; border-color:#f87171 }
-
-    /* 保险丝：把任何遗留的发布口令相关控件隐藏（就算旧代码还在也看不到） */
-    .pw-group,
-    .topbar .pw,
-    .topbar .remember,
-    .topbar .clear,
-    .publish-password,
-    #publish-pw,
-    input[name="publishPassword"],
-    label[for="publish-pw"] {
-      display:none !important;
-      visibility:hidden !important;
-      height:0 !important; padding:0 !important; margin:0 !important; border:0 !important;
-    }
+    .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px } .form-grid .full{ grid-column:1/-1 }
+    /* 保险丝：隐藏任何遗留“发布口令”UI */
+    .pw-group,.topbar .pw,.topbar .remember,.topbar .clear,.publish-password,#publish-pw,input[name="publishPassword"],label[for="publish-pw"]{display:none!important}
   </style>
 </head>
 <body>
-
-  <!-- 后台主体：直接显示（无登录） -->
   <div id="admin-root" style="display:block">
     <main class="admin container">
       <section class="card" style="padding:16px">
         <h2 style="margin:0 0 10px">Admin Console</h2>
 
         <div class="row" style="justify-content:space-between">
-          <div class="row">
-            <!-- 无登录，不显示退出按钮 -->
-          </div>
+          <div class="row"></div>
           <div class="row" style="align-items:center; gap:10px">
             <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
             <button id="clear-drafts" class="icon-btn danger">清空本地草稿</button>
