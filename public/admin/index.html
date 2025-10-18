@@ -302,6 +302,25 @@
         clearTimeout(id);
       }
     }
+    // 按钮锁定工具与错误解释
+    function withBtnLock(btn, fn){
+      if (!btn) return fn();
+      const old = btn.textContent;
+      btn.disabled = true; btn.classList.add('disabled'); btn.textContent = '处理中…';
+      return Promise.resolve()
+        .then(fn)
+        .finally(()=>{ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; });
+    }
+    function explainErr(e){
+      const m = (e && e.message) ? e.message : String(e||'');
+      if (m === 'DELETE_VERIFY_FAILED') return '删除后校验失败：可能缓存或权限问题，请稍后刷新确认。';
+      if (/BLOB_TOKEN_MISSING/i.test(m)) return '服务端未配置 Blob 写入 Token（请设置 BLOB_READ_WRITE_TOKEN）。';
+      if (/UNAUTHORIZED|401/.test(m)) return '未授权：请重新登录后台后再试。';
+      if (/SERVER_NO_ADMIN_PASSWORD|ADMIN_PASSWORD_NOT_SET/i.test(m)) return '服务端未设置 ADMIN_PASSWORD。';
+      if (/DELETE_FAILED/i.test(m)) return '删除失败：服务端删除文件出错。';
+      if (/timeout|AbortError/i.test(m)) return '请求超时，请稍后重试。';
+      return m || '操作失败';
+    }
     const fetchJSON = (url, init={}) => apiFetch(url, init);
     async function getJSON(url){
       const r = await apiFetch(url);
@@ -453,16 +472,16 @@
       const slug=B.slug.value.trim()||today();
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
       bMsg('删除中…');
-      try{
-        const del = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-        // 额外校验：确认已不存在
-        const check = await apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'GET' });
-        if (check.ok) {
-          throw new Error('DELETE_VERIFY_FAILED');
-        }
-        bMsg('🗑️ 已删除');
-      }catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#b-delete');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const del = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+          if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+          const check = await apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'GET' });
+          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          bMsg('🗑️ 已删除');
+        }catch(e){ bMsg('删除失败：' + explainErr(e)); }
+      });
     };
 
     /* ===== Analyses ===== */
@@ -532,13 +551,16 @@
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
       if(!confirm(`确定删除分析：${slug} ?`)) return;
       aMsg('删除中…');
-      try{
-        const del = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-        const check = await apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'GET' });
-        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
-        aMsg('🗑️ 已删除');
-      }catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#a-delete');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const del = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+          if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+          const check = await apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'GET' });
+          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          aMsg('🗑️ 已删除');
+        }catch(e){ aMsg('删除失败：' + explainErr(e)); }
+      });
     };
 
     /* ===== Market News ===== */
@@ -593,13 +615,16 @@
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
       if(!confirm(`确定删除快讯：${id} ?`)) return;
       nMsg('删除中…');
-      try{
-        const del = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
-        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-        const check = await apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'GET' });
-        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
-        nMsg('🗑️ 已删除');
-      }catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#n-delete');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const del = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
+          if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+          const check = await apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'GET' });
+          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          nMsg('🗑️ 已删除');
+        }catch(e){ nMsg('删除失败：' + explainErr(e)); }
+      });
     };
 
     /* ===== Research (syllabus) ===== */
@@ -684,13 +709,16 @@
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
       if(!confirm(`确定删除文章：${slug} ?`)) return;
       raMsg('删除中…');
-      try{
-        const del = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
-        const check = await apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'GET' });
-        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
-        raMsg('🗑️ 已删除');
-      }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
+      const btn = $('#ra-delete');
+      await withBtnLock(btn, async ()=>{
+        try{
+          const del = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+          if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+          const check = await apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'GET' });
+          if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
+          raMsg('🗑️ 已删除');
+        }catch(e){ raMsg('删除失败：' + explainErr(e)); }
+      });
     };
 
     /* 快捷键：Ctrl/Cmd + Enter */
