@@ -7,7 +7,14 @@ const OP_RETRIES = Number(process.env.BLOB_OP_RETRIES || 2);
 const OP_RETRY_DELAY_MS = Number(process.env.BLOB_OP_RETRY_DELAY_MS || 500);
 
 function getToken() {
-  return process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_RW_TOKEN || undefined;
+  const direct = process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_RW_TOKEN;
+  if (direct) return direct;
+  try {
+    for (const [k, v] of Object.entries(process.env || {})) {
+      if (/_READ_WRITE_TOKEN$/i.test(k) && v) return v;
+    }
+  } catch {}
+  return undefined;
 }
 
 function requireToken() {
