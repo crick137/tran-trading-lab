@@ -22,7 +22,6 @@
     .tab{ display:none } .tab.active{ display:block }
     textarea{ min-height: 120px; }
     .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-    .hint{ font-size:12px; opacity:.75 }
     .split{ display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; } @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
     .kbd{ border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
     .danger{ color:#f87171; border-color:#f87171 }
@@ -61,7 +60,6 @@
       <section class="card" style="padding:16px">
         <h2 style="margin:0 0 10px">Admin Console</h2>
 
-        <!-- 顶部工具栏 -->
         <div class="row" style="justify-content:space-between">
           <div class="row">
             <button id="logout-admin" class="icon-btn">退出登录</button>
@@ -280,26 +278,21 @@
 
       </section>
     </main>
-  </div> <!-- /#admin-root -->
+  </div>
 
-  <!-- 业务脚本（登录门禁 + 统一鉴权头） -->
+  <!-- 业务脚本 -->
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    // ---------- 登录门禁 ----------
+    // ===== 登录门禁 =====
     const overlay = $('#pw-overlay');
     const adminRoot = $('#admin-root');
     const LS_KEY = 'TRAN_ADMIN_PW';
 
     const saved = localStorage.getItem(LS_KEY);
-    if (!saved) {
-      overlay.style.display = 'flex';
-      adminRoot.style.display = 'none';
-    } else {
-      overlay.style.display = 'none';
-      adminRoot.style.display = 'block';
-    }
+    overlay.style.display = saved ? 'none' : 'flex';
+    adminRoot.style.display = saved ? 'block' : 'none';
 
     $('#pw-enter')?.addEventListener('click', ()=>{
       const v = ($('#admin-pw').value||'').trim();
@@ -315,12 +308,11 @@
       location.reload();
     });
 
-    // ---------- 通用请求工具（自动携带 Authorization） ----------
+    // ===== 通用请求（自动带 Authorization）=====
     function authHeader(){
       try{
         const pw = localStorage.getItem(LS_KEY);
-        if(!pw) return {};
-        return { 'Authorization': 'Bearer ' + pw };
+        return pw ? { 'Authorization': 'Bearer ' + pw } : {};
       }catch{ return {}; }
     }
     async function fetchJSON(url, init={}) {
@@ -336,14 +328,9 @@
       if (!r.data) throw '响应不是 JSON';
       return r.data;
     }
-    async function del(url) {
-      const r = await fetchJSON(url, { method:'DELETE' });
-      if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
-      return r.data || {};
-    }
     function today(){ return new Date().toISOString().slice(0,10); }
 
-    // ---------- Tabs ----------
+    // Tabs
     $$('.tab-btn').forEach(b=>{
       b.onclick=()=>{
         $$('.tab-btn').forEach(x=>x.classList.toggle('active', x===b));
@@ -352,12 +339,10 @@
       };
     });
 
-    // ---------- 本地草稿存取 ----------
+    // 草稿
     const LS = {
-      brief: 'draft.brief.v1',
-      analyses: 'draft.analyses.v1',
-      news: 'draft.news.v1',
-      research: 'draft.research.v1',
+      brief: 'draft.brief.v1', analyses: 'draft.analyses.v1',
+      news: 'draft.news.v1',   research: 'draft.research.v1',
       rArticles: 'draft.research.articles.v1'
     };
     function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
@@ -378,7 +363,6 @@
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
     $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
 
-    // 复用：从 /api/daily-brief/index 获取最近一条
     $('#b-reuse').onclick = async ()=>{
       bMsg('拉取最新一条…');
       try{
@@ -390,16 +374,13 @@
       }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
     };
 
-    // 发布：PUT /api/daily-brief/:slug.json
     $('#b-publish').onclick = async ()=>{
       const payload = bGet();
       const slug = payload.slug || today();
       bMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, {
-          method:'PUT',
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         bMsg('✅ 发布成功');
@@ -408,7 +389,6 @@
 
     $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
 
-    // 删除：DELETE /api/daily-brief/:slug.json
     $('#b-delete').onclick = async ()=>{
       const slug=B.slug.value.trim()||today();
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
@@ -429,7 +409,6 @@
     (function(){ const d=loadDraft(LS.analyses); if(Object.keys(d).length) aSet(d); })();
     $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
 
-    // 复用：GET /api/analyses/index -> 最新 slug
     $('#a-reuse').onclick = async ()=>{
       aMsg('拉取最新一条…');
       try{
@@ -444,15 +423,12 @@
       }catch{ aMsg('拉取失败'); }
     };
 
-    // 发布：PUT /api/analyses/:slug.json
     $('#a-publish').onclick = async ()=>{
       const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
       aMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/analyses/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT',
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         aMsg('✅ 发布成功');
@@ -461,7 +437,6 @@
 
     $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
 
-    // 删除：DELETE /api/analyses/:slug.json
     $('#a-delete').onclick = async ()=>{
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
       if(!confirm(`确定删除分析：${slug} ?`)) return;
@@ -473,7 +448,7 @@
       }catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
-    /* ===== News ===== */
+    /* ===== Market News ===== */
     const N = { id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets'), msg: $('#n-msg') };
     const nMsg = s => N.msg.textContent = s;
     function nGet(){ return { id:N.id.value.trim(), title:N.title.value.trim(), source:N.source.value.trim(), url:N.url.value.trim(), date:N.date.value.trim()||new Date().toISOString(), tags:N.tags.value.split(',').map(s=>s.trim()).filter(Boolean), summary:N.summary.value.trim(), bullets:N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean) }; }
@@ -482,7 +457,6 @@
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.news)||'{}'); if(Object.keys(d).length) nSet(d); }catch{} })();
     $('#n-clear').onclick = ()=>{ localStorage.removeItem(LS.news); nSet({}); nMsg('草稿已清空'); };
 
-    // 复用：GET /api/market-news/index -> 最新 id
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
@@ -497,15 +471,12 @@
       }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
     };
 
-    // 发布/更新：PUT /api/market-news/:id.json
     $('#n-publish').onclick = async ()=>{
       const payload = nGet(); if(!payload.id) return nMsg('请填写 id');
       nMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(payload.id)}.json`, {
-          method:'PUT',
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         nMsg('✅ 发布成功');
@@ -514,7 +485,6 @@
 
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
 
-    // 删除：DELETE /api/market-news/:id.json
     $('#n-delete').onclick = async ()=>{
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
       if(!confirm(`确定删除快讯：${id} ?`)) return;
@@ -545,9 +515,7 @@
       rMsg('保存中…');
       try{
         const { res, data } = await fetchJSON('/api/research/syllabus', {
-          method:'PUT',
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify({ syllabus })
+          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ syllabus })
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         rMsg('✅ 保存成功');
@@ -565,7 +533,6 @@
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.rArticles)||'{}'); if(Object.keys(d).length) raSet(d); }catch{} })();
     $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清空'); };
 
-    // 复用：GET /api/research/articles/index -> 最新 slug
     $('#ra-reuse').onclick = async ()=>{
       raMsg('拉取最新一篇…');
       try{
@@ -579,28 +546,23 @@
       }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
     };
 
-    // 发布：PUT /api/research/articles/:slug.json
     $('#ra-publish').onclick = async ()=>{
       const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
       raMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/research/articles/${encodeURIComponent(payload.slug)}.json`, {
-          method:'PUT',
-          headers:{ 'Content-Type':'application/json' },
-          body: JSON.stringify(payload)
+          method:'PUT', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
         });
         if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
         raMsg('✅ 发布成功');
       }catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
 
-    // 预览：直接看 JSON
     $('#ra-preview').onclick = ()=>{
       const slug=(RA.slug.value||'').trim(); if(!slug) return raMsg('请先填写 slug');
       window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
     };
 
-    // 删除：DELETE /api/research/articles/:slug.json
     $('#ra-delete').onclick = async ()=>{
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
       if(!confirm(`确定删除文章：${slug} ?`)) return;
@@ -612,7 +574,7 @@
       }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
-    // ---------- 快捷键：当前标签执行发布 ----------
+    // 快捷键
     document.addEventListener('keydown', e=>{
       if(!(e.key==='Enter'&&(e.ctrlKey||e.metaKey))) return;
       if($('#tab-brief').classList.contains('active')) return $('#b-publish').click();
