@@ -1,51 +1,79 @@
 <!doctype html>
-<html lang="ko">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Console · TRAN TRADING LAB</title>
   <link rel="stylesheet" href="/styles/global.css" />
   <style>
-    .admin { max-width: 1040px; margin: 24px auto; }
-    .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
-    .tab-btn { border:1px solid #23262b; background:#121418; color:var(--fg); padding:10px 14px; border-radius:10px; cursor:pointer }
-    .tab-btn.active { border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2) }
-    .tab { display:none }
-    .tab.active { display:block }
-    textarea { min-height: 120px; }
-    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-    .hint { font-size:12px; opacity:.75 }
-    .split { display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; }
-    @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
-    .kbd { border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
-    .danger { color:#f87171; border-color:#f87171 }
+    :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; --bd:#23262b; --primary:#3b82f6; }
+    html,body{height:100%; margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
+    .container{max-width:1040px; margin:24px auto; padding:0 16px}
+    .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
+    .muted{ color:var(--muted); }
+    input,select,textarea{ background:#0f1115; border:1px solid var(--bd); color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
+    input:focus,select:focus,textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.2); }
+    .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
+    .icon-btn:hover{ background:#1b1f24 }
+    button.primary{ padding:10px 14px; border-radius:12px; border:0; background:var(--primary); color:#fff; font-weight:700; cursor:pointer }
+    button.primary:hover{ filter:brightness(1.05) }
+    .tab-btn{ border:1px solid var(--bd); background:#121418; color:var(--fg); padding:10px 14px; border-radius:10px; cursor:pointer }
+    .tab-btn.active{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2) }
+    .tab{ display:none } .tab.active{ display:block }
+    textarea{ min-height: 120px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    .hint{ font-size:12px; opacity:.75 }
+    .split{ display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; } @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
+    .kbd{ border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
+    .danger{ color:#f87171; border-color:#f87171 }
+
+    /* 登录遮罩 */
+    #pw-overlay{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index:9999;
+    }
+    .login-box{
+      width:min(92vw,420px); background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px;
+      box-shadow:0 12px 40px rgba(0,0,0,.5)
+    }
+    .login-box h3{ margin:4px 0 10px }
+    .login-box .row{ margin-top:8px }
   </style>
 </head>
-<body class="loaded">
-  <!-- 登录遮罩（已默认隐藏/跳过） -->
-  <div id="pw-overlay" style="display:none"></div>
+<body>
 
-  <!-- 后台主体 -->
-  <div id="admin-root" style="display:block">
+  <!-- 登录遮罩：未登录时显示 -->
+  <div id="pw-overlay" style="display:none">
+    <div class="login-box">
+      <h3>管理员登录</h3>
+      <p class="muted" style="margin:0 0 6px">进入后台前需输入一次口令；进入后发布无需再填。</p>
+      <div class="row">
+        <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />
+        <button id="pw-enter" class="primary">进入后台</button>
+      </div>
+      <p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>
+    </div>
+  </div>
+
+  <!-- 后台主体：登录后显示 -->
+  <div id="admin-root" style="display:none">
     <main class="admin container">
-      <section class="card">
+      <section class="card" style="padding:16px">
         <h2 style="margin:0 0 10px">Admin Console</h2>
 
-        <!-- 顶部工具栏（口令相关隐藏） -->
+        <!-- 顶部工具栏 -->
         <div class="row" style="justify-content:space-between">
           <div class="row">
-            <label class="hint" style="display:none">发布口令</label>
-            <input id="token" type="password" class="search" placeholder="ADMIN_TOKEN" style="min-width:240px;display:none" />
-            <button id="remember-token" class="icon-btn" style="display:none">记住</button>
-            <button id="forget-token" class="icon-btn" style="display:none">清除</button>
+            <!-- 原“发布口令”输入已移除（进入后台前就已输入并缓存） -->
+            <button id="logout-admin" class="icon-btn">退出登录</button>
           </div>
           <div class="row" style="align-items:center; gap:10px">
             <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
-            <button id="logout-btn" class="icon-btn danger">清空本地草稿</button>
+            <button id="clear-drafts" class="icon-btn danger">清空本地草稿</button>
           </div>
         </div>
 
-        <div class="tabs">
+        <div class="tabs" style="margin-top:12px">
           <button class="tab-btn active" data-tab="brief">Daily Brief</button>
           <button class="tab-btn" data-tab="analyses">Analyses</button>
           <button class="tab-btn" data-tab="news">Market News</button>
@@ -81,10 +109,10 @@
               </div>
               <p class="muted" id="b-msg" style="margin-top:10px"></p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
-              <ul class="muted">
-                <li>发布到 <code>/daily-brief/YYYY-MM-DD.json</code></li>
+              <ul class="muted" style="margin:8px 0 0 18px">
+                <li>发布到 <code>/daily-brief/YYYY-MM-DD.json</code>（前端会自动附带 Authorization 头）</li>
                 <li>“昨日复用”：抓取最新一条，自动把日期改成今天</li>
                 <li>预览跳转：<code>#/daily-brief/YYYY-MM-DD</code></li>
                 <li>删除：<code>DELETE /daily-brief/YYYY-MM-DD.json</code></li>
@@ -135,9 +163,9 @@
               </div>
               <p class="muted" id="a-msg" style="margin-top:10px"></p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
-              <ul class="muted">
+              <ul class="muted" style="margin:8px 0 0 18px">
                 <li>发布到 <code>/analyses/{slug}.json</code></li>
                 <li>预览跳转：<code>#/trade-journal?slug=你的slug</code></li>
                 <li>删除：<code>DELETE /analyses/{slug}.json</code></li>
@@ -169,9 +197,9 @@
               </div>
               <p class="muted" id="n-msg" style="margin-top:10px"></p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
-              <ul class="muted">
+              <ul class="muted" style="margin:8px 0 0 18px">
                 <li>发布到 <code>/market-news/{id}.json</code></li>
                 <li>列表页：<code>#/market-news</code></li>
                 <li>删除：<code>DELETE /market-news/{id}.json</code></li>
@@ -197,9 +225,9 @@
               </div>
               <p class="muted" id="r-msg" style="margin-top:10px"></p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
-              <ul class="muted">
+              <ul class="muted" style="margin:8px 0 0 18px">
                 <li>保存到 <code>/research/syllabus.json</code></li>
                 <li>预览跳转：<code>#/knowledge-lab</code></li>
               </ul>
@@ -240,9 +268,9 @@
               </div>
               <p class="muted" id="ra-msg" style="margin-top:10px"></p>
             </div>
-            <div class="card">
+            <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
-              <ul class="muted">
+              <ul class="muted" style="margin:8px 0 0 18px">
                 <li>发布到 <code>/research/articles/{slug}.json</code></li>
                 <li>索引：<code>/research/articles/index.json</code></li>
                 <li>删除：<code>DELETE /research/articles/{slug}.json</code></li>
@@ -250,47 +278,78 @@
             </div>
           </div>
         </div>
+
       </section>
     </main>
   </div> <!-- /#admin-root -->
 
-  <!-- 业务脚本（无鉴权稳健版） -->
+  <!-- 业务脚本（登录门禁 + 统一鉴权头） -->
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
-    const LS = {
-      brief: 'draft.brief.v1',
-      analyses: 'draft.analyses.v1',
-      news: 'draft.news.v1',
-      research: 'draft.research.v1',
-      rArticles: 'draft.research.articles.v1'
-    };
 
-    // ---- fetch helpers ----
+    // ---------- 登录门禁 ----------
+    const overlay = $('#pw-overlay');
+    const adminRoot = $('#admin-root');
+    const LS_KEY = 'TRAN_ADMIN_PW';
+
+    const saved = localStorage.getItem(LS_KEY);
+    if (!saved) {
+      overlay.style.display = 'flex';
+      adminRoot.style.display = 'none';
+    } else {
+      overlay.style.display = 'none';
+      adminRoot.style.display = 'block';
+    }
+
+    $('#pw-enter')?.addEventListener('click', ()=>{
+      const v = ($('#admin-pw').value||'').trim();
+      if(!v){ $('#pw-err').textContent = '请输入口令'; return; }
+      try{ localStorage.setItem(LS_KEY, v); }catch{}
+      overlay.style.display = 'none';
+      adminRoot.style.display = 'block';
+    });
+
+    $('#logout-admin')?.addEventListener('click', ()=>{
+      if(!confirm('确定退出登录？')) return;
+      try{ localStorage.removeItem(LS_KEY); }catch{}
+      location.reload();
+    });
+
+    // ---------- 通用请求工具（自动携带 Authorization） ----------
+    function authHeader(){
+      try{
+        const pw = localStorage.getItem(LS_KEY);
+        if(!pw) return {};
+        return { 'Authorization': 'Bearer ' + pw };
+      }catch{ return {}; }
+    }
     async function fetchJSON(url, init={}) {
-      const res  = await fetch(url, { cache:'no-store', ...init });
+      const headers = Object.assign({ }, authHeader(), init.headers||{});
+      const res  = await fetch(url, { cache:'no-store', ...init, headers });
       const text = await res.text();
       let data = null; try { data = JSON.parse(text); } catch {}
       return { res, ok: res.ok, status: res.status, data, text };
     }
     async function getJSON(url) {
-      const r = await fetchJSON(url);
+      const r = await fetchJSON(url, { method:'GET' });
       if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
       if (!r.data) throw '响应不是 JSON';
       return r.data;
     }
-    async function postJSON(url, payload, headers={}) {
-      const r = await fetchJSON(url, { method:'POST', headers:{ 'content-type':'application/json', ...headers }, body: JSON.stringify(payload) });
+    async function postJSON(url, payload) {
+      const r = await fetchJSON(url, { method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
       if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
       return r.data || {};
     }
-    async function del(url, headers={}) {
-      const r = await fetchJSON(url, { method:'DELETE', headers });
+    async function del(url) {
+      const r = await fetchJSON(url, { method:'DELETE' });
       if (!r.ok) throw (r.data?.error || r.text || `HTTP ${r.status}`);
       return r.data || {};
     }
+    function today(){ return new Date().toISOString().slice(0,10); }
 
-    // Tabs
+    // ---------- Tabs ----------
     $$('.tab-btn').forEach(b=>{
       b.onclick=()=>{
         $$('.tab-btn').forEach(x=>x.classList.toggle('active', x===b));
@@ -299,15 +358,22 @@
       };
     });
 
-    // —— 去口令：固定空头，允许发布 ——
-    function authHeader(){ return {}; }
-    function ensureTokenOrMsg(){ return true; }
-    function today(){ return new Date().toISOString().slice(0,10); }
-
-    // Draft helpers
+    // ---------- 本地草稿存取 ----------
+    const LS = {
+      brief: 'draft.brief.v1',
+      analyses: 'draft.analyses.v1',
+      news: 'draft.news.v1',
+      research: 'draft.research.v1',
+      rArticles: 'draft.research.articles.v1'
+    };
     function saveDraft(key, obj){ localStorage.setItem(key, JSON.stringify(obj)); }
     function loadDraft(key){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch{return{}} }
     function clearDraft(key){ localStorage.removeItem(key); }
+    $('#clear-drafts')?.addEventListener('click', ()=>{
+      if(!confirm('确定清空本地草稿缓存？')) return;
+      Object.values(LS).forEach(clearDraft);
+      alert('本地草稿已清空');
+    });
 
     /* ===== Daily Brief ===== */
     const B = { slug: $('#b-slug'), title: $('#b-title'), bullets: $('#b-bullets'), schedule: $('#b-schedule'), symbol: $('#b-symbol'), interval: $('#b-interval'), msg: $('#b-msg') };
@@ -328,14 +394,14 @@
       }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#b-publish').onclick = async ()=>{
-      try{ await postJSON('/daily-brief/index.json', bGet(), { ...authHeader() }); bMsg('✅ 发布成功'); }
+      try{ await postJSON('/daily-brief/index.json', bGet()); bMsg('✅ 发布成功'); }
       catch(e){ bMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#b-preview').onclick = ()=> window.open(`/#/daily-brief/${B.slug.value.trim()||today()}`,'_blank','noopener');
     $('#b-delete').onclick = async ()=>{
       const slug=B.slug.value.trim()||today();
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
-      try{ await del(`/daily-brief/${slug}.json`, { ...authHeader() }); bMsg('🗑️ 已删除'); }
+      try{ await del(`/daily-brief/${slug}.json`); bMsg('🗑️ 已删除'); }
       catch(e){ bMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
@@ -360,14 +426,14 @@
     };
     $('#a-publish').onclick = async ()=>{
       const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
-      try{ await postJSON('/analyses/index.json', payload, { ...authHeader() }); aMsg('✅ 发布成功'); }
+      try{ await postJSON('/analyses/index.json', payload); aMsg('✅ 发布成功'); }
       catch(e){ aMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
     $('#a-delete').onclick = async ()=>{
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
       if(!confirm(`确定删除分析：${slug} ?`)) return;
-      try{ await del(`/analyses/${encodeURIComponent(slug)}.json`, { ...authHeader() }); aMsg('🗑️ 已删除'); }
+      try{ await del(`/analyses/${encodeURIComponent(slug)}.json`); aMsg('🗑️ 已删除'); }
       catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
@@ -376,9 +442,9 @@
     const nMsg = s => N.msg.textContent = s;
     function nGet(){ return { id:N.id.value.trim(), title:N.title.value.trim(), source:N.source.value.trim(), url:N.url.value.trim(), date:N.date.value.trim()||new Date().toISOString(), tags:N.tags.value.split(',').map(s=>s.trim()).filter(Boolean), summary:N.summary.value.trim(), bullets:N.bullets.value.split('\n').map(s=>s.trim()).filter(Boolean) }; }
     function nSet(d){ N.id.value=d.id||''; N.title.value=d.title||''; N.source.value=d.source||''; N.url.value=d.url||''; N.date.value=d.date||''; N.tags.value=(d.tags||[]).join(', '); N.summary.value=d.summary||''; N.bullets.value=(d.bullets||[]).join('\n'); }
-    $$('#tab-news input, #tab-news textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.news, nGet())));
-    (function(){ const d=loadDraft(LS.news); if(Object.keys(d).length) nSet(d); })();
-    $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清空'); };
+    $$('#tab-news input, #tab-news textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.news, JSON.stringify(nGet()))));
+    (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.news)||'{}'); if(Object.keys(d).length) nSet(d); }catch{} })();
+    $('#n-clear').onclick = ()=>{ localStorage.removeItem(LS.news); nSet({}); nMsg('草稿已清空'); };
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
@@ -387,19 +453,19 @@
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].id : arr[0];
         const d = await getJSON(`/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
         const base=today(); d.id=`${base}-1`; d.date=new Date().toISOString();
-        nSet(d); saveDraft(LS.news, nGet()); nMsg('已载入最近一条，已建议新的 id');
+        nSet(d); localStorage.setItem(LS.news, JSON.stringify(nGet())); nMsg('已载入最近一条，已建议新的 id');
       }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
     };
     $('#n-publish').onclick = async ()=>{
       const payload=nGet(); if(!payload.id) return nMsg('请填写 id');
-      try{ await postJSON('/market-news/index.json', payload, { ...authHeader() }); nMsg('✅ 发布成功'); }
+      try{ await postJSON('/market-news/index.json', payload); nMsg('✅ 发布成功'); }
       catch(e){ nMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
     $('#n-delete').onclick = async ()=>{
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
       if(!confirm(`确定删除快讯：${id} ?`)) return;
-      try{ await del(`/market-news/${encodeURIComponent(id)}.json`, { ...authHeader() }); nMsg('🗑️ 已删除'); }
+      try{ await del(`/market-news/${encodeURIComponent(id)}.json`); nMsg('🗑️ 已删除'); }
       catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
@@ -407,22 +473,22 @@
     const R = { json: $('#r-json'), msg: $('#r-msg') };
     function rMsg(s){ R.msg.textContent = s; }
     function rGet(){ let syllabus; try{ syllabus = JSON.parse(R.json.value); }catch{ syllabus = null; } return syllabus; }
-    $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.research, {text: R.json.value})));
-    (function(){ const d = loadDraft(LS.research); if (d && typeof d.text==='string') R.json.value = d.text; })();
+    $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.research, JSON.stringify({text: R.json.value}))));
+    (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.research)||'{}'); if (d && typeof d.text==='string') R.json.value = d.text; }catch{} })();
     $('#r-load').onclick = async ()=>{
       rMsg('加载线上大纲…');
       try{
         const j = await getJSON('/research/syllabus.json?_=' + Date.now());
         R.json.value = JSON.stringify(j.syllabus||[], null, 2);
-        saveDraft(LS.research, {text: R.json.value}); rMsg('已载入线上版本到编辑框');
+        localStorage.setItem(LS.research, JSON.stringify({text: R.json.value})); rMsg('已载入线上版本到编辑框');
       }catch(e){ rMsg('加载失败：' + (e?.message || e)); }
     };
     $('#r-save').onclick = async ()=>{
       const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
-      try{ await postJSON('/research/syllabus.json', { syllabus }, { ...authHeader() }); rMsg('✅ 保存成功'); }
+      try{ await postJSON('/research/syllabus.json', { syllabus }); rMsg('✅ 保存成功'); }
       catch(e){ rMsg('❌ 保存失败：' + (e?.message || e || 'Unknown')); }
     };
-    $('#r-clear').onclick = ()=>{ clearDraft(LS.research); R.json.value=''; rMsg('草稿已清空'); };
+    $('#r-clear').onclick = ()=>{ localStorage.removeItem(LS.research); R.json.value=''; rMsg('草稿已清空'); };
     $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
 
     /* ===== Research Articles ===== */
@@ -446,7 +512,7 @@
     };
     $('#ra-publish').onclick = async ()=>{
       const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
-      try{ await postJSON('/research/articles/index.json', payload, { ...authHeader() }); raMsg('✅ 发布成功'); }
+      try{ await postJSON('/research/articles/index.json', payload); raMsg('✅ 发布成功'); }
       catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
     $('#ra-preview').onclick = ()=>{
@@ -456,11 +522,11 @@
     $('#ra-delete').onclick = async ()=>{
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
       if(!confirm(`确定删除文章：${slug} ?`)) return;
-      try{ await del(`/research/articles/${encodeURIComponent(slug)}.json`, { ...authHeader() }); raMsg('🗑️ 已删除');
+      try{ await del(`/research/articles/${encodeURIComponent(slug)}.json`); raMsg('🗑️ 已删除');
       }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
 
-    // 快捷键
+    // ---------- 快捷键：当前标签执行发布 ----------
     document.addEventListener('keydown', e=>{
       if(!(e.key==='Enter'&&(e.ctrlKey||e.metaKey))) return;
       if($('#tab-brief').classList.contains('active')) return $('#b-publish').click();
@@ -469,34 +535,6 @@
       if($('#tab-research').classList.contains('active')) return $('#r-save').click();
       if($('#tab-r-articles').classList.contains('active')) return $('#ra-publish').click();
     });
-
-    // “清空本地草稿”按钮
-    document.getElementById('logout-btn')?.addEventListener('click', ()=>{
-      if(!confirm('确定清空本地草稿缓存？')) return;
-      Object.values(LS).forEach(clearDraft);
-      alert('本地草稿已清空');
-    });
   </script>
-
-  <style>
-    :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; }
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--fg);
-      font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-      -webkit-font-smoothing:antialiased;
-    }
-    .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
-    .muted{ color:var(--muted); }
-    input,select,textarea{ background:#0f1115; border:1px solid #23262b; color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
-    input:focus,select:focus,textarea:focus{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2); }
-    .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
-    .icon-btn:hover{ background:#1b1f24 }
-    button.primary{ padding:10px 14px; border-radius:12px; border:0; background:#3b82f6; color:#fff; font-weight:700; cursor:pointer }
-    button.primary:hover{ filter:brightness(1.05) }
-    .search{ background:#0f1115; border:1px solid #23262b; color:#fff; border-radius:10px }
-    .tab-btn:hover{ background:#171a20 }
-    .danger{ color:#f87171; border-color:#f87171 }
-  </style>
 </body>
 </html>
