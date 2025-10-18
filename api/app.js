@@ -1,4 +1,4 @@
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs18.x' };
 
 // api/app.js —— 超稳定总路由版（Node Runtime Safe）
 // 依赖：api/_lib/http.js, api/_lib/blob.js
