@@ -13,6 +13,7 @@ import {
 
 const ENABLE_CORS = false;
 
+/* ---------- 工具 ---------- */
 function withHeaders(init = {}) {
   const h = new Headers(init.headers || {});
   if (ENABLE_CORS) {
@@ -24,6 +25,13 @@ function withHeaders(init = {}) {
 }
 function ok(data, status = 200) { return jsonOK(data, status); }
 function err(message = 'BAD_REQUEST', status = 400) { return badRequest(message, status); }
+
+// 关键修复：Vercel 中 req.url 可能是相对路径，需补 base
+function getURL(req) {
+  const proto = req.headers.get('x-forwarded-proto') || 'https';
+  const host  = req.headers.get('x-forwarded-host') || req.headers.get('host') || 'localhost';
+  return new URL(req.url, `${proto}://${host}`);
+}
 
 async function readBody(req) {
   try {
@@ -259,8 +267,8 @@ async function handleResearch(req, pathname) {
 
 /* -------- 总路由入口 -------- */
 export default async function handler(req) {
-  const url = new URL(req.url);
-  const pathname = normPath(url.pathname);
+  const url = getURL(req);                 // ← 修复点
+  const pathname = normPath(url.pathname); // ← 修复点
 
   if (req.method === 'OPTIONS') return new Response(null, withHeaders({ status: 204 }));
   if (req.method === 'HEAD')    return new Response(null, withHeaders({ status: 200 }));
