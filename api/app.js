@@ -1,7 +1,7 @@
 // api/app.js
 export const config = { runtime: 'nodejs' };
 
-// —— 依赖：api/_lib/http.js, api/_lib/blob.js
+// —�?依赖：api/_lib/http.js, api/_lib/blob.js
 import { jsonOK, badRequest, requireAuth as _requireAuth } from './_lib/http.js';
 import {
   writeJSON,
@@ -30,7 +30,7 @@ function withHeaders(init = {}) {
   return { ...init, headers: h };
 }
 
-/* ---------- Header 与 URL 兼容 ---------- */
+/* ---------- Header �?URL 兼容 ---------- */
 function getHeader(req, name) {
   const h = req.headers || {};
   const key = String(name).toLowerCase();
@@ -118,6 +118,12 @@ async function removeFromIndex(prefix, key) {
 
 function requireAuthIfConfigured(req) {
   if (!process.env.ADMIN_PASSWORD) return null;
+  try {
+    const cookie = getHeader(req, 'cookie') || '';
+    if (cookie && /(?:^|;\s*)tran_admin=ok(?:;|$)/.test(cookie)) {
+      return null; // cookie �Ự�ѵ�¼
+    }
+  } catch {}
   return _requireAuth(req);
 }
 
@@ -130,7 +136,7 @@ async function handleAdmin(req, pathname) {
     const pass = body?.password || body?.pwd || '';
     if (!process.env.ADMIN_PASSWORD) return err('ADMIN_PASSWORD_NOT_SET', 500);
     if (pass !== process.env.ADMIN_PASSWORD) return err('INVALID_PASSWORD', 401);
-    // 你的前端并未真正设置 cookie，这里按“只验证一次”的轻模式
+    // 你的前端并未真正设置 cookie，这里按“只验证一次”的轻模�?
     return ok({ ok: true, token: 'ok' });
   }
 
@@ -185,13 +191,13 @@ async function genericHandler(req, pathname, PREFIX) {
     const slug = m[1];
     const FILE = `${PREFIX}/${slug}.json`;
   
-    // 读
+    // �?
     if (req.method === 'GET') {
       try { return ok(await readJSONViaFetch(FILE)); }
       catch { return err('NOT_FOUND', 404); }
     }
   
-    // 写操作增强日志
+    // 写操作增强日�?
     if (['PUT','POST'].includes(req.method)) {
       console.log(`[API] Writing to ${PREFIX}/${slug}.json`);
       const unauthorized = requireAuthIfConfigured(req); 
@@ -214,7 +220,7 @@ async function genericHandler(req, pathname, PREFIX) {
       }
     }
   
-    // 删
+    // �?
     if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
       try {
@@ -253,9 +259,9 @@ async function handleResearch(req, pathname) {
   return err('RESEARCH_NO_ROUTE', 404);
 }
 
-/* ---------- 把 Web Response 写回到 Node res ---------- */
+/* ---------- �?Web Response 写回�?Node res ---------- */
 async function sendNodeResponse(res, out) {
-  // out 是一个 Web Response（jsonOK/badRequest 返回的）
+  // out 是一�?Web Response（jsonOK/badRequest 返回的）
   if (out && typeof out === 'object' && typeof out.text === 'function' && out.headers) {
     const status = out.status || 200;
     const headersObj = {};
@@ -273,7 +279,7 @@ async function sendNodeResponse(res, out) {
   res.end(JSON.stringify(out ?? {}));
 }
 
-/* ---------- 主路由入口（Node 风格） ---------- */
+/* ---------- 主路由入口（Node 风格�?---------- */
 export default async function handler(req, res) {
   try {
     const url = getURL(req);
@@ -288,7 +294,7 @@ export default async function handler(req, res) {
       return sendNodeResponse(res, r);
     }
 
-    // 健康检查
+    // 健康检�?
     if (req.method === 'GET' && pathname === '/api/ping') {
       const r = ok({
         ok: true,
