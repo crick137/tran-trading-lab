@@ -1,11 +1,21 @@
 {
   "buildCommand": "npm ci && npm run build",
   "outputDirectory": "dist",
-
   "rewrites": [
     { "source": "/api/ping", "destination": "/api/ping.js" },
     { "source": "/api/:path*", "destination": "/api/app.js" },
+
+    { "source": "/daily-brief/index.json", "destination": "/api/daily-brief/index.json" },
+    { "source": "/daily-brief/:slug.json", "destination": "/api/daily-brief/:slug.json" },
+
+    { "source": "/analyses/index.json", "destination": "/api/analyses/index.json" },
+    { "source": "/analyses/:id.json", "destination": "/api/analyses/:id.json" },
+
+    { "source": "/market-news/index.json", "destination": "/api/market-news/index.json" },
+    { "source": "/market-news/:slug.json", "destination": "/api/market-news/:slug.json" },
+
     { "source": "/admin/:path*", "destination": "/public/admin/index.html" },
+
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

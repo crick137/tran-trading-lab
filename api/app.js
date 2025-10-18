@@ -1,3 +1,6 @@
+// 让 Vercel 以 Edge Runtime 执行（支持 handler(req) → Response）
+export const config = { runtime: 'edge' };
+
 // api/app.js —— 超稳定总路由版（Node Runtime Safe）
 // 依赖：api/_lib/http.js, api/_lib/blob.js
 
