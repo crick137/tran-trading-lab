@@ -14,12 +14,20 @@ import {
 const ENABLE_CORS = false;
 
 /* ---------- 工具 ---------- */
+// 使用“普通对象”来返回响应头，避免在 Node 运行时 new Headers 报错
 function withHeaders(init = {}) {
-  const h = new Headers(init.headers || {});
+  const h0 = init.headers || {};
+  let h = {};
+  if (h0 && typeof h0.forEach === 'function') {
+    // 兼容 Headers/Map
+    h0.forEach((v, k) => { h[String(k).toLowerCase()] = v; });
+  } else {
+    for (const k in h0) h[String(k).toLowerCase()] = h0[k];
+  }
   if (ENABLE_CORS) {
-    h.set('access-control-allow-origin', '*');
-    h.set('access-control-allow-methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    h.set('access-control-allow-headers', 'content-type,authorization,cookie');
+    h['access-control-allow-origin']  = '*';
+    h['access-control-allow-methods'] = 'GET,POST,PUT,DELETE,OPTIONS';
+    h['access-control-allow-headers'] = 'content-type,authorization,cookie';
   }
   return { ...init, headers: h };
 }
@@ -312,7 +320,7 @@ export default async function handler(req) {
   if (req.method === 'OPTIONS') return new Response(null, withHeaders({ status: 204 }));
   if (req.method === 'HEAD')    return new Response(null, withHeaders({ status: 200 }));
 
-  // 健康检查（调试用）：GET /api/ping -> { ok: true }
+  // 健康检查：GET /api/ping -> { ok: true }
   if (req.method === 'GET' && pathname === '/api/ping') {
     return ok({ ok: true, ts: Date.now() });
   }
