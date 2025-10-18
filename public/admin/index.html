@@ -8,7 +8,7 @@
   <style>
     :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; --bd:#23262b; --primary:#3b82f6; }
     html,body{height:100%; margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
-    .container{max-width:1040px; margin:24px auto; padding:0 16px}
+    .container{max-width:1080px; margin:24px auto; padding:0 16px}
     .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); }
     .muted{ color:var(--muted); }
     input,select,textarea{ background:#0f1115; border:1px solid var(--bd); color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
@@ -46,7 +46,7 @@
   <div id="pw-overlay" style="display:none">
     <div class="login-box">
       <h3>管理员登录</h3>
-      <p class="muted" style="margin:0 0 6px">进入后台前需输入一次口令；进入后发布无需再填。</p>
+      <p class="muted" style="margin:0 0 6px">进入后台前输入一次口令；进入后发布无需再填。</p>
       <div class="row">
         <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />
         <button id="pw-enter" class="primary">进入后台</button>
@@ -378,11 +378,11 @@
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
     $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
 
-    // 复用：/api/daily-brief/index.json -> 取最新，再读详情
+    // 复用：从 /api/daily-brief/index 获取最近一条
     $('#b-reuse').onclick = async ()=>{
       bMsg('拉取最新一条…');
       try{
-        const arr = await getJSON('/api/daily-brief/index.json?_=' + Date.now());
+        const arr = await getJSON('/api/daily-brief/index?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return bMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].slug : arr[0];
         const d = await getJSON(`/api/daily-brief/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
@@ -429,6 +429,7 @@
     (function(){ const d=loadDraft(LS.analyses); if(Object.keys(d).length) aSet(d); })();
     $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
 
+    // 复用：GET /api/analyses/index -> 最新 slug
     $('#a-reuse').onclick = async ()=>{
       aMsg('拉取最新一条…');
       try{
@@ -436,11 +437,14 @@
         if(!Array.isArray(arr)||!arr.length) return aMsg('没有历史记录');
         const latest = arr[0].slug || arr[0];
         const d = await getJSON(`/api/analyses/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
-        const base=(d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,''); d.slug=`${base}-${today()}`; d.date=today();
-        aSet(d); saveDraft(LS.analyses, aGet()); aMsg('已载入最近一条，slug/日期已更新为今天');
+        const base=(d.symbol||'idea').toLowerCase().replace(/[^a-z0-9]+/g,'');
+        d.slug=`${base}-${today()}`; d.date=today();
+        aSet(d); saveDraft(LS.analyses, aGet());
+        aMsg('已载入最近一条，slug/日期已更新为今天');
       }catch{ aMsg('拉取失败'); }
     };
 
+    // 发布：PUT /api/analyses/:slug.json
     $('#a-publish').onclick = async ()=>{
       const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
       aMsg('发布中…');
@@ -457,6 +461,7 @@
 
     $('#a-preview').onclick = ()=>{ const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug'); window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); };
 
+    // 删除：DELETE /api/analyses/:slug.json
     $('#a-delete').onclick = async ()=>{
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
       if(!confirm(`确定删除分析：${slug} ?`)) return;
@@ -477,6 +482,7 @@
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.news)||'{}'); if(Object.keys(d).length) nSet(d); }catch{} })();
     $('#n-clear').onclick = ()=>{ localStorage.removeItem(LS.news); nSet({}); nMsg('草稿已清空'); };
 
+    // 复用：GET /api/market-news/index -> 最新 id
     $('#n-reuse').onclick = async ()=>{
       nMsg('拉取最新一条…');
       try{
@@ -484,13 +490,16 @@
         if(!Array.isArray(arr)||!arr.length) return nMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].id : arr[0];
         const d = await getJSON(`/api/market-news/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
-        const base=today(); d.id=`${base}-1`; d.date=new Date().toISOString();
-        nSet(d); localStorage.setItem(LS.news, JSON.stringify(nGet())); nMsg('已载入最近一条，已建议新的 id');
+        const base = new Date().toISOString().slice(0,10);
+        d.id = `${base}-1`; d.date = new Date().toISOString();
+        nSet(d); localStorage.setItem(LS.news, JSON.stringify(nGet()));
+        nMsg('已载入最近一条，已建议新的 id');
       }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
     };
 
+    // 发布/更新：PUT /api/market-news/:id.json
     $('#n-publish').onclick = async ()=>{
-      const payload=nGet(); if(!payload.id) return nMsg('请填写 id');
+      const payload = nGet(); if(!payload.id) return nMsg('请填写 id');
       nMsg('发布中…');
       try{
         const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(payload.id)}.json`, {
@@ -505,6 +514,7 @@
 
     $('#n-preview').onclick = ()=> window.open('/#/market-news','_blank','noopener');
 
+    // 删除：DELETE /api/market-news/:id.json
     $('#n-delete').onclick = async ()=>{
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
       if(!confirm(`确定删除快讯：${id} ?`)) return;
@@ -555,6 +565,7 @@
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.rArticles)||'{}'); if(Object.keys(d).length) raSet(d); }catch{} })();
     $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清空'); };
 
+    // 复用：GET /api/research/articles/index -> 最新 slug
     $('#ra-reuse').onclick = async ()=>{
       raMsg('拉取最新一篇…');
       try{
@@ -562,11 +573,13 @@
         if(!Array.isArray(list)||!list.length) return raMsg('没有历史记录');
         const latestSlug = list[0].slug || list[0];
         const d = await getJSON(`/api/research/articles/${encodeURIComponent(latestSlug)}.json?_=${Date.now()}`);
-        const base=(d.slug||'article').replace(/[^a-z0-9\-]+/gi,''); d.slug=base+'-'+today(); d.date=new Date().toISOString();
+        const base=(d.slug||'article').replace(/[^a-z0-9\-]+/gi,'');
+        d.slug=base+'-'+today(); d.date=new Date().toISOString();
         raSet(d); localStorage.setItem(LS.rArticles, JSON.stringify(raGet())); raMsg('已载入最近一篇，已建议新的 slug');
       }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
     };
 
+    // 发布：PUT /api/research/articles/:slug.json
     $('#ra-publish').onclick = async ()=>{
       const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
       raMsg('发布中…');
@@ -581,11 +594,13 @@
       }catch(e){ raMsg('❌ 发布失败：' + (e?.message || e || 'Unknown')); }
     };
 
+    // 预览：直接看 JSON
     $('#ra-preview').onclick = ()=>{
       const slug=(RA.slug.value||'').trim(); if(!slug) return raMsg('请先填写 slug');
       window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
     };
 
+    // 删除：DELETE /api/research/articles/:slug.json
     $('#ra-delete').onclick = async ()=>{
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
       if(!confirm(`确定删除文章：${slug} ?`)) return;
