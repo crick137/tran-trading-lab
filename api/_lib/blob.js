@@ -1,25 +1,17 @@
 // /api/_lib/blob.js
 import { put, list, del } from '@vercel/blob';
 
-/**
- * 读取环境里的 RW Token（如果没绑定 Store 时做后备）
- */
 function getToken() {
   return process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_RW_TOKEN || undefined;
 }
 
-/**
- * 写入 JSON 到 Vercel Blob
- * - 优先使用绑定的 Store
- * - 若未绑定，则尝试使用环境变量 BLOB_READ_WRITE_TOKEN
- */
 export async function writeJSON(pathname, data) {
   try {
     const body = JSON.stringify(data, null, 2);
     const res = await put(pathname, body, {
       access: 'public',
       contentType: 'application/json; charset=utf-8',
-      token: getToken() // 没有绑定 Store 时启用
+      token: getToken()
     });
     return res;
   } catch (e) {
@@ -28,9 +20,6 @@ export async function writeJSON(pathname, data) {
   }
 }
 
-/**
- * 删除对象
- */
 export async function deleteObject(pathname) {
   try {
     return await del(pathname, { token: getToken() });
@@ -40,11 +29,6 @@ export async function deleteObject(pathname) {
   }
 }
 
-/**
- * 读取 JSON：先 list 找 URL，再 fetch
- * - 若文件不存在，抛 NOT_FOUND
- * - 若取回失败，抛 FETCH_FAILED
- */
 export async function readJSONViaFetch(pathname) {
   try {
     const dir = pathname.includes('/')
@@ -59,17 +43,16 @@ export async function readJSONViaFetch(pathname) {
     if (!r.ok) throw new Error('FETCH_FAILED');
     return await r.json();
   } catch (e) {
-    // 让上层能通过 message 区分 NOT_FOUND / FETCH_FAILED
     if (e && e.message) throw e;
     console.error('[blob.readJSONViaFetch] fail:', e);
     throw new Error('FETCH_FAILED');
   }
 }
 
-/**
- * 按前缀列出（返回 items.blobs 数组）
- */
 export async function listByPrefix(prefix) {
   const it = await list({ prefix, token: getToken() });
   return it?.blobs ?? [];
 }
+
+// ✅ 关键：把 SDK 的 list 也导出，供 app.js 作为后备调用
+export { list };
