@@ -533,8 +533,10 @@
       if(!confirm(`确定删除分析：${slug} ?`)) return;
       aMsg('删除中…');
       try{
-        const { res, data } = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+        const del = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+        const check = await apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'GET' });
+        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
         aMsg('🗑️ 已删除');
       }catch(e){ aMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -592,8 +594,10 @@
       if(!confirm(`确定删除快讯：${id} ?`)) return;
       nMsg('删除中…');
       try{
-        const { res, data } = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+        const del = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
+        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+        const check = await apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'GET' });
+        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
         nMsg('🗑️ 已删除');
       }catch(e){ nMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
@@ -681,8 +685,10 @@
       if(!confirm(`确定删除文章：${slug} ?`)) return;
       raMsg('删除中…');
       try{
-        const { res, data } = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
-        if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
+        const del = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+        if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
+        const check = await apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'GET' });
+        if (check.ok) throw new Error('DELETE_VERIFY_FAILED');
         raMsg('🗑️ 已删除');
       }catch(e){ raMsg('删除失败：' + (e?.message || e || 'Unknown')); }
     };
