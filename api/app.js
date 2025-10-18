@@ -216,8 +216,15 @@ async function genericHandler(req, pathname, PREFIX) {
     // 删
     if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
-      try { await deleteObject(FILE); } catch {}
-      await removeFromIndex(PREFIX, slug);
+      try {
+        await deleteObject(FILE);
+      } catch (e) {
+        console.error(`[API] Delete failed for ${FILE}:`, e);
+        return err('DELETE_FAILED', 500);
+      }
+      try { await removeFromIndex(PREFIX, slug); } catch (e) {
+        console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
+      }
       return ok({ deleted: true, slug });
     }
   
