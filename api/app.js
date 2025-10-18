@@ -93,23 +93,27 @@ function normPath(path) {
 }
 
 async function readIndexJson(path) {
-  try { return await readJSONViaFetch(path); } catch { return []; }
+  try { return await readJSONViaFetch(path, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch { return []; }
 }
 
 async function upsertIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
-  try { arr = await readJSONViaFetch(INDEX); } catch {}
+  try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
   arr = [key, ...arr.filter(x => x !== key)];
-  await writeJSON(INDEX, arr);
+  try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
+    console.warn('[INDEX] upsertIndex fast-path failed, continuing:', e?.message || e);
+  }
 }
 
 async function removeFromIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
-  try { arr = await readJSONViaFetch(INDEX); } catch {}
+  try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
   arr = arr.filter(x => x !== key);
-  await writeJSON(INDEX, arr);
+  try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
+    console.warn('[INDEX] removeFromIndex fast-path failed, continuing:', e?.message || e);
+  }
 }
 
 function requireAuthIfConfigured(req) {

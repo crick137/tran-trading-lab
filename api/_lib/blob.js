@@ -1,8 +1,23 @@
 // /api/_lib/blob.js
 import { put, list, del } from '@vercel/blob';
 
+// Tunables with sensible defaults; override via env in deployment
+const OP_TIMEOUT = Number(process.env.BLOB_OP_TIMEOUT_MS || 4000); // ms
+const OP_RETRIES = Number(process.env.BLOB_OP_RETRIES || 2);
+const OP_RETRY_DELAY_MS = Number(process.env.BLOB_OP_RETRY_DELAY_MS || 500);
+
 function getToken() {
   return process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_RW_TOKEN || undefined;
+}
+
+function requireToken() {
+  const t = getToken();
+  if (!t) {
+    const msg = '[Blob] Missing BLOB_READ_WRITE_TOKEN (or BLOB_RW_TOKEN)';
+    console.error(msg);
+    throw new Error('BLOB_TOKEN_MISSING');
+  }
+  return t;
 }
 
 // 添加超时函数
@@ -24,7 +39,7 @@ function timeoutPromise(promise, ms) {
 }
 
 // 添加重试机制
-async function withRetry(operation, maxRetries = 3, delay = 1000) {
+async function withRetry(operation, maxRetries = OP_RETRIES, delay = OP_RETRY_DELAY_MS) {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -41,20 +56,23 @@ async function withRetry(operation, maxRetries = 3, delay = 1000) {
   throw lastError;
 }
 
-export async function writeJSON(pathname, data) {
+export async function writeJSON(pathname, data, opts = {}) {
   try {
     console.log(`[Blob] Writing to ${pathname}`);
     const body = JSON.stringify(data, null, 2);
-    const res = await withRetry(() => 
+    const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
+    const retries = Number(opts.retries ?? OP_RETRIES);
+    const retryDelay = Number(opts.retryDelayMs || OP_RETRY_DELAY_MS);
+    const res = await withRetry(() =>
       timeoutPromise(
         put(pathname, body, {
           access: 'public',
           contentType: 'application/json; charset=utf-8',
-          token: getToken()
+          token: requireToken()
         }),
-        10000 // 10秒超时
+        timeout
       )
-    );
+    , retries, retryDelay);
     console.log(`[Blob] Write successful: ${pathname}`);
     return res;
   } catch (e) {
@@ -64,42 +82,49 @@ export async function writeJSON(pathname, data) {
 }
 
 // 其他函数也类似添加超时、重试和日志记录
-export async function deleteObject(pathname) {
+export async function deleteObject(pathname, opts = {}) {
   try {
-    return await withRetry(() => 
+    const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
+    const retries = Number(opts.retries ?? OP_RETRIES);
+    const retryDelay = Number(opts.retryDelayMs || OP_RETRY_DELAY_MS);
+    return await withRetry(() =>
       timeoutPromise(
-        del(pathname, { token: getToken() }),
-        10000 // 10秒超时
+        del(pathname, { token: requireToken() }),
+        timeout
       )
-    );
+    , retries, retryDelay);
   } catch (e) {
     console.error('[blob.deleteObject] fail:', e);
     throw e;
   }
 }
 
-export async function readJSONViaFetch(pathname) {
+export async function readJSONViaFetch(pathname, opts = {}) {
   try {
+    const token = requireToken();
+    const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
+    const retries = Number(opts.retries ?? OP_RETRIES);
+    const retryDelay = Number(opts.retryDelayMs || OP_RETRY_DELAY_MS);
     const dir = pathname.includes('/')
       ? pathname.slice(0, pathname.lastIndexOf('/') + 1)
       : '';
 
-    const items = await withRetry(() => 
+    const items = await withRetry(() =>
       timeoutPromise(
-        list({ prefix: dir, token: getToken() }),
-        10000 // 10秒超时
+        list({ prefix: dir, token }),
+        timeout
       )
-    );
+    , retries, retryDelay);
     
     const hit = items?.blobs?.find(b => b.pathname === pathname);
     if (!hit) throw new Error('NOT_FOUND');
 
-    const r = await withRetry(() => 
+    const r = await withRetry(() =>
       timeoutPromise(
         fetch(hit.url, { cache: 'no-store' }),
-        10000 // 10秒超时
+        timeout
       )
-    );
+    , retries, retryDelay);
     
     if (!r.ok) throw new Error('FETCH_FAILED');
     return await r.json();
@@ -110,14 +135,17 @@ export async function readJSONViaFetch(pathname) {
   }
 }
 
-export async function listByPrefix(prefix) {
+export async function listByPrefix(prefix, opts = {}) {
   try {
-    const it = await withRetry(() => 
+    const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
+    const retries = Number(opts.retries ?? OP_RETRIES);
+    const retryDelay = Number(opts.retryDelayMs || OP_RETRY_DELAY_MS);
+    const it = await withRetry(() =>
       timeoutPromise(
-        list({ prefix, token: getToken() }),
-        10000 // 10秒超时
+        list({ prefix, token: requireToken() }),
+        timeout
       )
-    );
+    , retries, retryDelay);
     return it?.blobs ?? [];
   } catch (e) {
     console.error('[blob.listByPrefix] fail:', e);

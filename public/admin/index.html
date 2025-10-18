@@ -283,12 +283,24 @@
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    /* 统一 Fetch（自动带 Cookie） */
+    /* 授权与统一 Fetch（自动带 Cookie + Authorization + 超时） */
+    let ADMIN_TOKEN = sessionStorage.getItem('tran_admin_token') || '';
+    function setAdminToken(tok){ ADMIN_TOKEN = tok || ''; if(tok){ sessionStorage.setItem('tran_admin_token', tok); } else { sessionStorage.removeItem('tran_admin_token'); } }
+
     async function apiFetch(url, init = {}) {
-      const res  = await fetch(url, { credentials: 'include', cache: 'no-store', ...init });
-      const text = await res.text();
-      let data = null; try { data = JSON.parse(text); } catch {}
-      return { res, ok: res.ok, status: res.status, data, text };
+      const timeoutMs = 12000; // 前端请求超时（12s）
+      const ctrl = new AbortController();
+      const id = setTimeout(()=> ctrl.abort(new DOMException('timeout','AbortError')), timeoutMs);
+      const headers = new Headers(init.headers || {});
+      if (ADMIN_TOKEN) headers.set('Authorization', 'Bearer ' + ADMIN_TOKEN);
+      try{
+        const res  = await fetch(url, { credentials: 'include', cache: 'no-store', ...init, headers, signal: ctrl.signal });
+        const text = await res.text();
+        let data = null; try { data = JSON.parse(text); } catch {}
+        return { res, ok: res.ok, status: res.status, data, text };
+      } finally {
+        clearTimeout(id);
+      }
     }
     const fetchJSON = (url, init={}) => apiFetch(url, init);
     async function getJSON(url){
@@ -326,6 +338,8 @@
           method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ password: pw })
         });
         if (!res.ok || !data?.ok) throw new Error(data?.error || text || `HTTP ${res.status}`);
+        // 用登录口令作为随后的 Bearer token，配合后端写入鉴权
+        setAdminToken(pw);
         await syncLoginUI();
         $('#pw-err').textContent = '';
         $('#admin-pw').value = '';
@@ -337,6 +351,7 @@
     $('#logout-admin')?.addEventListener('click', async ()=>{
       if (!confirm('确定退出登录？')) return;
       try{ await apiFetch('/api/admin/logout', { method:'POST' }); }catch{}
+      setAdminToken('');
       location.reload();
     });
 
