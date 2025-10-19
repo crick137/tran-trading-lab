@@ -131,7 +131,9 @@ async function ensureDeleted(prefix, slug) {
   const after = await listByPrefix(`${prefix}/`);
   const still = (after||[]).some(b => b.pathname === FILE);
   return !still;
-}\n\nfunction requireAuthIfConfigured(req) {
+}
+
+function requireAuthIfConfigured(req) {
   if (!process.env.ADMIN_PASSWORD) return null;
   try {
     const cookie = getHeader(req, 'cookie') || '';
@@ -352,6 +354,7 @@ export default async function handler(req, res) {
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }
+
 
 
 
