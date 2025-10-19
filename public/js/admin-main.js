@@ -22,7 +22,7 @@ async function waitForGone(apiPath, tries=8, interval=600){
     if (!r.ok) return true; // not found -> gone
     await new Promise(res=>setTimeout(res, interval));
   }
-  throw new Error('DELETE_VERIFY_FAILED');
+  return false;
 }
 
 function bindDailyBrief(){
@@ -179,5 +179,6 @@ function bindResearchArticles(){
   try{ bindNews(); }catch{}
   try{ bindResearchArticles(); }catch{}
 })();
+
 
 
