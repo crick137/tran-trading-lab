@@ -1,43 +1,43 @@
 ﻿<!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Console · TRAN TRADING LAB</title>
+  <title>管理后台 · TRAN TRADING LAB</title>
   <link rel="stylesheet" href="/styles/global.css" />
-    <style>
-    body{ margin:0; background:#0f1115; color:#eaecee; font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial; }
-    .container{ max-width:1100px; margin:24px auto 48px auto; padding:0 16px; }
-    .card{ background:#15171a; border:1px solid #23262b; border-radius:14px; padding:18px; margin:16px 0; box-shadow:0 12px 32px rgba(0,0,0,.35); }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .muted{ color:#9aa0a6; }
-    input,select,textarea{ background:#0f1115; border:1px solid #2a2f36; color:#fff; padding:8px 10px; border-radius:10px; outline:none; width:100%; box-sizing:border-box; }
-    textarea{ min-height:140px; font-family:inherit; }
-    button{ cursor:pointer; border-radius:10px; font-weight:600; }
-    button.primary{ background:#3b82f6; color:#fff; border:0; padding:8px 16px; }
-    button.danger{ background:transparent; color:#f87171; border:1px solid #f87171; padding:8px 16px; }
-    button.ghost{ background:transparent; color:#eaecee; border:1px solid #2a2f36; padding:8px 16px; }
-    button.primary:hover{ filter:brightness(1.05); }
-    button.ghost:hover{ border-color:#3b82f6; }
-    button.danger:hover{ background:rgba(248,113,113,.1); }
-    .nav-tabs{ display:flex; gap:10px; flex-wrap:wrap; margin:20px 0; }
-    .nav-tabs button{ background:#121418; border:1px solid #2a2f36; color:#eaecee; padding:8px 14px; border-radius:10px; }
-    .nav-tabs button.active{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
-    .tab-panel{ display:none; }
-    .tab-panel.active{ display:block; }
-    .form-grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
-    .form-grid .wide{ grid-column:1 / -1; }
-    .action-bar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
-    .section-footer{ margin-top:12px; }
-    pre{ background:#0f1115; border:1px solid #2a2f36; border-radius:12px; padding:12px; overflow:auto; max-height:240px; }
-    #pw-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:9999; }
-    .login-box{ width:min(92vw,420px); background:#15171a; border:1px solid #23262b; border-radius:14px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,.5); color:#eaecee; }
-    .login-box h3{ margin:0 0 10px; }
-    .login-box p{ margin:0 0 12px; color:#9aa0a6; }
-    .login-box input{ width:100%; margin-bottom:12px; }
-    .login-box button{ width:100%; }
-    a.inline-link{ color:#3b82f6; text-decoration:none; }
-    a.inline-link:hover{ text-decoration:underline; }
+  <style>
+    body{margin:0;background:#0f1115;color:#eaecee;font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
+    .container{max-width:1100px;margin:24px auto 48px auto;padding:0 16px;}
+    .card{background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 12px 32px rgba(0,0,0,.35);}    
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .muted{color:#9aa0a6;}
+    input,select,textarea{background:#0f1115;border:1px solid #2a2f36;color:#fff;padding:8px 10px;border-radius:10px;outline:none;width:100%;box-sizing:border-box;}
+    textarea{min-height:140px;font-family:inherit;}
+    button{cursor:pointer;border-radius:10px;font-weight:600;}
+    button.primary{background:#3b82f6;color:#fff;border:0;padding:8px 16px;}
+    button.danger{background:transparent;color:#f87171;border:1px solid #f87171;padding:8px 16px;}
+    button.ghost{background:transparent;color:#eaecee;border:1px solid #2a2f36;padding:8px 16px;}
+    button.primary:hover{filter:brightness(1.05);}    
+    button.ghost:hover{border-color:#3b82f6;}    
+    button.danger:hover{background:rgba(248,113,113,.1);}    
+    .nav-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0;}
+    .nav-tabs button{background:#121418;border:1px solid #2a2f36;color:#eaecee;padding:8px 14px;border-radius:10px;}
+    .nav-tabs button.active{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.25);}    
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+    .form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+    .form-grid .wide{grid-column:1 / -1;}
+    .action-bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+    .section-footer{margin-top:12px;}
+    pre{background:#0f1115;border:1px solid #2a2f36;border-radius:12px;padding:12px;overflow:auto;max-height:240px;}
+    #pw-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:9999;}
+    .login-box{width:min(92vw,420px);background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#eaecee;}
+    .login-box h3{margin:0 0 10px;}
+    .login-box p{margin:0 0 12px;color:#9aa0a6;}
+    .login-box input{width:100%;margin-bottom:12px;}
+    .login-box button{width:100%;}
+    a.inline-link{color:#3b82f6;text-decoration:none;}
+    a.inline-link:hover{text-decoration:underline;}
     .syllabus-structured{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
     .syllabus-level{background:#181b21;border:1px solid #2a2f36;border-radius:12px;padding:12px;}
     .syllabus-level.collapsed .syllabus-lessons{display:none;}
@@ -63,60 +63,60 @@
     <main class="container">
       <section class="card">
         <div class="row" style="justify-content:space-between;">
-          <h2 style="margin:0">Admin Console</h2>
+          <h2 style="margin:0">管理后台</h2>
           <div class="row">
-            <button id="run-diag" class="ghost">Run Diagnostics</button>
-            <button id="logout-admin" class="danger">Logout</button>
+            <button id="run-diag" class="ghost">运行诊断</button>
+            <button id="logout-admin" class="danger">退出登录</button>
           </div>
         </div>
         <div id="diag-wrap" style="display:none; margin-top:14px;">
-          <div id="diag-status" class="muted">Diagnostics pending.</div>
+          <div id="diag-status" class="muted">尚未运行诊断。</div>
           <pre id="diag-output"></pre>
         </div>
       </section>
 
       <nav class="nav-tabs">
-        <button class="tab-btn active" data-tab="brief">Daily Brief</button>
-        <button class="tab-btn" data-tab="analyses">Analyses</button>
-        <button class="tab-btn" data-tab="news">Market News</button>
-        <button class="tab-btn" data-tab="syllabus">Research Syllabus</button>
-        <button class="tab-btn" data-tab="articles">Research Articles</button>
+        <button class="tab-btn active" data-tab="brief">每日简报</button>
+        <button class="tab-btn" data-tab="analyses">市场分析</button>
+        <button class="tab-btn" data-tab="news">市场快讯</button>
+        <button class="tab-btn" data-tab="syllabus">知识课程</button>
+        <button class="tab-btn" data-tab="articles">研究文章</button>
       </nav>
 
       <section id="tab-brief" class="card tab-panel active">
-        <h3 style="margin-top:0">Daily Brief</h3>
+        <h3 style="margin-top:0">每日简报</h3>
         <div class="form-grid">
-          <label>Slug (YYYY-MM-DD)
+          <label>日期 (YYYY-MM-DD)
             <input id="b-slug" placeholder="2025-10-19" />
           </label>
-          <label>Title
-            <input id="b-title" placeholder="optional title" />
+          <label>标题
+            <input id="b-title" placeholder="可选标题" />
           </label>
-          <label>Symbol
+          <label>品种代码
             <input id="b-symbol" placeholder="FX:XAUUSD" />
           </label>
-          <label>Interval
+          <label>K 线周期
             <select id="b-interval">
-              <option value="15">15m</option>
-              <option value="60" selected>1H</option>
-              <option value="240">4H</option>
-              <option value="1D">1D</option>
+              <option value="15">15分钟</option>
+              <option value="60" selected>1小时</option>
+              <option value="240">4小时</option>
+              <option value="1D">日线</option>
             </select>
           </label>
-          <label class="wide">Bullets (one per line)
+          <label class="wide">重点 (一行一条)
             <textarea id="b-bullets"></textarea>
           </label>
-          <label class="wide">Schedule (one per line)
+          <label class="wide">行程安排 (一行一条)
             <textarea id="b-schedule"></textarea>
           </label>
         </div>
         <div class="action-bar">
-          <button id="b-publish" class="primary">Publish</button>
-          <button id="b-delete" class="danger">Delete</button>
-          <button id="b-reuse" class="ghost">Load Latest</button>
-          <button id="b-preview" class="ghost">Preview</button>
-          <button id="b-clear" class="ghost">Clear</button>
-          <button id="b-refresh" class="ghost">Show Recent</button>
+          <button id="b-publish" class="primary">发布</button>
+          <button id="b-delete" class="danger">删除</button>
+          <button id="b-reuse" class="ghost">载入线上最新</button>
+          <button id="b-preview" class="ghost">预览</button>
+          <button id="b-clear" class="ghost">清空表单</button>
+          <button id="b-refresh" class="ghost">刷新线上列表</button>
         </div>
         <div class="section-footer">
           <p id="b-msg" class="muted"></p>
@@ -125,67 +125,67 @@
       </section>
 
       <section id="tab-analyses" class="card tab-panel">
-        <h3 style="margin-top:0">Analyses</h3>
+        <h3 style="margin-top:0">市场分析</h3>
         <div class="form-grid">
           <label>Slug
             <input id="a-slug" placeholder="xauusd-2025-10-19" />
           </label>
-          <label>Title
-            <input id="a-title" placeholder="analysis title" />
+          <label>标题
+            <input id="a-title" placeholder="分析标题" />
           </label>
-          <label>Symbol
+          <label>交易品种
             <input id="a-symbol" placeholder="FX:XAUUSD" />
           </label>
-          <label>Timeframe
+          <label>时间周期
             <input id="a-tf" placeholder="H1" />
           </label>
-          <label>Date
+          <label>日期
             <input id="a-date" placeholder="2025-10-19" />
           </label>
-          <label>Bias
+          <label>方向
             <select id="a-bias">
-              <option value="bullish">bullish</option>
-              <option value="bearish">bearish</option>
-              <option value="neutral" selected>neutral</option>
+              <option value="bullish">看多</option>
+              <option value="bearish">看空</option>
+              <option value="neutral" selected>震荡</option>
             </select>
           </label>
-          <label class="wide">Tags (comma separated)
+          <label class="wide">标签 (逗号分隔)
             <input id="a-tags" placeholder="xauusd, breakout" />
           </label>
-          <label class="wide">Supports (one per line)
+          <label class="wide">支撑位 (一行一条)
             <textarea id="a-supports"></textarea>
           </label>
-          <label class="wide">Resistances (one per line)
+          <label class="wide">阻力位 (一行一条)
             <textarea id="a-resistances"></textarea>
           </label>
-          <label class="wide">Context
+          <label class="wide">背景说明
             <textarea id="a-context"></textarea>
           </label>
-          <label class="wide">View
+          <label class="wide">交易思路
             <textarea id="a-view"></textarea>
           </label>
-          <label class="wide">Invalidation
-            <input id="a-invalidation" placeholder="invalid when..." />
+          <label class="wide">失效条件
+            <input id="a-invalidation" placeholder="什么情况下方案失效" />
           </label>
-          <label>Chart Symbol
+          <label>图表品种
             <input id="a-chart-symbol" placeholder="FX:XAUUSD" />
           </label>
-          <label>Chart Interval
+          <label>图表周期
             <select id="a-chart-interval">
-              <option value="15">15m</option>
-              <option value="60" selected>1H</option>
-              <option value="240">4H</option>
-              <option value="1D">1D</option>
+              <option value="15">15分钟</option>
+              <option value="60" selected>1小时</option>
+              <option value="240">4小时</option>
+              <option value="1D">日线</option>
             </select>
           </label>
         </div>
         <div class="action-bar">
-          <button id="a-publish" class="primary">Publish</button>
-          <button id="a-delete" class="danger">Delete</button>
-          <button id="a-reuse" class="ghost">Load Latest</button>
-          <button id="a-preview" class="ghost">Preview</button>
-          <button id="a-clear" class="ghost">Clear</button>
-          <button id="a-refresh" class="ghost">Show Recent</button>
+          <button id="a-publish" class="primary">发布</button>
+          <button id="a-delete" class="danger">删除</button>
+          <button id="a-reuse" class="ghost">载入线上最新</button>
+          <button id="a-preview" class="ghost">预览</button>
+          <button id="a-clear" class="ghost">清空表单</button>
+          <button id="a-refresh" class="ghost">刷新线上列表</button>
         </div>
         <div class="section-footer">
           <p id="a-msg" class="muted"></p>
@@ -194,40 +194,40 @@
       </section>
 
       <section id="tab-news" class="card tab-panel">
-        <h3 style="margin-top:0">Market News</h3>
+        <h3 style="margin-top:0">市场快讯</h3>
         <div class="form-grid">
-          <label>ID
+          <label>编号
             <input id="n-id" placeholder="2025-10-19-1" />
           </label>
-          <label>Title
-            <input id="n-title" placeholder="headline" />
+          <label>标题
+            <input id="n-title" placeholder="快讯标题" />
           </label>
-          <label>Source
-            <input id="n-source" placeholder="source" />
+          <label>来源
+            <input id="n-source" placeholder="来源名称" />
           </label>
-          <label>URL
+          <label>原文链接
             <input id="n-url" placeholder="https://example.com" />
           </label>
-          <label>Date (ISO)
+          <label>时间 (ISO)
             <input id="n-date" placeholder="2025-10-19T08:00:00Z" />
           </label>
-          <label class="wide">Tags (comma separated)
+          <label class="wide">标签 (逗号分隔)
             <input id="n-tags" placeholder="fed, cpi" />
           </label>
-          <label class="wide">Summary
+          <label class="wide">摘要
             <textarea id="n-summary"></textarea>
           </label>
-          <label class="wide">Bullets (one per line)
+          <label class="wide">要点 (一行一条)
             <textarea id="n-bullets"></textarea>
           </label>
         </div>
         <div class="action-bar">
-          <button id="n-publish" class="primary">Publish</button>
-          <button id="n-delete" class="danger">Delete</button>
-          <button id="n-reuse" class="ghost">Load Latest</button>
-          <button id="n-preview" class="ghost">Preview</button>
-          <button id="n-clear" class="ghost">Clear</button>
-          <button id="n-refresh" class="ghost">Show Recent</button>
+          <button id="n-publish" class="primary">发布</button>
+          <button id="n-delete" class="danger">删除</button>
+          <button id="n-reuse" class="ghost">载入线上最新</button>
+          <button id="n-preview" class="ghost">预览</button>
+          <button id="n-clear" class="ghost">清空表单</button>
+          <button id="n-refresh" class="ghost">刷新线上列表</button>
         </div>
         <div class="section-footer">
           <p id="n-msg" class="muted"></p>
@@ -236,60 +236,61 @@
       </section>
 
       <section id="tab-syllabus" class="card tab-panel">
-        <h3 style="margin-top:0">Research Syllabus</h3>
-        <p class="muted">Edit levels/lessons below; textarea stays in sync. <a class="inline-link" href="/api/research/syllabus.json" target="_blank" rel="noopener">View JSON</a></p>
+        <h3 style="margin-top:0">知识课程</h3>
+        <p class="muted">在下方维护课程层级与条目，底部 JSON 会自动同步。<a class="inline-link" href="/api/research/syllabus.json" target="_blank" rel="noopener">查看线上数据</a></p>
         <div id="r-structured" class="syllabus-structured"></div>
         <div class="action-bar">
-          <button id="r-load" class="ghost">Load Online</button>
-          <button id="r-add-level" class="ghost">Add Level</button>
-          <button id="r-expand-all" class="ghost">Expand All</button>
-          <button id="r-collapse-all" class="ghost">Collapse All</button>
-          <button id="r-sync-json" class="ghost">Apply JSON to Structured</button>
-          <button id="r-save" class="primary">Save</button>
-          <button id="r-clear" class="ghost">Clear</button>
-          <button id="r-preview" class="ghost">Preview</button>
+          <button id="r-load" class="ghost">加载线上</button>
+          <button id="r-add-level" class="ghost">新增级别</button>
+          <button id="r-expand-all" class="ghost">全部展开</button>
+          <button id="r-collapse-all" class="ghost">全部收起</button>
+          <button id="r-sync-json" class="ghost">应用 JSON 到结构</button>
+          <button id="r-save" class="primary">保存</button>
+          <button id="r-clear" class="ghost">清空</button>
+          <button id="r-preview" class="ghost">前台预览</button>
         </div>
         <div class="section-footer">
-          <textarea id="r-json" style="min-height:220px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"></textarea>
+          <textarea id="r-json" style="min-height:220px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"></textarea>
           <p id="r-msg" class="muted"></p>
         </div>
       </section>
 
       <section id="tab-articles" class="card tab-panel">
-        <h3 style="margin-top:0">Research Articles</h3>
+        <h3 style="margin-top:0">研究文章</h3>
         <div class="form-grid">
-          <label>Slug
-            <input id="ra-slug" placeholder="smc-order-blocks" />
+          <label>文章标识 (Slug)
+            <input id="ra-slug" placeholder="order-block-2025-10-19" />
           </label>
-          <label class="wide">Title
-            <input id="ra-title" placeholder="article title" />
+          <label class="wide">标题
+            <input id="ra-title" placeholder="文章标题" />
           </label>
-          <label class="wide">Excerpt
-            <textarea id="ra-excerpt"></textarea>
+          <label class="wide">摘要
+            <textarea id="ra-excerpt" placeholder="用于列表和 SEO 的摘要"></textarea>
           </label>
-          <label class="wide">Tags (comma separated)
+          <label class="wide">标签 (逗号分隔)
             <input id="ra-tags" placeholder="smc, order block" />
           </label>
-          <label class="wide">Hero URL
+          <label class="wide">封面图 URL
             <input id="ra-hero" placeholder="https://example.com/cover.jpg" />
           </label>
-          <label class="wide">Body (Markdown)
-            <textarea id="ra-body" style="min-height:260px"></textarea>
+          <label class="wide">正文 (Markdown)
+            <textarea id="ra-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"></textarea>
           </label>
         </div>
         <div class="action-bar">
-          <button id="ra-publish" class="primary">Publish</button>
-          <button id="ra-delete" class="danger">Delete</button>
-          <button id="ra-reuse" class="ghost">Load Latest</button>
-          <button id="ra-preview" class="ghost">Preview</button>
-          <button id="ra-clear" class="ghost">Clear</button>
-          <button id="ra-refresh" class="ghost">Show Recent</button>
+          <button id="ra-publish" class="primary">发布</button>
+          <button id="ra-delete" class="danger">删除</button>
+          <button id="ra-reuse" class="ghost">载入线上最新</button>
+          <button id="ra-preview" class="ghost">预览</button>
+          <button id="ra-clear" class="ghost">清空表单</button>
+          <button id="ra-refresh" class="ghost">刷新线上列表</button>
         </div>
         <div class="section-footer">
           <p id="ra-msg" class="muted"></p>
           <pre id="ra-index"></pre>
         </div>
       </section>
+
     </main>
   </div>
 
@@ -297,8 +298,3 @@
   <script type="module" src="/js/admin-main.js"></script>
 </body>
 </html>
-
-
-
-
-

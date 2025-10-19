@@ -1,4 +1,4 @@
-// public/js/admin-bootstrap.js
+﻿// public/js/admin-bootstrap.js
 // Minimal, ASCII-only bootstrap to ensure login works even if HTML text is garbled
 
 const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
@@ -27,11 +27,11 @@ function buildOverlay(){
   if (!host) return;
   host.innerHTML = [
     '<div class="login-box">',
-    '  <h3 style="margin:4px 0 10px">Admin Login</h3>',
-    '  <p class="muted" style="margin:0 0 6px">Enter password to access admin.</p>',
+    '  <h3 style="margin:4px 0 10px">管理员登录</h3>',
+    '  <p class="muted" style="margin:0 0 6px">输入口令后即可进入后台。</p>',
     '  <div class="row">',
     '    <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />',
-    '    <button id="pw-enter" class="primary">Enter</button>',
+    '    <button id="pw-进入后台" class="primary">进入后台</button>',
     '  </div>',
     '  <p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>',
     '</div>'
@@ -55,14 +55,14 @@ async function syncLoginUI(){
 }
 
 function bindLogin(){
-  const btn = document.getElementById('pw-enter');
+  const btn = document.getElementById('pw-进入后台');
   const inp = document.getElementById('admin-pw');
   const err = document.getElementById('pw-err');
   if (!btn || !inp) return;
   const act = async()=>{
     const pw = (inp.value||'').trim();
-    if(!pw){ if(err) err.textContent = 'Please enter password'; return; }
-    if(err) err.textContent = 'Signing in...';
+    if(!pw){ if(err) err.textContent = 'Please 进入后台 password'; return; }
+    if(err) err.textContent = '正在登录...';
     try{
       const { res, data, text } = await apiFetch('/api/admin/login', {
         method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ password: pw })
@@ -72,17 +72,17 @@ function bindLogin(){
       await syncLoginUI();
       if(err) err.textContent = '';
       inp.value = '';
-    }catch(e){ if(err) err.textContent = 'Login failed: ' + (e && e.message ? e.message : e); }
+    }catch(e){ if(err) err.textContent = '登录失败: ' + (e && e.message ? e.message : e); }
   };
   btn.addEventListener('click', act);
-  inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ act(); }});
+  inp.addEventListener('keydown', e=>{ if(e.key==='进入后台'){ act(); }});
 }
 
 function bindLogout(){
   const btn = document.getElementById('logout-admin');
   if (!btn) return;
   btn.addEventListener('click', async ()=>{
-    if (!confirm('Logout?')) return;
+    if (!confirm('确定退出登录？')) return;
     try{ await apiFetch('/api/admin/logout', { method:'POST' }); }catch{}
     setAdminToken('');
     location.reload();
@@ -97,4 +97,5 @@ function bindLogout(){
   // expose utilities for main script
   window.Admin = { $, $$, apiFetch, setAdminToken };
 })();
+
 

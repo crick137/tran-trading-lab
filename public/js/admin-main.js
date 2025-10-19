@@ -66,12 +66,12 @@ async function fetchDocument(prefix, slug) {
 
 async function refreshIndexView(prefix, target) {
   if (!target) return;
-  target.textContent = 'Loading...';
+  target.textContent = '正在加载...';
   try {
     const list = await fetchIndex(prefix);
     target.textContent = JSON.stringify(list, null, 2);
   } catch (e) {
-    target.textContent = 'Failed: ' + (e.message || e);
+    target.textContent = '失败: ' + (e.message || e);
   }
 }
 
@@ -96,7 +96,7 @@ function bindDiagnostics() {
   if (!btn || !wrap) return;
   btn.addEventListener('click', async () => {
     wrap.style.display = 'block';
-    if (status) status.textContent = 'Running diagnostics...';
+    if (status) status.textContent = '正在运行诊断...';
     if (output) output.textContent = '';
     try {
       const res = await fetch('/api/admin/diag?_=' + Date.now(), { credentials: 'include', cache: 'no-store' });
@@ -105,14 +105,14 @@ function bindDiagnostics() {
       try { json = JSON.parse(text); } catch (_) {}
       if (!res.ok) throw new Error((json && json.error) || text || 'HTTP ' + res.status);
       if (status) {
-        const env = json.env?.vercelEnv || 'unknown';
-        const token = json.tokenDetected ? 'token ok' : 'token missing';
-        const conn = json.connectivity?.ok ? 'connectivity ok' : ('connectivity error: ' + (json.connectivity?.error || 'n/a'));
+        const env = json.env?.vercelEnv || '未知';
+        const token = json.tokenDetected ? '令牌正常' : '令牌缺失';
+        const conn = json.connectivity?.ok ? '连通正常' : ('连接异常: ' + (json.connectivity?.error || 'n/a'));
         status.textContent = `Env: ${env} · ${token} · ${conn}`;
       }
       if (output) output.textContent = JSON.stringify(json, null, 2);
     } catch (e) {
-      if (status) status.textContent = 'Diagnostics failed: ' + (e.message || e);
+      if (status) status.textContent = '诊断失败: ' + (e.message || e);
     }
   });
 }
@@ -163,7 +163,7 @@ function bindDailyBrief() {
 
   if (btnPublish) btnPublish.addEventListener('click', async () => {
     ensureDefaultSlug();
-    if (msg) msg.textContent = 'Publishing...';
+    if (msg) msg.textContent = '正在发布...';
     try {
       const payload = {
         slug: fields.slug?.value?.trim() || today(),
@@ -181,10 +181,10 @@ function bindDailyBrief() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
-      if (msg) msg.textContent = 'Published';
+      if (msg) msg.textContent = '发布成功';
       await refreshIndexView('daily-brief', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Publish failed: ' + (e.message || e);
+      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
     }
   });
 
@@ -192,31 +192,31 @@ function bindDailyBrief() {
     ensureDefaultSlug();
     const slug = fields.slug?.value?.trim();
     if (!slug) return;
-    if (!confirm(`Delete Daily Brief: ${slug}?`)) return;
-    if (msg) msg.textContent = 'Deleting...';
+    if (!confirm(`确认删除每日简报：${slug}？`)) return;
+    if (msg) msg.textContent = '正在删除...';
     try {
       const r = await __apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
-      if (msg) msg.textContent = 'Deleted';
+      if (msg) msg.textContent = '删除成功';
       await refreshIndexView('daily-brief', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Delete failed: ' + (e.message || e);
+      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
     }
   });
 
   if (btnReuse) btnReuse.addEventListener('click', async () => {
-    if (msg) msg.textContent = 'Loading latest...';
+    if (msg) msg.textContent = '正在载入线上数据...';
     try {
       const list = await fetchIndex('daily-brief');
-      if (!Array.isArray(list) || !list.length) throw new Error('No history');
+      if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
       const latest = typeof list[0] === 'string' ? list[0] : list[0]?.slug;
-      if (!latest) throw new Error('Invalid index entry');
+      if (!latest) throw new Error('索引数据无效');
       const doc = await fetchDocument('daily-brief', latest);
       populate(doc || {});
       if (fields.slug) fields.slug.value = today();
-      if (msg) msg.textContent = `Loaded ${latest} into form (slug set to today).`;
+      if (msg) msg.textContent = `已载入 ${latest}，Slug 自动改为今日。`;
     } catch (e) {
-      if (msg) msg.textContent = 'Load latest failed: ' + (e.message || e);
+      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
   });
 
@@ -287,8 +287,8 @@ function bindAnalyses() {
 
   if (buttons.publish) buttons.publish.addEventListener('click', async () => {
     const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = 'Please fill slug');
-    if (msg) msg.textContent = 'Publishing...';
+    if (!slug) return msg && (msg.textContent = '请输入 slug');
+    if (msg) msg.textContent = '正在发布...';
     try {
       const payload = {
         slug,
@@ -314,41 +314,41 @@ function bindAnalyses() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
-      if (msg) msg.textContent = 'Published';
+      if (msg) msg.textContent = '发布成功';
       await refreshIndexView('analyses', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Publish failed: ' + (e.message || e);
+      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
     }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
     const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = 'Please fill slug');
-    if (!confirm(`Delete Analysis: ${slug}?`)) return;
-    if (msg) msg.textContent = 'Deleting...';
+    if (!slug) return msg && (msg.textContent = '请输入 slug');
+    if (!confirm(`确认删除市场分析：${slug}？`)) return;
+    if (msg) msg.textContent = '正在删除...';
     try {
       const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
-      if (msg) msg.textContent = 'Deleted';
+      if (msg) msg.textContent = '删除成功';
       await refreshIndexView('analyses', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Delete failed: ' + (e.message || e);
+      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
     }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
-    if (msg) msg.textContent = 'Loading latest...';
+    if (msg) msg.textContent = '正在载入线上数据...';
     try {
       const list = await fetchIndex('analyses');
-      if (!Array.isArray(list) || !list.length) throw new Error('No history');
+      if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
       const latest = typeof list[0] === 'string' ? list[0] : list[0]?.slug;
-      if (!latest) throw new Error('Invalid index entry');
+      if (!latest) throw new Error('索引数据无效');
       const doc = await fetchDocument('analyses', latest);
       populate(doc || {});
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
-      if (msg) msg.textContent = `Loaded ${latest}. Slug updated with today.`;
+      if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
     } catch (e) {
-      if (msg) msg.textContent = 'Load latest failed: ' + (e.message || e);
+      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
   });
 
@@ -405,8 +405,8 @@ function bindNews() {
 
   if (buttons.publish) buttons.publish.addEventListener('click', async () => {
     const id = fields.id?.value?.trim();
-    if (!id) return msg && (msg.textContent = 'Please fill id');
-    if (msg) msg.textContent = 'Publishing...';
+    if (!id) return msg && (msg.textContent = '请输入 ID');
+    if (msg) msg.textContent = '正在发布...';
     try {
       const payload = {
         id,
@@ -424,41 +424,41 @@ function bindNews() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
-      if (msg) msg.textContent = 'Published';
+      if (msg) msg.textContent = '发布成功';
       await refreshIndexView('market-news', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Publish failed: ' + (e.message || e);
+      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
     }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
     const id = fields.id?.value?.trim();
-    if (!id) return msg && (msg.textContent = 'Please fill id');
-    if (!confirm(`Delete news item: ${id}?`)) return;
-    if (msg) msg.textContent = 'Deleting...';
+    if (!id) return msg && (msg.textContent = '请输入 ID');
+    if (!confirm(`确认删除市场快讯：${id}？`)) return;
+    if (msg) msg.textContent = '正在删除...';
     try {
       const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
-      if (msg) msg.textContent = 'Deleted';
+      if (msg) msg.textContent = '删除成功';
       await refreshIndexView('market-news', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Delete failed: ' + (e.message || e);
+      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
     }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
-    if (msg) msg.textContent = 'Loading latest...';
+    if (msg) msg.textContent = '正在载入线上数据...';
     try {
       const list = await fetchIndex('market-news');
-      if (!Array.isArray(list) || !list.length) throw new Error('No history');
+      if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
       const latest = typeof list[0] === 'string' ? list[0] : list[0]?.id;
-      if (!latest) throw new Error('Invalid index entry');
+      if (!latest) throw new Error('索引数据无效');
       const doc = await fetchDocument('market-news', latest);
       populate(doc || {});
       if (fields.id) fields.id.value = `${today()}-1`;
-      if (msg) msg.textContent = `Loaded ${latest}. ID set to today.`;
+      if (msg) msg.textContent = `已载入 ${latest}，ID 已更新为今日。`;
     } catch (e) {
-      if (msg) msg.textContent = 'Load latest failed: ' + (e.message || e);
+      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
   });
 
@@ -590,7 +590,7 @@ function bindResearchSyllabus() {
       actions.className = 'syllabus-level-actions';
 
       const addLessonBtn = document.createElement('button');
-      addLessonBtn.textContent = 'Lesson +';
+      addLessonBtn.textContent = '新增课程';
       addLessonBtn.addEventListener('click', () => {
         current.lessons.push(ensureLessonShape());
         renderStructured();
@@ -599,19 +599,19 @@ function bindResearchSyllabus() {
       actions.appendChild(addLessonBtn);
 
       const upBtn = document.createElement('button');
-      upBtn.textContent = 'Up';
+      upBtn.textContent = '上移';
       upBtn.disabled = levelIndex === 0;
       upBtn.addEventListener('click', () => moveLevel(levelIndex, levelIndex - 1));
       actions.appendChild(upBtn);
 
       const downBtn = document.createElement('button');
-      downBtn.textContent = 'Down';
+      downBtn.textContent = '下移';
       downBtn.disabled = levelIndex === syllabusData.length - 1;
       downBtn.addEventListener('click', () => moveLevel(levelIndex, levelIndex + 1));
       actions.appendChild(downBtn);
 
       const toggleBtn = document.createElement('button');
-      toggleBtn.textContent = current._collapsed ? 'Expand' : 'Collapse';
+      toggleBtn.textContent = current._collapsed ? '展开' : '收起';
       toggleBtn.addEventListener('click', () => {
         current._collapsed = !current._collapsed;
         renderStructured();
@@ -619,9 +619,9 @@ function bindResearchSyllabus() {
       actions.appendChild(toggleBtn);
 
       const removeBtn = document.createElement('button');
-      removeBtn.textContent = 'Remove';
+      removeBtn.textContent = '删除';
       removeBtn.addEventListener('click', () => {
-        if (!confirm(`Remove level "${current.level}"?`)) return;
+        if (!confirm(`删除级别 "${current.level}"?`)) return;
         syllabusData.splice(levelIndex, 1);
         renderStructured();
         syncTextarea();
@@ -641,7 +641,7 @@ function bindResearchSyllabus() {
         row.className = 'lesson-row';
 
         const nameInput = document.createElement('input');
-        nameInput.placeholder = 'Lesson title';
+        nameInput.placeholder = '课程标题';
         nameInput.value = lessonData.name;
         nameInput.addEventListener('input', (e) => {
           lessonData.name = e.target.value;
@@ -650,7 +650,7 @@ function bindResearchSyllabus() {
         row.appendChild(nameInput);
 
         const linkInput = document.createElement('input');
-        linkInput.placeholder = 'Lesson link (#/articles/...)';
+        linkInput.placeholder = '课程链接 (#/articles/...)';
         linkInput.value = lessonData.link;
         linkInput.addEventListener('input', (e) => {
           lessonData.link = e.target.value;
@@ -659,7 +659,7 @@ function bindResearchSyllabus() {
         row.appendChild(linkInput);
 
         const typeInput = document.createElement('input');
-        typeInput.placeholder = 'Tag / Type (optional)';
+        typeInput.placeholder = '标签/类别 (可选)';
         typeInput.value = lessonData.type;
         typeInput.addEventListener('input', (e) => {
           lessonData.type = e.target.value;
@@ -671,19 +671,19 @@ function bindResearchSyllabus() {
         lessonActions.className = 'lesson-actions';
 
         const lessonUp = document.createElement('button');
-        lessonUp.textContent = 'Up';
+        lessonUp.textContent = '上移';
         lessonUp.disabled = lessonIndex === 0;
         lessonUp.addEventListener('click', () => moveLesson(levelIndex, lessonIndex, lessonIndex - 1));
         lessonActions.appendChild(lessonUp);
 
         const lessonDown = document.createElement('button');
-        lessonDown.textContent = 'Down';
+        lessonDown.textContent = '下移';
         lessonDown.disabled = lessonIndex === current.lessons.length - 1;
         lessonDown.addEventListener('click', () => moveLesson(levelIndex, lessonIndex, lessonIndex + 1));
         lessonActions.appendChild(lessonDown);
 
         const lessonRemove = document.createElement('button');
-        lessonRemove.textContent = 'Remove';
+        lessonRemove.textContent = '删除';
         lessonRemove.addEventListener('click', () => {
           if (current.lessons.length <= 1) {
             lessonData.name = '';
@@ -703,7 +703,7 @@ function bindResearchSyllabus() {
 
         const descArea = document.createElement('textarea');
         descArea.className = 'lesson-desc';
-        descArea.placeholder = 'Description or notes (optional)';
+        descArea.placeholder = '课程简介 (可选)';
         descArea.value = lessonData.desc;
         descArea.addEventListener('input', (e) => {
           lessonData.desc = e.target.value;
@@ -718,7 +718,7 @@ function bindResearchSyllabus() {
   };
 
   const loadOnline = async () => {
-    setMessage('Loading...');
+    setMessage('正在加载...');
     try {
       const res = await __apiFetch('/api/research/syllabus.json?_=' + Date.now());
       const data = unwrapResponse(res, 'FETCH_FAILED');
@@ -726,12 +726,12 @@ function bindResearchSyllabus() {
       syllabusData = raw.map(ensureLevelShape);
       renderStructured();
       syncTextarea();
-      setMessage('Loaded current syllabus.');
+      setMessage('已加载线上课程数据。');
     } catch (e) {
       syllabusData = [];
       renderStructured();
       syncTextarea();
-      setMessage('Load failed: ' + (e.message || e));
+      setMessage('加载失败: ' + (e.message || e));
     }
   };
 
@@ -739,18 +739,18 @@ function bindResearchSyllabus() {
     if (!textarea) return;
     try {
       const parsed = JSON.parse(textarea.value || '[]');
-      if (!Array.isArray(parsed)) throw new Error('JSON must be an array.');
+      if (!Array.isArray(parsed)) throw new Error('JSON 数据必须为数组。');
       syllabusData = parsed.map(ensureLevelShape);
       renderStructured();
       syncTextarea();
-      setMessage('Structured view updated from JSON.');
+      setMessage('结构视图已根据 JSON 更新。');
     } catch (e) {
-      setMessage('Apply failed: ' + (e.message || e));
+      setMessage('Apply 失败: ' + (e.message || e));
     }
   };
 
   const saveOnline = async () => {
-    setMessage('Saving...');
+    setMessage('正在保存...');
     try {
       const payload = { syllabus: sanitize(syllabusData) };
       const res = await __apiFetch('/api/research/syllabus', {
@@ -759,9 +759,9 @@ function bindResearchSyllabus() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(res, 'SAVE_FAILED');
-      setMessage('Saved successfully.');
+      setMessage('保存成功。');
     } catch (e) {
-      setMessage('Save failed: ' + (e.message || e));
+      setMessage('Save 失败: ' + (e.message || e));
     }
   };
 
@@ -771,11 +771,11 @@ function bindResearchSyllabus() {
     syllabusData = [];
     renderStructured();
     syncTextarea();
-    setMessage('Cleared editor.');
+    setMessage('已清空编辑器。');
   });
   if (btnPreview) btnPreview.addEventListener('click', () => window.open('/#/knowledge-lab', '_blank', 'noopener'));
   if (btnAddLevel) btnAddLevel.addEventListener('click', () => {
-    syllabusData.push(ensureLevelShape({ level: 'New Level', lessons: [ensureLessonShape({ name: 'Lesson title' })] }));
+    syllabusData.push(ensureLevelShape({ level: '新课程阶段', lessons: [ensureLessonShape({ name: '课程标题' })] }));
     renderStructured();
     syncTextarea();
   });
@@ -826,8 +826,8 @@ function bindResearchArticles() {
 
   if (buttons.publish) buttons.publish.addEventListener('click', async () => {
     const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = 'Please fill slug');
-    if (msg) msg.textContent = 'Publishing...';
+    if (!slug) return msg && (msg.textContent = '请输入 slug');
+    if (msg) msg.textContent = '正在发布...';
     try {
       const payload = {
         slug,
@@ -844,41 +844,41 @@ function bindResearchArticles() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
-      if (msg) msg.textContent = 'Published';
+      if (msg) msg.textContent = '发布成功';
       await refreshIndexView('research/articles', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Publish failed: ' + (e.message || e);
+      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
     }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
     const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = 'Please fill slug');
-    if (!confirm(`Delete article: ${slug}?`)) return;
-    if (msg) msg.textContent = 'Deleting...';
+    if (!slug) return msg && (msg.textContent = '请输入 slug');
+    if (!confirm(`确认删除研究文章：${slug}？`)) return;
+    if (msg) msg.textContent = '正在删除...';
     try {
       const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
-      if (msg) msg.textContent = 'Deleted';
+      if (msg) msg.textContent = '删除成功';
       await refreshIndexView('research/articles', indexView);
     } catch (e) {
-      if (msg) msg.textContent = 'Delete failed: ' + (e.message || e);
+      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
     }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
-    if (msg) msg.textContent = 'Loading latest...';
+    if (msg) msg.textContent = '正在载入线上数据...';
     try {
       const list = await fetchIndex('research/articles');
-      if (!Array.isArray(list) || !list.length) throw new Error('No history');
+      if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
       const latest = typeof list[0] === 'string' ? list[0] : list[0]?.slug;
-      if (!latest) throw new Error('Invalid index entry');
+      if (!latest) throw new Error('索引数据无效');
       const doc = await fetchDocument('research/articles', latest);
       populate(doc || {});
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
-      if (msg) msg.textContent = `Loaded ${latest}. Slug updated with today.`;
+      if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
     } catch (e) {
-      if (msg) msg.textContent = 'Load latest failed: ' + (e.message || e);
+      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
   });
 
@@ -907,6 +907,10 @@ function bindResearchArticles() {
   bindResearchSyllabus();
   bindResearchArticles();
 })();
+
+
+
+
 
 
 
