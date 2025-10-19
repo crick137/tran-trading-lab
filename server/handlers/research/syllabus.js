@@ -16,6 +16,11 @@ export default async function handler(req) {
       } catch (_) {
         // ignore — fall back to embedded default below
       }
+      try {
+        await writeJSON(FILE, { syllabus: DEFAULT_SYLLABUS, updatedAt: new Date().toISOString() });
+      } catch (seedErr) {
+        console.warn('[syllabus seed] unable to persist default syllabus:', seedErr?.message || seedErr);
+      }
       return jsonOK({ syllabus: DEFAULT_SYLLABUS });
     }
 

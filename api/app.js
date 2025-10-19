@@ -284,6 +284,11 @@ async function handleResearch(req, pathname) {
     } catch (_) {
       // ignore — fall back to embedded default below
     }
+    try {
+      await writeJSON('research/syllabus.json', { syllabus: DEFAULT_SYLLABUS, updatedAt: new Date().toISOString() });
+    } catch (seedErr) {
+      console.warn('[syllabus seed] unable to persist default syllabus:', seedErr?.message || seedErr);
+    }
     return ok({ syllabus: DEFAULT_SYLLABUS });
   }
   if (/^\/api\/research\/articles(?:\.json)?$/.test(p)) {
