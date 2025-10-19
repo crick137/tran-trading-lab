@@ -350,7 +350,15 @@ export default async function handler(req, res) {
       out = await genericHandler(req, pathname, 'market-news');
     }
     else if (pathname.startsWith('/api/research')) {
-      out = await handleResearch(req, pathname);
+      if (req.method === 'GET') {
+        out = await handleResearch(req, pathname);
+      } else if (pathname.startsWith('/api/research/syllabus')) {
+        out = await genericHandler(req, pathname, 'research');
+      } else if (pathname.startsWith('/api/research/articles')) {
+        out = await genericHandler(req, pathname, 'research/articles');
+      } else {
+        out = err('RESEARCH_NO_ROUTE', 404);
+      }
     }
     else {
       out = err('NO_ROUTE', 404);

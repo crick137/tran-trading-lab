@@ -1090,16 +1090,21 @@ async function renderMarketNews(){
           marketNewsCache.set(r.id, await dres.json());
         }
         const d = marketNewsCache.get(r.id) || {};
-        const bullets = (d.bullets||[]).map(b=>`<li>${b}</li>`).join('');
+        const title = (d.title ?? r.title ?? r.id ?? '').trim();
+        const source = (d.source ?? r.source ?? '').trim();
+        const whenRaw = d.date ?? r.date ?? '';
+        const when = whenRaw ? new Date(whenRaw).toLocaleString() : '';
+        const summary = (d.summary ?? r.summary ?? '').trim();
+        const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r.tags) ? r.tags : []);
+        const bullets = (Array.isArray(d.bullets) ? d.bullets : []).map(b=>`<li>${b}</li>`).join('');
         const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문 보기</a>` : '';
-        const when = d.date ? new Date(d.date).toLocaleString() : '';
         return `
           <li class="card">
-            <h3 style="margin:0 0 6px">${d.title||r.id}</h3>
-            <p class="meta">${[d.source||'', when].filter(Boolean).join(' · ')}</p>
-            ${d.summary?`<p style="margin:8px 0">${d.summary}</p>`:''}
-            ${bullets?`<ul style="margin-top:6px">${bullets}</ul>`:''}
-            <p class="muted" style="margin-top:8px">${(d.tags||[]).map(t=>`#${t}`).join(' ')}</p>
+            <h3 style="margin:0 0 6px">${title || r.id || 'Market News'}</h3>
+            <p class="meta">${[source, when].filter(Boolean).join(' · ')}</p>
+            ${summary ? `<p style="margin:8px 0">${summary}</p>` : ''}
+            ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
+            <p class="muted" style="margin-top:8px">${tags.map(t=>`#${t}`).join(' ')}</p>
             ${link}
           </li>`;
       }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }
