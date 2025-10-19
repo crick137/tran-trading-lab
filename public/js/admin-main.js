@@ -499,6 +499,7 @@ function bindResearchSyllabus() {
     name: lesson.name || '',
     link: lesson.link || '',
     type: lesson.type || '',
+    duration: lesson.duration || '',
     desc: lesson.desc || ''
   });
 
@@ -521,6 +522,7 @@ function bindResearchSyllabus() {
       name: lesson.name || '',
       link: lesson.link || '',
       type: lesson.type || '',
+      duration: lesson.duration || '',
       desc: lesson.desc || ''
     }))
   }));
@@ -667,6 +669,17 @@ function bindResearchSyllabus() {
         });
         row.appendChild(typeInput);
 
+        const durationInput = document.createElement('input');
+        durationInput.placeholder = '时长 (例: 8m)';
+        durationInput.value = lessonData.duration;
+        durationInput.style.maxWidth = '90px';
+        durationInput.style.flex = '0 0 90px';
+        durationInput.addEventListener('input', (e) => {
+          lessonData.duration = e.target.value;
+          syncTextarea();
+        });
+        row.appendChild(durationInput);
+
         const lessonActions = document.createElement('div');
         lessonActions.className = 'lesson-actions';
 
@@ -689,6 +702,7 @@ function bindResearchSyllabus() {
             lessonData.name = '';
             lessonData.link = '';
             lessonData.type = '';
+            lessonData.duration = '';
             lessonData.desc = '';
           } else {
             current.lessons.splice(lessonIndex, 1);

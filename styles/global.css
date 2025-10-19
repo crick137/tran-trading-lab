@@ -132,12 +132,20 @@ html,body{
 
 /* ====== 修正：卡片过窄 & 纵向断行 ====== */
 
-/* 让网格自动铺满并保证每张卡片 >= 280px 宽 */
-.grid{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
-  gap: 18px !important;
+/* 特性卡片网格 */
+.feature-grid{
+  display:grid;
+  gap:18px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
+
+.grid-12{
+  display:grid;
+  gap:18px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+.grid-12 > *{ min-width:0; }
+
 
 /* 链接卡片必须是块级，才能充满网格单元 */
 .card{
@@ -233,6 +241,130 @@ body{ position: relative; }
   #bgfx{ display:none; }
 }
 
+/* ===== 通用行布局与表单元素 ===== */
+.row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.form-grid{
+  display:grid;
+  gap:12px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.form-grid label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  color:var(--muted);
+  font-size:14px;
+}
+.form-grid label.full{ grid-column:1/-1; }
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.search{
+  background: linear-gradient(180deg, #101318, #0b0d11);
+  border:1px solid #ffffff14;
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  outline:none;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus,
+.search:focus{
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px #2f88ff22;
+}
+.search{
+  min-width: 220px;
+}
+
+button.primary{
+  grid-column:1/-1;
+  padding:12px 14px;
+  border-radius:12px;
+  border:0;
+  background: linear-gradient(120deg, var(--brand), var(--brand-2));
+  color:#0b0d11;
+  font-weight:700;
+  cursor:pointer;
+  transition: filter .2s ease;
+}
+button.primary:hover{ filter: brightness(1.05); }
+
+/* ===== 分析列表与 Pill ===== */
+.entry{
+  background:
+    radial-gradient(120% 120% at 0% 0%, #1f223040, transparent 60%),
+    linear-gradient(180deg, #11141a, #0f1117);
+  border:1px solid #ffffff14;
+  border-radius: calc(var(--radius) - 4px);
+  padding:18px;
+  box-shadow: inset 0 1px 0 #ffffff0f;
+  margin-bottom:14px;
+}
+.entry h3{ margin:0; font-size:18px; }
+.entry .meta{ color:var(--muted); font-size:12px; }
+.entry .actions{ margin-left:auto; display:flex; gap:8px; }
+.icon-btn{
+  background: linear-gradient(180deg, #181c24, #10131a);
+  border:1px solid #ffffff18;
+  color:var(--text);
+  padding:6px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  transition: border-color .2s ease, transform .2s ease;
+}
+.icon-btn:hover{
+  border-color: var(--brand);
+  transform: translateY(-1px);
+}
+.pill{
+  padding:4px 12px;
+  border-radius:999px;
+  font-size:12px;
+  background: linear-gradient(180deg, #1a1e26, #11141a);
+  border:1px solid #ffffff12;
+  color:var(--muted);
+}
+.pill.level{ color:#7bdcb5; border-color:#2d5d48; background: linear-gradient(180deg,#113226,#0d241c); }
+.pill.res{ color:#f78da7; border-color:#5b2c35; background: linear-gradient(180deg,#30161d,#221118); }
+.badge.bullish{ background:#0f1f19; border-color:#1f3f32; color:#7bdcb5; }
+.badge.bearish{ background:#2b1416; border-color:#593136; color:#f78da7; }
+.badge.neutral{ background:#1a1d26; border-color:#2c3140; color:#cfd6e3; }
+
+/* ===== 模态框 ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(8,10,14,.72);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(12px);
+}
+.modal.hidden{ display:none; }
+.modal-body{
+  max-width:960px;
+  width:92%;
+  background: linear-gradient(180deg,#12151a,#0c0f13);
+  border:1px solid #ffffff1a;
+  border-radius:20px;
+  padding:28px;
+  position:relative;
+  box-shadow:0 24px 60px #000000aa;
+}
+#modal-close{
+  position:absolute;
+  top:16px;
+  right:16px;
+}
+
 /* About buttons */
 .socials{
   display: grid;
@@ -293,7 +425,7 @@ body{ position: relative; }
   overflow:hidden;
 }
 .kl-level .lv-head{
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   cursor:pointer;
 }
 .lv-badge{
@@ -305,27 +437,39 @@ body{ position: relative; }
 }
 .lv-title{ font-weight:800; font-size:18px; letter-spacing:.2px; }
 .lv-sub{ color:#aeb6c5; font-size:13px; margin-left:auto; }
+.lv-progress{
+  font-size:12px; letter-spacing:.3px; color:#b8c2d6;
+  padding:3px 10px; border-radius:999px; margin-left:10px;
+  border:1px solid #7a7dff33; background:rgba(122,125,255,0.12);
+}
 
 .kl-list{ margin-top:10px; display:grid; gap:8px; }
+.kl-item-row{ display:flex; gap:12px; align-items:flex-start; }
+.kl-dot-btn{ display:inline-flex; align-items:center; justify-content:center; }
 .kl-item{
-  display:flex; align-items:center; gap:10px;
-  padding:10px 12px; border-radius:12px;
+  display:flex; align-items:flex-start; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding:12px 14px; border-radius:12px;
   background: linear-gradient(180deg,#0f1216,#0b0e12);
   border:1px solid #ffffff16;
-  transition: background .2s ease, border-color .2s ease;
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
 }
-.kl-item:hover{ border-color:#ffffff2a; background: linear-gradient(180deg,#131821,#0e1218); }
+.kl-item:hover{ border-color:#ffffff2a; background: linear-gradient(180deg,#131821,#0e1218); transform: translateY(-1px); }
+.kl-item-content{ flex:1 1 220px; display:flex; flex-direction:column; gap:4px; }
+.kl-name{ font-weight:600; letter-spacing:.1px; }
+.kl-desc{ color:#9aa3b7; font-size:13px; margin:0; line-height:1.5; }
+.kl-meta{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.kl-tag{
+  font-size:12px; color:#c6cee1; padding:4px 10px; border-radius:999px;
+  border:1px solid #ffffff22; background:rgba(122,125,255,0.08); letter-spacing:.3px; text-transform:uppercase;
+}
+.kl-tag.kl-type{ background:rgba(122,125,255,0.12); border-color:#7a7dff33; }
+.kl-tag.kl-duration{ background:rgba(102,224,255,0.12); border-color:#66e0ff33; color:#9fe2ff; }
 .kl-dot{
   width:18px; height:18px; border-radius:50%;
   border:2px solid #7a7dff; box-shadow:0 0 0 2px #7a7dff22 inset;
   display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
 }
 .kl-item.done .kl-dot{ background:#7a7dff; box-shadow:0 0 0 2px #7a7dff44 inset; }
-.kl-name{ flex:1; }
-.kl-tag{
-  font-size:12px; color:#aeb6c5; padding:4px 8px; border-radius:999px;
-  border:1px solid #ffffff22;
-}
 
 .progress-wrap{
   width:100%; height:12px; background:#0e1217; border:1px solid #ffffff16;

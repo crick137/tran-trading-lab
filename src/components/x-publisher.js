@@ -19,15 +19,7 @@ class XPublisher extends HTMLElement {
       <section class="container" id="publish">
         <div class="card">
           <h3 class="m0">一键发布中心</h3>
-          <p class="mt8" style="color:#9aa0aa">根据“每日录入”自动生成可复制文案（默认韩语，可切换中文）。</p>
-          <div class="row mt8">
-            <label class="badge">语言
-              <select id="lang" class="card" style="margin-left:8px">
-                <option value="ko">韩语</option>
-                <option value="zh">中文</option>
-              </select>
-            </label>
-          </div>
+          <p class="mt8" style="color:#9aa0aa">根据每日录入的简报与信号，自动生成可复制的中文文案。</p>
 
           <div class="grid mt12" style="grid-template-columns: repeat(3,1fr); gap:12px;">
             <div class="card"><h4 class="m0">Telegram</h4><textarea id="tg" rows="12" class="card mt8"></textarea><button id="copy-tg" class="badge mt8">复制TG</button></div>
@@ -43,7 +35,6 @@ class XPublisher extends HTMLElement {
     this.querySelector('#copy-tg').onclick = () => copy(this.querySelector('#tg').value);
     this.querySelector('#copy-wa').onclick = () => copy(this.querySelector('#wa').value);
     this.querySelector('#copy-tw').onclick = () => copy(this.querySelector('#tw').value);
-    this.querySelector('#lang').onchange = () => this.update();
     this.querySelector('#tw').addEventListener('input', () => this.updateCount());
   }
 
@@ -53,42 +44,32 @@ class XPublisher extends HTMLElement {
   }
 
   update() {
-    const lang = this.querySelector('#lang').value || 'ko';
     const sig = loadSignalsLS();
     const brief = loadBrief();
     const date = todayStr();
     const sigText = fmtSignals(sig);
 
-    const textKO = {
-      title: brief.title || '굿모닝 마켓 브리핑',
-      macro: (brief.macro||'').split('；').filter(Boolean).map(x=>`- ${x}`).join('\n'),
-      events:(brief.events||'').split('；').filter(Boolean).map(x=>`- ${x}`).join('\n'),
-      assets:(brief.assets||'').split('\n').filter(Boolean).map(x=>`- ${x}`).join('\n'),
-      tip: brief.tip || '손절은 보험료다.'
-    };
-    const textZH = {
+    const T = {
       title: brief.title || '早安市场简报',
-      macro: (brief.macro||'').split('；').filter(Boolean).map(x=>`- ${x}`).join('\n'),
-      events:(brief.events||'').split('；').filter(Boolean).map(x=>`- ${x}`).join('\n'),
+      macro: (brief.macro||'').split(/；|\n/).filter(Boolean).map(x=>`- ${x}`).join('\n'),
+      events:(brief.events||'').split(/；|\n/).filter(Boolean).map(x=>`- ${x}`).join('\n'),
       assets:(brief.assets||'').split('\n').filter(Boolean).map(x=>`- ${x}`).join('\n'),
       tip: brief.tip || '止损是保险费。'
     };
 
-    const T = lang==='ko'?textKO:textZH;
-
     const tg = `📅 ${date} | ${T.title}
 
-📌 거시/宏观
-${T.macro || '- (미입력/待补)'}
+📌 宏观要点
+${T.macro || '- 待补充'}
 
-🗓️ 일정/事件
-${T.events || '- (미입력/待补)'}
+🗓️ 重点日程
+${T.events || '- 待补充'}
 
-📊 重点/要点
-${T.assets || '- (미입력/待补)'}
+📊 关注资产
+${T.assets || '- 待补充'}
 
-🧭 今日信号(Top5)
-${sigText || '- (暂无)'}
+🧭 今日信号（Top5）
+${sigText || '- 暂无'}
 
 🎓 今日小知识
 - ${T.tip}
@@ -96,15 +77,15 @@ ${sigText || '- (暂无)'}
 #TranTradingLab`;
 
     const wa = `${date} ｜ ${T.title}
-• 宏观/거시
-${T.macro || '-'}
-• 事件/일정
-${T.events || '-'}
-• 要点/핵심
-${T.assets || '-'}
-• 信号
-${sigText || '-'}
-• 小知识
+• 宏观要点
+${T.macro || '- 待补充'}
+• 重点日程
+${T.events || '- 待补充'}
+• 关注资产
+${T.assets || '- 待补充'}
+• 今日信号
+${sigText || '- 暂无'}
+• 今日小知识
 ${T.tip}
 #TranTradingLab`;
 

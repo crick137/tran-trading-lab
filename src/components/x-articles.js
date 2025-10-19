@@ -1,14 +1,32 @@
 const posts = [
-  { id: 'bos-intro',    title: 'BOS/CHoCH 핵심 가이드',   date: '2025-10-12', tags: ['SMC','Structure'],  excerpt: '구조 전환을 통해 방향성을 정의하는 가장 단순하고 강력한 방법.' },
-  { id: 'fvg-ob',       title: 'FVG와 OB의 상호작용',     date: '2025-10-13', tags: ['FVG','OB'],         excerpt: '유동성 공백과 수요·공급 블록이 맞물릴 때 생기는 고확률 구역.' },
-  { id: 'risk-pyramid', title: '리스크 피라미드 설계법',   date: '2025-10-14', tags: ['Risk','R:R'],       excerpt: '2% 규칙, 부분청산, 감정 방패 — 실전에서 바로 쓰는 체크리스트.' },
+  {
+    id: 'bos-intro',
+    title: 'BOS / CHoCH 核心指南',
+    date: '2025-10-12',
+    tags: ['SMC', 'Structure'],
+    excerpt: '用最简洁的方式识别结构转换，并据此定义市场方向。'
+  },
+  {
+    id: 'fvg-ob',
+    title: 'FVG 与 OB 的协同',
+    date: '2025-10-13',
+    tags: ['FVG', 'OB'],
+    excerpt: '当流动性缺口与供需块对齐时，如何锁定更高胜率的交易区域。'
+  },
+  {
+    id: 'risk-pyramid',
+    title: '风险金字塔的设计方法',
+    date: '2025-10-14',
+    tags: ['Risk', 'R:R'],
+    excerpt: '2% 规则、分批止盈、情绪隔离——一份可直接执行的检查清单。'
+  }
 ];
 
 class XArticles extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <section class="card" id="articles">
-        <h3 class="m0">글 모음</h3>
+        <h3 class="m0">文章精选</h3>
         <div class="mt12" style="display:grid;gap:12px">
           ${posts.map(p => `
             <article class="card" style="padding:14px">
