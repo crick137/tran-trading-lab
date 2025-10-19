@@ -1,4 +1,4 @@
-// /api/_lib/blob.js
+﻿// /api/_lib/blob.js
 import { put, list, del } from '@vercel/blob';
 
 // Tunables with sensible defaults; override via env in deployment
@@ -27,7 +27,7 @@ function requireToken() {
   return t;
 }
 
-// 添加超时函数
+// 娣诲姞瓒呮椂鍑芥暟
 function timeoutPromise(promise, ms) {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -45,7 +45,7 @@ function timeoutPromise(promise, ms) {
   });
 }
 
-// 添加重试机制
+// 娣诲姞閲嶈瘯鏈哄埗
 async function withRetry(operation, maxRetries = OP_RETRIES, delay = OP_RETRY_DELAY_MS) {
   let lastError;
   for (let i = 0; i < maxRetries; i++) {
@@ -88,7 +88,7 @@ export async function writeJSON(pathname, data, opts = {}) {
   }
 }
 
-// 其他函数也类似添加超时、重试和日志记录
+// 鍏朵粬鍑芥暟涔熺被浼兼坊鍔犺秴鏃躲€侀噸璇曞拰鏃ュ織璁板綍
 export async function deleteObject(pathname, opts = {}) {
   try {
     const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
@@ -160,5 +160,23 @@ export async function listByPrefix(prefix, opts = {}) {
   }
 }
 
-// ✅ 关键：把 SDK 的 list 也导出，供 app.js 作为后备调用
+// 鉁?鍏抽敭锛氭妸 SDK 鐨?list 涔熷鍑猴紝渚?app.js 浣滀负鍚庡璋冪敤
 export { list };
+
+// Delete by direct blob URL (sometimes more reliable shortly after writes)
+export async function deleteByUrl(url, opts = {}) {
+  try {
+    const timeout = Number(opts.timeoutMs || OP_TIMEOUT);
+    const retries = Number(opts.retries ?? OP_RETRIES);
+    const retryDelay = Number(opts.retryDelayMs || OP_RETRY_DELAY_MS);
+    return await withRetry(() =>
+      timeoutPromise(
+        del(url, { token: requireToken() }),
+        timeout
+      )
+    , retries, retryDelay);
+  } catch (e) {
+    console.error('[blob.deleteByUrl] fail:', e);
+    throw e;
+  }
+}
