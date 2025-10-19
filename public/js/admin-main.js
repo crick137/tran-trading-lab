@@ -49,6 +49,10 @@ function unwrapResponse(response, context) {
 const today = () => new Date().toISOString().slice(0, 10);
 const splitLines = (value) => (value || '').split('\n').map((line) => line.trim()).filter((line) => line.length);
 const joinLines = (arr) => (Array.isArray(arr) ? arr.join('\n') : '');
+const safeStringify = (value) => {
+  try { return JSON.stringify(value, null, 2); }
+  catch { return ''; }
+};
 
 async function fetchIndex(prefix) {
   const r = await __apiFetch(`/api/${prefix}/index.json?_=${Date.now()}`);
@@ -472,6 +476,323 @@ function bindNews() {
   });
 }
 
+function bindResearchSyllabus() {
+  const textarea = $('#r-json');
+  const host = $('#r-structured');
+  const msg = $('#r-msg');
+  const btnLoad = $('#r-load');
+  const btnSave = $('#r-save');
+  const btnClear = $('#r-clear');
+  const btnPreview = $('#r-preview');
+  const btnAddLevel = $('#r-add-level');
+  const btnExpandAll = $('#r-expand-all');
+  const btnCollapseAll = $('#r-collapse-all');
+  const btnSyncJson = $('#r-sync-json');
+
+  if (!textarea && !host) return;
+
+  let syllabusData = [];
+
+  const setMessage = (text) => { if (msg) msg.textContent = text || ''; };
+
+  const ensureLessonShape = (lesson = {}) => ({
+    name: lesson.name || '',
+    link: lesson.link || '',
+    type: lesson.type || '',
+    desc: lesson.desc || ''
+  });
+
+  const ensureLevelShape = (level = {}) => {
+    const shaped = {
+      level: level.level || '',
+      desc: level.desc || '',
+      icon: level.icon || '',
+      lessons: Array.isArray(level.lessons) && level.lessons.length ? level.lessons.map(ensureLessonShape) : [ensureLessonShape()],
+      _collapsed: !!level._collapsed
+    };
+    return shaped;
+  };
+
+  const sanitize = (data) => data.map((level) => ({
+    level: level.level || '',
+    desc: level.desc || '',
+    icon: level.icon || '',
+    lessons: (Array.isArray(level.lessons) ? level.lessons : []).map((lesson) => ({
+      name: lesson.name || '',
+      link: lesson.link || '',
+      type: lesson.type || '',
+      desc: lesson.desc || ''
+    }))
+  }));
+
+  const syncTextarea = () => { if (textarea) textarea.value = safeStringify(sanitize(syllabusData)); };
+
+  const moveLevel = (from, to) => {
+    if (to < 0 || to >= syllabusData.length) return;
+    const [item] = syllabusData.splice(from, 1);
+    syllabusData.splice(to, 0, item);
+    renderStructured();
+    syncTextarea();
+  };
+
+  const moveLesson = (levelIdx, from, to) => {
+    const level = syllabusData[levelIdx];
+    if (!level) return;
+    if (to < 0 || to >= level.lessons.length) return;
+    const [item] = level.lessons.splice(from, 1);
+    level.lessons.splice(to, 0, item);
+    renderStructured();
+    syncTextarea();
+  };
+
+  const renderStructured = () => {
+    if (!host) return;
+    host.innerHTML = '';
+    syllabusData.forEach((level, levelIndex) => {
+      syllabusData[levelIndex] = ensureLevelShape(level);
+      const current = syllabusData[levelIndex];
+
+      const card = document.createElement('div');
+      card.className = 'syllabus-level';
+      if (current._collapsed) card.classList.add('collapsed');
+
+      const header = document.createElement('div');
+      header.className = 'syllabus-level-header';
+
+      const levelInput = document.createElement('input');
+      levelInput.placeholder = 'Level name';
+      levelInput.value = current.level;
+      levelInput.addEventListener('input', (e) => {
+        current.level = e.target.value;
+        syncTextarea();
+      });
+      header.appendChild(levelInput);
+
+      const descInput = document.createElement('input');
+      descInput.placeholder = 'Description';
+      descInput.value = current.desc;
+      descInput.addEventListener('input', (e) => {
+        current.desc = e.target.value;
+        syncTextarea();
+      });
+      header.appendChild(descInput);
+
+      const iconInput = document.createElement('input');
+      iconInput.placeholder = 'Icon (emoji)';
+      iconInput.value = current.icon;
+      iconInput.addEventListener('input', (e) => {
+        current.icon = e.target.value;
+        syncTextarea();
+      });
+      header.appendChild(iconInput);
+
+      const actions = document.createElement('div');
+      actions.className = 'syllabus-level-actions';
+
+      const addLessonBtn = document.createElement('button');
+      addLessonBtn.textContent = 'Lesson +';
+      addLessonBtn.addEventListener('click', () => {
+        current.lessons.push(ensureLessonShape());
+        renderStructured();
+        syncTextarea();
+      });
+      actions.appendChild(addLessonBtn);
+
+      const upBtn = document.createElement('button');
+      upBtn.textContent = 'Up';
+      upBtn.disabled = levelIndex === 0;
+      upBtn.addEventListener('click', () => moveLevel(levelIndex, levelIndex - 1));
+      actions.appendChild(upBtn);
+
+      const downBtn = document.createElement('button');
+      downBtn.textContent = 'Down';
+      downBtn.disabled = levelIndex === syllabusData.length - 1;
+      downBtn.addEventListener('click', () => moveLevel(levelIndex, levelIndex + 1));
+      actions.appendChild(downBtn);
+
+      const toggleBtn = document.createElement('button');
+      toggleBtn.textContent = current._collapsed ? 'Expand' : 'Collapse';
+      toggleBtn.addEventListener('click', () => {
+        current._collapsed = !current._collapsed;
+        renderStructured();
+      });
+      actions.appendChild(toggleBtn);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.addEventListener('click', () => {
+        if (!confirm(`Remove level "${current.level}"?`)) return;
+        syllabusData.splice(levelIndex, 1);
+        renderStructured();
+        syncTextarea();
+      });
+      actions.appendChild(removeBtn);
+
+      header.appendChild(actions);
+      card.appendChild(header);
+
+      const lessonsWrap = document.createElement('div');
+      lessonsWrap.className = 'syllabus-lessons';
+      current.lessons.forEach((lesson, lessonIndex) => {
+        current.lessons[lessonIndex] = ensureLessonShape(lesson);
+        const lessonData = current.lessons[lessonIndex];
+
+        const row = document.createElement('div');
+        row.className = 'lesson-row';
+
+        const nameInput = document.createElement('input');
+        nameInput.placeholder = 'Lesson title';
+        nameInput.value = lessonData.name;
+        nameInput.addEventListener('input', (e) => {
+          lessonData.name = e.target.value;
+          syncTextarea();
+        });
+        row.appendChild(nameInput);
+
+        const linkInput = document.createElement('input');
+        linkInput.placeholder = 'Lesson link (#/articles/...)';
+        linkInput.value = lessonData.link;
+        linkInput.addEventListener('input', (e) => {
+          lessonData.link = e.target.value;
+          syncTextarea();
+        });
+        row.appendChild(linkInput);
+
+        const typeInput = document.createElement('input');
+        typeInput.placeholder = 'Tag / Type (optional)';
+        typeInput.value = lessonData.type;
+        typeInput.addEventListener('input', (e) => {
+          lessonData.type = e.target.value;
+          syncTextarea();
+        });
+        row.appendChild(typeInput);
+
+        const lessonActions = document.createElement('div');
+        lessonActions.className = 'lesson-actions';
+
+        const lessonUp = document.createElement('button');
+        lessonUp.textContent = 'Up';
+        lessonUp.disabled = lessonIndex === 0;
+        lessonUp.addEventListener('click', () => moveLesson(levelIndex, lessonIndex, lessonIndex - 1));
+        lessonActions.appendChild(lessonUp);
+
+        const lessonDown = document.createElement('button');
+        lessonDown.textContent = 'Down';
+        lessonDown.disabled = lessonIndex === current.lessons.length - 1;
+        lessonDown.addEventListener('click', () => moveLesson(levelIndex, lessonIndex, lessonIndex + 1));
+        lessonActions.appendChild(lessonDown);
+
+        const lessonRemove = document.createElement('button');
+        lessonRemove.textContent = 'Remove';
+        lessonRemove.addEventListener('click', () => {
+          if (current.lessons.length <= 1) {
+            lessonData.name = '';
+            lessonData.link = '';
+            lessonData.type = '';
+            lessonData.desc = '';
+          } else {
+            current.lessons.splice(lessonIndex, 1);
+          }
+          renderStructured();
+          syncTextarea();
+        });
+        lessonActions.appendChild(lessonRemove);
+
+        row.appendChild(lessonActions);
+        lessonsWrap.appendChild(row);
+
+        const descArea = document.createElement('textarea');
+        descArea.className = 'lesson-desc';
+        descArea.placeholder = 'Description or notes (optional)';
+        descArea.value = lessonData.desc;
+        descArea.addEventListener('input', (e) => {
+          lessonData.desc = e.target.value;
+          syncTextarea();
+        });
+        lessonsWrap.appendChild(descArea);
+      });
+
+      card.appendChild(lessonsWrap);
+      host.appendChild(card);
+    });
+  };
+
+  const loadOnline = async () => {
+    setMessage('Loading...');
+    try {
+      const res = await __apiFetch('/api/research/syllabus.json?_=' + Date.now());
+      const data = unwrapResponse(res, 'FETCH_FAILED');
+      const raw = Array.isArray(data?.syllabus) ? data.syllabus : Array.isArray(data) ? data : [];
+      syllabusData = raw.map(ensureLevelShape);
+      renderStructured();
+      syncTextarea();
+      setMessage('Loaded current syllabus.');
+    } catch (e) {
+      syllabusData = [];
+      renderStructured();
+      syncTextarea();
+      setMessage('Load failed: ' + (e.message || e));
+    }
+  };
+
+  const applyJsonToStructured = () => {
+    if (!textarea) return;
+    try {
+      const parsed = JSON.parse(textarea.value || '[]');
+      if (!Array.isArray(parsed)) throw new Error('JSON must be an array.');
+      syllabusData = parsed.map(ensureLevelShape);
+      renderStructured();
+      syncTextarea();
+      setMessage('Structured view updated from JSON.');
+    } catch (e) {
+      setMessage('Apply failed: ' + (e.message || e));
+    }
+  };
+
+  const saveOnline = async () => {
+    setMessage('Saving...');
+    try {
+      const payload = { syllabus: sanitize(syllabusData) };
+      const res = await __apiFetch('/api/research/syllabus', {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      unwrapResponse(res, 'SAVE_FAILED');
+      setMessage('Saved successfully.');
+    } catch (e) {
+      setMessage('Save failed: ' + (e.message || e));
+    }
+  };
+
+  if (btnLoad) btnLoad.addEventListener('click', () => loadOnline());
+  if (btnSave) btnSave.addEventListener('click', () => saveOnline());
+  if (btnClear) btnClear.addEventListener('click', () => {
+    syllabusData = [];
+    renderStructured();
+    syncTextarea();
+    setMessage('Cleared editor.');
+  });
+  if (btnPreview) btnPreview.addEventListener('click', () => window.open('/#/knowledge-lab', '_blank', 'noopener'));
+  if (btnAddLevel) btnAddLevel.addEventListener('click', () => {
+    syllabusData.push(ensureLevelShape({ level: 'New Level', lessons: [ensureLessonShape({ name: 'Lesson title' })] }));
+    renderStructured();
+    syncTextarea();
+  });
+  if (btnExpandAll) btnExpandAll.addEventListener('click', () => {
+    syllabusData.forEach((level) => { level._collapsed = false; });
+    renderStructured();
+  });
+  if (btnCollapseAll) btnCollapseAll.addEventListener('click', () => {
+    syllabusData.forEach((level) => { level._collapsed = true; });
+    renderStructured();
+  });
+  if (btnSyncJson) btnSyncJson.addEventListener('click', applyJsonToStructured);
+
+  renderStructured();
+  loadOnline().catch(() => {});
+}
+
 function bindResearchArticles() {
   const fields = {
     slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body')
@@ -583,5 +904,10 @@ function bindResearchArticles() {
   bindDailyBrief();
   bindAnalyses();
   bindNews();
+  bindResearchSyllabus();
   bindResearchArticles();
 })();
+
+
+
+
