@@ -40,7 +40,7 @@
     .login-box h3{ margin:4px 0 10px }
     .login-box .row{ margin-top:8px }
 
-    /* 保险丝#1：隐藏任何旧“发布口令”控件 */
+    /* 保险�?1：隐藏任何旧“发布口令”控�?*/
     .pw-group,.topbar .pw,.topbar .remember,.topbar .clear,.publish-password,#publish-pw,
     input[name="publishPassword"],label[for="publish-pw"]{
       display:none!important; visibility:hidden!important; height:0!important; padding:0!important; margin:0!important; border:0!important;
@@ -49,11 +49,11 @@
 </head>
 <body>
 
-  <!-- 登录遮罩（未登录显示） -->
+  <!-- 登录遮罩（未登录显示�?-->
   <div id="pw-overlay">
     <div class="login-box">
-      <h3>管理员登录</h3>
-      <p class="muted" style="margin:0 0 6px">输入一次口令进入后台；登录后发布无需再填。</p>
+      <h3>管理员登�?/h3>
+      <p class="muted" style="margin:0 0 6px">输入一次口令进入后台；登录后发布无需再填�?/p>
       <div class="row">
         <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />
         <button id="pw-enter" class="primary">进入后台</button>
@@ -62,7 +62,7 @@
     </div>
   </div>
 
-  <!-- 后台主体（登录后显示） -->
+  <!-- 后台主体（登录后显示�?-->
   <div id="admin-root" style="display:none">
     <main class="admin container">
       <section class="card">
@@ -70,7 +70,7 @@
 
         <div class="row" style="justify-content:space-between">
           <div class="row">
-            <button id="logout-admin" class="icon-btn">退出登录</button>
+            <button id="logout-admin" class="icon-btn">退出登�?/button>
           </div>
           <div class="row" style="align-items:center; gap:10px">
             <div class="muted">草稿自动保存 · <span class="kbd">Ctrl/Cmd + Enter</span> 发布</div>
@@ -78,7 +78,13 @@
           </div>
         </div>
 
-        <div class="tabs" style="margin-top:12px">
+        
+        <div id=\"diag-wrap\" class=\"card\" style=\"display:none; margin-top:10px; padding:12px\">
+          <h3 style=\"margin:0 0 8px\">��Ͻ��</h3>
+          <div id=\"diag-brief\" class=\"muted\" style=\"margin-bottom:8px\"></div>
+          <pre id=\"diag-out\" style=\"margin:0; white-space:pre-wrap; word-break:break-word; background:#0f1115; border:1px solid var(--bd); padding:8px; border-radius:8px\"></pre>
+        </div>
+<div class="tabs" style="margin-top:12px">
           <button class="tab-btn active" data-tab="brief">Daily Brief</button>
           <button class="tab-btn" data-tab="analyses">Analyses</button>
           <button class="tab-btn" data-tab="news">Market News</button>
@@ -91,7 +97,7 @@
           <div class="split">
             <div>
               <div class="form-grid">
-                <label>日期（YYYY-MM-DD，不填=今天）<input id="b-slug" placeholder="2025-10-18" /></label>
+                <label>日期（YYYY-MM-DD，不�?今天�?input id="b-slug" placeholder="2025-10-18" /></label>
                 <label class="full">标题<input id="b-title" placeholder="Daily Brief 标题（可选）" /></label>
                 <label class="full">核心要点（每行一条）<textarea id="b-bullets"></textarea></label>
                 <label class="full">今日日程（每行一条）<textarea id="b-schedule"></textarea></label>
@@ -108,8 +114,8 @@
               <div class="row" style="margin-top:10px">
                 <button id="b-publish" class="primary">发布</button>
                 <button id="b-reuse" class="icon-btn">昨日复用</button>
-                <button id="b-preview" class="icon-btn">一键预览</button>
-                <button id="b-delete" class="icon-btn danger">删除该日期</button>
+                <button id="b-preview" class="icon-btn">一键预�?/button>
+                <button id="b-delete" class="icon-btn danger">删除该日�?/button>
                 <button id="b-clear" class="icon-btn">清空草稿</button>
               </div>
               <p class="muted" id="b-msg" style="margin-top:10px"></p>
@@ -117,10 +123,10 @@
             <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
-                <li>发布到 <code>/api/daily-brief/YYYY-MM-DD.json</code></li>
-                <li>“昨日复用”：抓取最新一条，自动把日期改成今天</li>
-                <li>预览：<code>#/daily-brief/YYYY-MM-DD</code></li>
-                <li>删除：<code>DELETE /api/daily-brief/YYYY-MM-DD.json</code></li>
+                <li>发布�?<code>/api/daily-brief/YYYY-MM-DD.json</code></li>
+                <li>“昨日复用”：抓取最新一条，自动把日期改成今�?/li>
+                <li>预览�?code>#/daily-brief/YYYY-MM-DD</code></li>
+                <li>删除�?code>DELETE /api/daily-brief/YYYY-MM-DD.json</code></li>
               </ul>
             </div>
           </div>
@@ -132,7 +138,7 @@
             <div>
               <div class="form-grid">
                 <label>Slug（唯一，必填）<input id="a-slug" placeholder="xauusd-2025-10-18" /></label>
-                <label class="full">标题<input id="a-title" placeholder="XAUUSD — Range to Trend" /></label>
+                <label class="full">标题<input id="a-title" placeholder="XAUUSD �?Range to Trend" /></label>
                 <label>符号<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
                 <label>时间框架<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
                 <label>日期<input id="a-date" placeholder="2025-10-18" /></label>
@@ -143,12 +149,12 @@
                     <option value="neutral" selected>neutral</option>
                   </select>
                 </label>
-                <label class="full">标签（逗号分隔）<input id="a-tags" placeholder="gold, FX, liquidity" /></label>
+                <label class="full">标签（逗号分隔�?input id="a-tags" placeholder="gold, FX, liquidity" /></label>
                 <label class="full">支撑（每行一条）<textarea id="a-supports"></textarea></label>
                 <label class="full">阻力（每行一条）<textarea id="a-resistances"></textarea></label>
-                <label class="full">背景（context）<textarea id="a-context"></textarea></label>
-                <label class="full">观点（view）<textarea id="a-view"></textarea></label>
-                <label class="full">无效条件（invalidation）<textarea id="a-invalidation"></textarea></label>
+                <label class="full">背景（context�?textarea id="a-context"></textarea></label>
+                <label class="full">观点（view�?textarea id="a-view"></textarea></label>
+                <label class="full">无效条件（invalidation�?textarea id="a-invalidation"></textarea></label>
                 <label>图表符号<input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
                 <label>图表周期
                   <select id="a-chart-interval">
@@ -162,8 +168,8 @@
               <div class="row" style="margin-top:10px">
                 <button id="a-publish" class="primary">发布 / 更新</button>
                 <button id="a-reuse" class="icon-btn">昨日复用</button>
-                <button id="a-preview" class="icon-btn">一键预览</button>
-                <button id="a-delete" class="icon-btn danger">删除该分析</button>
+                <button id="a-preview" class="icon-btn">一键预�?/button>
+                <button id="a-delete" class="icon-btn danger">删除该分�?/button>
                 <button id="a-clear" class="icon-btn">清空草稿</button>
               </div>
               <p class="muted" id="a-msg" style="margin-top:10px"></p>
@@ -171,9 +177,9 @@
             <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
-                <li>发布到 <code>/api/analyses/{slug}.json</code></li>
-                <li>预览：<code>#/trade-journal?slug=你的slug</code></li>
-                <li>删除：<code>DELETE /api/analyses/{slug}.json</code></li>
+                <li>发布�?<code>/api/analyses/{slug}.json</code></li>
+                <li>预览�?code>#/trade-journal?slug=你的slug</code></li>
+                <li>删除�?code>DELETE /api/analyses/{slug}.json</code></li>
               </ul>
             </div>
           </div>
@@ -184,20 +190,20 @@
           <div class="split">
             <div>
               <div class="form-grid">
-                <label>ID（唯一）<input id="n-id" placeholder="2025-10-18-1 或自定义" /></label>
+                <label>ID（唯一�?input id="n-id" placeholder="2025-10-18-1 或自定义" /></label>
                 <label class="full">标题<input id="n-title" placeholder="美国CPI不及预期" /></label>
                 <label>来源<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
                 <label>外链URL<input id="n-url" placeholder="https://..." /></label>
-                <label>时间（ISO）<input id="n-date" placeholder="2025-10-18T12:34:00Z" /></label>
-                <label class="full">标签（逗号分隔）<input id="n-tags" placeholder="cpi, usd, gold" /></label>
+                <label>时间（ISO�?input id="n-date" placeholder="2025-10-18T12:34:00Z" /></label>
+                <label class="full">标签（逗号分隔�?input id="n-tags" placeholder="cpi, usd, gold" /></label>
                 <label class="full">摘要<textarea id="n-summary"></textarea></label>
                 <label class="full">要点（每行一条）<textarea id="n-bullets"></textarea></label>
               </div>
               <div class="row" style="margin-top:10px">
                 <button id="n-publish" class="primary">发布 / 更新</button>
                 <button id="n-reuse" class="icon-btn">昨日复用</button>
-                <button id="n-preview" class="icon-btn">一键预览</button>
-                <button id="n-delete" class="icon-btn danger">删除该快讯</button>
+                <button id="n-preview" class="icon-btn">一键预�?/button>
+                <button id="n-delete" class="icon-btn danger">删除该快�?/button>
                 <button id="n-clear" class="icon-btn">清空草稿</button>
               </div>
               <p class="muted" id="n-msg" style="margin-top:10px"></p>
@@ -205,15 +211,15 @@
             <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
-                <li>发布到 <code>/api/market-news/{id}.json</code></li>
+                <li>发布�?<code>/api/market-news/{id}.json</code></li>
                 <li>列表页：<code>#/market-news</code></li>
-                <li>删除：<code>DELETE /api/market-news/{id}.json</code></li>
+                <li>删除�?code>DELETE /api/market-news/{id}.json</code></li>
               </ul>
             </div>
           </div>
         </div>
 
-        <!-- Research（Syllabus） -->
+        <!-- Research（Syllabus�?-->
         <div class="tab" id="tab-research">
           <div class="split">
             <div>
@@ -225,7 +231,7 @@
               <div class="row" style="margin-top:10px">
                 <button id="r-load" class="icon-btn">载入线上版本</button>
                 <button id="r-save" class="primary">保存</button>
-                <button id="r-preview" class="icon-btn">一键预览</button>
+                <button id="r-preview" class="icon-btn">一键预�?/button>
                 <button id="r-clear" class="icon-btn">清空草稿</button>
               </div>
               <p class="muted" id="r-msg" style="margin-top:10px"></p>
@@ -233,8 +239,8 @@
             <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
-                <li>保存到 <code>/api/research/syllabus</code></li>
-                <li>预览：<code>#/knowledge-lab</code></li>
+                <li>保存�?<code>/api/research/syllabus</code></li>
+                <li>预览�?code>#/knowledge-lab</code></li>
               </ul>
             </div>
           </div>
@@ -246,19 +252,19 @@
             <div>
               <div class="form-grid">
                 <label>Slug（唯一，必填）<input id="ra-slug" placeholder="smc-order-blocks" /></label>
-                <label class="full">标题<input id="ra-title" placeholder="Order Blocks 全解析" /></label>
-                <label class="full">摘要（用于列表/SEO）<textarea id="ra-excerpt"></textarea></label>
-                <label class="full">标签（逗号分隔）<input id="ra-tags" placeholder="smc, ob, liquidity" /></label>
-                <label class="full">主图 URL（可选）<input id="ra-hero" placeholder="https://…" /></label>
-                <label class="full">正文（Markdown）
+                <label class="full">标题<input id="ra-title" placeholder="Order Blocks 全解�? /></label>
+                <label class="full">摘要（用于列�?SEO�?textarea id="ra-excerpt"></textarea></label>
+                <label class="full">标签（逗号分隔�?input id="ra-tags" placeholder="smc, ob, liquidity" /></label>
+                <label class="full">主图 URL（可选）<input id="ra-hero" placeholder="https://�? /></label>
+                <label class="full">正文（Markdown�?
                   <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
                 </label>
               </div>
               <div class="row" style="margin-top:10px">
                 <button id="ra-publish" class="primary">发布 / 更新</button>
                 <button id="ra-reuse" class="icon-btn">昨日复用</button>
-                <button id="ra-preview" class="icon-btn">一键预览</button>
-                <button id="ra-delete" class="icon-btn danger">删除该文章</button>
+                <button id="ra-preview" class="icon-btn">一键预�?/button>
+                <button id="ra-delete" class="icon-btn danger">删除该文�?/button>
                 <button id="ra-clear" class="icon-btn">清空草稿</button>
               </div>
               <p class="muted" id="ra-msg" style="margin-top:10px"></p>
@@ -266,9 +272,9 @@
             <div class="card" style="padding:12px">
               <h3 style="margin-top:0">说明</h3>
               <ul class="muted" style="margin:8px 0 0 18px">
-                <li>发布到 <code>/api/research/articles/{slug}.json</code></li>
-                <li>索引：<code>/api/research/articles/index</code></li>
-                <li>删除：<code>DELETE /api/research/articles/{slug}.json</code></li>
+                <li>发布�?<code>/api/research/articles/{slug}.json</code></li>
+                <li>索引�?code>/api/research/articles/index</code></li>
+                <li>删除�?code>DELETE /api/research/articles/{slug}.json</code></li>
               </ul>
             </div>
           </div>
@@ -283,13 +289,12 @@
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
 
-    /* 授权与统一 Fetch（自动带 Cookie + Authorization + 超时） */
+    /* 授权与统一 Fetch（自动带 Cookie + Authorization + 超时�?*/
     let ADMIN_TOKEN = sessionStorage.getItem('tran_admin_token') || '';
     function setAdminToken(tok){ ADMIN_TOKEN = tok || ''; if(tok){ sessionStorage.setItem('tran_admin_token', tok); } else { sessionStorage.removeItem('tran_admin_token'); } }
 
     async function apiFetch(url, init = {}) {
-      const timeoutMs = 12000; // 前端请求超时（12s）
-      const ctrl = new AbortController();
+      const timeoutMs = 12000; // 前端请求超时�?2s�?      const ctrl = new AbortController();
       const id = setTimeout(()=> ctrl.abort(new DOMException('timeout','AbortError')), timeoutMs);
       const headers = new Headers(init.headers || {});
       if (ADMIN_TOKEN) headers.set('Authorization', 'Bearer ' + ADMIN_TOKEN);
@@ -302,23 +307,22 @@
         clearTimeout(id);
       }
     }
-    // 按钮锁定工具与错误解释
-    function withBtnLock(btn, fn){
+    // 按钮锁定工具与错误解�?    function withBtnLock(btn, fn){
       if (!btn) return fn();
       const old = btn.textContent;
-      btn.disabled = true; btn.classList.add('disabled'); btn.textContent = '处理中…';
+      btn.disabled = true; btn.classList.add('disabled'); btn.textContent = '处理中�?;
       return Promise.resolve()
         .then(fn)
         .finally(()=>{ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; });
     }
     function explainErr(e){
       const m = (e && e.message) ? e.message : String(e||'');
-      if (m === 'DELETE_VERIFY_FAILED') return '删除后校验失败：可能缓存或权限问题，请稍后刷新确认。';
-      if (/BLOB_TOKEN_MISSING/i.test(m)) return '服务端未配置 Blob 写入 Token（请设置 BLOB_READ_WRITE_TOKEN）。';
-      if (/UNAUTHORIZED|401/.test(m)) return '未授权：请重新登录后台后再试。';
-      if (/SERVER_NO_ADMIN_PASSWORD|ADMIN_PASSWORD_NOT_SET/i.test(m)) return '服务端未设置 ADMIN_PASSWORD。';
-      if (/DELETE_FAILED/i.test(m)) return '删除失败：服务端删除文件出错。';
-      if (/timeout|AbortError/i.test(m)) return '请求超时，请稍后重试。';
+      if (m === 'DELETE_VERIFY_FAILED') return '删除后校验失败：可能缓存或权限问题，请稍后刷新确认�?;
+      if (/BLOB_TOKEN_MISSING/i.test(m)) return '服务端未配置 Blob 写入 Token（请设置 BLOB_READ_WRITE_TOKEN）�?;
+      if (/UNAUTHORIZED|401/.test(m)) return '未授权：请重新登录后台后再试�?;
+      if (/SERVER_NO_ADMIN_PASSWORD|ADMIN_PASSWORD_NOT_SET/i.test(m)) return '服务端未设置 ADMIN_PASSWORD�?;
+      if (/DELETE_FAILED/i.test(m)) return '删除失败：服务端删除文件出错�?;
+      if (/timeout|AbortError/i.test(m)) return '请求超时，请稍后重试�?;
       return m || '操作失败';
     }
     async function waitForGone(apiPath, tries=8, interval=600){
@@ -358,20 +362,19 @@
 
     $('#pw-enter')?.addEventListener('click', async ()=>{
       const pw = ($('#admin-pw').value||'').trim();
-      if (!pw) { $('#pw-err').textContent = '请输入口令'; return; }
-      $('#pw-err').textContent = '登录中…';
+      if (!pw) { $('#pw-err').textContent = '请输入口�?; return; }
+      $('#pw-err').textContent = '登录中�?;
       try{
         const { res, data, text } = await apiFetch('/api/admin/login', {
           method:'POST', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ password: pw })
         });
         if (!res.ok || !data?.ok) throw new Error(data?.error || text || `HTTP ${res.status}`);
-        // 用登录口令作为随后的 Bearer token，配合后端写入鉴权
-        setAdminToken(pw);
+        // 用登录口令作为随后的 Bearer token，配合后端写入鉴�?        setAdminToken(pw);
         await syncLoginUI();
         $('#pw-err').textContent = '';
         $('#admin-pw').value = '';
       }catch(e){
-        $('#pw-err').textContent = '登录失败：' + (e?.message || e);
+        $('#pw-err').textContent = '登录失败�? + (e?.message || e);
       }
     });
 
@@ -382,7 +385,7 @@
       location.reload();
     });
 
-    /* 安全启动（避免顶层 await 造成白屏） */
+    /* 安全启动（避免顶�?await 造成白屏�?*/
     (async () => {
       try { await syncLoginUI(); }
       catch (e) {
@@ -392,7 +395,7 @@
       }
     })();
 
-    /* 保险丝#2：移除任何旧的口令条 DOM */
+    /* 保险�?2：移除任何旧的口令条 DOM */
     (function removeLegacyPwBar(){
       const selectors = [
         '.pw-group','.topbar .pw','.topbar .remember','.topbar .clear',
@@ -423,9 +426,9 @@
     const loadDraft = k => { try{return JSON.parse(localStorage.getItem(k)||'{}')}catch{return{}} };
     const clearDraft= k => localStorage.removeItem(k);
     $('#clear-drafts')?.addEventListener('click', ()=>{
-      if(!confirm('确定清空本地草稿缓存？')) return;
+      if(!confirm('确定清空本地草稿缓存�?)) return;
       Object.values(LS).forEach(clearDraft);
-      alert('本地草稿已清空');
+      alert('本地草稿已清�?);
     });
 
     /* ===== Daily Brief ===== */
@@ -448,23 +451,23 @@
     }
     $$('#tab-brief input, #tab-brief textarea, #tab-brief select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.brief, bGet())));
     (function(){ const d=loadDraft(LS.brief); if(Object.keys(d).length) bSet(d); })();
-    $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清空'); };
+    $('#b-clear').onclick = ()=>{ clearDraft(LS.brief); bSet({}); bMsg('草稿已清�?); };
 
     $('#b-reuse').onclick = async ()=>{
-      bMsg('拉取最新一条…');
+      bMsg('拉取最新一条�?);
       try{
         const arr = await getJSON('/api/daily-brief/index?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return bMsg('没有历史记录');
         const latest = (arr[0] && typeof arr[0]==='object') ? arr[0].slug : arr[0];
         const d = await getJSON(`/api/daily-brief/${encodeURIComponent(latest)}.json?_=${Date.now()}`);
         d.slug = today(); bSet(d); saveDraft(LS.brief, bGet()); bMsg('已载入最近一条，并把日期改为今天');
-      }catch(e){ bMsg('拉取失败：' + (e?.message || e)); }
+      }catch(e){ bMsg('拉取失败�? + (e?.message || e)); }
     };
 
     $('#b-publish').onclick = async ()=>{
       const payload = bGet();
       const slug = payload.slug || today();
-      bMsg('发布中…');
+      bMsg('发布中�?);
       const btn = $('#b-publish');
       await withBtnLock(btn, async ()=>{
         try{
@@ -472,8 +475,8 @@
             method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
           });
           if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-          bMsg('✅ 发布成功');
-        }catch(e){ bMsg('❌ 发布失败：' + explainErr(e)); }
+          bMsg('�?发布成功');
+        }catch(e){ bMsg('�?发布失败�? + explainErr(e)); }
       });
     };
 
@@ -482,15 +485,15 @@
     $('#b-delete').onclick = async ()=>{
       const slug=B.slug.value.trim()||today();
       if(!confirm(`确定删除 Daily Brief: ${slug} ?`)) return;
-      bMsg('删除中…');
+      bMsg('删除中�?);
       const btn = $('#b-delete');
       await withBtnLock(btn, async ()=>{
         try{
           const del = await fetchJSON(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
           await waitForGone(`/api/daily-brief/${encodeURIComponent(slug)}.json`);
-          bMsg('🗑️ 已删除');
-        }catch(e){ bMsg('删除失败：' + explainErr(e)); }
+          bMsg('🗑�?已删�?);
+        }catch(e){ bMsg('删除失败�? + explainErr(e)); }
       });
     };
 
@@ -522,10 +525,10 @@
     }
     $$('#tab-analyses input, #tab-analyses textarea, #tab-analyses select').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.analyses, aGet())));
     (function(){ const d=loadDraft(LS.analyses); if(Object.keys(d).length) aSet(d); })();
-    $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清空'); };
+    $('#a-clear').onclick = ()=>{ clearDraft(LS.analyses); aSet({}); aMsg('草稿已清�?); };
 
     $('#a-reuse').onclick = async ()=>{
-      aMsg('拉取最新一条…');
+      aMsg('拉取最新一条�?);
       try{
         const arr = await getJSON('/api/analyses/index?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return aMsg('没有历史记录');
@@ -541,8 +544,8 @@
     };
 
     $('#a-publish').onclick = async ()=>{
-      const payload=aGet(); if(!payload.slug) return aMsg('请填写 slug');
-      aMsg('发布中…');
+      const payload=aGet(); if(!payload.slug) return aMsg('请填�?slug');
+      aMsg('发布中�?);
       const btn = $('#a-publish');
       await withBtnLock(btn, async ()=>{
         try{
@@ -550,8 +553,8 @@
             method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
           });
           if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-          aMsg('✅ 发布成功');
-        }catch(e){ aMsg('❌ 发布失败：' + explainErr(e)); }
+          aMsg('�?发布成功');
+        }catch(e){ aMsg('�?发布失败�? + explainErr(e)); }
       });
     };
 
@@ -562,16 +565,16 @@
 
     $('#a-delete').onclick = async ()=>{
       const slug=A.slug.value.trim(); if(!slug) return aMsg('请先填写 slug');
-      if(!confirm(`确定删除分析：${slug} ?`)) return;
-      aMsg('删除中…');
+      if(!confirm(`确定删除分析�?{slug} ?`)) return;
+      aMsg('删除中�?);
       const btn = $('#a-delete');
       await withBtnLock(btn, async ()=>{
         try{
           const del = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
           await waitForGone(`/api/analyses/${encodeURIComponent(slug)}.json`);
-          aMsg('🗑️ 已删除');
-        }catch(e){ aMsg('删除失败：' + explainErr(e)); }
+          aMsg('🗑�?已删�?);
+        }catch(e){ aMsg('删除失败�? + explainErr(e)); }
       });
     };
 
@@ -593,10 +596,10 @@
     }
     $$('#tab-news input, #tab-news textarea').forEach(el=> el.addEventListener('input', ()=> saveDraft(LS.news, nGet())));
     (function(){ const d=loadDraft(LS.news); if(Object.keys(d).length) nSet(d); })();
-    $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清空'); };
+    $('#n-clear').onclick = ()=>{ clearDraft(LS.news); nSet({}); nMsg('草稿已清�?); };
 
     $('#n-reuse').onclick = async ()=>{
-      nMsg('拉取最新一条…');
+      nMsg('拉取最新一条�?);
       try{
         const arr = await getJSON('/api/market-news/index?_=' + Date.now());
         if(!Array.isArray(arr)||!arr.length) return nMsg('没有历史记录');
@@ -605,13 +608,13 @@
         const base = new Date().toISOString().slice(0,10);
         d.id = `${base}-1`; d.date = new Date().toISOString();
         nSet(d); saveDraft(LS.news, nGet());
-        nMsg('已载入最近一条，已建议新的 id');
-      }catch(e){ nMsg('拉取失败：' + (e?.message || e)); }
+        nMsg('已载入最近一条，已建议新�?id');
+      }catch(e){ nMsg('拉取失败�? + (e?.message || e)); }
     };
 
     $('#n-publish').onclick = async ()=>{
-      const payload = nGet(); if(!payload.id) return nMsg('请填写 id');
-      nMsg('发布中…');
+      const payload = nGet(); if(!payload.id) return nMsg('请填�?id');
+      nMsg('发布中�?);
       const btn = $('#n-publish');
       await withBtnLock(btn, async ()=>{
         try{
@@ -619,8 +622,8 @@
             method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
           });
           if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-          nMsg('✅ 发布成功');
-        }catch(e){ nMsg('❌ 发布失败：' + explainErr(e)); }
+          nMsg('�?发布成功');
+        }catch(e){ nMsg('�?发布失败�? + explainErr(e)); }
       });
     };
 
@@ -628,16 +631,16 @@
 
     $('#n-delete').onclick = async ()=>{
       const id=N.id.value.trim(); if(!id) return nMsg('请先填写 id');
-      if(!confirm(`确定删除快讯：${id} ?`)) return;
-      nMsg('删除中…');
+      if(!confirm(`确定删除快讯�?{id} ?`)) return;
+      nMsg('删除中�?);
       const btn = $('#n-delete');
       await withBtnLock(btn, async ()=>{
         try{
           const del = await fetchJSON(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
           await waitForGone(`/api/market-news/${encodeURIComponent(id)}.json`);
-          nMsg('🗑️ 已删除');
-        }catch(e){ nMsg('删除失败：' + explainErr(e)); }
+          nMsg('🗑�?已删�?);
+        }catch(e){ nMsg('删除失败�? + explainErr(e)); }
       });
     };
 
@@ -648,17 +651,17 @@
     $$('#tab-research textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.research, JSON.stringify({text:R.json.value}))));
     (function(){ try{ const d = JSON.parse(localStorage.getItem(LS.research)||'{}'); if(d && typeof d.text==='string') R.json.value=d.text; }catch{} })();
     $('#r-load').onclick = async ()=>{
-      rMsg('加载线上大纲…');
+      rMsg('加载线上大纲�?);
       try{
         const j = await getJSON('/api/research/syllabus?_=' + Date.now());
         R.json.value = JSON.stringify(j.syllabus||[], null, 2);
         localStorage.setItem(LS.research, JSON.stringify({text: R.json.value}));
-        rMsg('已载入线上版本到编辑框');
-      }catch(e){ rMsg('加载失败：' + (e?.message || e)); }
+        rMsg('已载入线上版本到编辑�?);
+      }catch(e){ rMsg('加载失败�? + (e?.message || e)); }
     };
     $('#r-save').onclick = async ()=>{
       const syllabus = rGet(); if (!Array.isArray(syllabus)) return rMsg('JSON 格式错误，必须是数组');
-      rMsg('保存中…');
+      rMsg('保存中�?);
       const btn = $('#r-save');
       await withBtnLock(btn, async ()=>{
         try{
@@ -666,11 +669,11 @@
             method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify({ syllabus })
           });
           if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-          rMsg('✅ 保存成功');
-        }catch(e){ rMsg('❌ 保存失败：' + explainErr(e)); }
+          rMsg('�?保存成功');
+        }catch(e){ rMsg('�?保存失败�? + explainErr(e)); }
       });
     };
-    $('#r-clear').onclick = ()=>{ localStorage.removeItem(LS.research); R.json.value=''; rMsg('草稿已清空'); };
+    $('#r-clear').onclick = ()=>{ localStorage.removeItem(LS.research); R.json.value=''; rMsg('草稿已清�?); };
     $('#r-preview').onclick = ()=> window.open('/#/knowledge-lab','_blank','noopener');
 
     /* ===== Research Articles ===== */
@@ -689,10 +692,10 @@
     };
     $$('#tab-r-articles input, #tab-r-articles textarea').forEach(el=> el.addEventListener('input', ()=> localStorage.setItem(LS.rArticles, JSON.stringify(raGet()))));
     (function(){ try{ const d=JSON.parse(localStorage.getItem(LS.rArticles)||'{}'); if(Object.keys(d).length) raSet(d); }catch{} })();
-    $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清空'); };
+    $('#ra-clear').onclick = ()=>{ localStorage.removeItem(LS.rArticles); raSet({}); raMsg('草稿已清�?); };
 
     $('#ra-reuse').onclick = async ()=>{
-      raMsg('拉取最新一篇…');
+      raMsg('拉取最新一篇�?);
       try{
         const list = await getJSON('/api/research/articles/index?_=' + Date.now());
         if(!Array.isArray(list)||!list.length) return raMsg('没有历史记录');
@@ -701,13 +704,13 @@
         const base=(d.slug||'article').replace(/[^a-z0-9\-]+/gi,'');
         d.slug=base+'-'+today(); d.date=new Date().toISOString();
         raSet(d); localStorage.setItem(LS.rArticles, JSON.stringify(raGet()));
-        raMsg('已载入最近一篇，已建议新的 slug');
-      }catch(e){ raMsg('拉取失败：' + (e?.message || e)); }
+        raMsg('已载入最近一篇，已建议新�?slug');
+      }catch(e){ raMsg('拉取失败�? + (e?.message || e)); }
     };
 
     $('#ra-publish').onclick = async ()=>{
-      const payload=raGet(); if(!payload.slug) return raMsg('请填写 slug');
-      raMsg('发布中…');
+      const payload=raGet(); if(!payload.slug) return raMsg('请填�?slug');
+      raMsg('发布中�?);
       const btn = $('#ra-publish');
       await withBtnLock(btn, async ()=>{
         try{
@@ -715,8 +718,8 @@
             method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload)
           });
           if(!res.ok) throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`);
-          raMsg('✅ 发布成功');
-        }catch(e){ raMsg('❌ 发布失败：' + explainErr(e)); }
+          raMsg('�?发布成功');
+        }catch(e){ raMsg('�?发布失败�? + explainErr(e)); }
       });
     };
 
@@ -727,16 +730,16 @@
 
     $('#ra-delete').onclick = async ()=>{
       const slug=RA.slug.value.trim(); if(!slug) return raMsg('请先填写 slug');
-      if(!confirm(`确定删除文章：${slug} ?`)) return;
-      raMsg('删除中…');
+      if(!confirm(`确定删除文章�?{slug} ?`)) return;
+      raMsg('删除中�?);
       const btn = $('#ra-delete');
       await withBtnLock(btn, async ()=>{
         try{
           const del = await fetchJSON(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
           if(!del.res.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.res.status}`);
           await waitForGone(`/api/research/articles/${encodeURIComponent(slug)}.json`);
-          raMsg('🗑️ 已删除');
-        }catch(e){ raMsg('删除失败：' + explainErr(e)); }
+          raMsg('🗑�?已删�?);
+        }catch(e){ raMsg('删除失败�? + explainErr(e)); }
       });
     };
 
@@ -752,3 +755,6 @@
   </script>
 </body>
 </html>
+
+
+
