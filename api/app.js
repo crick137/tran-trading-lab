@@ -8,7 +8,9 @@ import {
   readJSONViaFetch,
   deleteObject,
   listByPrefix as _listByPrefix,
-  deleteByUrl,\n  list as _listRaw,\n} from './_lib/blob.js';
+  deleteByUrl,
+  list as _listRaw,
+} from './_lib/blob.js';
 
 const ENABLE_CORS = false;
 
@@ -229,7 +231,7 @@ async function genericHandler(req, pathname, PREFIX) {
         return ok({ saved: true, slug });
       } catch (e) {
         console.error(`[API] Write failed:`, e);
-        return err('WRITE_FAILED', 500);
+        return err((e && e.message) ? e.message : 'WRITE_FAILED', 500);
       }
     }
   
@@ -350,6 +352,8 @@ export default async function handler(req, res) {
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }
+
+
 
 
 
