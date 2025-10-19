@@ -4,10 +4,20 @@
 //   ADMIN_PASSWORD=... node tools/push-articles-from-syllabus.mjs https://your.domain backup/syllabus-full.json
 
 import fs from 'node:fs/promises';
+import { Agent, fetch as undiciFetch } from 'undici';
 
 const base = (process.argv[2] || '').replace(/\/$/, '') || 'http://localhost:3000';
 const file = process.argv[3] || 'backup/syllabus-full.json';
 const token = process.env.ADMIN_PASSWORD || '';
+
+const dispatcher = new Agent({
+  connect: {
+    timeout: Number(process.env.HTTP_CONNECT_TIMEOUT_MS || 20000),
+    family: 4
+  }
+});
+
+const fetchWithAgent = (url, init = {}) => undiciFetch(url, { dispatcher, ...init });
 
 if (!token) {
   console.error('ERROR: ADMIN_PASSWORD env is required');
@@ -37,7 +47,7 @@ async function upsertArticle(item){
     tags,
     body: ''
   };
-  const res = await fetch(`${base}/api/research/articles/${encodeURIComponent(slug)}.json`, {
+  const res = await fetchWithAgent(`${base}/api/research/articles/${encodeURIComponent(slug)}.json`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json', 'authorization': 'Bearer ' + token },
     body: JSON.stringify(payload)
