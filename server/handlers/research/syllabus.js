@@ -1,6 +1,7 @@
 // api/research/syllabus.js  —— 无鉴权 GET/POST 同一文件
 import { writeJSON, readJSONViaFetch } from '../_lib/blob.js';
 import { jsonOK, badRequest } from '../_lib/http.js';
+import { DEFAULT_SYLLABUS } from '../../../data/syllabus.js';
 
 const FILE = 'research/syllabus.json';
 
@@ -9,10 +10,13 @@ export default async function handler(req) {
     if (req.method === 'GET') {
       try {
         const data = await readJSONViaFetch(FILE);
-        return jsonOK(data);
-      } catch {
-        return jsonOK({ syllabus: [] }); // 不存在则返回空数组
+        if (Array.isArray(data?.syllabus) && data.syllabus.length) {
+          return jsonOK(data);
+        }
+      } catch (_) {
+        // ignore — fall back to embedded default below
       }
+      return jsonOK({ syllabus: DEFAULT_SYLLABUS });
     }
 
     if (req.method === 'POST') {

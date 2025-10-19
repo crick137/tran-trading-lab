@@ -1,6 +1,7 @@
 // ===== src/main.js (KO, preview + auto-open 1st, clickable lessons + News + Remote Syllabus) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
+import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
 
 const routes = {
   '': 'home',
@@ -862,134 +863,9 @@ function currentSlugFromQuery(){
 const KL_KEY = 'kl.progress.v1';
 let KL_QUERY = '';   // 검색어
 
-// ★ let으로 정의해 원격 데이터를 불러오면 덮어씌울 수 있도록 유지
-let SYLLABUS = [
-  {
-    level: 'Starter · 입문 토대',
-    icon: '🌱',
-    desc: '외환 시장의 구조와 참여자를 이해합니다.',
-    lessons: [
-      { name: '외환거래란 무엇인가?', link: '#/articles/what-is-forex', type: '개념', duration: '5m', desc: '시장 규모와 참가자, 특징을 한눈에 정리합니다.' },
-      { name: '외환은 어떻게 거래하나?', link: '#/articles/how-to-trade-forex', type: '개념', duration: '8m', desc: '주문·체결·레버리지·결제 구조를 이해합니다.' },
-      { name: '언제 거래할 수 있나?', link: '#/articles/when-to-trade-forex', type: '세션', duration: '6m', desc: '주요 세션과 유동성 패턴을 살펴봅니다.' },
-      { name: '누가 외환을 거래하나?', link: '#/articles/who-trades-forex', type: '개념', duration: '6m', desc: '중앙은행, 기관, 개인 트레이더의 역할과 동기.' },
-      { name: '왜 외환을 거래하나?', link: '#/articles/why-trade-forex', type: '개념', duration: '7m', desc: '수익 구조와 FX가 적합한 전략을 정리합니다.' },
-      { name: '마진거래 101: 마진계좌의 동작 원리', link: '#/articles/margin-101', type: '메커니즘', duration: '8m', desc: '마진, 레버리지, 마진콜 개념을 이해합니다.' }
-    ]
-  },
-  {
-    level: 'Framework · 기초 도구',
-    icon: '🧰',
-    desc: '분석을 위한 기본 도구와 프레임을 준비합니다.',
-    lessons: [
-      { name: '포렉스 브로커 101', link: '#/articles/forex-brokers-101', type: '도구', duration: '8m', desc: '브로커 선택과 규제 등급을 체크합니다.' },
-      { name: '세 가지 분석 방법', link: '#/articles/three-types-of-analysis', type: '프레임', duration: '10m', desc: '기술·기본·심리 분석의 역할을 구분합니다.' },
-      { name: '차트의 종류', link: '#/articles/types-of-charts', type: '도구', duration: '7m', desc: '라인, 바, 캔들 차트의 장단점을 비교합니다.' }
-    ]
-  },
-  {
-    level: 'Structure · 가격 구조',
-    icon: '📘',
-    desc: '구조와 밸류를 통해 시장의 뼈대를 읽습니다.',
-    lessons: [
-      { name: '지지와 저항 레벨', link: '#/articles/support-resistance', type: '구조', duration: '10m', desc: '핵심 레벨을 정의하고 반응 전략을 세웁니다.' },
-      { name: '일본식 캔들', link: '#/articles/japanese-candlesticks', type: '구조', duration: '12m', desc: '캔들 모양으로 심리와 흐름을 해석합니다.' },
-      { name: '피보나치', link: '#/articles/fibonacci', type: '도구', duration: '9m', desc: '황금비를 활용해 되돌림과 확장 목표를 찾습니다.' },
-      { name: '이동평균', link: '#/articles/moving-averages', type: '도구', duration: '8m', desc: '추세 판단과 평균선 조합을 설계합니다.' },
-      { name: '인기 보조지표', link: '#/articles/popular-indicators', type: '도구', duration: '9m', desc: 'MACD·RSI 등 지표와 구조를 결합합니다.' }
-    ]
-  },
-  {
-    level: 'Pattern · 패턴 확장',
-    icon: '🌀',
-    desc: '가격 패턴과 모멘텀을 확장해 해석합니다.',
-    lessons: [
-      { name: '오실레이터와 모멘텀 지표', link: '#/articles/oscillators', type: '구조', duration: '9m', desc: '모멘텀 신호의 장단점을 이해합니다.' },
-      { name: '중요 차트 패턴', link: '#/articles/chart-patterns', type: '구조', duration: '11m', desc: '깃발·쐐기·헤드앤숄더 패턴을 적용합니다.' },
-      { name: '피벗 포인트', link: '#/articles/pivot-points', type: '도구', duration: '7m', desc: '일중 지지·저항을 빠르게 파악합니다.' }
-    ]
-  },
-  {
-    level: 'Liquidity · 유동성 관점',
-    icon: '🌊',
-    desc: '스마트 머니 관점에서 가격을 바라봅니다.',
-    lessons: [
-      { name: '헤이킨 아시', link: '#/articles/heikin-ashi', type: '유동성', duration: '7m', desc: '노이즈를 낮추고 추세 뼈대를 포착합니다.' },
-      { name: '엘리엇 파동 기초', link: '#/articles/elliott-wave', type: '유동성', duration: '12m', desc: '파동 구조로 방향과 템포를 해석합니다.' },
-      { name: '하모닉 패턴', link: '#/articles/harmonic-patterns', type: '유동성', duration: '14m', desc: '비율과 조합으로 고확률 구역을 찾습니다.' }
-    ]
-  },
-  {
-    level: 'Strategy · 전략 설계',
-    icon: '🎯',
-    desc: '구조·유동성·펀더멘털을 실행 전략으로 묶습니다.',
-    lessons: [
-      { name: '다이버전스 트레이딩', link: '#/articles/divergences', type: '전략', duration: '10m', desc: '모멘텀과 가격의 괴리를 활용한 진입 로직.' },
-      { name: '시장 환경', link: '#/articles/market-environment', type: '전략', duration: '8m', desc: '추세·박스·전환 국면을 구분하고 대응합니다.' },
-      { name: '돌파와 페이크아웃', link: '#/articles/breakouts-fakeouts', type: '전략', duration: '9m', desc: '신뢰할 수 있는 돌파 조건과 필터를 정의합니다.' },
-      { name: '펀더멘털 분석', link: '#/articles/fundamental-analysis', type: '전략', duration: '12m', desc: '경제 지표와 중앙은행 시나리오를 전략에 반영합니다.' },
-      { name: '통화 크로스', link: '#/articles/currency-crosses', type: '전략', duration: '8m', desc: '교차 통화로 헤지와 상대 강도를 활용합니다.' },
-      { name: '멀티 타임프레임 분석', link: '#/articles/mtf-analysis', type: '전략', duration: '7m', desc: '상·하위 주기를 동기화해 정보 단절을 방지합니다.' }
-    ]
-  },
-  {
-    level: 'Mindset · 심리와 인사이트',
-    icon: '🧠',
-    desc: '심리와 정보 노이즈를 관리해 실행력을 지킵니다.',
-    lessons: [
-      { name: '시장 심리', link: '#/articles/market-sentiment', type: '심리', duration: '8m', desc: '극단적 심리와 자금 흐름을 해석합니다.' },
-      { name: '뉴스 트레이딩', link: '#/articles/trading-the-news', type: '인사이트', duration: '10m', desc: '지표 발표 전후 준비와 실행을 정리합니다.' },
-      { name: '캐리 트레이드', link: '#/articles/carry-trade', type: '전략', duration: '9m', desc: '금리 차이를 활용한 중장기 운용 전략.' }
-    ]
-  },
-  {
-    level: 'Macro Mesh · 거시 연결',
-    icon: '🧭',
-    desc: '크로스 마켓 관점으로 통화를 읽습니다.',
-    lessons: [
-      { name: '달러 인덱스', link: '#/articles/us-dollar-index', type: '거시', duration: '8m', desc: 'DXY가 주요 통화에 주는 영향을 이해합니다.' },
-      { name: '인터마켓 상관관계', link: '#/articles/intermarket-correlations', type: '거시', duration: '10m', desc: '채권·주식·원자재의 연동 신호를 해석합니다.' },
-      { name: '주식으로 FX 읽기', link: '#/articles/equities-to-trade-fx', type: '거시', duration: '7m', desc: '섹터/대표 종목으로 FX 시나리오를 검증합니다.' },
-      { name: '국가별 프로필', link: '#/articles/country-profiles', type: '거시', duration: '9m', desc: 'GDP·물가·정책 변수로 통화 특성을 파악합니다.' }
-    ]
-  },
-  {
-    level: 'System Lab · 시스템 구축',
-    icon: '🛠️',
-    desc: '재현 가능한 프로세스와 기록 시스템을 만듭니다.',
-    lessons: [
-      { name: '트레이딩 계획 수립', link: '#/articles/trading-plan', type: '시스템', duration: '10m', desc: '목표·프로세스·평가 체계를 문서화합니다.' },
-      { name: '나는 어떤 유형의 트레이더인가?', link: '#/articles/trader-types', type: '시스템', duration: '7m', desc: '리듬과 전략에 맞는 타입을 점검합니다.' },
-      { name: '나만의 트레이딩 시스템 만들기', link: '#/articles/build-your-system', type: '시스템', duration: '12m', desc: '규칙을 실행 가능한 플레이북으로 정리합니다.' },
-      { name: '트레이딩 저널 작성', link: '#/articles/trading-journal', type: '시스템', duration: '8m', desc: '기록을 통해 피드백 루프를 설계합니다.' },
-      { name: 'MetaTrader 4 사용법', link: '#/articles/mt4-howto', type: '도구', duration: '9m', desc: '자주 쓰는 기능과 단축키를 익힙니다.' }
-    ]
-  },
-  {
-    level: 'Risk Engine · 리스크 매트릭스',
-    icon: '🧮',
-    desc: '리스크 통제, 포지션 설계, 자금 곡선을 관리합니다.',
-    lessons: [
-      { name: '리스크 관리', link: '#/articles/risk-management', type: '리스크', duration: '9m', desc: '지표로 리스크를 측정하고 경계를 세웁니다.' },
-      { name: '트레이더 파산의 1순위 원인', link: '#/articles/cause-of-death', type: '리스크', duration: '6m', desc: '자주 반복되는 위험 누적 패턴을 인지합니다.' },
-      { name: '포지션 사이징', link: '#/articles/position-sizing', type: '리스크', duration: '8m', desc: '계좌 규모와 R 값을 활용해 포지션을 계산합니다.' },
-      { name: '손절(Stop Loss) 설정', link: '#/articles/stop-loss', type: '리스크', duration: '7m', desc: '구조·변동성·시간 기반 손절 방식을 설계합니다.' },
-      { name: '분할 진입·분할 청산', link: '#/articles/scaling', type: '리스크', duration: '7m', desc: '25/25/25/25 분할의 심리와 자금 관리.' },
-      { name: '통화 상관관계', link: '#/articles/currency-correlations', type: '리스크', duration: '8m', desc: '상관관계를 이용해 중복 리스크를 줄입니다.' }
-    ]
-  },
-  {
-    level: 'Graduation · 점검과 복기',
-    icon: '🏆',
-    desc: '경험을 정리하고 함정을 경계하며 다음 단계를 설계합니다.',
-    lessons: [
-      { name: '초보자가 가장 많이 하는 실수', link: '#/articles/common-mistakes', type: '복기', duration: '7m', desc: '자주 반복되는 실수를 살펴보고 교정합니다.' },
-      { name: '포렉스 사기 유형', link: '#/articles/forex-scams', type: '복기', duration: '6m', desc: '고수익 미끼와 폰지 구조를 판별합니다.' },
-      { name: '성향 테스트', link: '#/articles/personality-quizzes', type: '복기', duration: '10m', desc: '내 성향과 보완할 지점을 진단합니다.' },
-      { name: '졸업 연설', link: '#/articles/graduation-speech', type: '복기', duration: '6m', desc: '방법론을 정리하고 다음 성장 계획을 세웁니다.' }
-    ]
-  }
-];
+// SYLLABUS는 원격 데이터를 불러오면 덮어쓸 수 있도록 let으로 유지
+// 기본 강의 데이터는 공유 모듈의 복사본으로 시작 (원본 보호용)
+let SYLLABUS = JSON.parse(JSON.stringify(DEFAULT_SYLLABUS));
 
 function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
 function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }

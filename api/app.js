@@ -11,6 +11,7 @@ import {
   deleteByUrl,
   list as _listRaw,
 } from './_lib/blob.js';
+import { DEFAULT_SYLLABUS } from '../data/syllabus.js';
 
 const ENABLE_CORS = false;
 
@@ -275,8 +276,15 @@ async function handleResearch(req, pathname) {
   if (req.method !== 'GET') return err('METHOD_NOT_ALLOWED', 405);
 
   if (/^\/api\/research\/syllabus(?:\.json)?$/.test(p)) {
-    try { return ok(await readJSONViaFetch('research/syllabus.json')); }
-    catch { return err('NOT_FOUND', 404); }
+    try {
+      const data = await readJSONViaFetch('research/syllabus.json');
+      if (Array.isArray(data?.syllabus) && data.syllabus.length) {
+        return ok(data);
+      }
+    } catch (_) {
+      // ignore — fall back to embedded default below
+    }
+    return ok({ syllabus: DEFAULT_SYLLABUS });
   }
   if (/^\/api\/research\/articles(?:\.json)?$/.test(p)) {
     try { return ok(await readJSONViaFetch('research/articles/index.json')); }
