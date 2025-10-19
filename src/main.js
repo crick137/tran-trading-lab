@@ -36,12 +36,16 @@ let analysesIndexCache = null;
 const analysesDetailCache = new Map();
 let marketNewsIndexCache = null;
 const marketNewsCache = new Map();
+let articlesIndexCache = null;
+const articlesDetailCache = new Map();
 
 // -------- Daily Brief 라우팅 ----------
 function matchRoute() {
   const raw = location.hash || '#/';
-  const detail = raw.match(/^#\/daily-brief\/([\w-]+)$/);
-  if (detail) return { id: 'daily-brief-detail', slug: detail[1] };
+  const detailDaily = raw.match(/^#\/daily-brief\/([\w-]+)$/);
+  if (detailDaily) return { id: 'daily-brief-detail', slug: decodeURIComponent(detailDaily[1]) };
+  const detailArticle = raw.match(/^#\/articles\/([\w%-]+)$/);
+  if (detailArticle) return { id: 'article-detail', slug: decodeURIComponent(detailArticle[1]) };
   const base = raw.includes('?') ? raw.split('?')[0] : raw;
   return { id: (routes[base] || 'home') };
 }
@@ -298,18 +302,124 @@ function renderArticlesView(){
     <section aria-labelledby="articles-title">
       <div class="card">
         <h2 id="articles-title">아티클</h2>
-        <article class="card">
-          <h3>구조와 리스크의 경계</h3>
-          <p class="muted">실패한 거래를 복기하며 구조와 자금 관리를 다시 맞춘 이야기.</p>
-        </article>
-        <article class="card">
-          <h3>왜 분할이 더 합리적인가</h3>
-          <p class="muted">25/25/25/25 비중 조절의 심리와 수학을 한 번에 정리.</p>
-        </article>
+        <div id="articles-list" aria-live="polite"></div>
       </div>
     </section>
   `;
   window.__registerCards?.(outlet);
+}
+
+function renderArticleDetailView(){
+  outlet.innerHTML = `
+    <section aria-live="polite">
+      <div id="article-detail"></div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function escapeHtml(text){
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function loadArticleDetail(slug){
+  if (!slug) throw new Error('INVALID_SLUG');
+  if (!articlesDetailCache.has(slug)){
+    const res = await fetch(`/api/research/articles/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
+    if (!res.ok) throw new Error('NOT_FOUND');
+    const data = await res.json();
+    articlesDetailCache.set(slug, data || {});
+  }
+  return articlesDetailCache.get(slug) || {};
+}
+
+async function renderArticlesList(){
+  const host = document.getElementById('articles-list');
+  if (!host) return;
+  host.innerHTML = '<p class="muted">불러오는 중…</p>';
+  try{
+    const res = await fetch('/api/research/articles/index.json?_=' + Date.now());
+    const data = await res.json();
+    articlesIndexCache = Array.isArray(data) ? data : [];
+    const slugs = articlesIndexCache
+      .map(item => typeof item === 'string' ? item : (item && item.slug) ? item.slug : '')
+      .filter(Boolean);
+    if (!slugs.length){
+      host.innerHTML = '<p class="muted">등록된 아티클이 없습니다</p>';
+      return;
+    }
+    const articles = await Promise.all(slugs.map(async slug=>{
+      try{
+        const detail = await loadArticleDetail(slug);
+        return { slug, detail };
+      }catch(e){
+        return { slug, error: true, message: e?.message || '' };
+      }
+    }));
+    host.innerHTML = `
+      <div style="display:grid;gap:12px">
+        ${articles.map(({ slug, detail, error, message })=>{
+          if (error){
+            return `<article class="card"><h3>${escapeHtml(slug)}</h3><p class="muted">불러오기 실패: ${escapeHtml(message)}</p></article>`;
+          }
+          const title = detail?.title || slug;
+          const excerpt = detail?.excerpt || '';
+          const date = detail?.date ? new Date(detail.date).toLocaleDateString() : '';
+          const tags = Array.isArray(detail?.tags) && detail.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
+          return `
+            <article class="card" style="padding:18px">
+              <h3 style="margin:0 0 6px">${escapeHtml(title)}</h3>
+              ${excerpt ? `<p class="muted">${escapeHtml(excerpt)}</p>` : ''}
+              <p class="meta" style="margin:10px 0">${[date, tags].filter(Boolean).join(' · ')}</p>
+              <a class="icon-btn" href="#/articles/${encodeURIComponent(slug)}">자세히 보기</a>
+            </article>
+          `;
+        }).join('')}
+      </div>
+    `;
+    window.__registerCards?.(host);
+  }catch{
+    host.innerHTML = '<p class="muted">아티클을 불러오지 못했습니다</p>';
+  }
+}
+
+async function renderArticleDetail(slug){
+  const host = document.getElementById('article-detail');
+  if (!host) return;
+  if (!slug){
+    host.innerHTML = `<div class="card"><h2>유효한 슬러그가 필요합니다</h2><p class="muted" style="margin-top:8px"><a href="#/articles">← 목록으로</a></p></div>`;
+    if (window.__registerCards) window.__registerCards(host);
+    return;
+  }
+  host.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
+  try{
+    const detail = await loadArticleDetail(slug);
+    const title = detail?.title || slug;
+    const date = detail?.date ? new Date(detail.date).toLocaleString() : '';
+    const tags = Array.isArray(detail?.tags) && detail.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
+    const body = detail?.body || '';
+    const paragraphs = body
+      ? body.split(/\n{2,}/).map(block=>`<p>${escapeHtml(block).replace(/\n/g, '<br/>')}</p>`).join('')
+      : '<p>내용이 없습니다.</p>';
+    host.innerHTML = `
+      <article class="card" style="padding:24px">
+        <h2 style="margin:0 0 8px">${escapeHtml(title)}</h2>
+        <p class="muted">${[date, tags].filter(Boolean).join(' · ')}</p>
+        ${detail?.hero ? `<img src="${detail.hero}" alt="${escapeHtml(title)}" style="width:100%;border-radius:12px;margin:18px 0;">` : ''}
+        <div class="article-body" style="display:flex;flex-direction:column;gap:12px">${paragraphs}</div>
+        <p class="muted" style="margin-top:16px"><a href="#/articles">← 아티클 목록으로</a></p>
+      </article>
+    `;
+    if (window.__registerCards) window.__registerCards(host);
+  }catch(e){
+    host.innerHTML = `<div class="card"><h2>아티클을 불러올 수 없습니다</h2><p class="muted">${escapeHtml(e?.message || '')}</p><p class="muted" style="margin-top:8px"><a href="#/articles">← 목록으로</a></p></div>`;
+    if (window.__registerCards) window.__registerCards(host);
+  }
 }
 
 function renderAboutView(){
@@ -414,6 +524,11 @@ async function renderRoute(routeId, slug){
       break;
     case 'articles':
       renderArticlesView();
+      await renderArticlesList();
+      break;
+    case 'article-detail':
+      renderArticleDetailView();
+      await renderArticleDetail(slug);
       break;
     case 'about':
       renderAboutView();

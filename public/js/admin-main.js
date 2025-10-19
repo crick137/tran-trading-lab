@@ -899,7 +899,7 @@ function bindResearchArticles() {
   if (buttons.preview) buttons.preview.addEventListener('click', () => {
     const slug = fields.slug?.value?.trim();
     if (!slug) return;
-    window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
+    window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
 
   if (buttons.clear) buttons.clear.addEventListener('click', () => {
