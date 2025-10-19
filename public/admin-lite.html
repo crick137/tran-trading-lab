@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Console (Lite)</title>
+  <link rel="stylesheet" href="/styles/global.css" />
+  <style>
+    body{ background:#0f1115; color:#eaecee; }
+    .container{ max-width:1040px; margin:24px auto; padding:0 16px; }
+    .card{ background:#15171a; border:1px solid #23262b; border-radius:14px; padding:16px; margin:12px 0; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    input,select,textarea{ background:#0f1115; border:1px solid #23262b; color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
+    textarea{ min-height:120px; width:100% }
+    .primary{ padding:8px 12px; border:0; border-radius:10px; background:#3b82f6; color:#fff; font-weight:700; cursor:pointer }
+    .danger{ padding:8px 12px; border:1px solid #f87171; border-radius:10px; background:transparent; color:#f87171; cursor:pointer }
+    #pw-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:9999; }
+    .login-box{ width:min(92vw,420px); background:#15171a; border:1px solid #23262b; border-radius:14px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,.5) }
+    .muted{ color:#9aa0a6 }
+    label{ display:block; margin:6px 0 }
+  </style>
+</head>
+<body>
+
+  <div id="pw-overlay"></div>
+
+  <div id="admin-root" style="display:none">
+    <main class="container">
+      <section class="card">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <h2 style="margin:0">Admin Console (Lite)</h2>
+          <button id="logout-admin" class="danger">Logout</button>
+        </div>
+      </section>
+
+      <!-- Daily Brief -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">Daily Brief</h3>
+        <div class="row">
+          <label>Slug (YYYY-MM-DD)
+            <input id="b-slug" placeholder="2025-10-18" />
+          </label>
+          <label style="flex:1">Title
+            <input id="b-title" placeholder="optional title" />
+          </label>
+          <label>Symbol
+            <input id="b-symbol" placeholder="FX:XAUUSD" />
+          </label>
+          <label>Interval
+            <select id="b-interval">
+              <option value="15">15m</option>
+              <option value="60" selected>1H</option>
+              <option value="240">4H</option>
+              <option value="1D">1D</option>
+            </select>
+          </label>
+        </div>
+        <label>Bullets (one per line)
+          <textarea id="b-bullets"></textarea>
+        </label>
+        <label>Schedule (one per line)
+          <textarea id="b-schedule"></textarea>
+        </label>
+        <div class="row">
+          <button id="b-publish" class="primary">Publish</button>
+          <button id="b-delete" class="danger">Delete</button>
+        </div>
+        <p id="b-msg" class="muted"></p>
+      </section>
+
+      <!-- Analyses -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">Analyses</h3>
+        <div class="row">
+          <label>Slug <input id="a-slug" placeholder="xauusd-2025-10-18" /></label>
+          <label>Title <input id="a-title" placeholder="Title" /></label>
+          <label>Symbol <input id="a-symbol" placeholder="FX:XAUUSD" /></label>
+          <label>TF <input id="a-tf" placeholder="H1" /></label>
+          <label>Date <input id="a-date" placeholder="2025-10-18" /></label>
+          <label>Bias
+            <select id="a-bias">
+              <option value="bullish">bullish</option>
+              <option value="bearish">bearish</option>
+              <option value="neutral" selected>neutral</option>
+            </select>
+          </label>
+        </div>
+        <label>Tags (comma separated)
+          <input id="a-tags" placeholder="xauusd, breakout" />
+        </label>
+        <label>Supports (one per line)
+          <textarea id="a-supports"></textarea>
+        </label>
+        <label>Resistances (one per line)
+          <textarea id="a-resistances"></textarea>
+        </label>
+        <label>Context
+          <textarea id="a-context"></textarea>
+        </label>
+        <label>View
+          <textarea id="a-view"></textarea>
+        </label>
+        <label>Invalidation
+          <input id="a-invalidation" />
+        </label>
+        <div class="row">
+          <label>Chart Symbol <input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
+          <label>Chart Interval
+            <select id="a-chart-interval">
+              <option value="15">15m</option>
+              <option value="60" selected>1H</option>
+              <option value="240">4H</option>
+              <option value="1D">1D</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <button id="a-publish" class="primary">Publish</button>
+          <button id="a-delete" class="danger">Delete</button>
+        </div>
+        <p id="a-msg" class="muted"></p>
+      </section>
+
+      <!-- Market News -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">Market News</h3>
+        <div class="row">
+          <label>ID <input id="n-id" placeholder="2025-10-18-1" /></label>
+          <label>Title <input id="n-title" placeholder="title" /></label>
+          <label>Source <input id="n-source" placeholder="source" /></label>
+          <label>URL <input id="n-url" placeholder="https://..." /></label>
+          <label>Date <input id="n-date" placeholder="ISO datetime" /></label>
+        </div>
+        <label>Tags (comma separated)
+          <input id="n-tags" placeholder="fed, cpi" />
+        </label>
+        <label>Summary
+          <textarea id="n-summary"></textarea>
+        </label>
+        <label>Bullets (one per line)
+          <textarea id="n-bullets"></textarea>
+        </label>
+        <div class="row">
+          <button id="n-publish" class="primary">Publish</button>
+          <button id="n-delete" class="danger">Delete</button>
+        </div>
+        <p id="n-msg" class="muted"></p>
+      </section>
+
+      <!-- Research Articles -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">Research Articles</h3>
+        <div class="row">
+          <label>Slug <input id="ra-slug" placeholder="order-blocks-2025-10-18" /></label>
+          <label style="flex:1">Title <input id="ra-title" placeholder="article title" /></label>
+        </div>
+        <label>Excerpt
+          <textarea id="ra-excerpt"></textarea>
+        </label>
+        <label>Tags (comma separated)
+          <input id="ra-tags" placeholder="smc, ob" />
+        </label>
+        <label>Hero URL
+          <input id="ra-hero" placeholder="https://..." />
+        </label>
+        <label>Body (Markdown)
+          <textarea id="ra-body" style="min-height:260px"></textarea>
+        </label>
+        <div class="row">
+          <button id="ra-publish" class="primary">Publish</button>
+          <button id="ra-delete" class="danger">Delete</button>
+        </div>
+        <p id="ra-msg" class="muted"></p>
+      </section>
+
+    </main>
+  </div>
+
+  <script type="module" src="/js/admin-bootstrap.js"></script>
+  <script type="module" src="/js/admin-main.js"></script>
+</body>
+</html>

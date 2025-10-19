@@ -18,6 +18,7 @@
 
     { "source": "/admin",                 "destination": "/admin/index.html" },
     { "source": "/admin/(.*)",            "destination": "/admin/index.html" },
+    { "source": "/admin-lite",            "destination": "/admin-lite.html" },
 
     { "source": "/(.*)",                  "destination": "/index.html" }
   ]
