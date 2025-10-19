@@ -1,14 +1,24 @@
-// public/js/admin-main.js
+﻿// public/js/admin-main.js
 // Wire up core admin actions using the bootstrap utilities
 
 const Admin = window.Admin || {};
 const $ = Admin.$ || ((s, el=document)=> el.querySelector(s));
 
+
+// Fallbacks if bootstrap not ready
+let __ADMIN_TOKEN = sessionStorage.getItem('tran_admin_token') || '';
+function __setToken(tok){ __ADMIN_TOKEN = tok || ''; if(tok){ sessionStorage.setItem('tran_admin_token', tok); } else { sessionStorage.removeItem('tran_admin_token'); } }
+async function __apiFetch(url, init = {}){
+  if (window.Admin && typeof window.Admin.apiFetch === 'function') return window.Admin.apiFetch(url, init);
+  const timeoutMs = 12000; const ctrl = new AbortController(); const id = setTimeout(()=> ctrl.abort(new DOMException('timeout','AbortError')), timeoutMs);
+  const headers = new Headers(init.headers || {}); if (__ADMIN_TOKEN) headers.set('Authorization', 'Bearer ' + __ADMIN_TOKEN);
+  try{ const res = await fetch(url, { credentials: 'include', cache: 'no-store', ...init, headers, signal: ctrl.signal }); const text = await res.text(); let data=null; try{ data=JSON.parse(text);}catch{}; return { res, ok: res.ok, status: res.status, data, text }; } finally { clearTimeout(id); }
+}
 function today(){ return new Date().toISOString().slice(0,10); }
 
 async function waitForGone(apiPath, tries=8, interval=600){
   for (let i=0;i<tries;i++){
-    const r = await Admin.apiFetch(apiPath + (apiPath.includes('?')?'&':'?') + '_=' + Date.now(), { method:'GET' });
+    const r = await __apiFetch(apiPath + (apiPath.includes('?')?'&':'?') + '_=' + Date.now(), { method:'GET' });
     if (!r.ok) return true; // not found -> gone
     await new Promise(res=>setTimeout(res, interval));
   }
@@ -32,7 +42,7 @@ function bindDailyBrief(){
     const { slug, payload } = get();
     msgEl && (msgEl.textContent = 'Publishing...');
     try{
-      const r = await Admin.apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
+      const r = await __apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
       if(!r.ok) throw new Error((r.data && (r.data.error||r.data.message)) || `HTTP ${r.status}`);
       msgEl && (msgEl.textContent = 'Published');
     }catch(e){ msgEl && (msgEl.textContent = 'Publish failed: ' + (e?.message||e)); }
@@ -42,7 +52,7 @@ function bindDailyBrief(){
     if (!confirm(`Delete Daily Brief: ${slug}?`)) return;
     msgEl && (msgEl.textContent = 'Deleting...');
     try{
-      const del = await Admin.apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+      const del = await __apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
       if(!del.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.status}`);
       await waitForGone(`/api/daily-brief/${encodeURIComponent(slug)}.json`);
       msgEl && (msgEl.textContent = 'Deleted');
@@ -74,7 +84,7 @@ function bindAnalyses(){
     const { slug, payload } = get(); if(!slug) return msgEl && (msgEl.textContent='Please fill slug');
     msgEl && (msgEl.textContent = 'Publishing...');
     try{
-      const r = await Admin.apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
+      const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
       if(!r.ok) throw new Error((r.data && (r.data.error||r.data.message)) || `HTTP ${r.status}`);
       msgEl && (msgEl.textContent = 'Published');
     }catch(e){ msgEl && (msgEl.textContent = 'Publish failed: ' + (e?.message||e)); }
@@ -84,7 +94,7 @@ function bindAnalyses(){
     if (!confirm(`Delete analysis: ${slug}?`)) return;
     msgEl && (msgEl.textContent = 'Deleting...');
     try{
-      const del = await Admin.apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+      const del = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
       if(!del.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.status}`);
       await waitForGone(`/api/analyses/${encodeURIComponent(slug)}.json`);
       msgEl && (msgEl.textContent = 'Deleted');
@@ -110,7 +120,7 @@ function bindNews(){
     const { id, payload } = get(); if(!id) return msgEl && (msgEl.textContent='Please fill id');
     msgEl && (msgEl.textContent = 'Publishing...');
     try{
-      const r = await Admin.apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
+      const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
       if(!r.ok) throw new Error((r.data && (r.data.error||r.data.message)) || `HTTP ${r.status}`);
       msgEl && (msgEl.textContent = 'Published');
     }catch(e){ msgEl && (msgEl.textContent = 'Publish failed: ' + (e?.message||e)); }
@@ -120,7 +130,7 @@ function bindNews(){
     if (!confirm(`Delete news: ${id}?`)) return;
     msgEl && (msgEl.textContent = 'Deleting...');
     try{
-      const del = await Admin.apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
+      const del = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
       if(!del.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.status}`);
       await waitForGone(`/api/market-news/${encodeURIComponent(id)}.json`);
       msgEl && (msgEl.textContent = 'Deleted');
@@ -144,7 +154,7 @@ function bindResearchArticles(){
     const { slug, payload } = get(); if(!slug) return msgEl && (msgEl.textContent='Please fill slug');
     msgEl && (msgEl.textContent = 'Publishing...');
     try{
-      const r = await Admin.apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
+      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'PUT', headers:{ 'content-type':'application/json' }, body: JSON.stringify(payload) });
       if(!r.ok) throw new Error((r.data && (r.data.error||r.data.message)) || `HTTP ${r.status}`);
       msgEl && (msgEl.textContent = 'Published');
     }catch(e){ msgEl && (msgEl.textContent = 'Publish failed: ' + (e?.message||e)); }
@@ -154,7 +164,7 @@ function bindResearchArticles(){
     if (!confirm(`Delete article: ${slug}?`)) return;
     msgEl && (msgEl.textContent = 'Deleting...');
     try{
-      const del = await Admin.apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+      const del = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
       if(!del.ok) throw new Error((del.data && (del.data.error||del.data.message)) || `HTTP ${del.status}`);
       await waitForGone(`/api/research/articles/${encodeURIComponent(slug)}.json`);
       msgEl && (msgEl.textContent = 'Deleted');
