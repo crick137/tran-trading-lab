@@ -1,19 +1,18 @@
-// api/app.js
+﻿// api/app.js
 export const config = { runtime: 'nodejs' };
 
-// —�?依赖：api/_lib/http.js, api/_lib/blob.js
+// 鈥斺€?渚濊禆锛歛pi/_lib/http.js, api/_lib/blob.js
 import { jsonOK, badRequest, requireAuth as _requireAuth } from './_lib/http.js';
 import {
   writeJSON,
   readJSONViaFetch,
   deleteObject,
   listByPrefix as _listByPrefix,
-  list as _listRaw,
-} from './_lib/blob.js';
+  deleteByUrl,\n  list as _listRaw,\n} from './_lib/blob.js';
 
 const ENABLE_CORS = false;
 
-/* ---------- 基础响应工具：仍返回 Web Response ---------- */
+/* ---------- 鍩虹鍝嶅簲宸ュ叿锛氫粛杩斿洖 Web Response ---------- */
 function ok(data, status = 200) {
   return jsonOK(data, status);
 }
@@ -30,7 +29,7 @@ function withHeaders(init = {}) {
   return { ...init, headers: h };
 }
 
-/* ---------- Header �?URL 兼容 ---------- */
+/* ---------- Header 涓?URL 鍏煎 ---------- */
 function getHeader(req, name) {
   const h = req.headers || {};
   const key = String(name).toLowerCase();
@@ -50,7 +49,7 @@ function getURL(req) {
   }
 }
 
-/* ---------- 读取请求体：Edge/Web/Node 皆可 ---------- */
+/* ---------- 璇诲彇璇锋眰浣擄細Edge/Web/Node 鐨嗗彲 ---------- */
 async function readBody(req) {
   try {
     const ct = (getHeader(req, 'content-type') || '').toLowerCase();
@@ -77,7 +76,7 @@ async function readBody(req) {
   }
 }
 
-/* ---------- Blob 工具 ---------- */
+/* ---------- Blob 宸ュ叿 ---------- */
 async function listByPrefix(prefix) {
   try {
     if (typeof _listByPrefix === 'function') return await _listByPrefix(prefix);
@@ -116,12 +115,26 @@ async function removeFromIndex(prefix, key) {
   }
 }
 
-function requireAuthIfConfigured(req) {
+
+async function ensureDeleted(prefix, slug) {
+  const FILE = `${prefix}/${slug}.json`;
+  for (let i = 0; i < 3; i++) {
+    const blobs = await listByPrefix(`${prefix}/`);
+    const hit = (blobs||[]).find(b => b.pathname === FILE);
+    if (!hit) return true;
+    try { await deleteObject(FILE, { timeoutMs: 3000, retries: 1, retryDelayMs: 200 }); } catch {}
+    try { if (hit.url) await deleteByUrl(hit.url, { timeoutMs: 3000, retries: 1, retryDelayMs: 200 }); } catch {}
+    await new Promise(r => setTimeout(r, 400));
+  }
+  const after = await listByPrefix(`${prefix}/`);
+  const still = (after||[]).some(b => b.pathname === FILE);
+  return !still;
+}function requireAuthIfConfigured(req) {
   if (!process.env.ADMIN_PASSWORD) return null;
   try {
     const cookie = getHeader(req, 'cookie') || '';
     if (cookie && /(?:^|;\s*)tran_admin=ok(?:;|$)/.test(cookie)) {
-      return null; // cookie �Ự�ѵ�¼
+      return null; // cookie 会话已登录
     }
   } catch {}
   return _requireAuth(req);
@@ -136,12 +149,12 @@ async function handleAdmin(req, pathname) {
     const pass = body?.password || body?.pwd || '';
     if (!process.env.ADMIN_PASSWORD) return err('ADMIN_PASSWORD_NOT_SET', 500);
     if (pass !== process.env.ADMIN_PASSWORD) return err('INVALID_PASSWORD', 401);
-    // 你的前端并未真正设置 cookie，这里按“只验证一次”的轻模�?
+    // 浣犵殑鍓嶇骞舵湭鐪熸璁剧疆 cookie锛岃繖閲屾寜鈥滃彧楠岃瘉涓€娆♀€濈殑杞绘ā寮?
     return ok({ ok: true, token: 'ok' });
   }
 
   if (sub === '/verify' && req.method === 'GET') {
-    // 轻模式：只要能到达这里，就认为已登录
+    // 杞绘ā寮忥細鍙鑳藉埌杈捐繖閲岋紝灏辫涓哄凡鐧诲綍
     return ok({ authed: true });
   }
 
@@ -152,15 +165,15 @@ async function handleAdmin(req, pathname) {
   return err('ADMIN_NO_ROUTE', 404);
 }
 
-/* ---------- 通用 CRUD ---------- */
+/* ---------- 閫氱敤 CRUD ---------- */
 async function genericHandler(req, pathname, PREFIX) {
   try {
     const p = normPath(pathname);
     
-    // 日志记录
+    // 鏃ュ織璁板綍
     console.log(`[API] ${req.method} ${pathname} (PREFIX: ${PREFIX})`);
     
-    // 列表 / 索引
+    // 鍒楄〃 / 绱㈠紩
     if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
       const idx = await readIndexJson(`${PREFIX}/index.json`);
       const blobs = await listByPrefix(`${PREFIX}/`);
@@ -185,19 +198,19 @@ async function genericHandler(req, pathname, PREFIX) {
       return ok(items);
     }
   
-    // 单项
+    // 鍗曢」
     const m = p.match(new RegExp(`^/api/${PREFIX}/([^/]+?)(?:\\.json)?$`));
     if (!m) return err(`${PREFIX.toUpperCase()}_NO_ROUTE`, 404);
     const slug = m[1];
     const FILE = `${PREFIX}/${slug}.json`;
   
-    // �?
+    // 璇?
     if (req.method === 'GET') {
       try { return ok(await readJSONViaFetch(FILE)); }
       catch { return err('NOT_FOUND', 404); }
     }
   
-    // 写操作增强日�?
+    // 鍐欐搷浣滃寮烘棩蹇?
     if (['PUT','POST'].includes(req.method)) {
       console.log(`[API] Writing to ${PREFIX}/${slug}.json`);
       const unauthorized = requireAuthIfConfigured(req); 
@@ -220,7 +233,7 @@ async function genericHandler(req, pathname, PREFIX) {
       }
     }
   
-    // �?
+    // 鍒?
     if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
       try {
@@ -243,7 +256,7 @@ async function genericHandler(req, pathname, PREFIX) {
   }
 }
 
-/* ---------- Research 只读 ---------- */
+/* ---------- Research 鍙 ---------- */
 async function handleResearch(req, pathname) {
   const p = normPath(pathname);
   if (req.method !== 'GET') return err('METHOD_NOT_ALLOWED', 405);
@@ -259,9 +272,9 @@ async function handleResearch(req, pathname) {
   return err('RESEARCH_NO_ROUTE', 404);
 }
 
-/* ---------- �?Web Response 写回�?Node res ---------- */
+/* ---------- 鎶?Web Response 鍐欏洖鍒?Node res ---------- */
 async function sendNodeResponse(res, out) {
-  // out 是一�?Web Response（jsonOK/badRequest 返回的）
+  // out 鏄竴涓?Web Response锛坖sonOK/badRequest 杩斿洖鐨勶級
   if (out && typeof out === 'object' && typeof out.text === 'function' && out.headers) {
     const status = out.status || 200;
     const headersObj = {};
@@ -273,13 +286,13 @@ async function sendNodeResponse(res, out) {
     res.end(bodyText);
     return;
   }
-  // 容错：非 Response，按 JSON 输出
+  // 瀹归敊锛氶潪 Response锛屾寜 JSON 杈撳嚭
   res.setHeader('content-type', 'application/json; charset=utf-8');
   res.statusCode = 200;
   res.end(JSON.stringify(out ?? {}));
 }
 
-/* ---------- 主路由入口（Node 风格�?---------- */
+/* ---------- 涓昏矾鐢卞叆鍙ｏ紙Node 椋庢牸锛?---------- */
 export default async function handler(req, res) {
   try {
     const url = getURL(req);
@@ -294,7 +307,7 @@ export default async function handler(req, res) {
       return sendNodeResponse(res, r);
     }
 
-    // 健康检�?
+    // 鍋ュ悍妫€鏌?
     if (req.method === 'GET' && pathname === '/api/ping') {
       const r = ok({
         ok: true,
@@ -308,7 +321,7 @@ export default async function handler(req, res) {
     let out;
     console.log(`[API] Request received: ${req.method} ${pathname}`);
     
-    // 增强路由分发日志
+    // 澧炲己璺敱鍒嗗彂鏃ュ織
     if (pathname.startsWith('/api/admin')) {
       console.log(`[API] Handling admin route: ${pathname}`);
       out = await handleAdmin(req, pathname);
@@ -337,3 +350,6 @@ export default async function handler(req, res) {
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }
+
+
+
