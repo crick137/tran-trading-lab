@@ -288,6 +288,24 @@
   <script type="module">
     const $  = (s, el=document)=> el.querySelector(s);
     const $$ = (s, el=document)=> Array.from(el.querySelectorAll(s));
+    // Ensure login overlay markup is intact (ASCII-only to avoid encoding issues)
+    (function ensureLoginOverlay(){
+      const host = document.getElementById('pw-overlay');
+      if (!host) return;
+      if (!host.querySelector('#pw-enter')){
+        host.innerHTML = [
+          '<div class="login-box">',
+            '<h3 style="margin:4px 0 10px">Admin Login</h3>',
+            '<p class="muted" style="margin:0 0 6px">Enter password to access admin. You will stay logged in.</p>',
+            '<div class="row">',
+              '<input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />',
+              '<button id="pw-enter" class="primary">Enter</button>',
+            '</div>',
+            '<p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>',
+          '</div>'
+        ].join('');
+      }
+    })();
 
     /* 鎺堟潈涓庣粺涓€ Fetch锛堣嚜鍔ㄥ甫 Cookie + Authorization + 瓒呮椂锛?*/
     let ADMIN_TOKEN = sessionStorage.getItem('tran_admin_token') || '';
@@ -755,6 +773,7 @@
   </script>
 </body>
 </html>
+
 
 
 
