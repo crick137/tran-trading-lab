@@ -238,7 +238,7 @@ async function genericHandler(req, pathname, PREFIX) {
     }
   
     // 鍒?
-    if (req.method === 'DELETE') {
+        if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
       try {
         await deleteObject(FILE);
@@ -246,6 +246,15 @@ async function genericHandler(req, pathname, PREFIX) {
         console.error(`[API] Delete failed for ${FILE}:`, e);
         const msg = (e && e.message) ? e.message : 'DELETE_FAILED';
         return err(msg, 500);
+      }
+      try {
+        const okGone = await ensureDeleted(PREFIX, slug);
+        if (!okGone) {
+          console.warn(`[API] Delete verify failed for ${FILE}`);
+          return err('DELETE_VERIFY_FAILED', 500);
+        }
+      } catch (e) {
+        console.warn(`[API] ensureDeleted error for ${FILE}:`, e?.message || e);
       }
       try { await removeFromIndex(PREFIX, slug); } catch (e) {
         console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
@@ -354,6 +363,7 @@ export default async function handler(req, res) {
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }
+
 
 
 
