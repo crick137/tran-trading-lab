@@ -29,6 +29,14 @@ function setActive(){
   });
 }
 
+// ---- 데이터 캐시 ----
+let dailyBriefIndexCache = null;
+const dailyBriefCache = new Map();
+let analysesIndexCache = null;
+const analysesDetailCache = new Map();
+let marketNewsIndexCache = null;
+const marketNewsCache = new Map();
+
 // -------- Daily Brief 라우팅 ----------
 function matchRoute() {
   const raw = location.hash || '#/';
@@ -47,7 +55,7 @@ function renderHomeView(){
         <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
       </div>
 
-      <div class="feature-grid" role="list">
+      <div class="feature-grid home-feature-grid" role="list">
         <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
           <span class="glow" aria-hidden="true"></span>
           <div class="title">
@@ -371,6 +379,7 @@ function renderAboutView(){
 }
 
 async function renderRoute(routeId, slug){
+  window.scrollTo({ top: 0, behavior: 'auto' });
   switch (routeId) {
     case 'home':
       renderHomeView();
@@ -421,8 +430,12 @@ async function renderDailyBriefList(){
   if (!ul) return;
   ul.innerHTML = '<li class="muted">불러오는 중…</li>';
   try{
-    const res = await fetch('/api/daily-brief/index.json?_=' + Date.now());
-    const items = await res.json();
+    if (!dailyBriefIndexCache){
+      const res = await fetch('/api/daily-brief/index.json?_=' + Date.now());
+      const items = await res.json();
+      if (Array.isArray(items)) dailyBriefIndexCache = items;
+    }
+    const items = Array.isArray(dailyBriefIndexCache) ? dailyBriefIndexCache : [];
     ul.innerHTML = Array.isArray(items)&&items.length
       ? items.map(s=>`<li><a href="#/daily-brief/${s}">${s}</a></li>`).join('')
       : '<li class="muted">자료가 없습니다</li>';
@@ -440,9 +453,13 @@ async function renderDailyBriefDetail(slug){
   }
   wrap.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try {
-    const res = await fetch(`/api/daily-brief/${slug}.json?_=${Date.now()}`);
-    if (!res.ok) throw 0;
-    const d = await res.json();
+    if (!dailyBriefCache.has(slug)){
+      const res = await fetch(`/api/daily-brief/${slug}.json?_=${Date.now()}`);
+      if (!res.ok) throw 0;
+      const data = await res.json();
+      dailyBriefCache.set(slug, data);
+    }
+    const d = dailyBriefCache.get(slug) || {};
     wrap.innerHTML = `
       <div class="grid grid-12">
         <section class="card" style="grid-column: span 8;">
@@ -486,7 +503,10 @@ async function loadAnalysesList(){
   if (!list) return;
   list.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
-    const items = await fetchJSON(AIDX); // [{slug,title,symbol,tf,date,tags,bias}]
+    if (!analysesIndexCache){
+      analysesIndexCache = await fetchJSON(AIDX); // [{slug,title,symbol,tf,date,tags,bias}]
+    }
+    const items = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
@@ -564,7 +584,10 @@ async function renderAnalysisDetailBySlug(slug){
 
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
-    const d = await fetchJSON(`/api/analyses/${slug}.json`);
+    if (!analysesDetailCache.has(slug)){
+      analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${slug}.json`));
+    }
+    const d = analysesDetailCache.get(slug) || {};
     const ivl = (d.chart?.interval) || '60';
     const sym  = (d.chart?.symbol)   || d.symbol;
 
@@ -1050,16 +1073,23 @@ async function renderMarketNews(){
   if (!host) return;
   host.innerHTML = '<p class="muted">불러오는 중…</p>';
   try{
-    const res = await fetch('/api/market-news/index.json?_=' + Date.now());
-    const rows = await res.json(); // [{id}]
+    if (!marketNewsIndexCache){
+      const res = await fetch('/api/market-news/index.json?_=' + Date.now());
+      const rows = await res.json();
+      if (Array.isArray(rows)) marketNewsIndexCache = rows;
+    }
+    const rows = Array.isArray(marketNewsIndexCache) ? marketNewsIndexCache : [];
     if (!Array.isArray(rows) || !rows.length) {
       host.innerHTML = '<p class="muted">뉴스가 없습니다</p>';
       return;
     }
     const html = await Promise.all(rows.map(async r=>{
       try{
-        const dres = await fetch(`/api/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
-        const d = await dres.json();
+        if (!marketNewsCache.has(r.id)){
+          const dres = await fetch(`/api/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
+          marketNewsCache.set(r.id, await dres.json());
+        }
+        const d = marketNewsCache.get(r.id) || {};
         const bullets = (d.bullets||[]).map(b=>`<li>${b}</li>`).join('');
         const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문 보기</a>` : '';
         const when = d.date ? new Date(d.date).toLocaleString() : '';

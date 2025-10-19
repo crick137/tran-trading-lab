@@ -26,6 +26,13 @@ html,body{
   backdrop-filter: saturate(140%) blur(6px);
   background: linear-gradient(180deg, #0b0c10cc, #0b0c1000);
   border-bottom: 1px solid #ffffff10;
+  display:flex;
+  gap:18px;
+  align-items:center;
+  padding:12px 20px;
+  position:sticky;
+  top:0;
+  z-index:20;
 }
 .nav a{
   color: var(--muted);
@@ -33,17 +40,25 @@ html,body{
   letter-spacing:.2px;
   transition:.25s ease;
   text-decoration: none;
+  display:inline-flex;
+  align-items:center;
+  position:relative;
+  padding:8px 10px;
 }
 .nav a:hover{ color: var(--text); }
 .nav a.active{
   color: var(--text);
-  position: relative;
 }
 .nav a.active::after{
   content:"";
-  position:absolute; left:0; right:0; bottom:-10px; height:2px;
+  position:absolute;
+  left:50%;
+  bottom:-8px;
+  transform:translateX(-50%);
+  width:60%;
+  height:2px;
   background: linear-gradient(90deg, var(--brand), var(--brand-2));
-  border-radius:2px;
+  border-radius:999px;
 }
 
 /* 容器 */
@@ -138,6 +153,7 @@ html,body{
   gap:18px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
+.home-feature-grid{ margin-top:26px; row-gap:22px; }
 
 .grid-12{
   display:grid;
