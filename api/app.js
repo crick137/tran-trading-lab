@@ -285,6 +285,32 @@ async function handleResearch(req, pathname) {
   return err('RESEARCH_NO_ROUTE', 404);
 }
 
+async function handleResearchSyllabusWrite(req) {
+  if (!['PUT','POST','DELETE'].includes(req.method)) return err('METHOD_NOT_ALLOWED', 405);
+
+  const unauthorized = requireAuthIfConfigured(req);
+  if (unauthorized) return unauthorized;
+
+  try {
+    let syllabus = [];
+
+    if (req.method === 'DELETE') {
+      syllabus = [];
+    } else {
+      const body = await readBody(req);
+      const raw = Array.isArray(body?.syllabus) ? body.syllabus : Array.isArray(body) ? body : null;
+      if (!Array.isArray(raw)) return err('INVALID_SYLLABUS_ARRAY', 400);
+      syllabus = raw;
+    }
+
+    await writeJSON('research/syllabus.json', { syllabus, updatedAt: new Date().toISOString() });
+    return ok({ saved: true, count: syllabus.length });
+  } catch (e) {
+    console.error('[syllabus write] error:', e);
+    return err('SYLLABUS_WRITE_FAILED', 500);
+  }
+}
+
 /* ---------- 鎶?Web Response 鍐欏洖鍒?Node res ---------- */
 async function sendNodeResponse(res, out) {
   // out 鏄竴涓?Web Response锛坖sonOK/badRequest 杩斿洖鐨勶級
@@ -349,15 +375,15 @@ export default async function handler(req, res) {
     else if (pathname.startsWith('/api/market-news')) {
       out = await genericHandler(req, pathname, 'market-news');
     }
+    else if (pathname.startsWith('/api/research/syllabus')) {
+      if (req.method === 'GET') out = await handleResearch(req, pathname);
+      else out = await handleResearchSyllabusWrite(req);
+    }
     else if (pathname.startsWith('/api/research/articles/')) {
       out = await genericHandler(req, pathname, 'research/articles');
     }
     else if (pathname === '/api/research/articles' || pathname === '/api/research/articles.json') {
       out = await handleResearch(req, pathname);
-    }
-    else if (pathname.startsWith('/api/research/syllabus')) {
-      const prefixed = pathname.replace('/api/research', '/api');
-      out = await genericHandler(req, prefixed, 'research');
     }
     else if (pathname.startsWith('/api/research')) {
       out = await handleResearch(req, pathname);
