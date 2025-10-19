@@ -333,17 +333,7 @@
         .then(fn)
         .finally(()=>{ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; });
     }
-    function explainErr(e){
-      const m = (e && e.message) ? e.message : String(e||'');
-      if (m === 'DELETE_VERIFY_FAILED') return '鍒犻櫎鍚庢牎楠屽け璐ワ細鍙兘缂撳瓨鎴栨潈闄愰棶棰橈紝璇风◢鍚庡埛鏂扮‘璁ゃ€?;
-      if (/BLOB_TOKEN_MISSING/i.test(m)) return '鏈嶅姟绔湭閰嶇疆 Blob 鍐欏叆 Token锛堣璁剧疆 BLOB_READ_WRITE_TOKEN锛夈€?;
-      if (/UNAUTHORIZED|401/.test(m)) return '鏈巿鏉冿細璇烽噸鏂扮櫥褰曞悗鍙板悗鍐嶈瘯銆?;
-      if (/SERVER_NO_ADMIN_PASSWORD|ADMIN_PASSWORD_NOT_SET/i.test(m)) return '鏈嶅姟绔湭璁剧疆 ADMIN_PASSWORD銆?;
-      if (/DELETE_FAILED/i.test(m)) return '鍒犻櫎澶辫触锛氭湇鍔＄鍒犻櫎鏂囦欢鍑洪敊銆?;
-      if (/timeout|AbortError/i.test(m)) return '璇锋眰瓒呮椂锛岃绋嶅悗閲嶈瘯銆?;
-      return m || '鎿嶄綔澶辫触';
-    }
-    async function waitForGone(apiPath, tries=8, interval=600){
+    function explainErr(e){\n  const m = (e && e.message) ? e.message : String(e||'');\n  if (m === 'DELETE_VERIFY_FAILED') return 'Verification failed after delete. Try refresh.';\n  if (/BLOB_TOKEN_MISSING/i.test(m)) return 'Blob RW token missing. Set BLOB_READ_WRITE_TOKEN.';\n  if (/UNAUTHORIZED|401/.test(m)) return 'Unauthorized. Please re-login.';\n  if (/SERVER_NO_ADMIN_PASSWORD|ADMIN_PASSWORD_NOT_SET/i.test(m)) return 'ADMIN_PASSWORD is not set on server.';\n  if (/DELETE_FAILED/i.test(m)) return 'Delete failed on server.';\n  if (/timeout|AbortError/i.test(m)) return 'Request timed out. Retry.';\n  return m || 'Operation failed';\n}\n    async function waitForGone(apiPath, tries=8, interval=600){
       for (let i=0; i<tries; i++){
         const r = await apiFetch(apiPath + (apiPath.includes('?')?'&':'?') + '_=' + Date.now(), { method:'GET' });
         if (!r.ok) return true;
@@ -773,6 +763,7 @@
   </script>
 </body>
 </html>
+
 
 
 
