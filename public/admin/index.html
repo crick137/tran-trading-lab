@@ -1,305 +1,262 @@
 ﻿<!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Console 路 TRAN TRADING LAB</title>
+  <title>Admin Console · TRAN TRADING LAB</title>
   <link rel="stylesheet" href="/styles/global.css" />
   <style>
-    :root{ --bg:#0f1115; --card:#15171a; --fg:#eaecee; --muted:#9aa0a6; --bd:#23262b; --primary:#3b82f6; }
-    html,body{height:100%; margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
-    .container{max-width:1080px; margin:24px auto; padding:0 16px}
-    .card{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35); color:var(--fg); padding:16px; }
-    .muted{ color:var(--muted); }
-    input,select,textarea{ background:#0f1115; border:1px solid var(--bd); color:#fff; padding:8px 10px; border-radius:10px; outline:none; }
-    input:focus,select:focus,textarea:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.2); }
-    .icon-btn{ background:transparent; border:1px solid #2a2f36; color:var(--fg); padding:6px 10px; border-radius:8px; cursor:pointer }
-    .icon-btn:hover{ background:#1b1f24 }
-    button.primary{ padding:10px 14px; border-radius:12px; border:0; background:var(--primary); color:#fff; font-weight:700; cursor:pointer }
-    button.primary:hover{ filter:brightness(1.05) }
-    .tab-btn{ border:1px solid var(--bd); background:#121418; color:var(--fg); padding:10px 14px; border-radius:10px; cursor:pointer }
-    .tab-btn.active{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.2) }
-    .tab{ display:none } .tab.active{ display:block }
-    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-    .split{ display:grid; gap:12px; grid-template-columns: 1.2fr .8fr; } @media (max-width: 900px){ .split { grid-template-columns: 1fr } }
-    .kbd{ border:1px solid #2a2f36; background:#1b1f24; padding:2px 6px; border-radius:6px; font-size:12px }
-    .danger{ color:#f87171; border-color:#f87171 }
-    textarea{ min-height: 120px; }
-    .form-grid{ display:grid; gap:10px; grid-template-columns: 1fr 1fr; }
-    .form-grid .full{ grid-column: 1 / -1; }
-
-    /* 鐧诲綍閬僵锛堥粯璁ゅ彲瑙侊紝閬垮厤鑴氭湰澶辫触鏃剁櫧灞忥級 */
-    #pw-overlay{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:rgba(0,0,0,.55); backdrop-filter: blur(4px); z-index:9999;
-    }
-    .login-box{
-      width:min(92vw,420px); background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px;
-      box-shadow:0 12px 40px rgba(0,0,0,.5)
-    }
-    .login-box h3{ margin:4px 0 10px }
-    .login-box .row{ margin-top:8px }
-
-    /* 淇濋櫓涓?1锛氶殣钘忎换浣曟棫鈥滃彂甯冨彛浠も€濇帶浠?*/
-    .pw-group,.topbar .pw,.topbar .remember,.topbar .clear,.publish-password,#publish-pw,
-    input[name="publishPassword"],label[for="publish-pw"]{
-      display:none!important; visibility:hidden!important; height:0!important; padding:0!important; margin:0!important; border:0!important;
-    }
+    body{ margin:0; background:#0f1115; color:#eaecee; font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial; }
+    .container{ max-width:1100px; margin:24px auto 48px auto; padding:0 16px; }
+    .card{ background:#15171a; border:1px solid #23262b; border-radius:14px; padding:18px; margin:16px 0; box-shadow:0 12px 32px rgba(0,0,0,.35); }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .muted{ color:#9aa0a6; }
+    input,select,textarea{ background:#0f1115; border:1px solid #2a2f36; color:#fff; padding:8px 10px; border-radius:10px; outline:none; width:100%; box-sizing:border-box; }
+    textarea{ min-height:140px; font-family:inherit; }
+    button{ cursor:pointer; border-radius:10px; font-weight:600; }
+    button.primary{ background:#3b82f6; color:#fff; border:0; padding:8px 16px; }
+    button.danger{ background:transparent; color:#f87171; border:1px solid #f87171; padding:8px 16px; }
+    button.ghost{ background:transparent; color:#eaecee; border:1px solid #2a2f36; padding:8px 16px; }
+    button.primary:hover{ filter:brightness(1.05); }
+    button.ghost:hover{ border-color:#3b82f6; }
+    button.danger:hover{ background:rgba(248,113,113,.1); }
+    .nav-tabs{ display:flex; gap:10px; flex-wrap:wrap; margin:20px 0; }
+    .nav-tabs button{ background:#121418; border:1px solid #2a2f36; color:#eaecee; padding:8px 14px; border-radius:10px; }
+    .nav-tabs button.active{ border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.25); }
+    .tab-panel{ display:none; }
+    .tab-panel.active{ display:block; }
+    .form-grid{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+    .form-grid .wide{ grid-column:1 / -1; }
+    .action-bar{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .section-footer{ margin-top:12px; }
+    pre{ background:#0f1115; border:1px solid #2a2f36; border-radius:12px; padding:12px; overflow:auto; max-height:240px; }
+    #pw-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:9999; }
+    .login-box{ width:min(92vw,420px); background:#15171a; border:1px solid #23262b; border-radius:14px; padding:18px; box-shadow:0 12px 40px rgba(0,0,0,.5); color:#eaecee; }
+    .login-box h3{ margin:0 0 10px; }
+    .login-box p{ margin:0 0 12px; color:#9aa0a6; }
+    .login-box input{ width:100%; margin-bottom:12px; }
+    .login-box button{ width:100%; }
+    a.inline-link{ color:#3b82f6; text-decoration:none; }
   </style>
 </head>
 <body>
 
-  <!-- 鐧诲綍閬僵锛堟湭鐧诲綍鏄剧ず锛?-->
-  <div id="pw-overlay">
-    <div class="login-box">
-      <h3>绠＄悊鍛樼櫥褰?/h3>
-      <p class="muted" style="margin:0 0 6px">杈撳叆涓€娆″彛浠よ繘鍏ュ悗鍙帮紱鐧诲綍鍚庡彂甯冩棤闇€鍐嶅～銆?/p>
-      <div class="row">
-        <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />
-        <button id="pw-enter" class="primary">杩涘叆鍚庡彴</button>
-      </div>
-      <p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>
-    </div>
-  </div>
+  <div id="pw-overlay"></div>
 
-  <!-- 鍚庡彴涓讳綋锛堢櫥褰曞悗鏄剧ず锛?-->
   <div id="admin-root" style="display:none">
-    <main class="admin container">
+    <main class="container">
       <section class="card">
-        <h2 style="margin:0 0 10px">Admin Console</h2>
-
-        <div class="row" style="justify-content:space-between">
+        <div class="row" style="justify-content:space-between;">
+          <h2 style="margin:0">Admin Console</h2>
           <div class="row">
-            <button id="logout-admin" class="icon-btn">閫€鍑虹櫥褰?/button>
-          </div>
-          <div class="row" style="align-items:center; gap:10px">
-            <div class="muted">鑽夌鑷姩淇濆瓨 路 <span class="kbd">Ctrl/Cmd + Enter</span> 鍙戝竷</div>
-            <button id="clear-drafts" class="icon-btn danger">娓呯┖鏈湴鑽夌</button>
+            <button id="run-diag" class="ghost">Run Diagnostics</button>
+            <button id="logout-admin" class="danger">Logout</button>
           </div>
         </div>
-
-        
-        <div id="diag-wrap" class="card" style="display:none; margin-top:10px; padding:12px">
-          <h3 style="margin:0 0 8px">诊断结果</h3>
-          <div id="diag-brief" class="muted" style="margin-bottom:8px"></div>
-          <pre id="diag-out" style="margin:0; white-space:pre-wrap; word-break:break-word; background:#0f1115; border:1px solid var(--bd); padding:8px; border-radius:8px"></pre>
+        <div id="diag-wrap" style="display:none; margin-top:14px;">
+          <div id="diag-status" class="muted">Diagnostics pending.</div>
+          <pre id="diag-output"></pre>
         </div>
-<div class="tabs" style="margin-top:12px">
-          <button class="tab-btn active" data-tab="brief">Daily Brief</button>
-          <button class="tab-btn" data-tab="analyses">Analyses</button>
-          <button class="tab-btn" data-tab="news">Market News</button>
-          <button class="tab-btn" data-tab="research">Research</button>
-          <button class="tab-btn" data-tab="r-articles">Articles</button>
-        </div>
+      </section>
 
-        <!-- Daily Brief -->
-        <div class="tab active" id="tab-brief">
-          <div class="split">
-            <div>
-              <div class="form-grid">
-                <label>鏃ユ湡锛圷YYY-MM-DD锛屼笉濉?浠婂ぉ锛?input id="b-slug" placeholder="2025-10-18" /></label>
-                <label class="full">鏍囬<input id="b-title" placeholder="Daily Brief 鏍囬锛堝彲閫夛級" /></label>
-                <label class="full">鏍稿績瑕佺偣锛堟瘡琛屼竴鏉★級<textarea id="b-bullets"></textarea></label>
-                <label class="full">浠婃棩鏃ョ▼锛堟瘡琛屼竴鏉★級<textarea id="b-schedule"></textarea></label>
-                <label>鍥捐〃绗﹀彿<input id="b-symbol" placeholder="FX:XAUUSD" /></label>
-                <label>鍥捐〃鍛ㄦ湡
-                  <select id="b-interval">
-                    <option value="15">15m</option>
-                    <option value="60" selected>1H</option>
-                    <option value="240">4H</option>
-                    <option value="1D">1D</option>
-                  </select>
-                </label>
-              </div>
-              <div class="row" style="margin-top:10px">
-                <button id="b-publish" class="primary">鍙戝竷</button>
-                <button id="b-reuse" class="icon-btn">鏄ㄦ棩澶嶇敤</button>
-                <button id="b-preview" class="icon-btn">涓€閿瑙?/button>
-                <button id="b-delete" class="icon-btn danger">鍒犻櫎璇ユ棩鏈?/button>
-                <button id="b-clear" class="icon-btn">娓呯┖鑽夌</button>
-              </div>
-              <p class="muted" id="b-msg" style="margin-top:10px"></p>
-            </div>
-            <div class="card" style="padding:12px">
-              <h3 style="margin-top:0">璇存槑</h3>
-              <ul class="muted" style="margin:8px 0 0 18px">
-                <li>鍙戝竷鍒?<code>/api/daily-brief/YYYY-MM-DD.json</code></li>
-                <li>鈥滄槰鏃ュ鐢ㄢ€濓細鎶撳彇鏈€鏂颁竴鏉★紝鑷姩鎶婃棩鏈熸敼鎴愪粖澶?/li>
-                <li>棰勮锛?code>#/daily-brief/YYYY-MM-DD</code></li>
-                <li>鍒犻櫎锛?code>DELETE /api/daily-brief/YYYY-MM-DD.json</code></li>
-              </ul>
-            </div>
-          </div>
-        </div>
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-tab="brief">Daily Brief</button>
+        <button class="tab-btn" data-tab="analyses">Analyses</button>
+        <button class="tab-btn" data-tab="news">Market News</button>
+        <button class="tab-btn" data-tab="articles">Research Articles</button>
+      </nav>
 
-        <!-- Analyses -->
-        <div class="tab" id="tab-analyses">
-          <div class="split">
-            <div>
-              <div class="form-grid">
-                <label>Slug锛堝敮涓€锛屽繀濉級<input id="a-slug" placeholder="xauusd-2025-10-18" /></label>
-                <label class="full">鏍囬<input id="a-title" placeholder="XAUUSD 鈥?Range to Trend" /></label>
-                <label>绗﹀彿<input id="a-symbol" placeholder="FX:XAUUSD" /></label>
-                <label>鏃堕棿妗嗘灦<input id="a-tf" placeholder="H1 / H4 / 1D" /></label>
-                <label>鏃ユ湡<input id="a-date" placeholder="2025-10-18" /></label>
-                <label>瑙傜偣
-                  <select id="a-bias">
-                    <option value="bullish">bullish</option>
-                    <option value="bearish">bearish</option>
-                    <option value="neutral" selected>neutral</option>
-                  </select>
-                </label>
-                <label class="full">鏍囩锛堥€楀彿鍒嗛殧锛?input id="a-tags" placeholder="gold, FX, liquidity" /></label>
-                <label class="full">鏀拺锛堟瘡琛屼竴鏉★級<textarea id="a-supports"></textarea></label>
-                <label class="full">闃诲姏锛堟瘡琛屼竴鏉★級<textarea id="a-resistances"></textarea></label>
-                <label class="full">鑳屾櫙锛坈ontext锛?textarea id="a-context"></textarea></label>
-                <label class="full">瑙傜偣锛坴iew锛?textarea id="a-view"></textarea></label>
-                <label class="full">鏃犳晥鏉′欢锛坕nvalidation锛?textarea id="a-invalidation"></textarea></label>
-                <label>鍥捐〃绗﹀彿<input id="a-chart-symbol" placeholder="FX:XAUUSD" /></label>
-                <label>鍥捐〃鍛ㄦ湡
-                  <select id="a-chart-interval">
-                    <option value="15">15m</option>
-                    <option value="60" selected>1H</option>
-                    <option value="240">4H</option>
-                    <option value="1D">1D</option>
-                  </select>
-                </label>
-              </div>
-              <div class="row" style="margin-top:10px">
-                <button id="a-publish" class="primary">鍙戝竷 / 鏇存柊</button>
-                <button id="a-reuse" class="icon-btn">鏄ㄦ棩澶嶇敤</button>
-                <button id="a-preview" class="icon-btn">涓€閿瑙?/button>
-                <button id="a-delete" class="icon-btn danger">鍒犻櫎璇ュ垎鏋?/button>
-                <button id="a-clear" class="icon-btn">娓呯┖鑽夌</button>
-              </div>
-              <p class="muted" id="a-msg" style="margin-top:10px"></p>
-            </div>
-            <div class="card" style="padding:12px">
-              <h3 style="margin-top:0">璇存槑</h3>
-              <ul class="muted" style="margin:8px 0 0 18px">
-                <li>鍙戝竷鍒?<code>/api/analyses/{slug}.json</code></li>
-                <li>棰勮锛?code>#/trade-journal?slug=浣犵殑slug</code></li>
-                <li>鍒犻櫎锛?code>DELETE /api/analyses/{slug}.json</code></li>
-              </ul>
-            </div>
-          </div>
+      <section id="tab-brief" class="card tab-panel active">
+        <h3 style="margin-top:0">Daily Brief</h3>
+        <div class="form-grid">
+          <label>Slug (YYYY-MM-DD)
+            <input id="b-slug" placeholder="2025-10-19" />
+          </label>
+          <label>Title
+            <input id="b-title" placeholder="optional title" />
+          </label>
+          <label>Symbol
+            <input id="b-symbol" placeholder="FX:XAUUSD" />
+          </label>
+          <label>Interval
+            <select id="b-interval">
+              <option value="15">15m</option>
+              <option value="60" selected>1H</option>
+              <option value="240">4H</option>
+              <option value="1D">1D</option>
+            </select>
+          </label>
+          <label class="wide">Bullets (one per line)
+            <textarea id="b-bullets"></textarea>
+          </label>
+          <label class="wide">Schedule (one per line)
+            <textarea id="b-schedule"></textarea>
+          </label>
         </div>
-
-        <!-- Market News -->
-        <div class="tab" id="tab-news">
-          <div class="split">
-            <div>
-              <div class="form-grid">
-                <label>ID锛堝敮涓€锛?input id="n-id" placeholder="2025-10-18-1 鎴栬嚜瀹氫箟" /></label>
-                <label class="full">鏍囬<input id="n-title" placeholder="缇庡浗CPI涓嶅強棰勬湡" /></label>
-                <label>鏉ユ簮<input id="n-source" placeholder="Bloomberg / Reuters ..." /></label>
-                <label>澶栭摼URL<input id="n-url" placeholder="https://..." /></label>
-                <label>鏃堕棿锛圛SO锛?input id="n-date" placeholder="2025-10-18T12:34:00Z" /></label>
-                <label class="full">鏍囩锛堥€楀彿鍒嗛殧锛?input id="n-tags" placeholder="cpi, usd, gold" /></label>
-                <label class="full">鎽樿<textarea id="n-summary"></textarea></label>
-                <label class="full">瑕佺偣锛堟瘡琛屼竴鏉★級<textarea id="n-bullets"></textarea></label>
-              </div>
-              <div class="row" style="margin-top:10px">
-                <button id="n-publish" class="primary">鍙戝竷 / 鏇存柊</button>
-                <button id="n-reuse" class="icon-btn">鏄ㄦ棩澶嶇敤</button>
-                <button id="n-preview" class="icon-btn">涓€閿瑙?/button>
-                <button id="n-delete" class="icon-btn danger">鍒犻櫎璇ュ揩璁?/button>
-                <button id="n-clear" class="icon-btn">娓呯┖鑽夌</button>
-              </div>
-              <p class="muted" id="n-msg" style="margin-top:10px"></p>
-            </div>
-            <div class="card" style="padding:12px">
-              <h3 style="margin-top:0">璇存槑</h3>
-              <ul class="muted" style="margin:8px 0 0 18px">
-                <li>鍙戝竷鍒?<code>/api/market-news/{id}.json</code></li>
-                <li>鍒楄〃椤碉細<code>#/market-news</code></li>
-                <li>鍒犻櫎锛?code>DELETE /api/market-news/{id}.json</code></li>
-              </ul>
-            </div>
-          </div>
+        <div class="action-bar">
+          <button id="b-publish" class="primary">Publish</button>
+          <button id="b-delete" class="danger">Delete</button>
+          <button id="b-reuse" class="ghost">Load Latest</button>
+          <button id="b-preview" class="ghost">Preview</button>
+          <button id="b-clear" class="ghost">Clear</button>
+          <button id="b-refresh" class="ghost">Show Recent</button>
         </div>
-
-        <!-- Research锛圫yllabus锛?-->
-        <div class="tab" id="tab-research">
-          <div class="split">
-            <div>
-              <div class="form-grid">
-                <label class="full">Syllabus JSON锛堟暟缁勶級
-                  <textarea id="r-json" style="min-height:420px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
-                </label>
-              </div>
-              <div class="row" style="margin-top:10px">
-                <button id="r-load" class="icon-btn">杞藉叆绾夸笂鐗堟湰</button>
-                <button id="r-save" class="primary">淇濆瓨</button>
-                <button id="r-preview" class="icon-btn">涓€閿瑙?/button>
-                <button id="r-clear" class="icon-btn">娓呯┖鑽夌</button>
-              </div>
-              <p class="muted" id="r-msg" style="margin-top:10px"></p>
-            </div>
-            <div class="card" style="padding:12px">
-              <h3 style="margin-top:0">璇存槑</h3>
-              <ul class="muted" style="margin:8px 0 0 18px">
-                <li>淇濆瓨鍒?<code>/api/research/syllabus</code></li>
-                <li>棰勮锛?code>#/knowledge-lab</code></li>
-              </ul>
-            </div>
-          </div>
+        <div class="section-footer">
+          <p id="b-msg" class="muted"></p>
+          <pre id="b-index"></pre>
         </div>
+      </section>
 
-        <!-- Research Articles -->
-        <div class="tab" id="tab-r-articles">
-          <div class="split">
-            <div>
-              <div class="form-grid">
-                <label>Slug锛堝敮涓€锛屽繀濉級<input id="ra-slug" placeholder="smc-order-blocks" /></label>
-                <label class="full">鏍囬<input id="ra-title" placeholder="Order Blocks 鍏ㄨВ鏋? /></label>
-                <label class="full">鎽樿锛堢敤浜庡垪琛?SEO锛?textarea id="ra-excerpt"></textarea></label>
-                <label class="full">鏍囩锛堥€楀彿鍒嗛殧锛?input id="ra-tags" placeholder="smc, ob, liquidity" /></label>
-                <label class="full">涓诲浘 URL锛堝彲閫夛級<input id="ra-hero" placeholder="https://鈥? /></label>
-                <label class="full">姝ｆ枃锛圡arkdown锛?
-                  <textarea id="ra-body" style="min-height:360px; font-family: ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"></textarea>
-                </label>
-              </div>
-              <div class="row" style="margin-top:10px">
-                <button id="ra-publish" class="primary">鍙戝竷 / 鏇存柊</button>
-                <button id="ra-reuse" class="icon-btn">鏄ㄦ棩澶嶇敤</button>
-                <button id="ra-preview" class="icon-btn">涓€閿瑙?/button>
-                <button id="ra-delete" class="icon-btn danger">鍒犻櫎璇ユ枃绔?/button>
-                <button id="ra-clear" class="icon-btn">娓呯┖鑽夌</button>
-              </div>
-              <p class="muted" id="ra-msg" style="margin-top:10px"></p>
-            </div>
-            <div class="card" style="padding:12px">
-              <h3 style="margin-top:0">璇存槑</h3>
-              <ul class="muted" style="margin:8px 0 0 18px">
-                <li>鍙戝竷鍒?<code>/api/research/articles/{slug}.json</code></li>
-                <li>绱㈠紩锛?code>/api/research/articles/index</code></li>
-                <li>鍒犻櫎锛?code>DELETE /api/research/articles/{slug}.json</code></li>
-              </ul>
-            </div>
-          </div>
+      <section id="tab-analyses" class="card tab-panel">
+        <h3 style="margin-top:0">Analyses</h3>
+        <div class="form-grid">
+          <label>Slug
+            <input id="a-slug" placeholder="xauusd-2025-10-19" />
+          </label>
+          <label>Title
+            <input id="a-title" placeholder="analysis title" />
+          </label>
+          <label>Symbol
+            <input id="a-symbol" placeholder="FX:XAUUSD" />
+          </label>
+          <label>Timeframe
+            <input id="a-tf" placeholder="H1" />
+          </label>
+          <label>Date
+            <input id="a-date" placeholder="2025-10-19" />
+          </label>
+          <label>Bias
+            <select id="a-bias">
+              <option value="bullish">bullish</option>
+              <option value="bearish">bearish</option>
+              <option value="neutral" selected>neutral</option>
+            </select>
+          </label>
+          <label class="wide">Tags (comma separated)
+            <input id="a-tags" placeholder="xauusd, breakout" />
+          </label>
+          <label class="wide">Supports (one per line)
+            <textarea id="a-supports"></textarea>
+          </label>
+          <label class="wide">Resistances (one per line)
+            <textarea id="a-resistances"></textarea>
+          </label>
+          <label class="wide">Context
+            <textarea id="a-context"></textarea>
+          </label>
+          <label class="wide">View
+            <textarea id="a-view"></textarea>
+          </label>
+          <label class="wide">Invalidation
+            <input id="a-invalidation" placeholder="invalid when..." />
+          </label>
+          <label>Chart Symbol
+            <input id="a-chart-symbol" placeholder="FX:XAUUSD" />
+          </label>
+          <label>Chart Interval
+            <select id="a-chart-interval">
+              <option value="15">15m</option>
+              <option value="60" selected>1H</option>
+              <option value="240">4H</option>
+              <option value="1D">1D</option>
+            </select>
+          </label>
         </div>
+        <div class="action-bar">
+          <button id="a-publish" class="primary">Publish</button>
+          <button id="a-delete" class="danger">Delete</button>
+          <button id="a-reuse" class="ghost">Load Latest</button>
+          <button id="a-preview" class="ghost">Preview</button>
+          <button id="a-clear" class="ghost">Clear</button>
+          <button id="a-refresh" class="ghost">Show Recent</button>
+        </div>
+        <div class="section-footer">
+          <p id="a-msg" class="muted"></p>
+          <pre id="a-index"></pre>
+        </div>
+      </section>
 
+      <section id="tab-news" class="card tab-panel">
+        <h3 style="margin-top:0">Market News</h3>
+        <div class="form-grid">
+          <label>ID
+            <input id="n-id" placeholder="2025-10-19-1" />
+          </label>
+          <label>Title
+            <input id="n-title" placeholder="headline" />
+          </label>
+          <label>Source
+            <input id="n-source" placeholder="source" />
+          </label>
+          <label>URL
+            <input id="n-url" placeholder="https://example.com" />
+          </label>
+          <label>Date (ISO)
+            <input id="n-date" placeholder="2025-10-19T08:00:00Z" />
+          </label>
+          <label class="wide">Tags (comma separated)
+            <input id="n-tags" placeholder="fed, cpi" />
+          </label>
+          <label class="wide">Summary
+            <textarea id="n-summary"></textarea>
+          </label>
+          <label class="wide">Bullets (one per line)
+            <textarea id="n-bullets"></textarea>
+          </label>
+        </div>
+        <div class="action-bar">
+          <button id="n-publish" class="primary">Publish</button>
+          <button id="n-delete" class="danger">Delete</button>
+          <button id="n-reuse" class="ghost">Load Latest</button>
+          <button id="n-preview" class="ghost">Preview</button>
+          <button id="n-clear" class="ghost">Clear</button>
+          <button id="n-refresh" class="ghost">Show Recent</button>
+        </div>
+        <div class="section-footer">
+          <p id="n-msg" class="muted"></p>
+          <pre id="n-index"></pre>
+        </div>
+      </section>
+
+      <section id="tab-articles" class="card tab-panel">
+        <h3 style="margin-top:0">Research Articles</h3>
+        <div class="form-grid">
+          <label>Slug
+            <input id="ra-slug" placeholder="smc-order-blocks" />
+          </label>
+          <label class="wide">Title
+            <input id="ra-title" placeholder="article title" />
+          </label>
+          <label class="wide">Excerpt
+            <textarea id="ra-excerpt"></textarea>
+          </label>
+          <label class="wide">Tags (comma separated)
+            <input id="ra-tags" placeholder="smc, order block" />
+          </label>
+          <label class="wide">Hero URL
+            <input id="ra-hero" placeholder="https://example.com/cover.jpg" />
+          </label>
+          <label class="wide">Body (Markdown)
+            <textarea id="ra-body" style="min-height:260px"></textarea>
+          </label>
+        </div>
+        <div class="action-bar">
+          <button id="ra-publish" class="primary">Publish</button>
+          <button id="ra-delete" class="danger">Delete</button>
+          <button id="ra-reuse" class="ghost">Load Latest</button>
+          <button id="ra-preview" class="ghost">Preview</button>
+          <button id="ra-clear" class="ghost">Clear</button>
+          <button id="ra-refresh" class="ghost">Show Recent</button>
+        </div>
+        <div class="section-footer">
+          <p id="ra-msg" class="muted"></p>
+          <pre id="ra-index"></pre>
+        </div>
       </section>
     </main>
   </div>
 
-  <!-- 涓氬姟鑴氭湰 -->
-  
-<script type="module" src="/js/admin-bootstrap.js"></script>`r`n<script type="module" src="/js/admin-main.js"></script>`r`n</body>
+  <script type="module" src="/js/admin-bootstrap.js"></script>
+  <script type="module" src="/js/admin-main.js"></script>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
