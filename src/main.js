@@ -4,6 +4,7 @@ import './components/x-tv-chart.js'
 
 const routes = {
   '': 'home',
+  '#/': 'home',
   '#/daily-brief': 'daily-brief',
   '#/trade-journal': 'trade-journal',   // 공개 분석
   '#/knowledge-lab': 'knowledge-lab',
@@ -12,24 +13,406 @@ const routes = {
   '#/about': 'about',
 };
 
+const outlet = document.getElementById('app');
+
 function setActive(){
+  const hash = location.hash || '#/';
   document.querySelectorAll('.nav a').forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href')===location.hash);
+    const href = a.getAttribute('href');
+    if (!href) return;
+    const isHomeLink = href === '#/' || href === '#';
+    const normalizedHash = hash || '#/';
+    const active = isHomeLink
+      ? (!location.hash || normalizedHash === '#/' || normalizedHash === '#')
+      : normalizedHash.startsWith(href);
+    a.classList.toggle('active', active);
   });
-}
-function show(routeId){
-  document.querySelectorAll('section[data-route]').forEach(s=>{
-    s.classList.toggle('hidden', s.dataset.route!==routeId);
-  });
-  setActive();
 }
 
 // -------- Daily Brief 라우팅 ----------
 function matchRoute() {
-  const h = location.hash;
-  const m = h.match(/^#\/daily-brief\/([\w-]+)$/);
-  if (m) return { id: 'daily-brief-detail', slug: m[1] };
-  return { id: (routes[h] || 'home') };
+  const raw = location.hash || '#/';
+  const detail = raw.match(/^#\/daily-brief\/([\w-]+)$/);
+  if (detail) return { id: 'daily-brief-detail', slug: detail[1] };
+  const base = raw.includes('?') ? raw.split('?')[0] : raw;
+  return { id: (routes[base] || 'home') };
+}
+
+function renderHomeView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="home-hero-title">
+      <div class="hero">
+        <div class="badge">TRAN TRADING LAB</div>
+        <h1 id="home-hero-title">매일 더 똑똑하게, 더 가볍게 시장을 읽다</h1>
+        <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
+      </div>
+
+      <div class="feature-grid" role="list">
+        <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <g class="float">
+                  <line x1="6" y1="4" x2="6" y2="20" class="stroke" />
+                  <rect x="4.5" y="9" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                </g>
+                <g class="float" style="animation-delay:.2s">
+                  <line x1="12" y1="6" x2="12" y2="18" class="stroke" />
+                  <rect x="10.5" y="8" width="3" height="5" rx="1.2" fill="url(#grad)" />
+                </g>
+                <g class="float" style="animation-delay:.4s">
+                  <line x1="18" y1="3" x2="18" y2="21" class="stroke" />
+                  <rect x="16.5" y="11" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                </g>
+              </svg>
+            </span>
+            데일리 브리프
+          </div>
+          <p>매일 아침 시장을 읽는 시간.</p>
+        </a>
+
+        <a href="#/trade-journal" class="card" role="listitem" aria-label="분석 아카이브로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <polyline class="stroke" points="2,16 7,10 11,13 15,7 22,12" />
+                <circle cx="7" cy="10" r="1.6" fill="url(#grad)" class="pulse" />
+              </svg>
+            </span>
+            분석 아카이브
+          </div>
+          <p>지지·저항과 시나리오를 공개 기록한 라이브러리.</p>
+        </a>
+
+        <a href="#/knowledge-lab" class="card" role="listitem" aria-label="지식 연구소로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <g class="spin">
+                  <circle cx="12" cy="12" r="6" class="stroke" />
+                  <path d="M12 6v-2M12 20v-2M6 12H4M20 12h-2M16.2 7.8l1.4-1.4M6.4 18.6l1.4-1.4M7.8 7.8 6.4 6.4M17.6 17.6l-1.4-1.4" class="stroke" />
+                </g>
+              </svg>
+            </span>
+            지식 연구소
+          </div>
+          <p>Preschool부터 Graduation까지 단계별 로드맵.</p>
+        </a>
+
+        <a href="#/market-news" class="card" role="listitem" aria-label="마켓 뉴스로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <rect x="3" y="5" width="18" height="14" rx="2" class="stroke" />
+                <line x1="6" y1="10" x2="18" y2="10" class="stroke" style="animation-delay:.3s" />
+                <line x1="6" y1="14" x2="15" y2="14" class="stroke" style="animation-delay:.6s" />
+              </svg>
+            </span>
+            마켓 뉴스
+          </div>
+          <p>글로벌 거시 이벤트와 핵심 포인트를 요약.</p>
+        </a>
+
+        <a href="#/articles" class="card" role="listitem" aria-label="아티클로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <path d="M3 20l5-1 11-11a2.5 2.5 0 0 0-3.5-3.5L4.5 15l-1.5 5z" class="stroke" />
+                <circle cx="17.5" cy="6.5" r="1.5" fill="url(#grad)" class="pulse" />
+              </svg>
+            </span>
+            아티클
+          </div>
+          <p>거래 사고, 리스크 복기, 전략 인사이트 모음.</p>
+        </a>
+
+        <a href="#/about" class="card" role="listitem" aria-label="About로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs>
+                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66e0ff" />
+                    <stop offset="1" stop-color="#7a7dff" />
+                  </linearGradient>
+                </defs>
+                <circle cx="12" cy="12" r="8" class="stroke" />
+                <polygon points="12,7 9,15 12,13 15,15" fill="url(#grad)" class="float" />
+              </svg>
+            </span>
+            About
+          </div>
+          <p>TRAN TRADING LAB의 철학과 다음 목표.</p>
+        </a>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderDailyBriefListView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="daily-brief-title">
+      <div class="card">
+        <h2 id="daily-brief-title">데일리 브리프 — 목록</h2>
+        <ul id="brief-list" aria-live="polite"></ul>
+        <p class="muted" style="margin-top:8px">각 날짜를 클릭하면 상세 페이지로 이동합니다.</p>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderDailyBriefDetailView(){
+  outlet.innerHTML = `
+    <section aria-live="polite">
+      <div id="daily-brief-detail"></div>
+    </section>
+  `;
+}
+
+function renderTradeJournalView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="journal-title">
+      <div class="grid grid-12">
+        <section class="card" style="grid-column: span 7;">
+          <div class="toolbar">
+            <h2 id="journal-title" style="margin:0">분석 목록</h2>
+            <input id="anal-search" class="search" placeholder="심볼·태그·제목 검색" aria-label="검색" />
+            <select id="anal-bias" class="search" aria-label="관점 필터">
+              <option value="">전체 관점</option>
+              <option value="bullish">상승</option>
+              <option value="bearish">하락</option>
+              <option value="neutral">중립</option>
+            </select>
+          </div>
+          <div id="anal-list" aria-live="polite"></div>
+        </section>
+
+        <aside class="card" style="grid-column: span 5;">
+          <div id="anal-detail">
+            <p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderKnowledgeLabView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="kl-hero-title">
+      <div class="hero">
+        <div class="badge">Knowledge Lab</div>
+        <h1 id="kl-hero-title">체계적인 외환 지식 로드맵</h1>
+        <p class="muted">Preschool부터 Graduation까지, 전략·구조·복기를 단계적으로 쌓아 올립니다.</p>
+      </div>
+
+      <div class="card" style="margin-bottom:14px">
+        <div class="row" style="justify-content:space-between;align-items:center">
+          <h2 style="margin:0">전체 진행도</h2>
+          <button id="kl-reset" class="btn" style="padding:6px 10px;font-weight:600">진행도 초기화</button>
+        </div>
+        <div class="progress-wrap" aria-label="전체 진행도">
+          <div id="kl-progress" class="progress-bar">
+            <span id="kl-progress-label" aria-live="polite">0%</span>
+          </div>
+        </div>
+        <p class="meta" id="kl-stats" aria-live="polite">0 / 0 강의</p>
+      </div>
+
+      <div id="kl-syllabus" class="kl-grid" aria-live="polite"></div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderMarketNewsView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="news-title">
+      <div class="card">
+        <h2 id="news-title">마켓 뉴스</h2>
+        <p class="muted">글로벌 핵심 이벤트와 거시 리듬을 한눈에.</p>
+        <div id="news">
+          <ul>
+            <li>📊 미국 CPI·고용 등 주요 지표 발표 일정</li>
+            <li>🏦 주요 중앙은행 발언과 금리 방향</li>
+            <li>💰 원자재·주요 통화 변동 포인트</li>
+            <li>🌏 아시아·유럽·미국 시장 헤드라인</li>
+          </ul>
+          <p class="muted" style="margin-top:10px">※ 데이터는 매일 갱신됩니다.</p>
+        </div>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderArticlesView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="articles-title">
+      <div class="card">
+        <h2 id="articles-title">아티클</h2>
+        <article class="card">
+          <h3>구조와 리스크의 경계</h3>
+          <p class="muted">실패한 거래를 복기하며 구조와 자금 관리를 다시 맞춘 이야기.</p>
+        </article>
+        <article class="card">
+          <h3>왜 분할이 더 합리적인가</h3>
+          <p class="muted">25/25/25/25 비중 조절의 심리와 수학을 한 번에 정리.</p>
+        </article>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderAboutView(){
+  outlet.innerHTML = `
+    <section aria-labelledby="about-hero-title">
+      <div class="hero">
+        <div class="badge">About TRAN</div>
+        <h1 id="about-hero-title">나는 ‘구조로 시장을 읽는 사람’입니다</h1>
+        <p class="muted">숫자보다 맥락, 운보다 준비. TRAN TRADING LAB의 출발과 원칙, 그리고 다음 여정을 기록합니다.</p>
+      </div>
+
+      <div class="feature-grid">
+        <section class="card" aria-labelledby="about-start">
+          <h2 id="about-start">어디서 시작됐나</h2>
+          <p>시장은 처음엔 ‘정답 맞히기’ 같았습니다. 올라갈까? 내려갈까? 수많은 실패가 알려준 건 <strong>가격은 결과</strong>, <strong>구조는 이유</strong>라는 사실. 그래서 차트를 사진이 아닌 <em>사건과 흔적의 연속</em>으로 읽기 시작했습니다.</p>
+          <p class="muted">— “가격은 마지막 문장, 문법은 구조다.”</p>
+        </section>
+
+        <section class="card" aria-labelledby="about-turning">
+          <h2 id="about-turning">전환점</h2>
+          <ul>
+            <li><strong>Loss Journal</strong> — 손실을 숨기지 않고 기록, ‘왜?’를 집요하게 추적.</li>
+            <li><strong>Structure First</strong> — HH/HL/LL/LH, BOS·CHoCH, FVG·OB로 맥락 정리.</li>
+            <li><strong>Risk Engine</strong> — 1~2% 고정 리스크, 25/25/25/25 분할, 일일 DD 제한.</li>
+            <li><strong>공개 분석</strong> — 기록을 밖으로 내보내자 피드백이 들어오고 더 단단해짐.</li>
+          </ul>
+        </section>
+
+        <section class="card" aria-labelledby="about-rules">
+          <h2 id="about-rules">내가 지키는 다섯 가지 원칙</h2>
+          <ol>
+            <li><strong>구조 &gt; 시그널</strong> — 신호는 구조 위에서만 의미가 있다.</li>
+            <li><strong>시나리오 2개</strong> — 주 시나리오와 반대 시나리오를 모두 적는다.</li>
+            <li><strong>트리거는 단순하게</strong> — 엔트리·SL·TP는 숫자로 명확하게.</li>
+            <li><strong>리스크가 먼저</strong> — 감정보다 규칙을 우선한다.</li>
+            <li><strong>기록은 자산</strong> — 좋은 손실은 다음 승리를 위한 조건이다.</li>
+          </ol>
+        </section>
+
+        <section class="card" aria-labelledby="about-next">
+          <h2 id="about-next">지금과 다음</h2>
+          <p>지금 나는 매일 <strong>데일리 브리프</strong>로 시장을 정리하고, <strong>분석 아카이브</strong>에 관점과 레벨을 공개합니다. 다음 목표는 <strong>자동화 체크리스트</strong>와 <strong>백테스트-라이브 일체화</strong> 워크플로우를 구축해 누구나 재현 가능한 시스템을 만드는 것입니다.</p>
+        </section>
+
+        <section class="card" aria-labelledby="about-one-line">
+          <h2 id="about-one-line">한 문장으로</h2>
+          <blockquote style="margin:8px 0 0; color:#cfd6e3">
+            “큰 수익은 <strong>예측</strong>이 아니라 <strong>반응</strong>에서 나온다.
+            준비된 원칙으로 <em>천천히</em>, 그러나 <em>끊임없이</em>.”
+          </blockquote>
+        </section>
+
+        <section class="card" aria-labelledby="about-socials">
+          <h2 id="about-socials">채널 & 커뮤니티</h2>
+          <p class="muted" style="margin:6px 0 14px">실시간 브리프, 공개 분석, 투표와 Q&A는 여기서 이어집니다.</p>
+          <div class="socials">
+            <a class="btn" href="https://x.com/TranTradingLab" target="_blank" rel="noopener">X / Twitter @TranTradingLab</a>
+            <a class="btn" href="https://t.me/http4477" target="_blank" rel="noopener">Telegram 채널</a>
+            <a class="btn" href="https://whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t" target="_blank" rel="noopener">WhatsApp 채널</a>
+          </div>
+          <p class="muted" style="margin-top:10px">— 하루를 가볍게 시작하는 가장 빠른 길.</p>
+        </section>
+      </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+async function renderRoute(routeId, slug){
+  switch (routeId) {
+    case 'home':
+      renderHomeView();
+      break;
+    case 'daily-brief':
+      renderDailyBriefListView();
+      await renderDailyBriefList();
+      break;
+    case 'daily-brief-detail':
+      renderDailyBriefDetailView();
+      await renderDailyBriefDetail(slug);
+      break;
+    case 'trade-journal':
+      renderTradeJournalView();
+      await loadAnalysesList();
+      {
+        const search = document.getElementById('anal-search');
+        const bias = document.getElementById('anal-bias');
+        if (search) search.oninput = renderAnalysesListFiltered;
+        if (bias) bias.onchange = renderAnalysesListFiltered;
+      }
+      await renderAnalysisDetailBySlug(currentSlugFromQuery());
+      break;
+    case 'knowledge-lab':
+      renderKnowledgeLabView();
+      await tryLoadRemoteSyllabus();
+      renderKnowledgeLab();
+      break;
+    case 'market-news':
+      renderMarketNewsView();
+      await renderMarketNews();
+      break;
+    case 'articles':
+      renderArticlesView();
+      break;
+    case 'about':
+      renderAboutView();
+      break;
+    default:
+      renderHomeView();
+  }
+  if (window.__registerCards) window.__registerCards(outlet);
 }
 
 // 목록
@@ -50,6 +433,11 @@ async function renderDailyBriefList(){
 async function renderDailyBriefDetail(slug){
   const wrap = document.getElementById('daily-brief-detail');
   if (!wrap) return;
+  if (!slug){
+    wrap.innerHTML = `<div class="card"><h2>유효한 슬러그가 필요합니다</h2><p class="muted" style="margin-top:8px"><a href="#/daily-brief">← 목록으로</a></p></div>`;
+    if (window.__registerCards) window.__registerCards(wrap);
+    return;
+  }
   wrap.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try {
     const res = await fetch(`/api/daily-brief/${slug}.json?_=${Date.now()}`);
@@ -70,8 +458,10 @@ async function renderDailyBriefDetail(slug){
       </div>
       <p class="muted" style="margin-top:12px"><a href="#/daily-brief">← 목록으로</a></p>
     `;
+    if (window.__registerCards) window.__registerCards(wrap);
   } catch {
     wrap.innerHTML = `<div class="card"><h2>자료를 찾지 못했습니다</h2></div>`;
+    if (window.__registerCards) window.__registerCards(wrap);
   }
 }
 
@@ -221,8 +611,10 @@ async function renderAnalysisDetailBySlug(slug){
         if (chart){ chart.setAttribute('interval', sel.value); }
       };
     }
+    if (window.__registerCards) window.__registerCards(box);
   }catch{
     box.innerHTML = `<p class="muted">자료를 찾지 못했습니다</p>`;
+    if (window.__registerCards) window.__registerCards(box);
   }
 }
 
@@ -235,28 +627,37 @@ function currentSlugFromQuery(){
 
 /* ===== Reveal & Canvas FX (safe, idempotent) ===== */
 (() => {
+  if (!window.__cardRevealObserver) {
+    let revealCounter = 0;
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12 });
+
+    window.__cardRevealObserver = observer;
+    window.__registerCards = (root = document) => {
+      const cards = root.querySelectorAll('.card');
+      cards.forEach(card => {
+        if (card.dataset.revealInit === '1') return;
+        card.dataset.revealInit = '1';
+        card.classList.add('reveal');
+        card.style.transitionDelay = (revealCounter * 60) + 'ms';
+        revealCounter += 1;
+        observer.observe(card);
+      });
+    };
+  }
+
+  window.__registerCards?.();
+
   if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
-  // 1) 카드 계단식 입장
-  const cards = document.querySelectorAll('.card');
-  cards.forEach((c, i) => {
-    c.classList.add('reveal');
-    c.style.transitionDelay = (i * 60) + 'ms';
-  });
-
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('in');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: .12 });
-
-  cards.forEach(c => revealObserver.observe(c));
-
-  // 2) 배경 캔들/그리드 저부하 애니메이션
+  // 배경 캔들/그리드 저부하 애니메이션
   const cvs = document.getElementById('bgfx');
   if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
   cvs.__inited = true;
@@ -576,6 +977,8 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
+  if (window.__registerCards) window.__registerCards(host.parentElement || host);
+
   // 분류 접기/펼치기
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
@@ -643,7 +1046,7 @@ function jumpToFirstIncomplete(){
 
 /* ===== Market News: render list (text version) ===== */
 async function renderMarketNews(){
-  const host = document.querySelector('section[data-route="market-news"] #news');
+  const host = document.getElementById('news');
   if (!host) return;
   host.innerHTML = '<p class="muted">불러오는 중…</p>';
   try{
@@ -672,59 +1075,25 @@ async function renderMarketNews(){
       }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }
     }));
     host.innerHTML = `<ul style="display:grid;gap:12px">${html.join('')}</ul>`;
+    if (window.__registerCards) window.__registerCards(host.parentElement || host);
   }catch{
     host.innerHTML = '<p class="muted">불러오기에 실패했습니다</p>';
   }
 }
 
 // -------- 라우터 구동 ----------
-window.addEventListener('hashchange', async ()=>{
-  const m = matchRoute();
-  const routeId = m.id;
-  show(routeId);
+async function handleRouteChange(){
+  const { id, slug } = matchRoute();
+  await renderRoute(id, slug);
+  setActive();
+}
 
-  if (routeId === 'daily-brief') renderDailyBriefList();
-  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
-
-  if (routeId === 'trade-journal'){
-    await loadAnalysesList();
-    const s = document.getElementById('anal-search');
-    const b = document.getElementById('anal-bias');
-    if (s) s.oninput = renderAnalysesListFiltered;
-    if (b) b.onchange = renderAnalysesListFiltered;
-    await renderAnalysisDetailBySlug(currentSlugFromQuery());
-  }
-
-  if (routeId === 'market-news') renderMarketNews();
-
-  if (routeId === 'knowledge-lab'){
-    await tryLoadRemoteSyllabus();
-    renderKnowledgeLab();
-  }
+window.addEventListener('hashchange', () => {
+  handleRouteChange().catch(err => console.error(err));
 });
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  const m = matchRoute();
-  const routeId = m.id;
-  show(routeId);
-
-  if (routeId === 'daily-brief') renderDailyBriefList();
-  if (routeId === 'daily-brief-detail') renderDailyBriefDetail(m.slug);
-
-  if (routeId === 'trade-journal'){
-    await loadAnalysesList();
-    const s = document.getElementById('anal-search');
-    const b = document.getElementById('anal-bias');
-    if (s) s.oninput = renderAnalysesListFiltered;
-    if (b) b.onchange = renderAnalysesListFiltered;
-    await renderAnalysisDetailBySlug(currentSlugFromQuery());
-  }
-
-  if (routeId === 'market-news') renderMarketNews();
-
-  if (routeId === 'knowledge-lab'){
-    await tryLoadRemoteSyllabus();
-    renderKnowledgeLab();
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  handleRouteChange().catch(err => console.error(err));
 });
+
 
