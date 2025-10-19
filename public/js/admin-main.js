@@ -180,3 +180,4 @@ function bindResearchArticles(){
   try{ bindResearchArticles(); }catch{}
 })();
 
+
