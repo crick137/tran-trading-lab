@@ -3,7 +3,7 @@ import { signals } from '../data/signals.js';
 
 class XSignalBoard extends HTMLElement {
   connectedCallback() {
-    const latest = [...signals].slice(-5).reverse(); // 最近 5 条
+    const latest = [...signals].slice(-5).reverse(); // 최근 5개
     this.innerHTML = `
       <div class="mt12" style="display:grid; gap:12px">
         ${latest.map(() => `<x-signal-card></x-signal-card>`).join('')}

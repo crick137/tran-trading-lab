@@ -2,11 +2,11 @@ class XAbout extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <section class="card" id="about">
-        <h3 class="m0">关于 TRAN</h3>
+        <h3 class="m0">About</h3>
         <p class="mt12">
-          Tran Trading Lab 是一间以 SMC 思维为核心的交易实验室。
-          我们聚焦结构、流动性与风险控制，以数据验证每一次改进。
-          所有内容与界面遵循极简、高可读性与暗色美学的原则。
+          Tran Trading Lab은 SMC 기반의 실험적 트레이딩 연구실입니다.
+          우리는 구조·유동성·리스크 관리에 집중하며, 데이터로 성과를 검증합니다.
+          모든 콘텐츠와 UI는 최소주의·고가독성·다크 테마 원칙을 따릅니다.
         </p>
       </section>
     `;

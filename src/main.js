@@ -5,7 +5,7 @@ import './components/x-tv-chart.js'
 const routes = {
   '': 'home',
   '#/daily-brief': 'daily-brief',
-  '#/trade-journal': 'trade-journal',   // 公开分析
+  '#/trade-journal': 'trade-journal',   // 공개 분석
   '#/knowledge-lab': 'knowledge-lab',
   '#/market-news': 'market-news',
   '#/articles': 'articles',
@@ -24,7 +24,7 @@ function show(routeId){
   setActive();
 }
 
-// -------- Daily Brief 路由 ----------
+// -------- Daily Brief 라우팅 ----------
 function matchRoute() {
   const h = location.hash;
   const m = h.match(/^#\/daily-brief\/([\w-]+)$/);
@@ -32,25 +32,25 @@ function matchRoute() {
   return { id: (routes[h] || 'home') };
 }
 
-// 列表
+// 목록
 async function renderDailyBriefList(){
   const ul = document.getElementById('brief-list');
   if (!ul) return;
-  ul.innerHTML = '<li class="muted">加载中…</li>';
+  ul.innerHTML = '<li class="muted">불러오는 중…</li>';
   try{
     const res = await fetch('/api/daily-brief/index.json?_=' + Date.now());
     const items = await res.json();
     ul.innerHTML = Array.isArray(items)&&items.length
       ? items.map(s=>`<li><a href="#/daily-brief/${s}">${s}</a></li>`).join('')
-      : '<li class="muted">暂无数据</li>';
-  }catch{ ul.innerHTML = '<li class="muted">暂无数据</li>'; }
+      : '<li class="muted">자료가 없습니다</li>';
+  }catch{ ul.innerHTML = '<li class="muted">자료가 없습니다</li>'; }
 }
 
-// 详情
+// 상세
 async function renderDailyBriefDetail(slug){
   const wrap = document.getElementById('daily-brief-detail');
   if (!wrap) return;
-  wrap.innerHTML = `<div class="card"><h2>加载中…</h2></div>`;
+  wrap.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try {
     const res = await fetch(`/api/daily-brief/${slug}.json?_=${Date.now()}`);
     if (!res.ok) throw 0;
@@ -59,31 +59,31 @@ async function renderDailyBriefDetail(slug){
       <div class="grid grid-12">
         <section class="card" style="grid-column: span 8;">
           <h2>${d.title || 'Daily Brief'}</h2>
-          <p class="muted">每日早读市场节奏</p>
-          ${d.bullets?.length?`<h3>📌 关键看点</h3><ul>${d.bullets.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-          ${d.schedule?.length?`<h3 style="margin-top:12px">🕒 今日日程</h3><ul>${d.schedule.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+          <p class="muted">매일 아침 시장을 읽는 시간</p>
+          ${d.bullets?.length?`<h3>📌 핵심 요약</h3><ul>${d.bullets.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+          ${d.schedule?.length?`<h3 style="margin-top:12px">🕒 오늘 일정</h3><ul>${d.schedule.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
         </section>
         <aside class="card" style="grid-column: span 4;">
-          <h2>快览图表</h2>
+          <h2>퀵 차트</h2>
           <x-tv-chart symbol="${(d.chart?.symbol)||d.symbol||'FX:XAUUSD'}" interval="${(d.chart?.interval)||d.interval||'60'}" ratio="16:9" min_height="420"></x-tv-chart>
         </aside>
       </div>
-      <p class="muted" style="margin-top:12px"><a href="#/daily-brief">← 返回列表</a></p>
+      <p class="muted" style="margin-top:12px"><a href="#/daily-brief">← 목록으로</a></p>
     `;
   } catch {
-    wrap.innerHTML = `<div class="card"><h2>未找到内容</h2></div>`;
+    wrap.innerHTML = `<div class="card"><h2>자료를 찾지 못했습니다</h2></div>`;
   }
 }
 
-// -------- Trade Journal = 公开“分析档案” ----------
+// -------- Trade Journal = 공개 “분석 아카이브” ----------
 const AIDX = '/api/analyses/index.json';
 
 function koBias(b){
-  return b==='bullish'?'看多':b==='bearish'?'看空':'中性';
+  return b==='bullish'?'상승':b==='bearish'?'하락':'중립';
 }
 function badge(bias){ return `<span class="badge ${bias}">${koBias(bias||'neutral')}</span>`; }
-function pillS(v){ return `<span class="pill level">支撑 ${v}</span>`; }
-function pillR(v){ return `<span class="pill res">阻力 ${v}</span>`; }
+function pillS(v){ return `<span class="pill level">지지 ${v}</span>`; }
+function pillR(v){ return `<span class="pill res">저항 ${v}</span>`; }
 
 async function fetchJSON(path){
   const res = await fetch(path + '?_=' + Date.now());
@@ -94,13 +94,13 @@ async function fetchJSON(path){
 async function loadAnalysesList(){
   const list = document.getElementById('anal-list');
   if (!list) return;
-  list.innerHTML = `<p class="muted">加载中…</p>`;
+  list.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     const items = await fetchJSON(AIDX); // [{slug,title,symbol,tf,date,tags,bias}]
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
-    // 👉 若 URL 未携带 slug，自动展开第一个条目并加载预览图表
+    // 👉 URL에 slug가 없으면 첫 번째 항목을 자동으로 열고 미리보기 차트를 로드
     const slugInUrl = currentSlugFromQuery();
     if (!slugInUrl && items.length){
       await renderAnalysisDetailBySlug(items[0].slug);
@@ -110,15 +110,15 @@ async function loadAnalysesList(){
         host.innerHTML = `<x-tv-chart symbol="${first.symbol}" interval="60" ratio="16:9" min_height="220"></x-tv-chart>`;
         host.dataset.rendered = '1';
         const btn = document.querySelector(`.pv-btn[data-slug="${first.slug}"]`);
-        if (btn) btn.textContent = '收起图表';
+        if (btn) btn.textContent = '차트 닫기';
       }
     }
   }catch{
-    list.innerHTML = `<p class="muted">暂无数据</p>`;
+    list.innerHTML = `<p class="muted">자료가 없습니다</p>`;
   }
 }
 
-// 列表 + 预览图表按钮
+// 목록 + 미리보기 차트 버튼
 function renderAnalysesListFiltered(){
   const list = document.getElementById('anal-list');
   const q = (document.getElementById('anal-search')?.value||'').toLowerCase();
@@ -138,16 +138,16 @@ function renderAnalysesListFiltered(){
         ${badge(it.bias)}
         <span class="meta">· ${it.symbol} · ${it.tf} · ${it.date}</span>
         <div class="actions">
-          <a class="icon-btn" href="#/trade-journal?slug=${encodeURIComponent(it.slug)}">查看</a>
-          <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${it.symbol}" data-ivl="60">预览图表</button>
+          <a class="icon-btn" href="#/trade-journal?slug=${encodeURIComponent(it.slug)}">열기</a>
+          <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${it.symbol}" data-ivl="60">미리보기 차트</button>
         </div>
       </div>
       ${it.tags?.length?`<div class="row" style="margin-top:6px">${it.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>`:''}
       <div class="preview" id="pv-${it.slug}" style="margin-top:10px;"></div>
     </article>
-  `).join('') || `<p class="muted">没有符合搜索的结果</p>`;
+  `).join('') || `<p class="muted">검색 결과가 없습니다</p>`;
 
-  // 预览图表切换（按需加载/卸载）
+  // 미리보기 차트 토글 (on-demand 로드/해제)
   list.querySelectorAll('.pv-btn').forEach(btn=>{
     btn.onclick = ()=>{
       const slug = btn.dataset.slug;
@@ -156,23 +156,23 @@ function renderAnalysesListFiltered(){
       if (!host) return;
       if (host.dataset.rendered === '1') {
         host.innerHTML = ''; host.dataset.rendered = '0';
-        btn.textContent = '预览图表';
+        btn.textContent = '미리보기 차트';
       } else {
         host.innerHTML = `<x-tv-chart symbol="${symbol}" interval="${btn.dataset.ivl}" ratio="16:9" min_height="220"></x-tv-chart>`;
         host.dataset.rendered = '1';
-        btn.textContent = '收起图表';
+        btn.textContent = '차트 닫기';
       }
     };
   });
 }
 
-// 详情（右侧面板）+ 周期选择
+// 상세(우측 패널) + 주기 선택
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
-  if (!slug){ box.innerHTML = `<p class="muted">在左侧选择条目即可查看详细内容。</p>`; return; }
+  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>`; return; }
 
-  box.innerHTML = `<p class="muted">加载中…</p>`;
+  box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     const d = await fetchJSON(`/api/analyses/${slug}.json`);
     const ivl = (d.chart?.interval) || '60';
@@ -182,7 +182,7 @@ async function renderAnalysisDetailBySlug(slug){
       <h2>${d.title} ${badge(d.bias)}</h2>
       <p class="muted">${d.symbol} · ${d.tf} · ${d.date}</p>
 
-      <h3>支撑 / 阻力</h3>
+      <h3>지지 / 저항</h3>
       <div class="row" style="margin-top:6px">
         ${(d.supports||[]).map(pillS).join('')}
         ${(d.resistances||[]).map(pillR).join('')}
@@ -190,15 +190,15 @@ async function renderAnalysisDetailBySlug(slug){
 
       ${d.tags?.length?`<div class="row" style="margin-top:6px">${d.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>`:''}
 
-      ${d.context?`<h3 style="margin-top:12px">背景</h3><p>${d.context}</p>`:''}
-      ${d.view?`<h3 style="margin-top:12px">交易思路</h3><p>${d.view}</p>`:''}
-      ${d.invalidation?`<p class="meta" style="margin-top:6px">失效条件: ${d.invalidation}</p>`:''}
+      ${d.context?`<h3 style="margin-top:12px">배경</h3><p>${d.context}</p>`:''}
+      ${d.view?`<h3 style="margin-top:12px">관점</h3><p>${d.view}</p>`:''}
+      ${d.invalidation?`<p class="meta" style="margin-top:6px">무효화 조건: ${d.invalidation}</p>`:''}
 
       <div class="card" style="margin-top:12px">
         <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="margin:0">参考图表</h3>
+          <h3 style="margin:0">참고 차트</h3>
           <div class="row">
-            <label class="meta">周期&nbsp;</label>
+            <label class="meta">주기&nbsp;</label>
             <select id="detail-interval" class="search">
               <option value="15">15m</option>
               <option value="60" selected>1H</option>
@@ -222,7 +222,7 @@ async function renderAnalysisDetailBySlug(slug){
       };
     }
   }catch{
-    box.innerHTML = `<p class="muted">未找到内容</p>`;
+    box.innerHTML = `<p class="muted">자료를 찾지 못했습니다</p>`;
   }
 }
 
@@ -238,7 +238,7 @@ function currentSlugFromQuery(){
   if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
-  // 1) 卡片阶梯式进入动画
+  // 1) 카드 계단식 입장
   const cards = document.querySelectorAll('.card');
   cards.forEach((c, i) => {
     c.classList.add('reveal');
@@ -256,7 +256,7 @@ function currentSlugFromQuery(){
 
   cards.forEach(c => revealObserver.observe(c));
 
-  // 2) 背景蜡烛/网格的轻量动画
+  // 2) 배경 캔들/그리드 저부하 애니메이션
   const cvs = document.getElementById('bgfx');
   if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
   cvs.__inited = true;
@@ -321,133 +321,133 @@ function currentSlugFromQuery(){
 /* ===== Knowledge Lab: syllabus + renderer (clickable) ===== */
 
 const KL_KEY = 'kl.progress.v1';
-let KL_QUERY = '';   // 搜索关键词
+let KL_QUERY = '';   // 검색어
 
-// ★ 改为 let，后面可被远程覆盖
+// ★ let으로 정의해 원격 데이터를 불러오면 덮어씌울 수 있도록 유지
 let SYLLABUS = [
   {
-    level: 'Starter · 入门地基',
+    level: 'Starter · 입문 토대',
     icon: '🌱',
-    desc: '认识外汇市场的结构、参与者与运作方式。',
+    desc: '외환 시장의 구조와 참여자를 이해합니다.',
     lessons: [
-      { name: '外汇市场是什么', link: '#/articles/what-is-forex', type: '概念', duration: '5m', desc: '了解市场规模、参与者与交易特点。' },
-      { name: '如何交易外汇', link: '#/articles/how-to-trade-forex', type: '概念', duration: '8m', desc: '下单、撮合、杠杆与交割的基础流程。' },
-      { name: '何时可以交易', link: '#/articles/when-to-trade-forex', type: '节奏', duration: '6m', desc: '主要交易时段与流动性节奏。' },
-      { name: '谁在交易外汇', link: '#/articles/who-trades-forex', type: '概念', duration: '6m', desc: '央行、机构与个人的角色与动机。' },
-      { name: '为什么交易外汇', link: '#/articles/why-trade-forex', type: '概念', duration: '7m', desc: '收益来源与适合外汇的策略优势。' },
-      { name: '保证金交易 101', link: '#/articles/margin-101', type: '机制', duration: '8m', desc: '理解保证金、杠杆与强平机制。' }
+      { name: '외환거래란 무엇인가?', link: '#/articles/what-is-forex', type: '개념', duration: '5m', desc: '시장 규모와 참가자, 특징을 한눈에 정리합니다.' },
+      { name: '외환은 어떻게 거래하나?', link: '#/articles/how-to-trade-forex', type: '개념', duration: '8m', desc: '주문·체결·레버리지·결제 구조를 이해합니다.' },
+      { name: '언제 거래할 수 있나?', link: '#/articles/when-to-trade-forex', type: '세션', duration: '6m', desc: '주요 세션과 유동성 패턴을 살펴봅니다.' },
+      { name: '누가 외환을 거래하나?', link: '#/articles/who-trades-forex', type: '개념', duration: '6m', desc: '중앙은행, 기관, 개인 트레이더의 역할과 동기.' },
+      { name: '왜 외환을 거래하나?', link: '#/articles/why-trade-forex', type: '개념', duration: '7m', desc: '수익 구조와 FX가 적합한 전략을 정리합니다.' },
+      { name: '마진거래 101: 마진계좌의 동작 원리', link: '#/articles/margin-101', type: '메커니즘', duration: '8m', desc: '마진, 레버리지, 마진콜 개념을 이해합니다.' }
     ]
   },
   {
-    level: 'Framework · 基础工具',
+    level: 'Framework · 기초 도구',
     icon: '🧰',
-    desc: '准备交易所需的基本工具与分析框架。',
+    desc: '분석을 위한 기본 도구와 프레임을 준비합니다.',
     lessons: [
-      { name: '外汇经纪商 101', link: '#/articles/forex-brokers-101', type: '工具', duration: '8m', desc: '如何选择经纪商与辨别监管等级。' },
-      { name: '三类市场分析方法', link: '#/articles/three-types-of-analysis', type: '框架', duration: '10m', desc: '技术、基本面与情绪分析的分工。' },
-      { name: '常见图表类型', link: '#/articles/types-of-charts', type: '工具', duration: '7m', desc: '线图、柱状图与烛图的优势与适用场景。' }
+      { name: '포렉스 브로커 101', link: '#/articles/forex-brokers-101', type: '도구', duration: '8m', desc: '브로커 선택과 규제 등급을 체크합니다.' },
+      { name: '세 가지 분석 방법', link: '#/articles/three-types-of-analysis', type: '프레임', duration: '10m', desc: '기술·기본·심리 분석의 역할을 구분합니다.' },
+      { name: '차트의 종류', link: '#/articles/types-of-charts', type: '도구', duration: '7m', desc: '라인, 바, 캔들 차트의 장단점을 비교합니다.' }
     ]
   },
   {
-    level: 'Structure · 价格结构',
+    level: 'Structure · 가격 구조',
     icon: '📘',
-    desc: '从结构与价差的角度理解行情骨架。',
+    desc: '구조와 밸류를 통해 시장의 뼈대를 읽습니다.',
     lessons: [
-      { name: '支撑与阻力级别', link: '#/articles/support-resistance', type: '结构', duration: '10m', desc: '识别关键价位并制定反应策略。' },
-      { name: '日本蜡烛图', link: '#/articles/japanese-candlesticks', type: '结构', duration: '12m', desc: '用烛形阅读市场行为与心理。' },
-      { name: '斐波那契工具', link: '#/articles/fibonacci', type: '工具', duration: '9m', desc: '利用黄金分割定位回撤与扩展目标。' },
-      { name: '移动平均线', link: '#/articles/moving-averages', type: '工具', duration: '8m', desc: '趋势判断与均线组合的配合方式。' },
-      { name: '常用指标组合', link: '#/articles/popular-indicators', type: '工具', duration: '9m', desc: 'MACD、RSI 等指标与结构如何协同。' }
+      { name: '지지와 저항 레벨', link: '#/articles/support-resistance', type: '구조', duration: '10m', desc: '핵심 레벨을 정의하고 반응 전략을 세웁니다.' },
+      { name: '일본식 캔들', link: '#/articles/japanese-candlesticks', type: '구조', duration: '12m', desc: '캔들 모양으로 심리와 흐름을 해석합니다.' },
+      { name: '피보나치', link: '#/articles/fibonacci', type: '도구', duration: '9m', desc: '황금비를 활용해 되돌림과 확장 목표를 찾습니다.' },
+      { name: '이동평균', link: '#/articles/moving-averages', type: '도구', duration: '8m', desc: '추세 판단과 평균선 조합을 설계합니다.' },
+      { name: '인기 보조지표', link: '#/articles/popular-indicators', type: '도구', duration: '9m', desc: 'MACD·RSI 등 지표와 구조를 결합합니다.' }
     ]
   },
   {
-    level: 'Pattern · 结构延伸',
+    level: 'Pattern · 패턴 확장',
     icon: '🌀',
-    desc: '深化对价格形态与动量的理解。',
+    desc: '가격 패턴과 모멘텀을 확장해 해석합니다.',
     lessons: [
-      { name: '摆动指标与动量', link: '#/articles/oscillators', type: '结构', duration: '9m', desc: '解读动量信号的优势与局限。' },
-      { name: '关键图形形态', link: '#/articles/chart-patterns', type: '结构', duration: '11m', desc: '旗形、楔形、头肩顶等结构的使用。' },
-      { name: '枢轴点应用', link: '#/articles/pivot-points', type: '工具', duration: '7m', desc: '日内定位支撑与阻力的快捷方式。' }
+      { name: '오실레이터와 모멘텀 지표', link: '#/articles/oscillators', type: '구조', duration: '9m', desc: '모멘텀 신호의 장단점을 이해합니다.' },
+      { name: '중요 차트 패턴', link: '#/articles/chart-patterns', type: '구조', duration: '11m', desc: '깃발·쐐기·헤드앤숄더 패턴을 적용합니다.' },
+      { name: '피벗 포인트', link: '#/articles/pivot-points', type: '도구', duration: '7m', desc: '일중 지지·저항을 빠르게 파악합니다.' }
     ]
   },
   {
-    level: 'Liquidity · 流动性视角',
+    level: 'Liquidity · 유동성 관점',
     icon: '🌊',
-    desc: '从聪明资金角度观察价格与定位。',
+    desc: '스마트 머니 관점에서 가격을 바라봅니다.',
     lessons: [
-      { name: 'Heikin Ashi 解读', link: '#/articles/heikin-ashi', type: '流动性', duration: '7m', desc: '平滑波动以捕捉趋势骨架。' },
-      { name: '艾略特波浪基础', link: '#/articles/elliott-wave', type: '流动性', duration: '12m', desc: '用波浪结构辅助方向与节奏判断。' },
-      { name: '谐波形态进阶', link: '#/articles/harmonic-patterns', type: '流动性', duration: '14m', desc: '比例组合与入场区域的设计技巧。' }
+      { name: '헤이킨 아시', link: '#/articles/heikin-ashi', type: '유동성', duration: '7m', desc: '노이즈를 낮추고 추세 뼈대를 포착합니다.' },
+      { name: '엘리엇 파동 기초', link: '#/articles/elliott-wave', type: '유동성', duration: '12m', desc: '파동 구조로 방향과 템포를 해석합니다.' },
+      { name: '하모닉 패턴', link: '#/articles/harmonic-patterns', type: '유동성', duration: '14m', desc: '비율과 조합으로 고확률 구역을 찾습니다.' }
     ]
   },
   {
-    level: 'Strategy · 策略设计',
+    level: 'Strategy · 전략 설계',
     icon: '🎯',
-    desc: '把结构、流动性与基本面整合为可执行策略。',
+    desc: '구조·유동성·펀더멘털을 실행 전략으로 묶습니다.',
     lessons: [
-      { name: '背离交易', link: '#/articles/divergences', type: '策略', duration: '10m', desc: '动量与价格错位下的入场逻辑。' },
-      { name: '市场环境分类', link: '#/articles/market-environment', type: '策略', duration: '8m', desc: '趋势、震荡与过渡阶段的应对。' },
-      { name: '突破与假突破', link: '#/articles/breakouts-fakeouts', type: '策略', duration: '9m', desc: '定义可靠的突破条件与过滤方式。' },
-      { name: '基本面分析入门', link: '#/articles/fundamental-analysis', type: '策略', duration: '12m', desc: '经济指标与央行预期如何融入计划。' },
-      { name: '货币对交叉交易', link: '#/articles/currency-crosses', type: '策略', duration: '8m', desc: '用交叉货币构建多空对冲思路。' },
-      { name: '多周期分析', link: '#/articles/mtf-analysis', type: '策略', duration: '7m', desc: '同步高低周期，避免信息孤岛。' }
+      { name: '다이버전스 트레이딩', link: '#/articles/divergences', type: '전략', duration: '10m', desc: '모멘텀과 가격의 괴리를 활용한 진입 로직.' },
+      { name: '시장 환경', link: '#/articles/market-environment', type: '전략', duration: '8m', desc: '추세·박스·전환 국면을 구분하고 대응합니다.' },
+      { name: '돌파와 페이크아웃', link: '#/articles/breakouts-fakeouts', type: '전략', duration: '9m', desc: '신뢰할 수 있는 돌파 조건과 필터를 정의합니다.' },
+      { name: '펀더멘털 분석', link: '#/articles/fundamental-analysis', type: '전략', duration: '12m', desc: '경제 지표와 중앙은행 시나리오를 전략에 반영합니다.' },
+      { name: '통화 크로스', link: '#/articles/currency-crosses', type: '전략', duration: '8m', desc: '교차 통화로 헤지와 상대 강도를 활용합니다.' },
+      { name: '멀티 타임프레임 분석', link: '#/articles/mtf-analysis', type: '전략', duration: '7m', desc: '상·하위 주기를 동기화해 정보 단절을 방지합니다.' }
     ]
   },
   {
-    level: 'Mindset · 心态与资讯',
+    level: 'Mindset · 심리와 인사이트',
     icon: '🧠',
-    desc: '稳固认知、处理信息噪音并保持执行力。',
+    desc: '심리와 정보 노이즈를 관리해 실행력을 지킵니다.',
     lessons: [
-      { name: '市场情绪与定位', link: '#/articles/market-sentiment', type: '心理', duration: '8m', desc: '读取极端情绪与资金流向。' },
-      { name: '新闻交易手册', link: '#/articles/trading-the-news', type: '资讯', duration: '10m', desc: '数据发布前后的准备与执行。' },
-      { name: '套息交易框架', link: '#/articles/carry-trade', type: '策略', duration: '9m', desc: '利差驱动的长期配置思路。' }
+      { name: '시장 심리', link: '#/articles/market-sentiment', type: '심리', duration: '8m', desc: '극단적 심리와 자금 흐름을 해석합니다.' },
+      { name: '뉴스 트레이딩', link: '#/articles/trading-the-news', type: '인사이트', duration: '10m', desc: '지표 발표 전후 준비와 실행을 정리합니다.' },
+      { name: '캐리 트레이드', link: '#/articles/carry-trade', type: '전략', duration: '9m', desc: '금리 차이를 활용한 중장기 운용 전략.' }
     ]
   },
   {
-    level: 'Macro Mesh · 宏观关联',
+    level: 'Macro Mesh · 거시 연결',
     icon: '🧭',
-    desc: '从跨市场角度构建对货币对的理解。',
+    desc: '크로스 마켓 관점으로 통화를 읽습니다.',
     lessons: [
-      { name: '美元指数导航', link: '#/articles/us-dollar-index', type: '宏观', duration: '8m', desc: 'DXY 如何牵引主要货币。' },
-      { name: '跨市场关联', link: '#/articles/intermarket-correlations', type: '宏观', duration: '10m', desc: '债券、股指与商品的联动线索。' },
-      { name: '从股票看外汇', link: '#/articles/equities-to-trade-fx', type: '宏观', duration: '7m', desc: '用行业或龙头股验证外汇假设。' },
-      { name: '国家画像速查', link: '#/articles/country-profiles', type: '宏观', duration: '9m', desc: 'GDP、通胀、政策如何影响货币。' }
+      { name: '달러 인덱스', link: '#/articles/us-dollar-index', type: '거시', duration: '8m', desc: 'DXY가 주요 통화에 주는 영향을 이해합니다.' },
+      { name: '인터마켓 상관관계', link: '#/articles/intermarket-correlations', type: '거시', duration: '10m', desc: '채권·주식·원자재의 연동 신호를 해석합니다.' },
+      { name: '주식으로 FX 읽기', link: '#/articles/equities-to-trade-fx', type: '거시', duration: '7m', desc: '섹터/대표 종목으로 FX 시나리오를 검증합니다.' },
+      { name: '국가별 프로필', link: '#/articles/country-profiles', type: '거시', duration: '9m', desc: 'GDP·물가·정책 변수로 통화 특성을 파악합니다.' }
     ]
   },
   {
-    level: 'System Lab · 系统养成',
+    level: 'System Lab · 시스템 구축',
     icon: '🛠️',
-    desc: '搭建可复现的流程与记录系统。',
+    desc: '재현 가능한 프로세스와 기록 시스템을 만듭니다.',
     lessons: [
-      { name: '交易计划搭建', link: '#/articles/trading-plan', type: '系统', duration: '10m', desc: '制定目标、流程与评估方式。' },
-      { name: '识别你的交易者类型', link: '#/articles/trader-types', type: '系统', duration: '7m', desc: '确认适配的节奏与策略框架。' },
-      { name: '打造个人交易系统', link: '#/articles/build-your-system', type: '系统', duration: '12m', desc: '把规则写成可执行的 Playbook。' },
-      { name: '交易日志实操', link: '#/articles/trading-journal', type: '系统', duration: '8m', desc: '通过记录提炼反馈循环。' },
-      { name: 'MetaTrader 4 使用手册', link: '#/articles/mt4-howto', type: '工具', duration: '9m', desc: '熟悉常用功能与快捷操作。' }
+      { name: '트레이딩 계획 수립', link: '#/articles/trading-plan', type: '시스템', duration: '10m', desc: '목표·프로세스·평가 체계를 문서화합니다.' },
+      { name: '나는 어떤 유형의 트레이더인가?', link: '#/articles/trader-types', type: '시스템', duration: '7m', desc: '리듬과 전략에 맞는 타입을 점검합니다.' },
+      { name: '나만의 트레이딩 시스템 만들기', link: '#/articles/build-your-system', type: '시스템', duration: '12m', desc: '규칙을 실행 가능한 플레이북으로 정리합니다.' },
+      { name: '트레이딩 저널 작성', link: '#/articles/trading-journal', type: '시스템', duration: '8m', desc: '기록을 통해 피드백 루프를 설계합니다.' },
+      { name: 'MetaTrader 4 사용법', link: '#/articles/mt4-howto', type: '도구', duration: '9m', desc: '자주 쓰는 기능과 단축키를 익힙니다.' }
     ]
   },
   {
-    level: 'Risk Engine · 风险矩阵',
+    level: 'Risk Engine · 리스크 매트릭스',
     icon: '🧮',
-    desc: '风险控制、仓位设计与资金曲线管理。',
+    desc: '리스크 통제, 포지션 설계, 자금 곡선을 관리합니다.',
     lessons: [
-      { name: '风险管理基石', link: '#/articles/risk-management', type: '风险', duration: '9m', desc: '用指标衡量风险并制定边界。' },
-      { name: '交易者爆仓的首要原因', link: '#/articles/cause-of-death', type: '风险', duration: '6m', desc: '识别常见的风险积累路径。' },
-      { name: '仓位规模设计', link: '#/articles/position-sizing', type: '风险', duration: '8m', desc: 'R 值、账户权益与仓位计算。' },
-      { name: '止损设置策略', link: '#/articles/stop-loss', type: '风险', duration: '7m', desc: '结构、波动与时间三种止损方式。' },
-      { name: '分批进出场', link: '#/articles/scaling', type: '风险', duration: '7m', desc: '25/25/25/25 的心理与资金管理。' },
-      { name: '货币相关性应用', link: '#/articles/currency-correlations', type: '风险', duration: '8m', desc: '利用相关性避免重复风险敞口。' }
+      { name: '리스크 관리', link: '#/articles/risk-management', type: '리스크', duration: '9m', desc: '지표로 리스크를 측정하고 경계를 세웁니다.' },
+      { name: '트레이더 파산의 1순위 원인', link: '#/articles/cause-of-death', type: '리스크', duration: '6m', desc: '자주 반복되는 위험 누적 패턴을 인지합니다.' },
+      { name: '포지션 사이징', link: '#/articles/position-sizing', type: '리스크', duration: '8m', desc: '계좌 규모와 R 값을 활용해 포지션을 계산합니다.' },
+      { name: '손절(Stop Loss) 설정', link: '#/articles/stop-loss', type: '리스크', duration: '7m', desc: '구조·변동성·시간 기반 손절 방식을 설계합니다.' },
+      { name: '분할 진입·분할 청산', link: '#/articles/scaling', type: '리스크', duration: '7m', desc: '25/25/25/25 분할의 심리와 자금 관리.' },
+      { name: '통화 상관관계', link: '#/articles/currency-correlations', type: '리스크', duration: '8m', desc: '상관관계를 이용해 중복 리스크를 줄입니다.' }
     ]
   },
   {
-    level: 'Graduation · 巩固与反思',
+    level: 'Graduation · 점검과 복기',
     icon: '🏆',
-    desc: '总结经验、警惕陷阱并规划下一阶段。',
+    desc: '경험을 정리하고 함정을 경계하며 다음 단계를 설계합니다.',
     lessons: [
-      { name: '新手最常见的错误', link: '#/articles/common-mistakes', type: '复盘', duration: '7m', desc: '列举高频失误并给出修正方法。' },
-      { name: '外汇骗局速查', link: '#/articles/forex-scams', type: '复盘', duration: '6m', desc: '识别高收益诱饵与庞氏结构。' },
-      { name: '交易偏好测验', link: '#/articles/personality-quizzes', type: '复盘', duration: '10m', desc: '评估自身优势与改进方向。' },
-      { name: '毕业复盘', link: '#/articles/graduation-speech', type: '复盘', duration: '6m', desc: '总结方法论并规划下一步成长。' }
+      { name: '초보자가 가장 많이 하는 실수', link: '#/articles/common-mistakes', type: '복기', duration: '7m', desc: '자주 반복되는 실수를 살펴보고 교정합니다.' },
+      { name: '포렉스 사기 유형', link: '#/articles/forex-scams', type: '복기', duration: '6m', desc: '고수익 미끼와 폰지 구조를 판별합니다.' },
+      { name: '성향 테스트', link: '#/articles/personality-quizzes', type: '복기', duration: '10m', desc: '내 성향과 보완할 지점을 진단합니다.' },
+      { name: '졸업 연설', link: '#/articles/graduation-speech', type: '복기', duration: '6m', desc: '방법론을 정리하고 다음 성장 계획을 세웁니다.' }
     ]
   }
 ];
@@ -455,7 +455,7 @@ let SYLLABUS = [
 function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
 function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }
 
-// ★ 远程覆盖本地 SYLLABUS（存在且为数组才覆盖）
+// ★ 원격 syllabus가 존재하면 위 배열을 덮어씁니다
 let __syllabusLoaded = false;
 async function tryLoadRemoteSyllabus(){
   if (__syllabusLoaded) return;
@@ -481,10 +481,10 @@ function ensureKLControls(){
   bar.style.marginBottom = '14px';
   bar.innerHTML = `
     <div class="toolbar" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <input id="kl-q" class="search" placeholder="搜索课程…" style="min-width:220px">
-      <button id="kl-expand" class="btn">全部展开</button>
-      <button id="kl-collapse" class="btn">全部收起</button>
-      <button id="kl-start" class="btn" style="font-weight:700">开始学习</button>
+      <input id="kl-q" class="search" placeholder="강의 검색…" style="min-width:220px">
+      <button id="kl-expand" class="btn">전체 펼치기</button>
+      <button id="kl-collapse" class="btn">전체 접기</button>
+      <button id="kl-start" class="btn" style="font-weight:700">학습 시작</button>
     </div>
   `;
   host.parentElement.insertBefore(bar, host);
@@ -511,7 +511,7 @@ function renderKnowledgeLab(){
   const stats = document.getElementById('kl-stats');
   if (bar){ bar.style.width = pct+'%'; }
   if (label){ label.textContent = pct+'%'; }
-  if (stats){ stats.textContent = `${done} / ${total} 课程`; }
+  if (stats){ stats.textContent = `${done} / ${total} 강의`; }
 
   host.innerHTML = SYLLABUS.map(group=>{
     const levelTitle = group.level || '';
@@ -543,7 +543,7 @@ function renderKnowledgeLab(){
 
       return `
         <div class="kl-item-row" style="${visible?'':'display:none'}">
-          <button class="kl-dot-btn" data-key="${key}" aria-label="标记完成" title="标记完成" style="all:unset">
+          <button class="kl-dot-btn" data-key="${key}" aria-label="완료 표시" title="완료 표시" style="all:unset">
             <span class="kl-dot">${isDone?'✓':''}</span>
           </button>
           ${start}
@@ -576,7 +576,7 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
-  // 分类折叠/展开
+  // 분류 접기/펼치기
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
       const sec = document.querySelector(h.dataset.toggle);
@@ -584,7 +584,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 完成标记：仅通过左侧圆点按钮切换
+  // 완료 체크: 왼쪽 점 버튼만 토글
   host.querySelectorAll('.kl-dot-btn').forEach(btn=>{
     btn.onclick = (e)=>{
       e.preventDefault();
@@ -597,7 +597,7 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 进度重置
+  // 진행도 초기화
   const resetBtn = document.getElementById('kl-reset');
   if (resetBtn){
     resetBtn.onclick = ()=>{
@@ -645,12 +645,12 @@ function jumpToFirstIncomplete(){
 async function renderMarketNews(){
   const host = document.querySelector('section[data-route="market-news"] #news');
   if (!host) return;
-  host.innerHTML = '<p class="muted">加载中…</p>';
+  host.innerHTML = '<p class="muted">불러오는 중…</p>';
   try{
     const res = await fetch('/api/market-news/index.json?_=' + Date.now());
     const rows = await res.json(); // [{id}]
     if (!Array.isArray(rows) || !rows.length) {
-      host.innerHTML = '<p class="muted">暂无快讯</p>';
+      host.innerHTML = '<p class="muted">뉴스가 없습니다</p>';
       return;
     }
     const html = await Promise.all(rows.map(async r=>{
@@ -658,7 +658,7 @@ async function renderMarketNews(){
         const dres = await fetch(`/api/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
         const d = await dres.json();
         const bullets = (d.bullets||[]).map(b=>`<li>${b}</li>`).join('');
-        const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">查看原文</a>` : '';
+        const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문 보기</a>` : '';
         const when = d.date ? new Date(d.date).toLocaleString() : '';
         return `
           <li class="card">
@@ -673,11 +673,11 @@ async function renderMarketNews(){
     }));
     host.innerHTML = `<ul style="display:grid;gap:12px">${html.join('')}</ul>`;
   }catch{
-    host.innerHTML = '<p class="muted">加载失败</p>';
+    host.innerHTML = '<p class="muted">불러오기에 실패했습니다</p>';
   }
 }
 
-// -------- 路由驱动 ----------
+// -------- 라우터 구동 ----------
 window.addEventListener('hashchange', async ()=>{
   const m = matchRoute();
   const routeId = m.id;

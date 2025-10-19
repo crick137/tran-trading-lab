@@ -1,52 +1,52 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TRAN TRADING LAB | 系统化外汇交易实验室</title>
-    <meta name="description" content="TRAN TRADING LAB：每日速览、分析档案、知识实验室、市场快讯与深度文章，让外汇交易更系统。" />
-    <meta property="og:title" content="TRAN TRADING LAB | 系统化外汇交易实验室" />
-    <meta property="og:description" content="每日速览、结构化分析、知识课程和全球市场要点，帮助你更快建立可复制的交易框架。" />
+    <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
+    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+    <meta property="og:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta property="og:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tran-trading-lab.vercel.app/" />
     <meta property="og:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TRAN TRADING LAB | 系统化外汇交易实验室" />
-    <meta name="twitter:description" content="每日速览、结构化分析、知识课程和全球市场要点，帮助你更快建立可复制的交易框架。" />
+    <meta name="twitter:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta name="twitter:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
     <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <link rel="canonical" href="https://tran-trading-lab.vercel.app/" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <!-- 背景动态效果画布（可通过 data-enabled 开关） -->
+    <!-- 배경 동효과 캔버스 (data-enabled로 온/오프) -->
     <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
 
-    <!-- 顶部导航 -->
+    <!-- 상단 내비게이션 -->
     <nav class="nav" aria-label="Primary">
-      <a href="#/" class="brand" aria-label="返回首页">
+      <a href="#/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
         TRAN TRADING LAB
       </a>
-      <a href="#/daily-brief">每日速览</a>
-      <a href="#/trade-journal">分析档案</a>
-      <a href="#/knowledge-lab">知识实验室</a>
-      <a href="#/market-news">市场快讯</a>
-      <a href="#/articles">深度文章</a>
-      <a href="#/about">关于我们</a>
+      <a href="#/daily-brief">데일리 브리프</a>
+      <a href="#/trade-journal">분석 아카이브</a>
+      <a href="#/knowledge-lab">지식 연구소</a>
+      <a href="#/market-news">마켓 뉴스</a>
+      <a href="#/articles">아티클</a>
+      <a href="#/about">About</a>
     </nav>
 
     <main class="container" id="main">
-      <!-- 首页 -->
+      <!-- 홈 -->
       <section data-route="home" aria-labelledby="home-hero-title">
         <div class="hero">
           <div class="badge">TRAN TRADING LAB</div>
-          <h1 id="home-hero-title">每天更聪明、更轻松地读懂市场</h1>
-          <p>每日速览、结构化分析、知识探索与全球市场要点，一站式整理你的交易节奏。</p>
+          <h1 id="home-hero-title">매일 더 똑똑하게, 더 가볍게 시장을 읽다</h1>
+          <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
         </div>
 
         <div class="feature-grid" role="list">
-          <!-- 每日速览 -->
-          <a href="#/daily-brief" class="card" role="listitem" aria-label="前往每日速览">
+          <!-- 데일리 브리프 -->
+          <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -71,13 +71,13 @@
                   </g>
                 </svg>
               </span>
-              每日速览
+              데일리 브리프
             </div>
-            <p>十分钟掌握当天的趋势、节奏与关键风险点。</p>
+            <p>매일 아침 시장을 읽는 시간.</p>
           </a>
 
-          <!-- 分析档案 -->
-          <a href="#/trade-journal" class="card" role="listitem" aria-label="前往分析档案">
+          <!-- 분석 아카이브 -->
+          <a href="#/trade-journal" class="card" role="listitem" aria-label="분석 아카이브로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -92,13 +92,13 @@
                   <circle cx="7" cy="10" r="1.6" fill="url(#grad)" class="pulse" />
                 </svg>
               </span>
-              分析档案
+              분석 아카이브
             </div>
-            <p>结构、关键价位与交易逻辑全部公开归档，随时回溯。</p>
+            <p>지지·저항과 시나리오 중심의 공개 분석을 모아둔 라이브러리.</p>
           </a>
 
-          <!-- 知识实验室 -->
-          <a href="#/knowledge-lab" class="card" role="listitem" aria-label="前往知识实验室">
+          <!-- 지식 연구소 -->
+          <a href="#/knowledge-lab" class="card" role="listitem" aria-label="지식 연구소로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -115,13 +115,13 @@
                   </g>
                 </svg>
               </span>
-              知识实验室
+              지식 연구소
             </div>
-            <p>从零基础到系统复盘的课程路线图，按阶段稳步推进。</p>
+            <p>Preschool부터 Graduation까지, 위로 쌓아 올리는 커리큘럼 로드맵.</p>
           </a>
 
-          <!-- 市场快讯 -->
-          <a href="#/market-news" class="card" role="listitem" aria-label="前往市场快讯">
+          <!-- 마켓 뉴스 -->
+          <a href="#/market-news" class="card" role="listitem" aria-label="마켓 뉴스로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -137,13 +137,13 @@
                   <line x1="6" y1="14" x2="15" y2="14" class="stroke" style="animation-delay:.6s" />
                 </svg>
               </span>
-              市场快讯
+              마켓 뉴스
             </div>
-            <p>全球宏观与外汇核心动态一目了然，做决定更有底气。</p>
+            <p>글로벌 거시 이벤트와 FX 핵심 포인트를 빠르게 정리.</p>
           </a>
 
-          <!-- 深度文章 -->
-          <a href="#/articles" class="card" role="listitem" aria-label="前往深度文章">
+          <!-- 아티클 -->
+          <a href="#/articles" class="card" role="listitem" aria-label="아티클로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -158,13 +158,13 @@
                   <circle cx="17.5" cy="6.5" r="1.5" fill="url(#grad)" class="pulse" />
                 </svg>
               </span>
-              深度文章
+              아티클
             </div>
-            <p>交易思考、风险复盘与策略心得，持续更新的知识库。</p>
+            <p>거래 사고, 리스크 복기, 전략 인사이트를 기록한 에세이.</p>
           </a>
 
-          <!-- 关于我们 -->
-          <a href="#/about" class="card" role="listitem" aria-label="前往关于我们">
+          <!-- About -->
+          <a href="#/about" class="card" role="listitem" aria-label="About로 이동">
             <span class="glow" aria-hidden="true"></span>
             <div class="title">
               <span class="icon-wrap" aria-hidden="true">
@@ -179,37 +179,37 @@
                   <polygon points="12,7 9,15 12,13 15,15" fill="url(#grad)" class="float" />
                 </svg>
               </span>
-              关于我们
+              About
             </div>
-            <p>交易哲学、成长轨迹与未来计划，一起了解 TRAN。</p>
+            <p>TRAN TRADING LAB의 철학, 여정, 그리고 다음 계획.</p>
           </a>
         </div>
       </section>
 
-      <!-- 每日速览：列表 -->
+      <!-- 데일리 브리프: 목록 -->
       <section data-route="daily-brief" id="daily-brief-list" class="hidden" aria-labelledby="daily-brief-title">
         <div class="card">
-          <h2 id="daily-brief-title">每日速览 — 列表</h2>
+          <h2 id="daily-brief-title">데일리 브리프 — 목록</h2>
           <ul id="brief-list" aria-live="polite"></ul>
-          <p class="muted" style="margin-top:8px">点击任意日期即可查看详情。</p>
+          <p class="muted" style="margin-top:8px">날짜를 클릭하면 상세 페이지로 이동합니다.</p>
         </div>
       </section>
 
-      <!-- 每日速览：详情 -->
+      <!-- 데일리 브리프: 상세 -->
       <section data-route="daily-brief-detail" id="daily-brief-detail" class="hidden" aria-live="polite"></section>
 
-      <!-- 分析档案（公开版） -->
+      <!-- 분석 아카이브 (공개용) -->
       <section data-route="trade-journal" class="hidden" aria-labelledby="journal-title">
         <div class="grid grid-12">
           <section class="card" style="grid-column: span 7;">
             <div class="toolbar">
-              <h2 id="journal-title" style="margin:0">分析列表</h2>
-              <input id="anal-search" class="search" placeholder="搜索品种/标签/标题" aria-label="搜索" />
-              <select id="anal-bias" class="search" aria-label="方向筛选">
-                <option value="">全部方向</option>
-                <option value="bullish">看多</option>
-                <option value="bearish">看空</option>
-                <option value="neutral">中性</option>
+              <h2 id="journal-title" style="margin:0">분석 목록</h2>
+              <input id="anal-search" class="search" placeholder="심볼·태그·제목 검색" aria-label="검색" />
+              <select id="anal-bias" class="search" aria-label="관점 필터">
+                <option value="">전체 관점</option>
+                <option value="bullish">상승</option>
+                <option value="bearish">하락</option>
+                <option value="neutral">중립</option>
               </select>
             </div>
             <div id="anal-list" aria-live="polite"></div>
@@ -217,135 +217,135 @@
 
           <aside class="card" style="grid-column: span 5;">
             <div id="anal-detail">
-              <p class="muted">在左侧选择条目即可查看详细内容。</p>
+              <p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>
             </div>
           </aside>
         </div>
       </section>
 
-      <!-- 知识实验室（课程目录 + 学习进度） -->
+      <!-- 지식 연구소 (커리큘럼 + 진행도) -->
       <section data-route="knowledge-lab" class="hidden" aria-labelledby="kl-hero-title">
         <div class="hero">
           <div class="badge">Knowledge Lab</div>
-          <h1 id="kl-hero-title">系统化外汇知识路线图</h1>
-          <p class="muted">从 Preschool 到 Graduation，按阶段累积策略、结构与复盘能力。</p>
+          <h1 id="kl-hero-title">체계적인 외환 지식 로드맵</h1>
+          <p class="muted">Preschool부터 Graduation까지, 전략·구조·복기를 단계적으로 쌓아 올립니다.</p>
         </div>
 
-        <!-- 进度 -->
+        <!-- 진행도 -->
         <div class="card" style="margin-bottom:14px">
           <div class="row" style="justify-content:space-between;align-items:center">
-            <h2 style="margin:0">总体进度</h2>
-            <button id="kl-reset" class="btn" style="padding:6px 10px;font-weight:600">重置进度</button>
+            <h2 style="margin:0">전체 진행도</h2>
+            <button id="kl-reset" class="btn" style="padding:6px 10px;font-weight:600">진행도 초기화</button>
           </div>
-          <div class="progress-wrap" aria-label="总体进度">
+          <div class="progress-wrap" aria-label="전체 진행도">
             <div id="kl-progress" class="progress-bar">
               <span id="kl-progress-label" aria-live="polite">0%</span>
             </div>
           </div>
-          <p class="meta" id="kl-stats" aria-live="polite">0 / 0 课程</p>
+          <p class="meta" id="kl-stats" aria-live="polite">0 / 0 강의</p>
         </div>
 
-        <!-- 控制栏由 JS 注入（搜索/展开/收起/开始学习） -->
-        <!-- 课程容器 -->
+        <!-- 컨트롤 바는 JS에서 삽입 (검색/펼치기/접기/학습 시작) -->
+        <!-- 커리큘럼 컨테이너 -->
         <div id="kl-syllabus" class="kl-grid" aria-live="polite"></div>
       </section>
 
-      <!-- 市场快讯（纯文本版本） -->
+      <!-- 마켓 뉴스 (텍스트 버전) -->
       <section data-route="market-news" class="hidden" aria-labelledby="news-title">
         <div class="card">
-          <h2 id="news-title">市场快讯</h2>
-          <p class="muted">全球关键事件与宏观节奏的速览。</p>
+          <h2 id="news-title">마켓 뉴스</h2>
+          <p class="muted">글로벌 핵심 이벤트와 거시 리듬을 한눈에.</p>
           <div id="news">
             <ul>
-              <li>📊 美国 CPI、就业等核心经济数据时间表</li>
-              <li>🏦 主要央行讲话与利率政策指引</li>
-              <li>💰 大宗商品与主要货币的波动亮点</li>
-              <li>🌏 亚欧与北美市场的焦点头条</li>
+              <li>📊 미국 CPI·고용 등 주요 지표 발표 일정</li>
+              <li>🏦 주요 중앙은행 발언과 금리 방향</li>
+              <li>💰 원자재·주요 통화 변동 포인트</li>
+              <li>🌏 아시아·유럽·미국 시장 헤드라인</li>
             </ul>
-            <p class="muted" style="margin-top:10px">※ 数据按日更新，保持交易日节奏。</p>
+            <p class="muted" style="margin-top:10px">※ 데이터는 매일 갱신됩니다.</p>
           </div>
         </div>
       </section>
 
-      <!-- 深度文章 -->
+      <!-- 아티클 -->
       <section data-route="articles" class="hidden" aria-labelledby="articles-title">
         <div class="card">
-          <h2 id="articles-title">深度文章</h2>
+          <h2 id="articles-title">아티클</h2>
           <article class="card">
-            <h3>结构与风险的临界点</h3>
-            <p class="muted">复盘失败交易，重新校准结构与资金管理的秩序。</p>
+            <h3>구조와 리스크의 경계</h3>
+            <p class="muted">실패한 거래를 복기하며 구조와 자금 관리를 다시 맞춘 이야기.</p>
           </article>
           <article class="card">
-            <h3>为什么分批更合理</h3>
-            <p class="muted">25/25/25/25 的心理与数学，一次读懂分批进出的意义。</p>
+            <h3>왜 분할이 더 합리적인가</h3>
+            <p class="muted">25/25/25/25 비중 조절의 심리와 수학을 한 번에 정리.</p>
           </article>
         </div>
       </section>
 
-      <!-- 关于 -->
+      <!-- About -->
       <section data-route="about" class="hidden" aria-labelledby="about-hero-title">
         <div class="hero">
-          <div class="badge">关于 TRAN</div>
-          <h1 id="about-hero-title">我们以结构看市场，以纪律走得更远</h1>
-          <p class="muted">语境重于数字，准备胜于运气。这里记录 TRAN TRADING LAB 的起点、原则与下一个目标。</p>
+          <div class="badge">About TRAN</div>
+          <h1 id="about-hero-title">나는 ‘구조로 시장을 읽는 사람’입니다</h1>
+          <p class="muted">숫자보다 맥락, 운보다 준비. TRAN TRADING LAB의 출발과 원칙, 그리고 다음 여정을 기록합니다.</p>
         </div>
 
         <div class="feature-grid">
           <section class="card" aria-labelledby="about-start">
-            <h2 id="about-start">起点</h2>
-            <p>起初，交易像是在猜“它会涨还是跌”。无数次失误提醒我，<strong>价格是结果</strong>，<strong>结构才是原因</strong>。自那以后，我把图表当作事件与痕迹的叙事，而不是静态的照片。</p>
-            <p class="muted">— “价格是最后一句话，语法是结构。”</p>
+            <h2 id="about-start">어디서 시작됐나</h2>
+            <p>시장은 처음엔 ‘정답 맞히기’ 같았습니다. 올라갈까? 내려갈까? 수많은 실패가 알려준 건 <strong>가격은 결과</strong>, <strong>구조는 이유</strong>라는 사실. 그래서 차트를 사진이 아닌 <em>사건과 흔적의 연속</em>으로 읽기 시작했습니다.</p>
+            <p class="muted">— “가격은 마지막 문장, 문법은 구조다.”</p>
           </section>
 
           <section class="card" aria-labelledby="about-turning">
-            <h2 id="about-turning">关键转折</h2>
+            <h2 id="about-turning">전환점</h2>
             <ul>
-              <li><strong>Loss Journal</strong> — 坦诚记录亏损，执着追问“为什么”。</li>
-              <li><strong>Structure First</strong> — 以 HH/HL/LL/LH、BOS·CHoCH、FVG·OB 梳理语境。</li>
-              <li><strong>Risk Engine</strong> — 固定 1~2% 风险，25/25/25/25 分批，设定每日回撤上限。</li>
-              <li><strong>公开分析</strong> — 把记录公开，换来反馈与迭代，系统愈发稳固。</li>
+              <li><strong>Loss Journal</strong> — 손실을 숨기지 않고 기록하며 ‘왜?’를 집요하게 추적.</li>
+              <li><strong>Structure First</strong> — HH/HL/LL/LH, BOS·CHoCH, FVG·OB로 맥락을 정리.</li>
+              <li><strong>Risk Engine</strong> — 1~2% 고정 리스크, 25/25/25/25 분할, 일일 DD 제한.</li>
+              <li><strong>공개 분석</strong> — 기록을 밖으로 꺼내자 피드백이 들어오고 시스템이 단단해짐.</li>
             </ul>
           </section>
 
           <section class="card" aria-labelledby="about-rules">
-            <h2 id="about-rules">坚持的五个原则</h2>
+            <h2 id="about-rules">내가 지키는 다섯 가지 원칙</h2>
             <ol>
-              <li><strong>结构优先</strong> — 任何信号都必须落在明确的结构之内。</li>
-              <li><strong>双场景推演</strong> — 主场景 + 反手场景，条件写清楚。</li>
-              <li><strong>触发要简单</strong> — 进场、止损、止盈全部数字化。</li>
-              <li><strong>先管风险</strong> — 情绪靠后，规则靠前。</li>
-              <li><strong>记录即资产</strong> — 优质的亏损，是下一次胜利的前提。</li>
+              <li><strong>구조 &gt; 시그널</strong> — 신호는 구조 위에서만 의미가 있다.</li>
+              <li><strong>시나리오 2개</strong> — 주 시나리오 + 반대 시나리오를 모두 적는다.</li>
+              <li><strong>트리거는 단순하게</strong> — 엔트리·SL·TP는 숫자로 미리 정한다.</li>
+              <li><strong>리스크가 먼저</strong> — 감정은 나중, 규칙은 먼저.</li>
+              <li><strong>기록은 자산</strong> — 좋은 손실은 다음 승리의 선행 조건.</li>
             </ol>
           </section>
 
           <section class="card" aria-labelledby="about-next">
-            <h2 id="about-next">现在与下一步</h2>
-            <p>现在，我每天用 <strong>每日速览</strong> 对齐盘前节奏，并在 <strong>分析档案</strong> 中公开结构与价位。下一步，我正搭建 <strong>自动化检查清单</strong> 与 <strong>回测-实盘一体化</strong> 的流程，让任何人都能复制这套系统。</p>
+            <h2 id="about-next">지금과 다음</h2>
+            <p>지금 나는 매일 <strong>데일리 브리프</strong>로 시장을 정리하고, <strong>분석 아카이브</strong>에 관점과 레벨을 공개합니다. 다음 목표는 <strong>자동화 체크리스트</strong>와 <strong>백테스트-라이브 일체화</strong> 워크플로우를 구축해 누구나 재현 가능한 시스템을 만드는 것입니다.</p>
           </section>
 
           <section class="card" aria-labelledby="about-one-line">
-            <h2 id="about-one-line">一句话的座右铭</h2>
+            <h2 id="about-one-line">한 문장으로</h2>
             <blockquote style="margin:8px 0 0; color:#cfd6e3">
-              “真正的大收益来自 <strong>反应</strong> 而非预测。
-              带着准备好的原则，<em>慢慢地</em>，但 <em>持续地</em> 前进。”
+              “큰 수익은 <strong>예측</strong>이 아니라 <strong>반응</strong>에서 나온다.
+              준비된 원칙으로 <em>천천히</em>, 그러나 <em>끊임없이</em>.”
             </blockquote>
           </section>
 
           <section class="card" aria-labelledby="about-socials">
-            <h2 id="about-socials">频道与社区</h2>
-            <p class="muted" style="margin:6px 0 14px">实时速览、公开分析、投票与问答都在这里继续。</p>
+            <h2 id="about-socials">채널 & 커뮤니티</h2>
+            <p class="muted" style="margin:6px 0 14px">실시간 브리프, 공개 분석, 투표와 Q&A는 여기서 이어집니다.</p>
             <div class="socials">
               <a class="btn" href="https://x.com/TranTradingLab" target="_blank" rel="noopener">X / Twitter @TranTradingLab</a>
-              <a class="btn" href="https://t.me/http4477" target="_blank" rel="noopener">Telegram 频道</a>
-              <a class="btn" href="https://whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t" target="_blank" rel="noopener">WhatsApp 频道</a>
+              <a class="btn" href="https://t.me/http4477" target="_blank" rel="noopener">Telegram 채널</a>
+              <a class="btn" href="https://whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t" target="_blank" rel="noopener">WhatsApp 채널</a>
             </div>
-            <p class="muted" style="margin-top:10px">— 让每天的开盘更轻松。</p>
+            <p class="muted" style="margin-top:10px">— 하루를 가볍게 시작하는 가장 빠른 길.</p>
           </section>
         </div>
       </section>
     </main>
 
-    <!-- 应用脚本 -->
+    <!-- 앱 스크립트 -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

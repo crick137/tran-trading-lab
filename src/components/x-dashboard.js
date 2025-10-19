@@ -27,19 +27,19 @@ class XDashboard extends HTMLElement {
             <option value="60">H1</option>
             <option value="240">H4</option>
           </select>
-          <button id="apply" class="btn">更新图表</button>
+          <button id="apply" class="btn">적용</button>
         </div>
 
         <div class="grid">
           <section class="card">
-            <h3 class="m0">图表</h3>
+            <h3 class="m0">차트</h3>
             <x-tv-chart id="tv" symbol="OANDA:XAUUSD" interval="15" autosize></x-tv-chart>
           </section>
 
           <section class="card">
             <div class="row" style="justify-content:space-between">
-              <h3 class="m0">交易信号</h3>
-              <span class="badge">${new Date().toLocaleString('zh-CN')}</span>
+              <h3 class="m0">시그널</h3>
+              <span class="badge">${new Date().toLocaleString('ko-KR')}</span>
             </div>
             <x-signal-board></x-signal-board>
           </section>
