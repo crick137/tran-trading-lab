@@ -349,11 +349,15 @@ export default async function handler(req, res) {
     else if (pathname.startsWith('/api/market-news')) {
       out = await genericHandler(req, pathname, 'market-news');
     }
-    else if (pathname.startsWith('/api/research/articles')) {
+    else if (pathname.startsWith('/api/research/articles/')) {
       out = await genericHandler(req, pathname, 'research/articles');
     }
+    else if (pathname === '/api/research/articles' || pathname === '/api/research/articles.json') {
+      out = await handleResearch(req, pathname);
+    }
     else if (pathname.startsWith('/api/research/syllabus')) {
-      out = await genericHandler(req, pathname, 'research');
+      const prefixed = pathname.replace('/api/research', '/api');
+      out = await genericHandler(req, prefixed, 'research');
     }
     else if (pathname.startsWith('/api/research')) {
       out = await handleResearch(req, pathname);
