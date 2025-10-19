@@ -38,21 +38,18 @@
     .login-box button{width:100%;}
     a.inline-link{color:#3b82f6;text-decoration:none;}
     a.inline-link:hover{text-decoration:underline;}
-    .syllabus-structured{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
-    .syllabus-level{background:#181b21;border:1px solid #2a2f36;border-radius:12px;padding:12px;}
-    .syllabus-level.collapsed .syllabus-lessons{display:none;}
-    .syllabus-level-header{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;align-items:center;}
-    .syllabus-level-header input{min-width:160px;}
-    .syllabus-level-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
-    .syllabus-level-actions button,
-    .lesson-row button{padding:6px 10px;border-radius:8px;border:1px solid #2a2f36;background:transparent;color:#eaecee;cursor:pointer;}
-    .syllabus-level-actions button:hover,
-    .lesson-row button:hover{border-color:#3b82f6;}
-    .syllabus-lessons{display:flex;flex-direction:column;gap:10px;}
-    .lesson-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-    .lesson-row input{min-width:160px;flex:1;}
-    .lesson-actions{display:flex;gap:6px;flex-wrap:wrap;}
-    .lesson-desc{width:100%;min-height:70px;background:#10131a;border:1px solid #2a2f36;border-radius:8px;padding:6px;color:#eaecee;}
+    .course-editor{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:16px;align-items:start;margin-top:12px;}
+    @media (max-width:900px){.course-editor{grid-template-columns:1fr;}}
+    #lesson-list{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:12px;max-height:520px;overflow:auto;}
+    .lesson-group{margin-bottom:12px;}
+    .lesson-group h4{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:6px;}
+    .lesson-item{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin:4px 0;color:#eaecee;background:transparent;}
+    .lesson-item:hover{border-color:#3b82f6;}
+    .lesson-item.active{border-color:#3b82f6;background:rgba(59,130,246,.12);}
+    .lesson-item span{display:block;font-size:12px;color:#9aa0a6;}
+    .lesson-editor{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:16px;}
+    .lesson-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;}
+    .lesson-meta-value{margin:2px 0 0;font-weight:600;}
   </style>
 </head>
 <body>
@@ -236,22 +233,53 @@
       </section>
 
       <section id="tab-syllabus" class="card tab-panel">
-        <h3 style="margin-top:0">知识课程</h3>
-        <p class="muted">在下方维护课程层级与条目，底部 JSON 会自动同步。类别与时长字段会直接用于前台标签显示。<a class="inline-link" href="/api/research/syllabus.json" target="_blank" rel="noopener">查看线上数据</a></p>
-        <div id="r-structured" class="syllabus-structured"></div>
-        <div class="action-bar">
-          <button id="r-load" class="ghost">加载线上</button>
-          <button id="r-add-level" class="ghost">新增级别</button>
-          <button id="r-expand-all" class="ghost">全部展开</button>
-          <button id="r-collapse-all" class="ghost">全部收起</button>
-          <button id="r-sync-json" class="ghost">应用 JSON 到结构</button>
-          <button id="r-save" class="primary">保存</button>
-          <button id="r-clear" class="ghost">清空</button>
-          <button id="r-preview" class="ghost">前台预览</button>
+        <h3 style="margin-top:0">课程内容</h3>
+        <p class="muted">课程大纲已固定在系统内。左侧选择课时，在右侧填写正文内容并保存，前台将自动读取对应文章。</p>
+        <div class="course-editor">
+          <aside id="lesson-list" aria-live="polite">
+            <p class="muted" id="lesson-list-msg">正在加载课程大纲…</p>
+          </aside>
+          <div class="lesson-editor">
+            <div class="lesson-meta">
+              <div>
+                <label class="muted">阶段</label>
+                <p id="lesson-level" class="lesson-meta-value">-</p>
+              </div>
+              <div>
+                <label class="muted">课时</label>
+                <p id="lesson-name" class="lesson-meta-value">请选择左侧课时</p>
+              </div>
+            </div>
+            <div class="form-grid">
+              <label>文章标识 (Slug)
+                <input id="lesson-slug" placeholder="如：what-is-forex" />
+              </label>
+              <label class="wide">文章标题
+                <input id="lesson-article-title" placeholder="默认使用课时标题，可修改" />
+              </label>
+              <label class="wide">摘要
+                <textarea id="lesson-article-excerpt" placeholder="用于列表和分享的简短摘要"></textarea>
+              </label>
+              <label class="wide">标签 (逗号或换行分隔)
+                <textarea id="lesson-article-tags" placeholder="concept, beginner"></textarea>
+              </label>
+              <label class="wide">封面图 URL (可选)
+                <input id="lesson-article-hero" placeholder="https://example.com/cover.jpg" />
+              </label>
+              <label class="wide">正文内容
+                <textarea id="lesson-article-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace" placeholder="在此编写课程正文，每段之间可空一行。"></textarea>
+              </label>
+            </div>
+            <div class="action-bar">
+              <button id="lesson-save" class="primary">保存内容</button>
+              <button id="lesson-delete" class="danger">删除文章</button>
+              <button id="lesson-preview" class="ghost">前台预览</button>
+              <button id="lesson-open" class="ghost">在新标签打开 JSON</button>
+            </div>
+          </div>
         </div>
         <div class="section-footer">
-          <textarea id="r-json" style="min-height:220px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"></textarea>
-          <p id="r-msg" class="muted"></p>
+          <p id="lesson-msg" class="muted"></p>
         </div>
       </section>
 

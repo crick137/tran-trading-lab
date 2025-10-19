@@ -807,6 +807,220 @@ function bindResearchSyllabus() {
   loadOnline().catch(() => {});
 }
 
+// Course Content Editor: read syllabus only; edit per-lesson article content
+function bindCourseContentEditor() {
+  const listHost = document.getElementById('lesson-list');
+  const listMsg = document.getElementById('lesson-list-msg');
+
+  const meta = {
+    level: document.getElementById('lesson-level'),
+    name: document.getElementById('lesson-name')
+  };
+  const fields = {
+    slug: document.getElementById('lesson-slug'),
+    title: document.getElementById('lesson-article-title'),
+    excerpt: document.getElementById('lesson-article-excerpt'),
+    tags: document.getElementById('lesson-article-tags'),
+    hero: document.getElementById('lesson-article-hero'),
+    body: document.getElementById('lesson-article-body')
+  };
+  const msg = document.getElementById('lesson-msg');
+  const btn = {
+    save: document.getElementById('lesson-save'),
+    del: document.getElementById('lesson-delete'),
+    prev: document.getElementById('lesson-preview'),
+    open: document.getElementById('lesson-open')
+  };
+
+  if (!listHost) return; // HTML not present; skip
+
+  const state = { current: null }; // { level, name, link, slug }
+
+  const toSlug = (text) => {
+    return String(text || '')
+      .toLowerCase()
+      .replace(/[#/]/g, ' ')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 120);
+  };
+  const linkToSlug = (link) => {
+    if (!link) return '';
+    // Expect pattern like "#/articles/<slug>"
+    const m = String(link).match(/#\/?articles\/?([A-Za-z0-9_-]+)/);
+    return m ? m[1] : '';
+  };
+
+  const clearEditor = () => {
+    if (meta.level) meta.level.textContent = '-';
+    if (meta.name) meta.name.textContent = '未选择课程/课时';
+    if (fields.slug) fields.slug.value = '';
+    if (fields.title) fields.title.value = '';
+    if (fields.excerpt) fields.excerpt.value = '';
+    if (fields.tags) fields.tags.value = '';
+    if (fields.hero) fields.hero.value = '';
+    if (fields.body) fields.body.value = '';
+  };
+
+  const populateEditor = (lessonMeta, doc) => {
+    if (meta.level) meta.level.textContent = lessonMeta.level || '-';
+    if (meta.name) meta.name.textContent = lessonMeta.name || '';
+    const derivedSlug = lessonMeta.slug
+      || linkToSlug(lessonMeta.link)
+      || toSlug(lessonMeta.name || '');
+    if (fields.slug) fields.slug.value = doc?.slug || derivedSlug;
+    if (fields.title) fields.title.value = doc?.title || (lessonMeta.name || '');
+    if (fields.excerpt) fields.excerpt.value = doc?.excerpt || '';
+    if (fields.tags) fields.tags.value = Array.isArray(doc?.tags) ? doc.tags.join(', ') : '';
+    if (fields.hero) fields.hero.value = doc?.hero || '';
+    if (fields.body) fields.body.value = doc?.body || '';
+  };
+
+  const renderList = (syllabus) => {
+    if (!Array.isArray(syllabus) || !syllabus.length) {
+      listHost.innerHTML = '';
+      if (listMsg) listMsg.textContent = '未找到已发布的课程大纲';
+      return;
+    }
+    listHost.innerHTML = '';
+    if (listMsg) listMsg.remove();
+    syllabus.forEach((group) => {
+      const sec = document.createElement('section');
+      sec.className = 'lesson-group';
+      const h4 = document.createElement('h4');
+      h4.innerHTML = `<span>${group.icon || '📚'}</span><span>${group.level || ''}</span>`;
+      sec.appendChild(h4);
+      const ul = document.createElement('div');
+      (Array.isArray(group.lessons) ? group.lessons : []).forEach((row) => {
+        const obj = typeof row === 'string' ? { name: row } : row || {};
+        const a = document.createElement('button');
+        a.type = 'button';
+        a.className = 'lesson-item';
+        a.innerHTML = `${obj.name || ''}${obj.duration ? `<span>${obj.duration}</span>` : ''}`;
+        a.onclick = async () => {
+          listHost.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
+          a.classList.add('active');
+          state.current = { level: group.level || '', name: obj.name || '', link: obj.link || '', slug: obj.slug || '' };
+          if (msg) msg.textContent = '加载中…';
+          clearEditor();
+          try {
+            // choose slug preference: explicit -> link -> derived from name
+            const s = state.current.slug || linkToSlug(state.current.link) || toSlug(state.current.name);
+            let doc = null;
+            if (s) {
+              const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(s)}.json?_=${Date.now()}`);
+              if (r.ok) doc = r.data || null; // ignore 404
+            }
+            populateEditor({ ...state.current, slug: s }, doc || {});
+            if (msg) msg.textContent = '';
+          } catch (e) {
+            populateEditor(state.current, {});
+            if (msg) msg.textContent = '加载失败: ' + (e.message || e);
+          }
+        };
+        ul.appendChild(a);
+      });
+      sec.appendChild(ul);
+      listHost.appendChild(sec);
+    });
+  };
+
+  const loadSyllabus = async () => {
+    if (listMsg) listMsg.textContent = '正在加载课程大纲…';
+    try {
+      const r = await __apiFetch('/api/research/syllabus.json?_=' + Date.now());
+      const arr = Array.isArray(r?.data?.syllabus) ? r.data.syllabus : Array.isArray(r?.data) ? r.data : [];
+      renderList(arr);
+      if (listMsg) listMsg.textContent = '';
+    } catch (e) {
+      if (listMsg) listMsg.textContent = '加载失败: ' + (e.message || e);
+    }
+  };
+
+  const getSlugOrSuggest = () => {
+    const input = (fields.slug?.value || '').trim();
+    if (input) return toSlug(input);
+    const fromSel = state.current?.slug || linkToSlug(state.current?.link) || toSlug(state.current?.name || '');
+    return fromSel;
+  };
+
+  const refreshArticlesIndexPreview = async () => {
+    try {
+      const indexView = document.getElementById('ra-index');
+      if (indexView) await refreshIndexView('research/articles', indexView);
+    } catch {}
+  };
+
+  const toast = (text, ok = true) => {
+    if (!msg) return;
+    msg.textContent = text || '';
+    msg.style.color = ok ? '#22c55e' : '#f87171';
+    setTimeout(() => { if (msg) { msg.textContent = ''; msg.style.color = ''; } }, 1800);
+  };
+
+  if (btn.save) btn.save.addEventListener('click', async () => {
+    const slug = getSlugOrSuggest();
+    if (!slug) return msg && (msg.textContent = '请先选择课时，并填写有效的 slug');
+    if (msg) msg.textContent = '保存中…';
+    try {
+      const payload = {
+        slug,
+        title: fields.title?.value?.trim() || state.current?.name || slug,
+        excerpt: fields.excerpt?.value?.trim() || undefined,
+        hero: fields.hero?.value?.trim() || undefined,
+        date: new Date().toISOString(),
+        tags: splitLines((fields.tags?.value || '').replace(/,/g, '\n')),
+        body: fields.body?.value || ''
+      };
+      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      unwrapResponse(r, 'SAVE_FAILED');
+      toast('保存成功 ✓', true);
+      await refreshArticlesIndexPreview();
+    } catch (e) {
+      if (msg) msg.textContent = '保存失败: ' + (e.message || e);
+    }
+  });
+
+  if (btn.del) btn.del.addEventListener('click', async () => {
+    const slug = getSlugOrSuggest();
+    if (!slug) return msg && (msg.textContent = '请提供要删除的 slug');
+    if (!confirm(`确定删除课程内容：${slug}？`)) return;
+    if (msg) msg.textContent = '删除中…';
+    try {
+      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
+      unwrapResponse(r, 'DELETE_FAILED');
+      toast('删除成功 ✓', true);
+      await refreshArticlesIndexPreview();
+    } catch (e) {
+      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
+    }
+  });
+
+  if (btn.prev) btn.prev.addEventListener('click', () => {
+    const slug = getSlugOrSuggest();
+    if (!slug) return;
+    window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
+  });
+
+  if (btn.open) btn.open.addEventListener('click', () => {
+    const slug = getSlugOrSuggest();
+    if (!slug) return;
+    window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
+  });
+
+  // allow quick slug suggestion when name changes manually
+  if (fields.slug && meta.name) {
+    fields.slug.placeholder = '例如: what-is-forex';
+  }
+
+  clearEditor();
+  loadSyllabus();
+}
+
 function bindResearchArticles() {
   const fields = {
     slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body')
@@ -918,7 +1132,7 @@ function bindResearchArticles() {
   bindDailyBrief();
   bindAnalyses();
   bindNews();
-  bindResearchSyllabus();
+  bindCourseContentEditor();
   bindResearchArticles();
 })();
 
