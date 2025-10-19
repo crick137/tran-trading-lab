@@ -1,127 +1,127 @@
 [
   {
-    "level": "Preschool",
+    "level": "프리스쿨 · 입문 토대",
     "icon": "🍼",
-    "desc": "Currency trading? Forex trading? FX trading? Totally clueless about forex? Here's an introduction to the foreign exchange market.",
+    "desc": "외환 시장을 처음 접하는 학습자를 위한 개념 정리와 전체 구조 안내",
     "lessons": [
-      { "name": "What is Forex?", "link": "#/articles/what-is-forex" },
-      { "name": "How Do You Trade Forex?", "link": "#/articles/how-do-you-trade-forex" },
-      { "name": "When Can You Trade Forex?", "link": "#/articles/when-can-you-trade-forex" },
-      { "name": "Who Trades Forex?", "link": "#/articles/who-trades-forex" },
-      { "name": "Why Trade Forex?", "link": "#/articles/why-trade-forex" },
-      { "name": "Margin Trading 101: Understand How Your Margin Account Works", "link": "#/articles/margin-trading-101" }
+      { "name": "외환 시장이란?", "link": "#/articles/what-is-forex", "type": "개념", "duration": "5m", "desc": "시장 규모와 주요 참여자를 한눈에 이해합니다." },
+      { "name": "외환은 어떻게 거래하나요?", "link": "#/articles/how-do-you-trade-forex", "type": "개념", "duration": "8m", "desc": "거래 방식, 주문 유형, 체결 구조를 정리합니다." },
+      { "name": "외환은 언제 거래할 수 있나요?", "link": "#/articles/when-can-you-trade-forex", "type": "세션", "duration": "6m", "desc": "런던·뉴욕 등 주요 세션 별 특징과 유동성을 살펴봅니다." },
+      { "name": "누가 외환을 거래하나요?", "link": "#/articles/who-trades-forex", "type": "개념", "duration": "6m", "desc": "은행, 기업, 기관, 개인 등 참여자별 역할을 정리합니다." },
+      { "name": "왜 외환을 거래하나요?", "link": "#/articles/why-trade-forex", "type": "개념", "duration": "7m", "desc": "외환 시장의 장점과 적합한 전략 유형을 짚어봅니다." },
+      { "name": "마진 거래 101", "link": "#/articles/margin-trading-101", "type": "메커니즘", "duration": "8m", "desc": "마진 계좌 구조와 레버리지·증거금 요구 사항을 이해합니다." }
     ]
   },
   {
-    "level": "Kindergarten",
+    "level": "킨더 · 기초 도구",
     "icon": "🎒",
-    "desc": "Learn the basics on how to choose a forex broker and analyze the currency markets.",
+    "desc": "브로커 선택부터 분석 프레임 구축까지, 거래 준비를 위한 첫 단계",
     "lessons": [
-      { "name": "Forex Brokers 101", "link": "#/articles/forex-brokers-101" },
-      { "name": "Three Types of Analysis", "link": "#/articles/three-types-of-analysis" },
-      { "name": "Types of Charts", "link": "#/articles/types-of-charts" }
+      { "name": "외환 브로커 101", "link": "#/articles/forex-brokers-101", "type": "도구", "duration": "8m", "desc": "규제, 스프레드, 수수료 확인 등 브로커 선택 기준을 정리합니다." },
+      { "name": "세 가지 분석 방법", "link": "#/articles/three-types-of-analysis", "type": "프레임", "duration": "10m", "desc": "기술·기본·심리 분석이 어떻게 결합되는지 살펴봅니다." },
+      { "name": "차트의 종류", "link": "#/articles/types-of-charts", "type": "도구", "duration": "7m", "desc": "라인, 바, 캔들 차트의 장단점과 활용 상황을 비교합니다." }
     ]
   },
   {
-    "level": "Elementary",
+    "level": "엘리멘터리 · 구조 해석",
     "icon": "📘",
-    "desc": "The beginner's guide to technical analysis.",
+    "desc": "기술적 분석의 기초 도구로 시장의 뼈대를 읽는 훈련",
     "lessons": [
-      { "name": "Grade 1 Support and Resistance Levels", "link": "#/articles/grade-1-support-and-resistance-levels" },
-      { "name": "Grade 2 Japanese Candlesticks", "link": "#/articles/grade-2-japanese-candlesticks" },
-      { "name": "Grade 3 Fibonacci", "link": "#/articles/grade-3-fibonacci" },
-      { "name": "Grade 4 Moving Averages", "link": "#/articles/grade-4-moving-averages" },
-      { "name": "Grade 5 Popular Chart Indicators", "link": "#/articles/grade-5-popular-chart-indicators" }
+      { "name": "서포트와 레지스턴스", "link": "#/articles/grade-1-support-and-resistance-levels", "type": "구조", "duration": "10m", "desc": "핵심 지지·저항 레벨을 정의하고 반응 시나리오를 세웁니다." },
+      { "name": "일본식 캔들스틱", "link": "#/articles/grade-2-japanese-candlesticks", "type": "구조", "duration": "12m", "desc": "캔들 패턴으로 시장 심리와 방향성을 해석합니다." },
+      { "name": "피보나치 도구", "link": "#/articles/grade-3-fibonacci", "type": "도구", "duration": "9m", "desc": "되돌림과 확장 목표를 설정하는 방법을 학습합니다." },
+      { "name": "이동평균 활용", "link": "#/articles/grade-4-moving-averages", "type": "도구", "duration": "8m", "desc": "추세 판단과 다중 평균 조합 전략을 설계합니다." },
+      { "name": "인기 보조지표", "link": "#/articles/grade-5-popular-chart-indicators", "type": "도구", "duration": "9m", "desc": "MACD·RSI 등 대표 지표의 역할과 한계를 파악합니다." }
     ]
   },
   {
-    "level": "Middle School",
+    "level": "미들 스쿨 · 패턴 확장",
     "icon": "🏫",
-    "desc": "Learn how to properly use chart indicators, spot chart patterns and use pivot points.",
+    "desc": "모멘텀 지표와 패턴, 피벗 포인트로 차트 해석을 확장",
     "lessons": [
-      { "name": "Grade 6 Oscillators and Momentum Indicators", "link": "#/articles/grade-6-oscillators-and-momentum-indicators" },
-      { "name": "Grade 7 Important Chart Patterns", "link": "#/articles/grade-7-important-chart-patterns" },
-      { "name": "Grade 8 Pivot Points", "link": "#/articles/grade-8-pivot-points" }
+      { "name": "오실레이터와 모멘텀", "link": "#/articles/grade-6-oscillators-and-momentum-indicators", "type": "도구", "duration": "9m", "desc": "대표 오실레이터 신호와 주의할 점을 정리합니다." },
+      { "name": "중요 차트 패턴", "link": "#/articles/grade-7-important-chart-patterns", "type": "구조", "duration": "11m", "desc": "헤드앤숄더, 깃발 등 반복 패턴을 인식하고 활용합니다." },
+      { "name": "피벗 포인트", "link": "#/articles/grade-8-pivot-points", "type": "도구", "duration": "7m", "desc": "일중 지지·저항과 목표 영역을 계산합니다." }
     ]
   },
   {
-    "level": "Summer School",
+    "level": "서머 스쿨 · 고급 차트",
     "icon": "🌞",
-    "desc": "Take your technical analysis and chart reading skills to another level by learning Heikin Ashi, Elliott Wave Theory and harmonic price patterns.",
+    "desc": "헤이킨 아시와 엘리엇 파동, 하모닉 패턴으로 고급 분석을 훈련",
     "lessons": [
-      { "name": "Heikin Ashi", "link": "#/articles/heikin-ashi" },
-      { "name": "Elliott Wave Theory", "link": "#/articles/elliott-wave-theory" },
-      { "name": "Harmonic Price Patterns", "link": "#/articles/harmonic-price-patterns" }
+      { "name": "헤이킨 아시", "link": "#/articles/heikin-ashi", "type": "패턴", "duration": "7m", "desc": "노이즈를 줄여 추세의 뼈대를 포착하는 방법을 익힙니다." },
+      { "name": "엘리엇 파동 이론", "link": "#/articles/elliott-wave-theory", "type": "패턴", "duration": "12m", "desc": "파동 구조와 사이클 해석으로 맥락을 파악합니다." },
+      { "name": "하모닉 패턴", "link": "#/articles/harmonic-price-patterns", "type": "패턴", "duration": "14m", "desc": "비율 조합으로 고확률 반전 구역을 찾습니다." }
     ]
   },
   {
-    "level": "High School",
+    "level": "하이스쿨 · 응용 전략",
     "icon": "🎓",
-    "desc": "Dig deeper into more technical analysis concepts like trading divergences, breakouts and using multiple time frames on your charts.",
+    "desc": "다이버전스, 브레이크아웃 등 응용 전략으로 시장을 깊이 읽기",
     "lessons": [
-      { "name": "Grade 9 Trading Divergences", "link": "#/articles/grade-9-trading-divergences" },
-      { "name": "Grade 10 Market Environment", "link": "#/articles/grade-10-market-environment" },
-      { "name": "Grade 11 Trading Breakouts and Fakeouts", "link": "#/articles/grade-11-trading-breakouts-and-fakeouts" },
-      { "name": "Grade 12 Fundamental Analysis", "link": "#/articles/grade-12-fundamental-analysis" },
-      { "name": "Grade 13 Currency Crosses", "link": "#/articles/grade-13-currency-crosses" },
-      { "name": "Grade 14 Multiple Time Frame Analysis", "link": "#/articles/grade-14-multiple-time-frame-analysis" }
+      { "name": "다이버전스 트레이딩", "link": "#/articles/grade-9-trading-divergences", "type": "전략", "duration": "10m", "desc": "가격과 모멘텀의 괴리를 활용한 진입 로직을 설계합니다." },
+      { "name": "시장 환경 구분", "link": "#/articles/grade-10-market-environment", "type": "전략", "duration": "8m", "desc": "추세·박스·전환 국면별 트레이딩 접근을 정리합니다." },
+      { "name": "브레이크아웃과 페이크아웃", "link": "#/articles/grade-11-trading-breakouts-and-fakeouts", "type": "전략", "duration": "9m", "desc": "신뢰도 높은 돌파 조건과 실패 패턴을 구분합니다." },
+      { "name": "기초 펀더멘털", "link": "#/articles/grade-12-fundamental-analysis", "type": "펀더멘털", "duration": "12m", "desc": "경제 지표와 정책 이벤트를 시나리오에 반영합니다." },
+      { "name": "통화 크로스 이해", "link": "#/articles/grade-13-currency-crosses", "type": "전략", "duration": "8m", "desc": "교차 통화쌍으로 상대 강도를 읽고 헤지 전략을 세웁니다." },
+      { "name": "멀티 타임프레임 분석", "link": "#/articles/grade-14-multiple-time-frame-analysis", "type": "전략", "duration": "7m", "desc": "상·하위 주기를 동기화해 정보 단절을 막습니다." }
     ]
   },
   {
-    "level": "Undergraduate - Freshman",
+    "level": "프레시맨 · 시장 감각",
     "icon": "🧑‍🎓",
-    "desc": "Learn how to gauge whether the market is bullish or bearish, how to trade during news releases and how to potentially make money without price moving.",
+    "desc": "시장 심리와 뉴스, 금리 차이를 활용한 수익 모델 탐색",
     "lessons": [
-      { "name": "Market Sentiment", "link": "#/articles/market-sentiment" },
-      { "name": "Trading the News", "link": "#/articles/trading-the-news" },
-      { "name": "Carry Trade", "link": "#/articles/carry-trade" }
+      { "name": "시장 심리 읽기", "link": "#/articles/market-sentiment", "type": "심리", "duration": "8m", "desc": "비관·낙관 극단 지표와 포지셔닝 변화를 해석합니다." },
+      { "name": "뉴스 트레이딩", "link": "#/articles/trading-the-news", "type": "전략", "duration": "10m", "desc": "지표 발표 전후 준비와 변동성 대응 전략을 정리합니다." },
+      { "name": "캐리 트레이드", "link": "#/articles/carry-trade", "type": "전략", "duration": "9m", "desc": "금리 차이를 활용한 보유 전략과 리스크를 살펴봅니다." }
     ]
   },
   {
-    "level": "Undergraduate - Sophomore",
-    "icon": "🎓",
-    "desc": "Learn how other asset classes like stocks, bonds and commodities can affect the foreign exchange market.",
+    "level": "소포모어 · 거시 연결",
+    "icon": "🧭",
+    "desc": "다른 자산군과의 상관관계를 통해 통화 흐름을 이해",
     "lessons": [
-      { "name": "The U.S. Dollar Index", "link": "#/articles/the-us-dollar-index" },
-      { "name": "Intermarket Correlations", "link": "#/articles/intermarket-correlations" },
-      { "name": "Using Equities to Trade FX", "link": "#/articles/using-equities-to-trade-fx" },
-      { "name": "Country Profiles", "link": "#/articles/country-profiles" }
+      { "name": "달러 인덱스 이해", "link": "#/articles/the-us-dollar-index", "type": "거시", "duration": "8m", "desc": "DXY 구성과 주요 통화에 미치는 영향을 살펴봅니다." },
+      { "name": "인터마켓 상관관계", "link": "#/articles/intermarket-correlations", "type": "거시", "duration": "10m", "desc": "채권·주식·원자재의 연동 신호를 활용합니다." },
+      { "name": "주식으로 FX 읽기", "link": "#/articles/using-equities-to-trade-fx", "type": "거시", "duration": "7m", "desc": "섹터와 대표 종목을 통해 통화 시나리오를 검증합니다." },
+      { "name": "국가별 프로필", "link": "#/articles/country-profiles", "type": "거시", "duration": "9m", "desc": "GDP, 물가, 금리 구조로 통화 특성을 파악합니다." }
     ]
   },
   {
-    "level": "Undergraduate - Junior",
-    "icon": "🎓",
-    "desc": "Learn how to develop a trading plan, create a trading system and maintain a trading journal.",
+    "level": "주니어 · 시스템 구축",
+    "icon": "🛠️",
+    "desc": "거래 계획과 시스템, 기록 관리로 재현 가능한 프로세스를 설계",
     "lessons": [
-      { "name": "Developing Your Own Trading Plan", "link": "#/articles/developing-your-own-trading-plan" },
-      { "name": "Which Type of Trader Are You?", "link": "#/articles/which-type-of-trader-are-you" },
-      { "name": "Create Your Own Trading System", "link": "#/articles/create-your-own-trading-system" },
-      { "name": "Keeping a Trading Journal", "link": "#/articles/keeping-a-trading-journal" },
-      { "name": "How to Use MetaTrader 4", "link": "#/articles/how-to-use-metatrader-4" }
+      { "name": "트레이딩 계획 수립", "link": "#/articles/developing-your-own-trading-plan", "type": "시스템", "duration": "10m", "desc": "목표·위험·검토 루틴을 문서화합니다." },
+      { "name": "나는 어떤 트레이더인가?", "link": "#/articles/which-type-of-trader-are-you", "type": "자기진단", "duration": "7m", "desc": "성향과 라이프스타일에 맞는 전략을 고릅니다." },
+      { "name": "나만의 시스템 만들기", "link": "#/articles/create-your-own-trading-system", "type": "시스템", "duration": "12m", "desc": "규칙을 실행 가능한 체크리스트로 정리합니다." },
+      { "name": "트레이딩 저널 작성", "link": "#/articles/keeping-a-trading-journal", "type": "관리", "duration": "8m", "desc": "기록과 피드백 루프로 성장 속도를 높입니다." },
+      { "name": "MetaTrader 4 활용", "link": "#/articles/how-to-use-metatrader-4", "type": "도구", "duration": "9m", "desc": "MT4 설치, 주문, 인디케이터 사용법을 익힙니다." }
     ]
   },
   {
-    "level": "Undergraduate - Senior",
-    "icon": "🎓",
-    "desc": "Develop the proper risk management skills and mindset so you don't become part of the 95% of new traders who end up losing all their money.",
+    "level": "시니어 · 리스크 매트릭스",
+    "icon": "🧮",
+    "desc": "손실을 통제하고 자금 곡선을 지키는 리스크 관리 심화",
     "lessons": [
-      { "name": "Risk Management", "link": "#/articles/risk-management" },
-      { "name": "The Number 1 Cause of Death of Forex Traders", "link": "#/articles/the-number-1-cause-of-death-of-forex-traders" },
-      { "name": "Position Sizing", "link": "#/articles/position-sizing" },
-      { "name": "Setting Stop Losses", "link": "#/articles/setting-stop-losses" },
-      { "name": "Scaling In and Out", "link": "#/articles/scaling-in-and-out" },
-      { "name": "Currency Correlations", "link": "#/articles/currency-correlations" }
+      { "name": "리스크 관리", "link": "#/articles/risk-management", "type": "리스크", "duration": "9m", "desc": "지표와 한도를 활용해 위험을 수치화합니다." },
+      { "name": "외환 트레이더의 파산 원인", "link": "#/articles/the-number-1-cause-of-death-of-forex-traders", "type": "리스크", "duration": "6m", "desc": "자주 반복되는 리스크 누적 패턴을 점검합니다." },
+      { "name": "포지션 사이징", "link": "#/articles/position-sizing", "type": "리스크", "duration": "8m", "desc": "계좌 규모와 R 값을 기반으로 적정 수량을 계산합니다." },
+      { "name": "손절 설정", "link": "#/articles/setting-stop-losses", "type": "리스크", "duration": "7m", "desc": "구조·변동성·시간 기준으로 손절 지점을 설계합니다." },
+      { "name": "분할 진입과 청산", "link": "#/articles/scaling-in-and-out", "type": "리스크", "duration": "7m", "desc": "분할 운영으로 심리와 자금 곡선을 안정화합니다." },
+      { "name": "통화 상관관계", "link": "#/articles/currency-correlations", "type": "리스크", "duration": "8m", "desc": "중복 리스크를 줄이고 포트폴리오를 조정합니다." }
     ]
   },
   {
-    "level": "Graduation",
+    "level": "졸업반 · 마무리 점검",
     "icon": "🏆",
-    "desc": "Some final words of wisdom before you venture out into the challenging world of trading forex.",
+    "desc": "마지막 점검과 다짐으로 실전에 나갈 준비를 마무리",
     "lessons": [
-      { "name": "The Most Common Trading Mistakes New Traders Make", "link": "#/articles/the-most-common-trading-mistakes-new-traders-make" },
-      { "name": "Forex Trading Scams", "link": "#/articles/forex-trading-scams" },
-      { "name": "Personality Quizzes", "link": "#/articles/personality-quizzes" },
-      { "name": "Graduation Speech", "link": "#/articles/graduation-speech" }
+      { "name": "초보자가 자주 겪는 실수", "link": "#/articles/the-most-common-trading-mistakes-new-traders-make", "type": "점검", "duration": "7m", "desc": "초보가 흔히 빠지는 함정을 사례로 정리합니다." },
+      { "name": "외환 사기 유형", "link": "#/articles/forex-trading-scams", "type": "경고", "duration": "6m", "desc": "폰지, 파생상품 사기 등 주의해야 할 신호를 정리합니다." },
+      { "name": "성향 테스트", "link": "#/articles/personality-quizzes", "type": "자기진단", "duration": "10m", "desc": "자신의 의사결정 패턴을 진단하고 보완합니다." },
+      { "name": "졸업 연설", "link": "#/articles/graduation-speech", "type": "마무리", "duration": "6m", "desc": "방법론을 정리하고 향후 성장 계획을 세웁니다." }
     ]
   }
 ]

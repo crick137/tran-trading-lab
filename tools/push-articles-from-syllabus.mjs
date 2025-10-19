@@ -26,14 +26,15 @@ const linkToSlug = (link) => {
   return m ? m[1] : '';
 };
 
-async function upsertArticle(slug, title){
+async function upsertArticle(item){
+  const { slug, title, excerpt, tags } = item;
   const payload = {
     slug,
     title: title || slug,
-    excerpt: '',
+    excerpt: excerpt || '',
     hero: '',
     date: new Date().toISOString(),
-    tags: [],
+    tags,
     body: ''
   };
   const res = await fetch(`${base}/api/research/articles/${encodeURIComponent(slug)}.json`, {
@@ -51,18 +52,24 @@ async function main(){
   const syllabus = JSON.parse(text);
   const lessons = [];
   for (const group of syllabus){
+    const groupLabel = group?.level || '';
     for (const item of (group?.lessons||[])){
       const name = typeof item === 'string' ? item : (item?.name || '');
       const link = typeof item === 'string' ? '' : (item?.link || '');
+      const desc = typeof item === 'string' ? '' : (item?.desc || '');
+      const type = typeof item === 'string' ? '' : (item?.type || '');
       const s = linkToSlug(link) || slugify(name);
       if (!s) continue;
-      lessons.push({ slug: s, title: name });
+      const tags = [];
+      if (groupLabel) tags.push(groupLabel.replace(/\s+·\s+.*$/, '')); // keep 앞부분
+      if (type) tags.push(type);
+      lessons.push({ slug: s, title: name, excerpt: desc, tags });
     }
   }
   console.log(`Seeding ${lessons.length} articles...`);
   for (const it of lessons){
     try{
-      await upsertArticle(it.slug, it.title);
+      await upsertArticle(it);
       console.log('OK', it.slug);
     }catch(e){
       console.error('FAIL', it.slug, e.message);
@@ -71,4 +78,3 @@ async function main(){
 }
 
 main().catch((e)=>{ console.error(e); process.exit(1); });
-
