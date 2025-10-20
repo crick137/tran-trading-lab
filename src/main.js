@@ -1306,31 +1306,34 @@ async function renderMarketNews(){
       return;
     }
     const html = await Promise.all(rows.map(async r=>{
+      // support index entries that are either strings (id) or objects ({ id, title, ... })
+      const id = (typeof r === 'string') ? r : (r && (r.id || r.slug) ? (r.id || r.slug) : '');
       try{
-        if (!marketNewsCache.has(r.id)){
-          const dres = await fetch(`/api/market-news/${encodeURIComponent(r.id)}.json?_=${Date.now()}`);
-          marketNewsCache.set(r.id, await dres.json());
+        if (!marketNewsCache.has(id)){
+          const dres = await fetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
+          if (!dres.ok) throw new Error('NOT_FOUND');
+          marketNewsCache.set(id, await dres.json());
         }
-        const d = marketNewsCache.get(r.id) || {};
-  const title = String((d.title ?? r.title ?? r.id ?? '')).trim();
-        const source = (d.source ?? r.source ?? '').trim();
-        const whenRaw = d.date ?? r.date ?? '';
+        const d = marketNewsCache.get(id) || {};
+        const title = String((d.title ?? (typeof r === 'object' ? r.title : '') ?? id ?? '')).trim();
+        const source = (d.source ?? (typeof r === 'object' ? r.source : '') ?? '').trim();
+        const whenRaw = d.date ?? (typeof r === 'object' ? r.date : '') ?? '';
         const when = whenRaw ? new Date(whenRaw).toLocaleString() : '';
-  const summary = String((d.summary ?? r.summary ?? '')).trim();
-        const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r.tags) ? r.tags : []);
-  const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
-  const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
+        const summary = String((d.summary ?? (typeof r === 'object' ? r.summary : '') ?? '')).trim();
+        const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r && r.tags) ? r.tags : []);
+        const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
+        const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
         const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
         return `
           <li class="card">
-            <h3 style="margin:0 0 6px">${escapeHtml(title || r.id || 'Market News')}</h3>
+            <h3 style="margin:0 0 6px">${escapeHtml(title || id || 'Market News')}</h3>
             <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
             ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : `<p class="muted">요약 정보가 없습니다.</p>`}
             ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
             <p class="muted" style="margin-top:8px">${(tags && tags.length) ? tags.map(t=>`#${escapeHtml(t)}`).join(' ') : ''}</p>
             ${link}
           </li>`;
-      }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }
+      }catch{ return `<li class="card"><h3>${escapeHtml(id || String(r))}</h3><p class="muted">요약 정보가 없습니다.</p></li>`; }
     }));
     host.innerHTML = `<ul style="display:grid;gap:12px">${html.join('')}</ul>`;
     if (window.__registerCards) window.__registerCards(host.parentElement || host);
