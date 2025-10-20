@@ -8,14 +8,14 @@ const tips = [
 
 class XKnowledge extends HTMLElement {
   connectedCallback() {
-    this.innerHTML = `
-      <section class="card">
-        <h3 class="m0">지식 보드</h3>
-        <ul class="mt12" style="margin:0;padding-left:18px;line-height:1.8">
-          ${tips.map(t=>`<li>${t}</li>`).join('')}
-        </ul>
-      </section>
-    `;
+    this.innerHTML = '';
+    const section = document.createElement('section'); section.className='card';
+    const h3 = document.createElement('h3'); h3.className = 'm0'; h3.textContent = '지식 보드';
+    section.appendChild(h3);
+    const ul = document.createElement('ul'); ul.className='mt12'; ul.style.margin=0; ul.style.paddingLeft='18px'; ul.style.lineHeight='1.8';
+    for(const t of tips){ const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
+    section.appendChild(ul);
+    this.appendChild(section);
   }
 }
 customElements.define('x-knowledge', XKnowledge);

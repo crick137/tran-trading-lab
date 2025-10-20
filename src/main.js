@@ -238,7 +238,7 @@ function renderTradeJournalView(){
   outlet.innerHTML = `
     <section aria-labelledby="journal-title">
       <div class="grid grid-12">
-        <section class="card" style="grid-column: span 7;">
+        <section class="card" style="grid-column: span 12;">
           <div class="toolbar">
             <h2 id="journal-title" style="margin:0">분석 목록</h2>
             <input id="anal-search" class="search" placeholder="심볼·태그·제목 검색" aria-label="검색" />
@@ -251,12 +251,6 @@ function renderTradeJournalView(){
           </div>
           <div id="anal-list" aria-live="polite"></div>
         </section>
-
-        <aside class="card" style="grid-column: span 5;">
-          <div id="anal-detail">
-            <p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>
-          </div>
-        </aside>
       </div>
     </section>
   `;
@@ -526,7 +520,7 @@ async function renderRoute(routeId, slug){
         if (search) search.oninput = renderAnalysesListFiltered;
         if (bias) bias.onchange = renderAnalysesListFiltered;
       }
-      await renderAnalysisDetailBySlug(currentSlugFromQuery());
+      // Note: right-hand detail panel removed — detail renders inline or on detail route.
       break;
     case 'trade-journal-detail':
       renderTradeJournalDetailView();
@@ -597,14 +591,14 @@ async function renderDailyBriefDetail(slug){
     wrap.innerHTML = `
       <div class="grid grid-12">
         <section class="card" style="grid-column: span 8;">
-          <h2>${d.title || 'Daily Brief'}</h2>
+          <h2>${escapeHtml(d.title || 'Daily Brief')}</h2>
           <p class="muted">매일 아침 시장을 읽는 시간</p>
-          ${d.bullets?.length?`<h3>📌 핵심 요약</h3><ul>${d.bullets.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-          ${d.schedule?.length?`<h3 style="margin-top:12px">🕒 오늘 일정</h3><ul>${d.schedule.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
+          ${d.bullets?.length?`<h3>📌 핵심 요약</h3><ul>${d.bullets.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul>`:''}
+          ${d.schedule?.length?`<h3 style="margin-top:12px">🕒 오늘 일정</h3><ul>${d.schedule.map(i=>`<li>${escapeHtml(i)}</li>`).join('')}</ul>`:''}
         </section>
         <aside class="card" style="grid-column: span 4;">
           <h2>퀵 차트</h2>
-          <x-tv-chart symbol="${(d.chart?.symbol)||d.symbol||'FX:XAUUSD'}" interval="${(d.chart?.interval)||d.interval||'60'}" ratio="16:9" min_height="420"></x-tv-chart>
+          <x-tv-chart symbol="${escapeHtml((d.chart && d.chart.symbol) || d.symbol || 'FX:XAUUSD')}" interval="${escapeHtml((d.chart && d.chart.interval) || d.interval || '60')}" ratio="16:9" min_height="420"></x-tv-chart>
         </aside>
       </div>
       <p class="muted" style="margin-top:12px"><a href="#/daily-brief">← 목록으로</a></p>
@@ -622,9 +616,12 @@ const AIDX = '/api/analyses/index.json';
 function koBias(b){
   return b==='bullish'?'상승':b==='bearish'?'하락':'중립';
 }
-function badge(bias){ return `<span class="badge ${bias}">${koBias(bias||'neutral')}</span>`; }
-function pillS(v){ return `<span class="pill level">지지 ${v}</span>`; }
-function pillR(v){ return `<span class="pill res">저항 ${v}</span>`; }
+function badge(b){
+  const cls = String(b || 'neutral').replace(/[^a-z0-9_-]/gi, '');
+  return `<span class="badge ${cls}">${escapeHtml(koBias(b || 'neutral'))}</span>`;
+}
+function pillS(v){ return `<span class="pill level">지지 ${escapeHtml(String(v || ''))}</span>`; }
+function pillR(v){ return `<span class="pill res">저항 ${escapeHtml(String(v || ''))}</span>`; }
 
 async function fetchJSON(path){
   const res = await fetch(path + '?_=' + Date.now());
@@ -696,7 +693,50 @@ async function loadAnalysesList(){
     }
     const items = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
     list.dataset.raw = JSON.stringify(items);
-    renderAnalysesListFiltered();
+      // render initial list (may render skeletons if items empty)
+      renderAnalysesListFiltered();
+
+      // progressive replacement: if raw array was slugs-only, we already fetched enriched in load, but
+      // ensure we progressively update each entry as its detail becomes available.
+      function updateEntryDOM(i, slug, obj){
+        try{
+          const host = document.getElementById('anal-list');
+          if (!host) return;
+          const entry = document.getElementById(`entry-${slug}`);
+          const html = `
+            <article class="entry" id="entry-${slug}">
+              <div class="row">
+                <h3 style="margin-right:6px">${escapeHtml(obj.title || slug)}</h3>
+                ${badge(obj.bias)}
+                <span class="meta">· ${escapeHtml(obj.symbol||'')} · ${escapeHtml(obj.tf||'')} · ${escapeHtml(obj.date||'')}</span>
+                <div class="actions">
+                  <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(slug)}" aria-label="자세히 보기 ${escapeHtml(obj.title || slug)}">자세히 보기 →</a>
+                  <button class="icon-btn pv-btn" data-slug="${slug}" data-symbol="${escapeHtml(obj.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(obj.symbol || obj.title || slug)}">미리보기 차트</button>
+                </div>
+              </div>
+              ${(obj.tags && obj.tags.length)? `<div class="row" style="margin-top:6px">${(obj.tags||[]).map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`: ''}
+              <div class="preview" id="pv-${slug}" style="margin-top:10px;"></div>
+            </article>
+          `;
+          if (entry){ entry.outerHTML = html; }
+          else { host.insertAdjacentHTML('beforeend', html); }
+        }catch(e){ console.warn('updateEntryDOM', e); }
+      }
+
+      // If original index was an array of slugs, fetchDetailsForSlugsWithCallback will progressively call updateEntryDOM
+      const originalRaw = JSON.parse(list.dataset.raw||'[]');
+      const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
+      if (slugsOnly){
+        // render skeleton placeholders first
+        list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
+        fetchDetailsForSlugsWithCallback(originalRaw, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
+      } else {
+        // otherwise, progressively update entries if details are missing
+        const maybeSlugs = originalRaw.map(it => it && it.slug ? it.slug : it && typeof it==='string' ? it : null).filter(Boolean);
+        if (maybeSlugs.length){
+          fetchDetailsForSlugsWithCallback(maybeSlugs, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
+        }
+      }
 
     // 👉 URL에 slug가 없으면 첫 번째 항목을 자동으로 열고 미리보기 차트를 로드
     const slugInUrl = currentSlugFromQuery();
@@ -706,7 +746,7 @@ async function loadAnalysesList(){
       const first = items[0];
       const host = document.getElementById(`pv-${first.slug}`);
       if (host && !host.dataset.rendered){
-        host.innerHTML = `<x-tv-chart symbol="${first.symbol}" interval="60" ratio="16:9" min_height="220"></x-tv-chart>`;
+        host.innerHTML = `<x-tv-chart symbol="${escapeHtml(first.symbol || '')}" interval="60" ratio="16:9" min_height="220"></x-tv-chart>`;
         host.dataset.rendered = '1';
         const btn = document.querySelector(`.pv-btn[data-slug="${first.slug}"]`);
         if (btn) btn.textContent = '차트 닫기';
@@ -730,39 +770,113 @@ function renderAnalysesListFiltered(){
     return hit && okBias;
   });
 
-  list.innerHTML = items.map(it=>`
+  const htmlItems = items.map(it=>`
     <article class="entry" id="entry-${it.slug}">
       <div class="row">
-        <h3 style="margin-right:6px">${it.title}</h3>
+        <h3 style="margin-right:6px">${escapeHtml(it.title || it.slug)}</h3>
         ${badge(it.bias)}
-        <span class="meta">· ${it.symbol} · ${it.tf} · ${it.date}</span>
+        <span class="meta">· ${escapeHtml(it.symbol || '')} · ${escapeHtml(it.tf || '')} · ${escapeHtml(it.date || '')}</span>
         <div class="actions">
-          <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(it.slug)}">자세히 보기 →</a>
-          <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${it.symbol}" data-ivl="60">미리보기 차트</button>
+          <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(it.slug)}" aria-label="자세히 보기 ${escapeHtml(it.title || it.slug)}">자세히 보기 →</a>
+          <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${escapeHtml(it.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(it.symbol || it.title || it.slug)}">미리보기 차트</button>
         </div>
       </div>
-      ${it.tags?.length?`<div class="row" style="margin-top:6px">${it.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>`:''}
+      ${it.tags?.length?`<div class="row" style="margin-top:6px">${it.tags.map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`:''}
       <div class="preview" id="pv-${it.slug}" style="margin-top:10px;"></div>
     </article>
-  `).join('') || `<p class="muted">검색 결과가 없습니다</p>`;
+  `).join('');
+
+  if (htmlItems && htmlItems.trim()) {
+    list.innerHTML = htmlItems;
+  } else {
+    // if there's no search query, assume loading/empty and show skeletons; otherwise show no results
+    if (!q) {
+      list.innerHTML = Array.from({length:4}).map(()=>`
+        <article class="entry skeleton">
+          <div class="row">
+            <h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3>
+            <span class="meta"><span class="skeleton-text" style="width:120px;display:inline-block;height:14px;background:#2a2e36;border-radius:6px"></span></span>
+          </div>
+          <div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div>
+        </article>
+      `).join('');
+    } else {
+      list.innerHTML = `<p class="muted">검색 결과가 없습니다</p>`;
+    }
+  }
 
   // 미리보기 차트 토글 (on-demand 로드/해제)
-  list.querySelectorAll('.pv-btn').forEach(btn=>{
-    btn.onclick = ()=>{
-      const slug = btn.dataset.slug;
-      const symbol = btn.dataset.symbol;
-      const host = document.getElementById(`pv-${slug}`);
-      if (!host) return;
-      if (host.dataset.rendered === '1') {
-        host.innerHTML = ''; host.dataset.rendered = '0';
-        btn.textContent = '미리보기 차트';
-      } else {
-        host.innerHTML = `<x-tv-chart symbol="${symbol}" interval="${btn.dataset.ivl}" ratio="16:9" min_height="220"></x-tv-chart>`;
-        host.dataset.rendered = '1';
-        btn.textContent = '차트 닫기';
-      }
-    };
-  });
+  function bindEntryActions(root=document){
+    root.querySelectorAll('.pv-btn').forEach(btn=>{
+      btn.onclick = ()=>{
+        const slug = btn.dataset.slug;
+        const symbol = btn.dataset.symbol;
+        const host = document.getElementById(`pv-${slug}`);
+        if (!host) return;
+        if (host.dataset.rendered === '1') {
+          host.innerHTML = ''; host.dataset.rendered = '0';
+          btn.textContent = '미리보기 차트';
+        } else {
+          host.innerHTML = `<x-tv-chart symbol="${escapeHtml(symbol || '')}" interval="${escapeHtml(btn.dataset.ivl || '60')}" ratio="16:9" min_height="220"></x-tv-chart>`;
+          host.dataset.rendered = '1';
+          btn.textContent = '차트 닫기';
+        }
+      };
+    });
+
+    // inline expand: attach to detail links to render inline instead of navigating
+    root.querySelectorAll('.entry .icon-btn[href^="#/trade-journal/"]').forEach(a=>{
+      a.onclick = (e)=>{
+        e.preventDefault();
+        const href = a.getAttribute('href') || '';
+        const m = href.match(/#\/trade-journal\/([^?]+)/);
+        if (!m) return;
+        const slug = decodeURIComponent(m[1]);
+        renderEntryDetailInline(slug);
+      };
+    });
+  }
+
+  bindEntryActions(list);
+}
+
+// Render inline detail inside the entry's preview container
+async function renderEntryDetailInline(slug){
+  const host = document.getElementById(`pv-${slug}`);
+  if (!host) return;
+  if (host.dataset.rendered === '1'){
+    // collapse
+    host.innerHTML = ''; host.dataset.rendered = '0';
+    const btn = document.querySelector(`.pv-btn[data-slug="${slug}"]`);
+    if (btn) btn.textContent = '미리보기 차트';
+    return;
+  }
+  host.innerHTML = `<p class="muted">불러오는 중…</p>`;
+  try{
+    if (!analysesDetailCache.has(slug)){
+      analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${slug}.json`));
+    }
+    const d = analysesDetailCache.get(slug) || {};
+    const ivl = (d.chart?.interval) || '60';
+    const sym = (d.chart?.symbol) || d.symbol || '';
+    const title = escapeHtml(d.title || slug);
+    const meta = [escapeHtml(d.symbol||''), escapeHtml(d.tf||''), escapeHtml(d.date||'')].filter(Boolean).join(' · ');
+
+    host.innerHTML = `
+        <div class="entry-detail">
+        <h4 style="margin:6px 0 8px">${title}</h4>
+        <p class="meta">${meta}</p>
+        ${(d.supports||[]).length|| (d.resistances||[]).length ? `<div class="row" style="margin-top:8px">${(d.supports||[]).map(pillS).join('')}${(d.resistances||[]).map(pillR).join('')}</div>` : ''}
+        ${d.context?`<p style="margin-top:10px">${escapeHtml((d.context||'').slice(0,240))}${(d.context||'').length>240? '...':''}</p>`:''}
+        <div style="margin-top:10px"><x-tv-chart symbol="${escapeHtml(sym || '')}" interval="${escapeHtml(ivl || '60')}" ratio="16:9" min_height="260"></x-tv-chart></div>
+      </div>
+    `;
+    host.dataset.rendered = '1';
+    const btn = document.querySelector(`.pv-btn[data-slug="${slug}"]`);
+    if (btn) btn.textContent = '차트 닫기';
+    if (window.__registerCards) window.__registerCards(host);
+    // re-bind any pv buttons inside (none) and ensure focusability
+  }catch(e){ host.innerHTML = `<p class="muted">자료를 불러올 수 없습니다</p>`; }
 }
 
 // 상세(우측 패널) + 주기 선택
@@ -770,11 +884,10 @@ async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
   if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>`; return; }
-
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     if (!analysesDetailCache.has(slug)){
-      analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${slug}.json`));
+      analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`));
     }
     const d = analysesDetailCache.get(slug) || {};
     const ivl = (d.chart?.interval) || '60';
@@ -790,15 +903,15 @@ async function renderAnalysisDetailBySlug(slug){
 
       <h3>지지 / 저항</h3>
       <div class="row" style="margin-top:6px">
-        ${(d.supports||[]).map(pillS).join('')}
-        ${(d.resistances||[]).map(pillR).join('')}
+        ${(d.supports||[]).map(s=>`<span class="pill level">지지 ${escapeHtml(s)}</span>`).join('')}
+        ${(d.resistances||[]).map(r=>`<span class="pill res">저항 ${escapeHtml(r)}</span>`).join('')}
       </div>
 
-      ${d.tags?.length?`<div class="row" style="margin-top:6px">${d.tags.map(t=>`<span class="pill">#${t}</span>`).join('')}</div>`:''}
+      ${d.tags?.length?`<div class="row" style="margin-top:6px">${d.tags.map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`:''}
 
-      ${d.context?`<h3 style="margin-top:12px">배경</h3><p>${d.context}</p>`:''}
-      ${d.view?`<h3 style="margin-top:12px">관점</h3><p>${d.view}</p>`:''}
-      ${d.invalidation?`<p class="meta" style="margin-top:6px">무효화 조건: ${d.invalidation}</p>`:''}
+      ${d.context?`<h3 style="margin-top:12px">배경</h3><p>${escapeHtml(d.context)}</p>`:''}
+      ${d.view?`<h3 style="margin-top:12px">관점</h3><p>${escapeHtml(d.view)}</p>`:''}
+      ${d.invalidation?`<p class="meta" style="margin-top:6px">무효화 조건: ${escapeHtml(d.invalidation)}</p>`:''}
 
       <div class="card" style="margin-top:12px">
         <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -807,21 +920,20 @@ async function renderAnalysisDetailBySlug(slug){
             <label class="meta">주기&nbsp;</label>
             <select id="detail-interval" class="search">
               <option value="15">15m</option>
-              <option value="60" selected>1H</option>
-              <option value="240">4H</option>
-              <option value="1D">1D</option>
+              <option value="60" ${ivl==='60'?'selected':''}>1H</option>
+              <option value="240" ${ivl==='240'?'selected':''}>4H</option>
+              <option value="1D" ${ivl==='1D'?'selected':''}>1D</option>
             </select>
           </div>
         </div>
         <div id="detail-chart-wrap">
             <x-tv-chart id="detail-chart" symbol="${escapeHtml(sym)}" interval="${escapeHtml(ivl)}" ratio="16:9" min_height="420"></x-tv-chart>
-          </div>
+        </div>
       </div>
     `;
 
     const sel = document.getElementById('detail-interval');
     if (sel){
-      Array.from(sel.options).forEach(o=>{ o.selected = (o.value === ivl); });
       sel.onchange = ()=>{
         const chart = document.getElementById('detail-chart');
         if (chart){ chart.setAttribute('interval', sel.value); }
@@ -1167,15 +1279,15 @@ async function renderMarketNews(){
         const when = whenRaw ? new Date(whenRaw).toLocaleString() : '';
         const summary = (d.summary ?? r.summary ?? '').trim();
         const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r.tags) ? r.tags : []);
-        const bullets = (Array.isArray(d.bullets) ? d.bullets : []).map(b=>`<li>${b}</li>`).join('');
-        const link = d.url ? `<a href="${d.url}" target="_blank" rel="noopener">원문 보기</a>` : '';
+        const bullets = (Array.isArray(d.bullets) ? d.bullets : []).map(b=>`<li>${escapeHtml(b)}</li>`).join('');
+        const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
         return `
           <li class="card">
-            <h3 style="margin:0 0 6px">${title || r.id || 'Market News'}</h3>
-            <p class="meta">${[source, when].filter(Boolean).join(' · ')}</p>
-            ${summary ? `<p style="margin:8px 0">${summary}</p>` : ''}
+            <h3 style="margin:0 0 6px">${escapeHtml(title || r.id || 'Market News')}</h3>
+            <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
+            ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : ''}
             ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
-            <p class="muted" style="margin-top:8px">${tags.map(t=>`#${t}`).join(' ')}</p>
+            <p class="muted" style="margin-top:8px">${tags.map(t=>`#${escapeHtml(t)}`).join(' ')}</p>
             ${link}
           </li>`;
       }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }

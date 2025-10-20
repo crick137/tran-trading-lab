@@ -25,17 +25,18 @@ async function apiFetch(url, init = {}){
 function buildOverlay(){
   const host = document.getElementById('pw-overlay');
   if (!host) return;
-  host.innerHTML = [
-    '<div class="login-box">',
-    '  <h3 style="margin:4px 0 10px">管理员登录</h3>',
-    '  <p class="muted" style="margin:0 0 6px">输入口令后即可进入后台。</p>',
-    '  <div class="row">',
-    '    <input id="admin-pw" type="password" placeholder="ADMIN_PASSWORD" style="flex:1" />',
-    '    <button id="pw-进入后台" class="primary">进入后台</button>',
-    '  </div>',
-    '  <p id="pw-err" class="muted" style="color:#f87171; min-height:18px; margin:8px 0 0"></p>',
-    '</div>'
-  ].join('');
+  // build nodes to avoid string HTML injection
+  host.textContent = '';
+  const box = document.createElement('div'); box.className = 'login-box';
+  const h3 = document.createElement('h3'); h3.style.margin = '4px 0 10px'; h3.textContent = '管理员登录';
+  const p = document.createElement('p'); p.className = 'muted'; p.style.margin = '0 0 6px'; p.textContent = '输入口令后即可进入后台。';
+  const row = document.createElement('div'); row.className = 'row';
+  const input = document.createElement('input'); input.id = 'admin-pw'; input.type = 'password'; input.placeholder = 'ADMIN_PASSWORD'; input.style.flex = '1';
+  const btn = document.createElement('button'); btn.id = 'pw-进入后台'; btn.className = 'primary'; btn.textContent = '进入后台';
+  row.appendChild(input); row.appendChild(btn);
+  const err = document.createElement('p'); err.id = 'pw-err'; err.className = 'muted'; err.style.color = '#f87171'; err.style.minHeight = '18px'; err.style.margin = '8px 0 0';
+  box.appendChild(h3); box.appendChild(p); box.appendChild(row); box.appendChild(err);
+  host.appendChild(box);
 }
 
 async function syncLoginUI(){

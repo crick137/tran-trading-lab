@@ -3,10 +3,12 @@
   --card: #121418;
   --card-2: #0f1114;
   --text: #e9edf1;
-  --muted: #a5acb8;
+  --muted: #c1c9d6; /* 提升弱色文字对比 */
+  --muted-strong: #9fb0c6;
   --brand: #66e0ff;
   --brand-2:#7a7dff;
   --ring: #2f88ff44;
+  --focus: rgba(102,224,255,0.18);
   --radius: 20px;
 }
 
@@ -228,6 +230,24 @@ html,body{
   transform: translateX(120%) skewX(-10deg);
 }
 
+/* Skeleton animation */
+.skeleton-text, .skeleton-box{
+  background: linear-gradient(90deg,#141619 0%, #1a1d22 40%, #22242a 50%, #1a1d22 60%, #141619 100%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.6s linear infinite;
+}
+@keyframes skeleton-shimmer{ 0%{ background-position: 200% 0 } 100%{ background-position: -200% 0 } }
+
+/* Slightly stronger entry card emphasis */
+.entry{ box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 1px 0 #ffffff08; }
+
+/* pv button stronger focus / active */
+.icon-btn:focus{ outline:none; box-shadow: 0 0 0 4px rgba(102,224,255,0.12); border-color:var(--brand); }
+.icon-btn:active{ transform: translateY(0); filter:brightness(.96); }
+
+/* Responsive: reduce preview height on small screens */
+@media (max-width:680px){ .entry .preview{ min-height:140px } }
+
 /* 进入视口的阶梯式出现（JS 里加类名 .reveal） */
 .reveal{
   opacity: 0;
@@ -255,6 +275,46 @@ body{ position: relative; }
   .card, .card::before{ transition: none !important; animation: none !important; }
   .reveal{ opacity:1; transform:none; }
   #bgfx{ display:none; }
+}
+
+/* ===== 可访问性增强 ===== */
+/* 屏幕阅读器隐藏但可访问 */
+.sr-only{
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* 跳过链接（键盘首选） */
+.skip-link{
+  position: absolute; left: -999px; top: auto; z-index: 1000;
+}
+.skip-link:focus, .skip-link:active{
+  left: 12px; top: 12px; width: auto; height: auto; padding: 8px 12px;
+  background: var(--brand); color: #041526; border-radius: 8px; text-decoration: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* 更明显的键盘焦点指示（只在键盘导航时生效） */
+a:focus-visible, button:focus-visible, .icon-btn:focus-visible, .btn:focus-visible, .kl-item:focus-visible, .nav a:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 4px var(--focus);
+  border-color: var(--brand);
+}
+
+/* 小幅触摸优化 */
+a, .btn, .icon-btn{ touch-action: manipulation; }
+
+/* 高对比/强制颜色模式支持 */
+@media (forced-colors: active){
+  :root{ --bg: Window; --card: ButtonFace; --text: WindowText; --muted: GrayText; }
+  a, button, .icon-btn{ border: 2px solid ButtonText; background: ButtonFace; color: ButtonText; }
 }
 
 /* ===== 通用行布局与表单元素 ===== */
@@ -340,6 +400,18 @@ button.primary:hover{ filter: brightness(1.05); }
   border-color: var(--brand);
   transform: translateY(-1px);
 }
+.entry .preview{
+  transition: max-height .36s cubic-bezier(.2,.6,.2,1), opacity .24s ease;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+}
+.entry .preview[x-rendered="1"], .entry .preview[data-rendered="1"], .entry .preview[style*="display:block"]{
+  max-height: 960px; opacity:1;
+}
+.entry-detail{ padding:12px 0 0; border-top:1px dashed #ffffff10; margin-top:10px }
+.entry-detail h4{ margin:0; font-size:16px }
+.entry-detail p.meta{ color:var(--muted); margin-top:6px }
 .pill{
   padding:4px 12px;
   border-radius:999px;

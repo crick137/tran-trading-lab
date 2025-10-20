@@ -31,27 +31,32 @@ function calcMetrics(list) {
 class XMetrics extends HTMLElement {
   connectedCallback() {
     const m = calcMetrics(closedSignals);
-    this.innerHTML = `
-      <section class="card">
-        <h3 class="m0">성과 통계</h3>
-        <p class="mt8" style="color:#9aa0aa">닫힌 포지션 기준 (1R 고정)</p>
-        <div class="grid mt12" style="grid-template-columns: repeat(4,1fr); gap:12px;">
-          ${this.box('승률', m.winRate + '%')}
-          ${this.box('평균 R', m.avgR)}
-          ${this.box('기대값(Expectancy)', m.expectancy)}
-          ${this.box('최대 낙폭(MDD)', m.mdd + ' R')}
-        </div>
-        <p class="mt12" style="color:#9aa0aa">표본: ${m.n}개 | 승: ${m.wins} / 패: ${m.losses}</p>
-      </section>
-    `;
+    // build DOM safely
+    this.innerHTML = '';
+    const section = document.createElement('section'); section.className='card';
+    const h3 = document.createElement('h3'); h3.className='m0'; h3.textContent='성과 통계';
+    section.appendChild(h3);
+    const p = document.createElement('p'); p.className='mt8'; p.style.color='#9aa0aa'; p.textContent = '닫힌 포지션 기준 (1R 고정)';
+    section.appendChild(p);
+
+    const grid = document.createElement('div'); grid.className='grid mt12'; grid.style.gridTemplateColumns = 'repeat(4,1fr)'; grid.style.gap='12px';
+    grid.appendChild(this.box('승률', m.winRate + '%'));
+    grid.appendChild(this.box('평균 R', m.avgR));
+    grid.appendChild(this.box('기대값(Expectancy)', m.expectancy));
+    grid.appendChild(this.box('최대 낙폭(MDD)', m.mdd + ' R'));
+    section.appendChild(grid);
+
+    const footer = document.createElement('p'); footer.className='mt12'; footer.style.color='#9aa0aa'; footer.textContent = `표본: ${m.n}개 | 승: ${m.wins} / 패: ${m.losses}`;
+    section.appendChild(footer);
+    this.appendChild(section);
   }
+
   box(label, value) {
-    return `
-      <div class="card" style="padding:12px; text-align:center;">
-        <div style="font-size:13px;color:#9aa0aa">${label}</div>
-        <div style="font-size:22px;font-weight:700;margin-top:4px">${value}</div>
-      </div>
-    `;
+    const box = document.createElement('div'); box.className='card'; box.style.padding='12px'; box.style.textAlign='center';
+    const labelEl = document.createElement('div'); labelEl.style.fontSize='13px'; labelEl.style.color='#9aa0aa'; labelEl.textContent = label;
+    const valueEl = document.createElement('div'); valueEl.style.fontSize='22px'; valueEl.style.fontWeight='700'; valueEl.style.marginTop='4px'; valueEl.textContent = value;
+    box.appendChild(labelEl); box.appendChild(valueEl);
+    return box;
   }
 }
 customElements.define('x-metrics', XMetrics);

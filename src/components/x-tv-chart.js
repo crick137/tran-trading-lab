@@ -74,8 +74,14 @@
       await loadTV();
       if (!window.TradingView || !this._container || this._widget) return;
 
-      const attr=(n,d)=> this.getAttribute(n) ?? d;
-      const studies = (attr("studies","")).split(",").filter(Boolean);
+      // defensive attribute accessor: trim and limit length to avoid unexpected long inputs
+      const sanitize = (v, def) => {
+        if (v == null) return def;
+        const s = String(v).trim();
+        return s.length > 128 ? s.slice(0, 128) : s;
+      };
+      const attr = (n, d) => sanitize(this.getAttribute(n), d);
+      const studies = (attr("studies", "")).split(",").map(s => s.trim().slice(0, 64)).filter(Boolean);
 
       this._widget = new window.TradingView.widget({
         container_id: this._container.id,

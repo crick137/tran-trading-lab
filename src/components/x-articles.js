@@ -6,23 +6,28 @@ const posts = [
 
 class XArticles extends HTMLElement {
   connectedCallback() {
-    this.innerHTML = `
-      <section class="card" id="articles">
-        <h3 class="m0">글 모음</h3>
-        <div class="mt12" style="display:grid;gap:12px">
-          ${posts.map(p => `
-            <article class="card" style="padding:14px">
-              <div class="row" style="justify-content:space-between">
-                <strong>${p.title}</strong>
-                <span class="badge">${p.date}</span>
-              </div>
-              <p class="mt8" style="color:#9aa0aa">${p.excerpt}</p>
-              <div class="row mt8">${p.tags.map(t=>`<span class="badge">#${t}</span>`).join(' ')}</div>
-            </article>
-          `).join('')}
-        </div>
-      </section>
-    `;
+    // build DOM safely
+    this.innerHTML = '';
+    const section = document.createElement('section'); section.className='card'; section.id='articles';
+    const h3 = document.createElement('h3'); h3.className='m0'; h3.textContent='글 모음';
+    section.appendChild(h3);
+    const container = document.createElement('div'); container.className='mt12'; container.style.display='grid'; container.style.gap='12px';
+    for(const p of posts){
+      const art = document.createElement('article'); art.className='card'; art.style.padding='14px';
+      const row = document.createElement('div'); row.className='row'; row.style.justifyContent='space-between';
+      const strong = document.createElement('strong'); strong.textContent = p.title;
+      const span = document.createElement('span'); span.className='badge'; span.textContent = p.date;
+      row.appendChild(strong); row.appendChild(span);
+      art.appendChild(row);
+      const pEl = document.createElement('p'); pEl.className='mt8'; pEl.style.color='#9aa0aa'; pEl.textContent = p.excerpt;
+      art.appendChild(pEl);
+      const tagRow = document.createElement('div'); tagRow.className='row mt8';
+      for(const t of p.tags){ const tb = document.createElement('span'); tb.className='badge'; tb.textContent = `#${t}`; tagRow.appendChild(tb); }
+      art.appendChild(tagRow);
+      container.appendChild(art);
+    }
+    section.appendChild(container);
+    this.appendChild(section);
   }
 }
 customElements.define('x-articles', XArticles);

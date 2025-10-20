@@ -32,10 +32,55 @@ class XPublisher extends HTMLElement {
         </div>
       </section>
     `;
-    this.querySelector('#copy-tg').onclick = () => copy(this.querySelector('#tg').value);
-    this.querySelector('#copy-wa').onclick = () => copy(this.querySelector('#wa').value);
-    this.querySelector('#copy-tw').onclick = () => copy(this.querySelector('#tw').value);
-    this.querySelector('#tw').addEventListener('input', () => this.updateCount());
+        // Build DOM instead of string templates to avoid unsafe interpolation
+        this.innerHTML = '';
+
+        const section = document.createElement('section');
+        section.className = 'container';
+        section.id = 'publish';
+
+        const card = document.createElement('div'); card.className = 'card';
+        const h3 = document.createElement('h3'); h3.className = 'm0'; h3.textContent = '一键发布中心';
+        const p = document.createElement('p'); p.className = 'mt8'; p.style.color = '#9aa0aa';
+        p.textContent = '根据每日录入的简报与信号，自动生成可复制的中文文案。';
+        card.appendChild(h3); card.appendChild(p);
+
+        const grid = document.createElement('div'); grid.className = 'grid mt12'; grid.style.gridTemplateColumns = 'repeat(3,1fr)'; grid.style.gap = '12px';
+
+        // Telegram column
+        const colTg = document.createElement('div'); colTg.className = 'card';
+        const h4Tg = document.createElement('h4'); h4Tg.className = 'm0'; h4Tg.textContent = 'Telegram';
+        const taTg = document.createElement('textarea'); taTg.id = 'tg'; taTg.rows = 12; taTg.className = 'card mt8';
+        const btnCopyTg = document.createElement('button'); btnCopyTg.id = 'copy-tg'; btnCopyTg.className = 'badge mt8'; btnCopyTg.type = 'button'; btnCopyTg.textContent = '复制TG';
+        colTg.appendChild(h4Tg); colTg.appendChild(taTg); colTg.appendChild(btnCopyTg);
+
+        // WhatsApp column
+        const colWa = document.createElement('div'); colWa.className = 'card';
+        const h4Wa = document.createElement('h4'); h4Wa.className = 'm0'; h4Wa.textContent = 'WhatsApp';
+        const taWa = document.createElement('textarea'); taWa.id = 'wa'; taWa.rows = 12; taWa.className = 'card mt8';
+        const btnCopyWa = document.createElement('button'); btnCopyWa.id = 'copy-wa'; btnCopyWa.className = 'badge mt8'; btnCopyWa.type = 'button'; btnCopyWa.textContent = '复制WS';
+        colWa.appendChild(h4Wa); colWa.appendChild(taWa); colWa.appendChild(btnCopyWa);
+
+        // X / Twitter column
+        const colTw = document.createElement('div'); colTw.className = 'card';
+        const h4Tw = document.createElement('h4'); h4Tw.className = 'm0'; h4Tw.textContent = 'X / Twitter';
+        const taTw = document.createElement('textarea'); taTw.id = 'tw'; taTw.rows = 12; taTw.className = 'card mt8';
+        const row = document.createElement('div'); row.className = 'row mt8';
+        const btnCopyTw = document.createElement('button'); btnCopyTw.id = 'copy-tw'; btnCopyTw.className = 'badge'; btnCopyTw.type = 'button'; btnCopyTw.textContent = '复制X';
+        const spanCount = document.createElement('span'); spanCount.id = 'count'; spanCount.className = 'badge'; spanCount.textContent = '0/280';
+        row.appendChild(btnCopyTw); row.appendChild(spanCount);
+        colTw.appendChild(h4Tw); colTw.appendChild(taTw); colTw.appendChild(row);
+
+        grid.appendChild(colTg); grid.appendChild(colWa); grid.appendChild(colTw);
+        card.appendChild(grid);
+        section.appendChild(card);
+        this.appendChild(section);
+
+        // Event wiring
+        btnCopyTg.addEventListener('click', () => copy(taTg.value));
+        btnCopyWa.addEventListener('click', () => copy(taWa.value));
+        btnCopyTw.addEventListener('click', () => copy(taTw.value));
+        taTw.addEventListener('input', () => this.updateCount());
   }
 
   updateCount() {

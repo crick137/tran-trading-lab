@@ -151,25 +151,43 @@ class XAdminPage extends HTMLElement {
     if(!res.ok){ box.innerHTML = `<div class="list-item"><span class="err">索引获取失败</span></div>`; return; }
     const items = Array.isArray(data) ? data : [];
     if(items.length===0){ box.innerHTML = `<div class="list-item"><span class="muted">暂无条目</span></div>`; return; }
-    box.innerHTML = items.map(slug=>`
-      <div class="list-item">
-        <code>${slug}</code>
-        <div>
-          <button data-act="fill" data-slug="${slug}" class="ghost">填入</button>
-          <button data-act="get" data-slug="${slug}" class="ghost">读取</button>
-          <button data-act="del" data-slug="${slug}" class="danger">删除</button>
-        </div>
-      </div>
-    `).join('');
-    box.querySelectorAll('button').forEach(btn=>{
-      btn.addEventListener('click',(e)=>{
-        const s = btn.dataset.slug;
-        const act = btn.dataset.act;
-        if(act==='fill'){ this.$('#slug').value = s; this.setMsg('已填入 slug'); }
-        if(act==='get'){ this.$('#slug').value = s; this.load(); }
-        if(act==='del'){ this.$('#slug').value = s; this.remove(); }
-      });
-    });
+    // construct list items using DOM APIs to avoid HTML injection
+    box.innerHTML = '';
+    for(const slug of items){
+      const item = document.createElement('div');
+      item.className = 'list-item';
+
+      const code = document.createElement('code');
+      code.textContent = slug;
+      item.appendChild(code);
+
+      const ctr = document.createElement('div');
+
+      const makeBtn = (act, label, cls) => {
+        const b = document.createElement('button');
+        b.className = cls || 'ghost';
+        b.type = 'button';
+        b.dataset.act = act;
+        // store slug on dataset safely
+        b.dataset.slug = slug;
+        b.textContent = label;
+        b.addEventListener('click', () => {
+          const s = b.dataset.slug;
+          const a = b.dataset.act;
+          if(a==='fill'){ this.$('#slug').value = s; this.setMsg('已填入 slug'); }
+          if(a==='get'){ this.$('#slug').value = s; this.load(); }
+          if(a==='del'){ this.$('#slug').value = s; this.remove(); }
+        });
+        return b;
+      };
+
+      ctr.appendChild(makeBtn('fill','填入','ghost'));
+      ctr.appendChild(makeBtn('get','读取','ghost'));
+      ctr.appendChild(makeBtn('del','删除','danger'));
+
+      item.appendChild(ctr);
+      box.appendChild(item);
+    }
   }
 
   logout(){

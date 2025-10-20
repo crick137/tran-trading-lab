@@ -887,16 +887,22 @@ function bindCourseContentEditor() {
     syllabus.forEach((group) => {
       const sec = document.createElement('section');
       sec.className = 'lesson-group';
-      const h4 = document.createElement('h4');
-      h4.innerHTML = `<span>${group.icon || '📚'}</span><span>${group.level || ''}</span>`;
-      sec.appendChild(h4);
+  const h4 = document.createElement('h4');
+  const spanIcon = document.createElement('span'); spanIcon.textContent = group.icon || '📚';
+  const spanLevel = document.createElement('span'); spanLevel.textContent = group.level || '';
+  h4.appendChild(spanIcon); h4.appendChild(spanLevel);
+  sec.appendChild(h4);
       const ul = document.createElement('div');
       (Array.isArray(group.lessons) ? group.lessons : []).forEach((row) => {
         const obj = typeof row === 'string' ? { name: row } : row || {};
         const a = document.createElement('button');
         a.type = 'button';
         a.className = 'lesson-item';
-        a.innerHTML = `${obj.name || ''}${obj.duration ? `<span>${obj.duration}</span>` : ''}`;
+        // build label safely
+        a.textContent = obj.name || '';
+        if (obj.duration) {
+          const sd = document.createElement('span'); sd.textContent = obj.duration; a.appendChild(sd);
+        }
         a.onclick = async () => {
           listHost.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
           a.classList.add('active');
