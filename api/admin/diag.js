@@ -49,12 +49,16 @@ export default async function handler(req, res){
   // Connectivity check with short timeout
   let connectivity = { ok: false, error: null };
   try {
-    const p = list({ prefix: '', token });
-    const r = await Promise.race([
-      p,
-      new Promise((_, rej)=> setTimeout(()=> rej(new Error('TIMEOUT')), 4000))
-    ]);
-    if (r && (Array.isArray(r.blobs) || typeof r === 'object')) connectivity.ok = true;
+    if (!token) {
+      connectivity.error = 'NO_BLOB_TOKEN';
+    } else {
+      const p = list({ prefix: '', token });
+      const r = await Promise.race([
+        p,
+        new Promise((_, rej)=> setTimeout(()=> rej(new Error('TIMEOUT')), 4000))
+      ]);
+      if (r && (Array.isArray(r.blobs) || typeof r === 'object')) connectivity.ok = true;
+    }
   } catch (e) {
     connectivity.error = (e && e.message) ? e.message : String(e||'UNKNOWN');
   }
