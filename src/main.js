@@ -45,10 +45,14 @@ function matchRoute() {
   const raw = location.hash || '#/';
   const detailDaily = raw.match(/^#\/daily-brief\/([\w-]+)$/);
   if (detailDaily) return { id: 'daily-brief-detail', slug: decodeURIComponent(detailDaily[1]) };
+  const detailNews = raw.match(/^#\/market-news\/([\w-]+)$/);
+  if (detailNews) return { id: 'market-news-detail', slug: decodeURIComponent(detailNews[1]) };
   const detailArticle = raw.match(/^#\/articles\/([\w%-]+)$/);
   if (detailArticle) return { id: 'article-detail', slug: decodeURIComponent(detailArticle[1]) };
+  const detailJournal = raw.match(/^#\/trade-journal\/([\w%-]+)$/);
+  if (detailJournal) return { id: 'trade-journal-detail', slug: decodeURIComponent(detailJournal[1]) };
   const base = raw.includes('?') ? raw.split('?')[0] : raw;
-  return { id: (routes[base] || 'home') };
+  return { id: (routes[base] || 'home'), slug: '' };
 }
 
 function renderHomeView(){
@@ -194,6 +198,16 @@ function renderHomeView(){
           <p>TRAN TRADING LAB의 철학과 다음 목표.</p>
         </a>
       </div>
+    </section>
+  `;
+  window.__registerCards?.(outlet);
+}
+
+function renderTradeJournalDetailView(){
+  outlet.innerHTML = `
+    <section aria-label="거래 분석 상세">
+      <article class="card" id="anal-detail" style="padding:24px"></article>
+      <p class="muted" style="margin-top:12px"><a href="#/trade-journal">← 목록으로</a></p>
     </section>
   `;
   window.__registerCards?.(outlet);
@@ -514,6 +528,10 @@ async function renderRoute(routeId, slug){
       }
       await renderAnalysisDetailBySlug(currentSlugFromQuery());
       break;
+    case 'trade-journal-detail':
+      renderTradeJournalDetailView();
+      await renderAnalysisDetailBySlug(slug);
+      break;
     case 'knowledge-lab':
       renderKnowledgeLabView();
       await tryLoadRemoteSyllabus();
@@ -628,7 +646,8 @@ async function loadAnalysesList(){
 
     // 👉 URL에 slug가 없으면 첫 번째 항목을 자동으로 열고 미리보기 차트를 로드
     const slugInUrl = currentSlugFromQuery();
-    if (!slugInUrl && items.length){
+    const detailHost = document.getElementById('anal-detail');
+    if (!slugInUrl && items.length && detailHost){
       await renderAnalysisDetailBySlug(items[0].slug);
       const first = items[0];
       const host = document.getElementById(`pv-${first.slug}`);
@@ -664,7 +683,7 @@ function renderAnalysesListFiltered(){
         ${badge(it.bias)}
         <span class="meta">· ${it.symbol} · ${it.tf} · ${it.date}</span>
         <div class="actions">
-          <a class="icon-btn" href="#/trade-journal?slug=${encodeURIComponent(it.slug)}">열기</a>
+          <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(it.slug)}">자세히 보기 →</a>
           <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${it.symbol}" data-ivl="60">미리보기 차트</button>
         </div>
       </div>
@@ -758,10 +777,13 @@ async function renderAnalysisDetailBySlug(slug){
 }
 
 function currentSlugFromQuery(){
-  const m = location.hash.match(/^[^?]+\?(.+)$/);
-  if (!m) return '';
-  const p = new URLSearchParams(m[1]);
-  return p.get('slug') || '';
+  const hash = location.hash || '';
+  const matchPath = hash.match(/^#\/trade-journal\/([^?]+)/);
+  if (matchPath) return decodeURIComponent(matchPath[1]);
+  const matchQuery = hash.match(/^[^?]+\?(.+)$/);
+  if (!matchQuery) return '';
+  const params = new URLSearchParams(matchQuery[1]);
+  return params.get('slug') || '';
 }
 
 /* ===== Reveal & Canvas FX (safe, idempotent) ===== */
