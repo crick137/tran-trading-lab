@@ -632,13 +632,67 @@ async function fetchJSON(path){
   return res.json();
 }
 
+// Fetch many slugs with a concurrency limit to avoid overwhelming network
+async function fetchDetailsForSlugs(slugs, concurrency = 6){
+  const results = new Array(slugs.length);
+  let idx = 0;
+
+  async function worker(){
+    while (idx < slugs.length){
+      const i = idx++;
+      const slug = String(slugs[i]);
+      try{
+        const detail = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`);
+        analysesDetailCache.set(slug, detail || {});
+        results[i] = Object.assign({ slug }, (detail && typeof detail === 'object') ? detail : {});
+      }catch(_){
+        results[i] = { slug, title: slug, symbol: '', tf: '', date: '', tags: [], bias: '' };
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, slugs.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
+// Like fetchDetailsForSlugs but invoke onDetail(index, slug, detail) as each detail is fetched
+async function fetchDetailsForSlugsWithCallback(slugs, onDetail, concurrency = 6){
+  let idx = 0;
+  async function worker(){
+    while (idx < slugs.length){
+      const i = idx++;
+      const slug = String(slugs[i]);
+      try{
+        const detail = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`);
+        analysesDetailCache.set(slug, detail || {});
+        const obj = Object.assign({ slug }, (detail && typeof detail === 'object') ? detail : {});
+        try{ onDetail?.(i, slug, obj); }catch{}
+      }catch(_){
+        const obj = { slug, title: slug, symbol: '', tf: '', date: '', tags: [], bias: '' };
+        try{ onDetail?.(i, slug, obj); }catch{}
+      }
+    }
+  }
+  const workers = Array.from({ length: Math.min(concurrency, slugs.length) }, () => worker());
+  await Promise.all(workers);
+}
+
 async function loadAnalysesList(){
   const list = document.getElementById('anal-list');
   if (!list) return;
   list.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     if (!analysesIndexCache){
-      analysesIndexCache = await fetchJSON(AIDX); // [{slug,title,symbol,tf,date,tags,bias}]
+      // The backend may return either an array of full objects or an array of slugs (strings).
+      // If it's the latter, fetch each slug's JSON (with concurrency limit) and enrich the index so the UI has title/symbol/tf/date/tags/bias.
+      analysesIndexCache = await fetchJSON(AIDX);
+      if (Array.isArray(analysesIndexCache) && analysesIndexCache.length && typeof analysesIndexCache[0] === 'string'){
+        const slugs = analysesIndexCache.slice();
+        // fetch details in batches with limited concurrency (default 6)
+        const enriched = await fetchDetailsForSlugs(slugs, 6);
+        analysesIndexCache = enriched;
+      }
     }
     const items = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
     list.dataset.raw = JSON.stringify(items);
@@ -724,11 +778,15 @@ async function renderAnalysisDetailBySlug(slug){
     }
     const d = analysesDetailCache.get(slug) || {};
     const ivl = (d.chart?.interval) || '60';
-    const sym  = (d.chart?.symbol)   || d.symbol;
+    const sym  = (d.chart?.symbol)   || d.symbol || '';
+    const title = d.title || slug;
+    const symbolLabel = d.symbol || sym || '';
+    const tfLabel = d.tf || '';
+    const dateLabel = d.date || '';
 
     box.innerHTML = `
-      <h2>${d.title} ${badge(d.bias)}</h2>
-      <p class="muted">${d.symbol} · ${d.tf} · ${d.date}</p>
+      <h2>${escapeHtml(title)} ${badge(d.bias)}</h2>
+      <p class="muted">${escapeHtml(symbolLabel)}${symbolLabel && tfLabel? ' · ' : ''}${escapeHtml(tfLabel)}${(symbolLabel||tfLabel) && dateLabel? ' · ' : ''}${escapeHtml(dateLabel)}</p>
 
       <h3>지지 / 저항</h3>
       <div class="row" style="margin-top:6px">
@@ -756,8 +814,8 @@ async function renderAnalysisDetailBySlug(slug){
           </div>
         </div>
         <div id="detail-chart-wrap">
-          <x-tv-chart id="detail-chart" symbol="${sym}" interval="${ivl}" ratio="16:9" min_height="420"></x-tv-chart>
-        </div>
+            <x-tv-chart id="detail-chart" symbol="${escapeHtml(sym)}" interval="${escapeHtml(ivl)}" ratio="16:9" min_height="420"></x-tv-chart>
+          </div>
       </div>
     `;
 

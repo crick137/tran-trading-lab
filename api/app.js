@@ -108,6 +108,23 @@ async function upsertIndex(prefix, key) {
   }
 }
 
+// Maintain a rich index for analyses: array of objects with metadata
+async function upsertAnalysesIndex(prefix, meta) {
+  const INDEX = `${prefix}/index.json`;
+  let arr = [];
+  try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
+  if (!Array.isArray(arr)) arr = [];
+  // normalize existing entries to objects { slug, ... }
+  arr = arr.map(x => (typeof x === 'string') ? { slug: x } : (x && typeof x === 'object') ? x : null).filter(Boolean);
+  // remove existing same slug
+  arr = arr.filter(x => x.slug !== meta.slug);
+  // put newest first
+  arr.unshift(meta);
+  try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
+    console.warn('[INDEX] upsertAnalysesIndex failed, continuing:', e?.message || e);
+  }
+}
+
 async function removeFromIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
@@ -229,7 +246,24 @@ async function genericHandler(req, pathname, PREFIX) {
       
       try {
         await writeJSON(FILE, body);
-        await upsertIndex(PREFIX, slug);
+        // update index: default behavior is to keep an index of slugs,
+        // but for analyses we also maintain a rich index with metadata to speed up frontend
+        try{
+          if (PREFIX === 'analyses'){
+            const meta = {
+              slug,
+              title: body?.title || slug,
+              symbol: body?.symbol || body?.chart?.symbol || '',
+              tf: body?.tf || '',
+              date: body?.date || '',
+              tags: Array.isArray(body?.tags) ? body.tags : [],
+              bias: body?.bias || ''
+            };
+            await upsertAnalysesIndex(PREFIX, meta);
+          } else {
+            await upsertIndex(PREFIX, slug);
+          }
+        }catch(e){ console.warn('[API] index update error', e?.message || e); }
         console.log(`[API] Write successful`);
         return ok({ saved: true, slug });
       } catch (e) {
