@@ -379,13 +379,19 @@ async function renderArticlesList(){
           const title = detail?.title || slug;
           const excerpt = detail?.excerpt || '';
           const date = detail?.date ? new Date(detail.date).toLocaleDateString() : '';
-          const tags = Array.isArray(detail?.tags) && detail.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
+          const tags = Array.isArray(detail?.tags) && detail?.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
+          const img = detail?.hero || detail?.image || '';
           return `
-            <article class="card" style="padding:18px">
-              <h3 style="margin:0 0 6px">${escapeHtml(title)}</h3>
-              ${excerpt ? `<p class="muted">${escapeHtml(excerpt)}</p>` : ''}
-              <p class="meta" style="margin:10px 0">${[date, tags].filter(Boolean).join(' · ')}</p>
-              <a class="icon-btn" href="#/articles/${encodeURIComponent(slug)}">자세히 보기</a>
+            <article class="card" style="padding:12px">
+              <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+                ${img ? `<div style="flex:0 0 160px"><img src="${escapeHtml(img)}" alt="${escapeHtml(title)}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
+                <div style="flex:1;min-width:0">
+                  <h3 style="margin:0 0 6px">${escapeHtml(title)}</h3>
+                  ${excerpt ? `<p class="muted">${escapeHtml(excerpt)}</p>` : ''}
+                  <p class="meta" style="margin:10px 0">${[date, tags].filter(Boolean).join(' · ')}</p>
+                  <a class="icon-btn" href="#/articles/${encodeURIComponent(slug)}">자세히 보기</a>
+                </div>
+              </div>
             </article>
           `;
         }).join('')}
@@ -703,19 +709,25 @@ async function loadAnalysesList(){
           const host = document.getElementById('anal-list');
           if (!host) return;
           const entry = document.getElementById(`entry-${slug}`);
+          const img = obj.hero || obj.image || '';
           const html = `
             <article class="entry" id="entry-${slug}">
-              <div class="row">
-                <h3 style="margin-right:6px">${escapeHtml(obj.title || slug)}</h3>
-                ${badge(obj.bias)}
-                <span class="meta">· ${escapeHtml(obj.symbol||'')} · ${escapeHtml(obj.tf||'')} · ${escapeHtml(obj.date||'')}</span>
-                <div class="actions">
-                  <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(slug)}" aria-label="자세히 보기 ${escapeHtml(obj.title || slug)}">자세히 보기 →</a>
-                  <button class="icon-btn pv-btn" data-slug="${slug}" data-symbol="${escapeHtml(obj.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(obj.symbol || obj.title || slug)}">미리보기 차트</button>
+              <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+                ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(obj.title||slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
+                <div style="flex:1;min-width:0">
+                  <div class="row">
+                    <h3 style="margin-right:6px">${escapeHtml(obj.title || slug)}</h3>
+                    ${badge(obj.bias)}
+                    <span class="meta">· ${escapeHtml(obj.symbol||'')} · ${escapeHtml(obj.tf||'')} · ${escapeHtml(obj.date||'')}</span>
+                    <div class="actions">
+                      <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(slug)}" aria-label="자세히 보기 ${escapeHtml(obj.title || slug)}">자세히 보기 →</a>
+                      <button class="icon-btn pv-btn" data-slug="${slug}" data-symbol="${escapeHtml(obj.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(obj.symbol || obj.title || slug)}">미리보기 차트</button>
+                    </div>
+                  </div>
+                  ${(obj.tags && obj.tags.length)? `<div class="row" style="margin-top:6px">${(obj.tags||[]).map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`: ''}
+                  <div class="preview" id="pv-${slug}" style="margin-top:10px;"></div>
                 </div>
               </div>
-              ${(obj.tags && obj.tags.length)? `<div class="row" style="margin-top:6px">${(obj.tags||[]).map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`: ''}
-              <div class="preview" id="pv-${slug}" style="margin-top:10px;"></div>
             </article>
           `;
           if (entry){ entry.outerHTML = html; }
@@ -775,21 +787,28 @@ function renderAnalysesListFiltered(){
     return hit && okBias;
   });
 
-  const htmlItems = items.map(it=>`
+  const htmlItems = items.map(it=>{
+    const img = it.hero || it.image || '';
+    return `
     <article class="entry" id="entry-${it.slug}">
-      <div class="row">
-        <h3 style="margin-right:6px">${escapeHtml(it.title || it.slug)}</h3>
-        ${badge(it.bias)}
-        <span class="meta">· ${escapeHtml(it.symbol || '')} · ${escapeHtml(it.tf || '')} · ${escapeHtml(it.date || '')}</span>
-        <div class="actions">
-          <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(it.slug)}" aria-label="자세히 보기 ${escapeHtml(it.title || it.slug)}">자세히 보기 →</a>
-          <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${escapeHtml(it.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(it.symbol || it.title || it.slug)}">미리보기 차트</button>
+      <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+        ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(it.title||it.slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
+        <div style="flex:1;min-width:0">
+          <div class="row">
+            <h3 style="margin-right:6px">${escapeHtml(it.title || it.slug)}</h3>
+            ${badge(it.bias)}
+            <span class="meta">· ${escapeHtml(it.symbol || '')} · ${escapeHtml(it.tf || '')} · ${escapeHtml(it.date || '')}</span>
+            <div class="actions">
+              <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(it.slug)}" aria-label="자세히 보기 ${escapeHtml(it.title || it.slug)}">자세히 보기 →</a>
+              <button class="icon-btn pv-btn" data-slug="${it.slug}" data-symbol="${escapeHtml(it.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(it.symbol || it.title || it.slug)}">미리보기 차트</button>
+            </div>
+          </div>
+          ${it.tags?.length?`<div class="row" style="margin-top:6px">${it.tags.map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`:''}
+          <div class="preview" id="pv-${it.slug}" style="margin-top:10px;"></div>
         </div>
       </div>
-      ${it.tags?.length?`<div class="row" style="margin-top:6px">${it.tags.map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`:''}
-      <div class="preview" id="pv-${it.slug}" style="margin-top:10px;"></div>
     </article>
-  `).join('');
+  `}).join('');
 
   if (htmlItems && htmlItems.trim()) {
     list.innerHTML = htmlItems;
@@ -1324,14 +1343,21 @@ async function renderMarketNews(){
         const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
         const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
         const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
+        // try common image fields
+        const imgUrl = (d && (d.hero || d.image || d.thumbnail || d.thumb)) || (typeof r === 'object' && (r.hero || r.image || r.thumbnail || r.thumb)) || '';
         return `
           <li class="card">
-            <h3 style="margin:0 0 6px">${escapeHtml(title || id || 'Market News')}</h3>
-            <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
-            ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : `<p class="muted">요약 정보가 없습니다.</p>`}
-            ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
-            <p class="muted" style="margin-top:8px">${(tags && tags.length) ? tags.map(t=>`#${escapeHtml(t)}`).join(' ') : ''}</p>
-            ${link}
+            <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+              ${imgUrl ? `<div style="flex:0 0 160px"><img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(title||id)}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
+              <div style="flex:1;min-width:0">
+                <h3 style="margin:0 0 6px">${escapeHtml(title || id || 'Market News')}</h3>
+                <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
+                ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : `<p class="muted">요약 정보가 없습니다.</p>`}
+                ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
+                <p class="muted" style="margin-top:8px">${(tags && tags.length) ? tags.map(t=>`#${escapeHtml(t)}`).join(' ') : ''}</p>
+                ${link}
+              </div>
+            </div>
           </li>`;
       }catch{ return `<li class="card"><h3>${escapeHtml(id || String(r))}</h3><p class="muted">요약 정보가 없습니다.</p></li>`; }
     }));
