@@ -720,6 +720,11 @@ async function loadAnalysesList(){
           `;
           if (entry){ entry.outerHTML = html; }
           else { host.insertAdjacentHTML('beforeend', html); }
+          try{
+            // ensure newly inserted entry has interactive handlers bound
+            const newEntry = document.getElementById(`entry-${slug}`);
+            if (newEntry) bindAnalysesEntryActions(newEntry);
+          }catch(e){}
         }catch(e){ console.warn('updateEntryDOM', e); }
       }
 
@@ -838,6 +843,40 @@ function renderAnalysesListFiltered(){
   }
 
   bindEntryActions(list);
+}
+
+// Bind actions for a single entry node (used when entries are inserted progressively)
+function bindAnalysesEntryActions(entryNode){
+  if (!entryNode) return;
+  // bind pv button
+  entryNode.querySelectorAll('.pv-btn').forEach(btn=>{
+    btn.onclick = ()=>{
+      const slug = btn.dataset.slug;
+      const symbol = btn.dataset.symbol;
+      const host = document.getElementById(`pv-${slug}`);
+      if (!host) return;
+      if (host.dataset.rendered === '1') {
+        host.innerHTML = ''; host.dataset.rendered = '0';
+        btn.textContent = '미리보기 차트';
+      } else {
+        host.innerHTML = `<x-tv-chart symbol="${escapeHtml(symbol||'')}" interval="${escapeHtml(btn.dataset.ivl||'60')}" ratio="16:9" min_height="220"></x-tv-chart>`;
+        host.dataset.rendered = '1';
+        btn.textContent = '차트 닫기';
+      }
+    };
+  });
+
+  // bind inline expand
+  entryNode.querySelectorAll('.entry .icon-btn[href^="#/trade-journal/"]').forEach(a=>{
+    a.onclick = (e)=>{
+      e.preventDefault();
+      const href = a.getAttribute('href') || '';
+      const m = href.match(/#\/trade-journal\/([^?]+)/);
+      if (!m) return;
+      const slug = decodeURIComponent(m[1]);
+      renderEntryDetailInline(slug);
+    };
+  });
 }
 
 // Render inline detail inside the entry's preview container
@@ -1273,21 +1312,22 @@ async function renderMarketNews(){
           marketNewsCache.set(r.id, await dres.json());
         }
         const d = marketNewsCache.get(r.id) || {};
-        const title = (d.title ?? r.title ?? r.id ?? '').trim();
+  const title = String((d.title ?? r.title ?? r.id ?? '')).trim();
         const source = (d.source ?? r.source ?? '').trim();
         const whenRaw = d.date ?? r.date ?? '';
         const when = whenRaw ? new Date(whenRaw).toLocaleString() : '';
-        const summary = (d.summary ?? r.summary ?? '').trim();
+  const summary = String((d.summary ?? r.summary ?? '')).trim();
         const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r.tags) ? r.tags : []);
-        const bullets = (Array.isArray(d.bullets) ? d.bullets : []).map(b=>`<li>${escapeHtml(b)}</li>`).join('');
+  const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
+  const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
         const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
         return `
           <li class="card">
             <h3 style="margin:0 0 6px">${escapeHtml(title || r.id || 'Market News')}</h3>
             <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
-            ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : ''}
+            ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : `<p class="muted">요약 정보가 없습니다.</p>`}
             ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
-            <p class="muted" style="margin-top:8px">${tags.map(t=>`#${escapeHtml(t)}`).join(' ')}</p>
+            <p class="muted" style="margin-top:8px">${(tags && tags.length) ? tags.map(t=>`#${escapeHtml(t)}`).join(' ') : ''}</p>
             ${link}
           </li>`;
       }catch{ return `<li class="card"><h3>${r.id}</h3></li>`; }
