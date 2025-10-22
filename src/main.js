@@ -1,4 +1,4 @@
-// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons + News + Remote Syllabus with Home left-image/right-title) =====
+// ===== src/main.js (KO, boards = left-image/right-title; Home restored to hero+feature cards) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
@@ -30,7 +30,7 @@ function setActive(){
   });
 }
 
-// ---- 데이터 캐시 ----
+// ---- 数据缓存 ----
 let dailyBriefIndexCache = null;
 const dailyBriefCache = new Map();
 let analysesIndexCache = null;
@@ -40,7 +40,7 @@ const marketNewsCache = new Map();
 let articlesIndexCache = null;
 const articlesDetailCache = new Map();
 
-// -------- Daily Brief 라우팅 ----------
+// -------- 路由匹配 ----------
 function matchRoute() {
   const raw = location.hash || '#/';
   const detailDaily = raw.match(/^#\/daily-brief\/([\w-]+)$/);
@@ -55,65 +55,26 @@ function matchRoute() {
   return { id: (routes[base] || 'home'), slug: '' };
 }
 
-// ===================== 新增：主页工具（左图右标题） =====================
-function toCardItem(raw = {}, section = '') {
-  const obj = (typeof raw === 'object' && raw) ? raw : {};
-  const title = obj.title || obj.headline || obj.name || String(raw) || 'Untitled';
-  const cover = obj.hero || obj.image || obj.thumbnail || obj.thumb || obj.cover || '/placeholder.png';
-  const summary = obj.summary || obj.excerpt || obj.description || '';
-  const date = obj.date || obj.publishedAt || obj.time || '';
-  let href =
-    obj.href || obj.link || obj.url ||
-    (section === 'briefs'   && (obj.slug || raw) ? `#/daily-brief/${encodeURIComponent(obj.slug || String(raw))}` : null) ||
-    (section === 'news'     && (obj.id   || obj.slug || raw) ? `#/market-news/${encodeURIComponent(obj.id || obj.slug || String(raw))}` : null) ||
-    (section === 'articles' && (obj.slug || raw) ? `#/articles/${encodeURIComponent(obj.slug || String(raw))}` : '#');
+// ===================== 公用工具（媒体列表） =====================
+function _esc(s){ return String(s??'')
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-  return { title, cover, summary, date, href };
-}
-
-function mediaItemHTML(it) {
+function _mediaItem({href, title, desc, meta, img}){
   return `
     <li class="media-item">
-      <a class="media-thumb" href="${it.href}">
-        <img src="${escapeHtml(it.cover)}" alt="${escapeHtml(it.title)}" loading="lazy" />
-      </a>
+      ${img ? `<a class="media-thumb" href="${href}"><img src="${_esc(img)}" alt="${_esc(title)}" loading="lazy"></a>` : ''}
       <div class="media-body">
-        <a class="media-title" href="${it.href}">${escapeHtml(it.title)}</a>
-        ${it.summary ? `<p class="media-desc">${escapeHtml(it.summary)}</p>` : ''}
-        ${it.date ? `<div class="media-meta">${escapeHtml(it.date)}</div>` : ''}
+        <a class="media-title" href="${href}">${_esc(title)}</a>
+        ${desc ? `<p class="media-desc">${_esc(desc)}</p>` : ''}
+        ${meta ? `<div class="media-meta">${_esc(meta)}</div>` : ''}
       </div>
-    </li>`;
+    </li>
+  `;
 }
 
-function sectionHTML(title, viewAllHref, items) {
-  const list = (items && items.length) ? items.map(mediaItemHTML).join('') : `<li class="media-empty">No items</li>`;
-  return `
-    <section class="home-section">
-      <div class="home-sec-header">
-        <h2>${title}</h2>
-        <a class="home-view-all" href="${viewAllHref}">View all</a>
-      </div>
-      <ul class="media-list">${list}</ul>
-    </section>`;
-}
-
-// limit concurrency to avoid hammering API
-async function fetchMany(details, limit = 4) {
-  const out = new Array(details.length);
-  let i = 0;
-  async function worker() {
-    while (i < details.length) {
-      const idx = i++;
-      try { out[idx] = await details[idx](); }
-      catch { out[idx] = null; }
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, details.length) }, worker));
-  return out;
-}
-
-// ===================== 主页视图（左图右标题） =====================
-async function renderHomeView(){
+// ===================== 主页（恢复原样：Hero + 功能卡片） =====================
+function renderHomeView(){
   outlet.innerHTML = `
     <section aria-labelledby="home-hero-title">
       <div class="hero">
@@ -122,87 +83,122 @@ async function renderHomeView(){
         <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
       </div>
 
-      <div id="home-sections" class="home-grid" aria-live="polite">
-        <section class="hero-card">
-          <div class="hero-body">
-            <h2 style="margin:0">오늘의 하이라이트</h2>
-            <p class="muted" style="margin:6px 0 0">Daily Brief · Market News · Articles</p>
+      <div class="feature-grid home-feature-grid" role="list">
+        <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <g class="float">
+                  <line x1="6" y1="4" x2="6" y2="20" class="stroke" />
+                  <rect x="4.5" y="9" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                </g>
+                <g class="float" style="animation-delay:.2s">
+                  <line x1="12" y1="6" x2="12" y2="18" class="stroke" />
+                  <rect x="10.5" y="8" width="3" height="5" rx="1.2" fill="url(#grad)" />
+                </g>
+                <g class="float" style="animation-delay:.4s">
+                  <line x1="18" y1="3" x2="18" y2="21" class="stroke" />
+                  <rect x="16.5" y="11" width="3" height="6" rx="1.2" fill="url(#grad)" />
+                </g>
+              </svg>
+            </span>데일리 브리프
           </div>
-        </section>
-        <div class="home-col"><div class="home-loading">Loading…</div></div>
+          <p>매일 아침 시장을 읽는 시간.</p>
+        </a>
+
+        <a href="#/trade-journal" class="card" role="listitem" aria-label="분석 아카이브로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <polyline class="stroke" points="2,16 7,10 11,13 15,7 22,12" />
+                <circle cx="7" cy="10" r="1.6" fill="url(#grad)" class="pulse" />
+              </svg>
+            </span>분석 아카이브
+          </div>
+          <p>지지·저항과 시나리오를 공개 기록한 라이브러리.</p>
+        </a>
+
+        <a href="#/knowledge-lab" class="card" role="listitem" aria-label="지식 연구소로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <g class="spin">
+                  <circle cx="12" cy="12" r="6" class="stroke" />
+                  <path d="M12 6v-2M12 20v-2M6 12H4M20 12h-2M16.2 7.8l1.4-1.4M6.4 18.6l1.4-1.4M7.8 7.8 6.4 6.4M17.6 17.6l-1.4-1.4" class="stroke" />
+                </g>
+              </svg>
+            </span>지식 연구소
+          </div>
+          <p>Preschool부터 Graduation까지 단계별 로드맵.</p>
+        </a>
+
+        <a href="#/market-news" class="card" role="listitem" aria-label="마켓 뉴스로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <rect x="3" y="5" width="18" height="14" rx="2" class="stroke" />
+                <line x1="6" y1="10" x2="18" y2="10" class="stroke" style="animation-delay:.3s" />
+                <line x1="6" y1="14" x2="15" y2="14" class="stroke" style="animation-delay:.6s" />
+              </svg>
+            </span>마켓 뉴스
+          </div>
+          <p>글로벌 거시 이벤트와 핵심 포인트 요약.</p>
+        </a>
+
+        <a href="#/articles" class="card" role="listitem" aria-label="아티클로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <path d="M3 20l5-1 11-11a2.5 2.5 0 0 0-3.5-3.5L4.5 15l-1.5 5z" class="stroke" />
+                <circle cx="17.5" cy="6.5" r="1.5" fill="url(#grad)" class="pulse" />
+              </svg>
+            </span>아티클
+          </div>
+          <p>거래 사고, 리스크 복기, 전략 인사이트 모음.</p>
+        </a>
+
+        <a href="#/about" class="card" role="listitem" aria-label="About로 이동">
+          <span class="glow" aria-hidden="true"></span>
+          <div class="title">
+            <span class="icon-wrap" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <defs><linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#66e0ff" /><stop offset="1" stop-color="#7a7dff" />
+                </linearGradient></defs>
+                <circle cx="12" cy="12" r="8" class="stroke" />
+                <polygon points="12,7 9,15 12,13 15,15" fill="url(#grad)" class="float" />
+              </svg>
+            </span>About
+          </div>
+          <p>TRAN TRADING LAB의 철학과 다음 목표.</p>
+        </a>
       </div>
     </section>
   `;
-
-  const host = document.querySelector('#home-sections .home-col');
-  if (!host) return;
-
-  // 1) 데일리 브리프：index -> 详情
-  let briefIndex = [];
-  try {
-    const r = await fetch('/api/daily-brief/index.json?_=' + Date.now());
-    if (r.ok) briefIndex = await r.json();
-  } catch {}
-  const briefSlugs = (Array.isArray(briefIndex) ? briefIndex : []).slice(0, 6);
-  const briefDetails = await fetchMany(briefSlugs.map(slug => async () => {
-    const res = await fetch(`/api/daily-brief/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
-    if (!res.ok) return null;
-    const d = await res.json();
-    return toCardItem({ ...d, slug }, 'briefs');
-  }), 4);
-  const briefs = briefDetails.filter(Boolean);
-
-  // 2) 마켓 뉴스
-  let newsIndex = [];
-  try {
-    if (!marketNewsIndexCache){
-      const r = await fetch('/api/market-news/index.json?_=' + Date.now());
-      if (r.ok) marketNewsIndexCache = await r.json();
-    }
-    newsIndex = marketNewsIndexCache || [];
-  } catch {}
-  const newsIds = (Array.isArray(newsIndex) ? newsIndex : []).slice(0, 6).map(x => (typeof x === 'string') ? x : (x?.id || x?.slug || ''));
-  const newsDetails = await fetchMany(newsIds.map(id => async () => {
-    if (!id) return null;
-    if (!marketNewsCache.has(id)) {
-      const dres = await fetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
-      if (!dres.ok) return null;
-      marketNewsCache.set(id, await dres.json());
-    }
-    return toCardItem({ ...(marketNewsCache.get(id) || {}), id }, 'news');
-  }), 4);
-  const news = newsDetails.filter(Boolean);
-
-  // 3) 아티클
-  let artIndex = [];
-  try {
-    if (!articlesIndexCache){
-      const r = await fetch('/api/research/articles/index.json?_=' + Date.now());
-      if (r.ok) articlesIndexCache = await r.json();
-    }
-    artIndex = articlesIndexCache || [];
-  } catch {}
-  const artSlugs = (Array.isArray(artIndex) ? artIndex : []).slice(0, 6)
-    .map(x => typeof x === 'string' ? x : (x?.slug || ''))
-    .filter(Boolean);
-  const artDetails = await fetchMany(artSlugs.map(slug => async () => {
-    try {
-      const d = await loadArticleDetail(slug);
-      return toCardItem({ ...d, slug }, 'articles');
-    } catch { return null; }
-  }), 4);
-  const articles = artDetails.filter(Boolean);
-
-  host.innerHTML = [
-    sectionHTML('데일리 브리프', '#/daily-brief', briefs),
-    sectionHTML('마켓 뉴스', '#/market-news', news),
-    sectionHTML('아티클', '#/articles', articles),
-  ].join('');
-
-  window.__registerCards?.(host.parentElement || host);
+  window.__registerCards?.(outlet);
 }
 
-// ===================== 你原有的各页面渲染（保持不动） =====================
+// ===================== 其它页面渲染 =====================
 function renderTradeJournalDetailView(){
   outlet.innerHTML = `
     <section aria-label="거래 분석 상세">
@@ -213,13 +209,13 @@ function renderTradeJournalDetailView(){
   window.__registerCards?.(outlet);
 }
 
+/* ========== Daily Brief 列表页：左图右标题 ========== */
 function renderDailyBriefListView(){
   outlet.innerHTML = `
-    <section aria-labelledby="daily-brief-title">
+    <section aria-labelledby="daily-brief-title" data-route="daily-brief">
       <div class="card">
-        <h2 id="daily-brief-title">데일리 브리프 — 목록</h2>
-        <ul id="brief-list" aria-live="polite"></ul>
-        <p class="muted" style="margin-top:8px">각 날짜를 클릭하면 상세 페이지로 이동합니다.</p>
+        <h2 id="daily-brief-title">데일리 브리프</h2>
+        <ul id="brief-list" class="media-list"><li class="media-empty">불러오는 중…</li></ul>
       </div>
     </section>
   `;
@@ -234,9 +230,10 @@ function renderDailyBriefDetailView(){
   `;
 }
 
+/* ========== Trade Journal 列表视图（保持原样） ========== */
 function renderTradeJournalView(){
   outlet.innerHTML = `
-    <section aria-labelledby="journal-title">
+    <section aria-labelledby="journal-title" data-route="trade-journal">
       <div class="grid grid-12">
         <section class="card" style="grid-column: span 12;">
           <div class="toolbar">
@@ -285,33 +282,26 @@ function renderKnowledgeLabView(){
   window.__registerCards?.(outlet);
 }
 
+/* ========== Market News 列表页：左图右标题 ========== */
 function renderMarketNewsView(){
   outlet.innerHTML = `
-    <section aria-labelledby="news-title">
+    <section aria-labelledby="news-title" data-route="market-news">
       <div class="card">
         <h2 id="news-title">마켓 뉴스</h2>
-        <p class="muted">글로벌 핵심 이벤트와 거시 리듬을 한눈에.</p>
-        <div id="news">
-          <ul>
-            <li>📊 미국 CPI·고용 등 주요 지표 발표 일정</li>
-            <li>🏦 주요 중앙은행 발언과 금리 방향</li>
-            <li>💰 원자재·주요 통화 변동 포인트</li>
-            <li>🌏 아시아·유럽·미국 시장 헤드라인</li>
-          </ul>
-          <p class="muted" style="margin-top:10px">※ 데이터는 매일 갱신됩니다.</p>
-        </div>
+        <ul id="news-list" class="media-list"><li class="media-empty">불러오는 중…</li></ul>
       </div>
     </section>
   `;
   window.__registerCards?.(outlet);
 }
 
+/* ========== Articles 列表页：左图右标题 ========== */
 function renderArticlesView(){
   outlet.innerHTML = `
-    <section aria-labelledby="articles-title">
+    <section aria-labelledby="articles-title" data-route="articles">
       <div class="card">
         <h2 id="articles-title">아티클</h2>
-        <div id="articles-list" aria-live="polite"></div>
+        <ul id="articles-list" class="media-list"><li class="media-empty">불러오는 중…</li></ul>
       </div>
     </section>
   `;
@@ -327,6 +317,7 @@ function renderArticleDetailView(){
   window.__registerCards?.(outlet);
 }
 
+// ===== 通用工具 =====
 function escapeHtml(text){
   return String(text ?? '')
     .replace(/&/g, '&amp;')
@@ -336,6 +327,7 @@ function escapeHtml(text){
     .replace(/'/g, '&#39;');
 }
 
+// ===== Articles 数据 =====
 async function loadArticleDetail(slug){
   if (!slug) throw new Error('INVALID_SLUG');
   if (!articlesDetailCache.has(slug)){
@@ -347,69 +339,48 @@ async function loadArticleDetail(slug){
   return articlesDetailCache.get(slug) || {};
 }
 
+/* ========== Articles 列表渲染（媒体列表） ========== */
 async function renderArticlesList(){
   const host = document.getElementById('articles-list');
   if (!host) return;
-  host.innerHTML = '<p class="muted">불러오는 중…</p>';
+  host.innerHTML = '<li class="media-empty">불러오는 중…</li>';
   try{
     const res = await fetch('/api/research/articles/index.json?_=' + Date.now());
     const data = await res.json();
     articlesIndexCache = Array.isArray(data) ? data : [];
     const slugs = articlesIndexCache
       .map(item => typeof item === 'string' ? item : (item && item.slug) ? item.slug : '')
-      .filter(Boolean);
-    if (!slugs.length){
-      host.innerHTML = '<p class="muted">등록된 아티클이 없습니다</p>';
-      return;
-    }
-    const articles = await Promise.all(slugs.map(async slug=>{
+      .filter(Boolean).slice(0, 60);
+
+    if (!slugs.length){ host.innerHTML = '<li class="media-empty">등록된 아티클이 없습니다</li>'; return; }
+
+    const rows = await Promise.all(slugs.map(async slug=>{
       try{
-        const detail = await loadArticleDetail(slug);
-        return { slug, detail };
-      }catch(e){
-        return { slug, error: true, message: e?.message || '' };
-      }
+        const d = await loadArticleDetail(slug);
+        const meta = [d.date ? new Date(d.date).toLocaleDateString() : '', Array.isArray(d.tags)? d.tags.slice(0,3).map(t=>`#${t}`).join(' ') : ''].filter(Boolean).join(' · ');
+        return _mediaItem({
+          href: `#/articles/${encodeURIComponent(slug)}`,
+          title: d.title || slug,
+          desc: d.excerpt || (d.body ? String(d.body).slice(0,120)+'…' : ''),
+          meta,
+          img: d.hero || d.image || ''
+        });
+      }catch{ return null; }
     }));
-    host.innerHTML = `
-      <div style="display:grid;gap:12px">
-        ${articles.map(({ slug, detail, error, message })=>{
-          if (error){
-            return `<article class="card"><h3>${escapeHtml(slug)}</h3><p class="muted">불러오기 실패: ${escapeHtml(message)}</p></article>`;
-          }
-          const title = detail?.title || slug;
-          const excerpt = detail?.excerpt || '';
-          const date = detail?.date ? new Date(detail.date).toLocaleDateString() : '';
-          const tags = Array.isArray(detail?.tags) && detail?.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
-          const img = detail?.hero || detail?.image || '';
-          return `
-            <article class="card" style="padding:12px">
-              <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-                ${img ? `<div style="flex:0 0 160px"><img src="${escapeHtml(img)}" alt="${escapeHtml(title)}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
-                <div style="flex:1;min-width:0">
-                  <h3 style="margin:0 0 6px">${escapeHtml(title)}</h3>
-                  ${excerpt ? `<p class="muted">${escapeHtml(excerpt)}</p>` : ''}
-                  <p class="meta" style="margin:10px 0">${[date, tags].filter(Boolean).join(' · ')}</p>
-                  <a class="icon-btn" href="#/articles/${encodeURIComponent(slug)}">자세히 보기</a>
-                </div>
-              </div>
-            </article>
-          `;
-        }).join('')}
-      </div>
-    `;
-    window.__registerCards?.(host);
+
+    host.innerHTML = rows.filter(Boolean).join('') || '<li class="media-empty">등록된 아티클이 없습니다</li>';
   }catch{
-    host.innerHTML = '<p class="muted">아티클을 불러오지 못했습니다</p>';
+    host.innerHTML = '<li class="media-empty">아티클을 불러오지 못했습니다</li>';
   }
 }
 
+/* ========== Article 详情 ========== */
 async function renderArticleDetail(slug){
   const host = document.getElementById('article-detail');
   if (!host) return;
   if (!slug){
     host.innerHTML = `<div class="card"><h2>유효한 슬러그가 필요합니다</h2><p class="muted" style="margin-top:8px"><a href="#/articles">← 목록으로</a></p></div>`;
-    if (window.__registerCards) window.__registerCards(host);
-    return;
+    window.__registerCards?.(host); return;
   }
   host.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try{
@@ -430,13 +401,14 @@ async function renderArticleDetail(slug){
         <p class="muted" style="margin-top:16px"><a href="#/articles">← 아티클 목록으로</a></p>
       </article>
     `;
-    if (window.__registerCards) window.__registerCards(host);
+    window.__registerCards?.(host);
   }catch(e){
     host.innerHTML = `<div class="card"><h2>아티클을 불러올 수 없습니다</h2><p class="muted">${escapeHtml(e?.message || '')}</p><p class="muted" style="margin-top:8px"><a href="#/articles">← 목록으로</a></p></div>`;
-    if (window.__registerCards) window.__registerCards(host);
+    window.__registerCards?.(host);
   }
 }
 
+/* ========== About ========== */
 function renderAboutView(){
   outlet.innerHTML = `
     <section aria-labelledby="about-hero-title">
@@ -503,13 +475,13 @@ function renderAboutView(){
   window.__registerCards?.(outlet);
 }
 
-// ===== 数据与工具（保持原样） =====
+// ===== 数据与工具 =====
 async function renderRoute(routeId, slug){
   window.scrollTo({ top: 0, behavior: 'auto' });
   switch (routeId) {
     case 'home':
-      await renderHomeView(); // ← 重要：await 异步主页
-      break;
+      renderHomeView(); break;
+
     case 'daily-brief':
       renderDailyBriefListView();
       await renderDailyBriefList();
@@ -518,6 +490,7 @@ async function renderRoute(routeId, slug){
       renderDailyBriefDetailView();
       await renderDailyBriefDetail(slug);
       break;
+
     case 'trade-journal':
       renderTradeJournalView();
       await loadAnalysesList();
@@ -532,15 +505,22 @@ async function renderRoute(routeId, slug){
       renderTradeJournalDetailView();
       await renderAnalysisDetailBySlug(slug);
       break;
+
     case 'knowledge-lab':
       renderKnowledgeLabView();
       await tryLoadRemoteSyllabus();
       renderKnowledgeLab();
       break;
+
     case 'market-news':
       renderMarketNewsView();
-      await renderMarketNews();
+      await renderMarketNewsList();
       break;
+    case 'market-news-detail':
+      renderMarketNewsDetailView();
+      await renderMarketNewsDetail(slug);
+      break;
+
     case 'articles':
       renderArticlesView();
       await renderArticlesList();
@@ -549,41 +529,60 @@ async function renderRoute(routeId, slug){
       renderArticleDetailView();
       await renderArticleDetail(slug);
       break;
+
     case 'about':
       renderAboutView();
       break;
     default:
-      await renderHomeView();
+      renderHomeView();
   }
-  if (window.__registerCards) window.__registerCards(outlet);
+  window.__registerCards?.(outlet);
 }
 
-// 列表
+// ===== Daily Brief 列表（媒体列表） =====
 async function renderDailyBriefList(){
   const ul = document.getElementById('brief-list');
   if (!ul) return;
-  ul.innerHTML = '<li class="muted">불러오는 중…</li>';
+  ul.innerHTML = '<li class="media-empty">불러오는 중…</li>';
   try{
     if (!dailyBriefIndexCache){
       const res = await fetch('/api/daily-brief/index.json?_=' + Date.now());
       const items = await res.json();
       if (Array.isArray(items)) dailyBriefIndexCache = items;
     }
-    const items = Array.isArray(dailyBriefIndexCache) ? dailyBriefIndexCache : [];
-    ul.innerHTML = Array.isArray(items)&&items.length
-      ? items.map(s=>`<li><a href="#/daily-brief/${s}">${s}</a></li>`).join('')
-      : '<li class="muted">자료가 없습니다</li>';
-  }catch{ ul.innerHTML = '<li class="muted">자료가 없습니다</li>'; }
+    const ids = (Array.isArray(dailyBriefIndexCache) ? dailyBriefIndexCache : []).slice(0,60);
+    if (!ids.length){ ul.innerHTML = '<li class="media-empty">자료가 없습니다</li>'; return; }
+
+    const rows = await Promise.all(ids.map(async id=>{
+      try{
+        if (!dailyBriefCache.has(id)){
+          const r = await fetch(`/api/daily-brief/${encodeURIComponent(id)}.json?_=${Date.now()}`);
+          dailyBriefCache.set(id, await r.json());
+        }
+        const d = dailyBriefCache.get(id) || {};
+        return _mediaItem({
+          href: `#/daily-brief/${encodeURIComponent(id)}`,
+          title: d.title || id,
+          desc: (Array.isArray(d.bullets) && d.bullets[0]) ? d.bullets[0] : '',
+          meta: d.date || id,
+          img: d.hero || d.image || (d.chart && d.chart.thumb) || ''
+        });
+      }catch{ return null; }
+    }));
+
+    ul.innerHTML = rows.filter(Boolean).join('') || '<li class="media-empty">자료가 없습니다</li>';
+  }catch{
+    ul.innerHTML = '<li class="media-empty">불러오기 실패</li>';
+  }
 }
 
-// 详情
+// ===== Daily Brief 详情 =====
 async function renderDailyBriefDetail(slug){
   const wrap = document.getElementById('daily-brief-detail');
   if (!wrap) return;
   if (!slug){
     wrap.innerHTML = `<div class="card"><h2>유효한 슬러그가 필요합니다</h2><p class="muted" style="margin-top:8px"><a href="#/daily-brief">← 목록으로</a></p></div>`;
-    if (window.__registerCards) window.__registerCards(wrap);
-    return;
+    window.__registerCards?.(wrap); return;
   }
   wrap.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try {
@@ -609,10 +608,10 @@ async function renderDailyBriefDetail(slug){
       </div>
       <p class="muted" style="margin-top:12px"><a href="#/daily-brief">← 목록으로</a></p>
     `;
-    if (window.__registerCards) window.__registerCards(wrap);
+    window.__registerCards?.(wrap);
   } catch {
     wrap.innerHTML = `<div class="card"><h2>자료를 찾지 못했습니다</h2></div>`;
-    if (window.__registerCards) window.__registerCards(wrap);
+    window.__registerCards?.(wrap);
   }
 }
 
@@ -733,7 +732,7 @@ async function loadAnalysesList(){
       }catch(e){ console.warn('updateEntryDOM', e); }
     }
 
-    const originalRaw = JSON.parse(list.dataset.raw||'[]');
+    const originalRaw = JSON.parse(list.dataset.raw||'[]);
     const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
     if (slugsOnly){
       list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
@@ -912,14 +911,14 @@ async function renderEntryDetailInline(slug){
     host.dataset.rendered = '1';
     const btn = document.querySelector(`.pv-btn[data-slug="${slug}"]`);
     if (btn) btn.textContent = '차트 닫기';
-    if (window.__registerCards) window.__registerCards(host);
+    window.__registerCards?.(host);
   }catch(e){ host.innerHTML = `<p class="muted">자료를 불러올 수 없습니다</p>`; }
 }
 
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
-  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다.</p>`; return; }
+  if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다。</p>`; return; }
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     if (!analysesDetailCache.has(slug)){
@@ -975,10 +974,10 @@ async function renderAnalysisDetailBySlug(slug){
         if (chart){ chart.setAttribute('interval', sel.value); }
       };
     }
-    if (window.__registerCards) window.__registerCards(box);
+    window.__registerCards?.(box);
   }catch{
     box.innerHTML = `<p class="muted">자료를 찾지 못했습니다</p>`;
-    if (window.__registerCards) window.__registerCards(box);
+    window.__registerCards?.(box);
   }
 }
 
@@ -992,12 +991,12 @@ function currentSlugFromQuery(){
   return params.get('slug') || '';
 }
 
-/* ===== Reveal & Canvas FX (safe, idempotent) ===== */
-(() => {
+/* ===== 背景与卡片出现效果 ===== */
+(()=>{
   if (!window.__cardRevealObserver) {
     let revealCounter = 0;
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
         if (entry.isIntersecting) {
           entry.target.classList.add('in');
           observer.unobserve(entry.target);
@@ -1006,9 +1005,9 @@ function currentSlugFromQuery(){
     }, { threshold: .12 });
 
     window.__cardRevealObserver = observer;
-    window.__registerCards = (root = document) => {
+    window.__registerCards = (root=document)=>{
       const cards = root.querySelectorAll('.card');
-      cards.forEach(card => {
+      cards.forEach(card=>{
         if (card.dataset.revealInit === '1') return;
         card.dataset.revealInit = '1';
         card.classList.add('reveal');
@@ -1024,13 +1023,12 @@ function currentSlugFromQuery(){
   if (window.__homeFxInit) return;
   window.__homeFxInit = true;
 
-  // 배경 캔들/그리드 저부하 애니메이션
   const cvs = document.getElementById('bgfx');
   if (!cvs || cvs.dataset.enabled !== 'true' || cvs.__inited) return;
   cvs.__inited = true;
 
   const ctx = cvs.getContext('2d');
-  let w, h, dpr;
+  let w,h,dpr;
 
   function resize(){
     dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -1041,17 +1039,14 @@ function currentSlugFromQuery(){
   }
   resize(); addEventListener('resize', resize);
 
-  const candles = Array.from({length: 32}, () => ({
-    x: Math.random()*w,
-    y: Math.random()*h,
-    body: 14 + Math.random()*28,
-    w: 3 + Math.random()*3,
-    v: .15 + Math.random()*.25,
-    phase: Math.random()*Math.PI*2
+  const candles = Array.from({length:32},()=>({
+    x: Math.random()*w, y: Math.random()*h,
+    body: 14+Math.random()*28, w: 3+Math.random()*3,
+    v: .15+Math.random()*.25, phase: Math.random()*Math.PI*2
   }));
 
   function grid(){
-    const gap = 64 * dpr;
+    const gap = 64*dpr;
     ctx.save();
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
@@ -1077,7 +1072,7 @@ function currentSlugFromQuery(){
 
   let last=0;
   function tick(t){
-    if (t - last < 1000/30) { requestAnimationFrame(tick); return; }
+    if (t - last < 1000/30){ requestAnimationFrame(tick); return; }
     last = t;
     ctx.clearRect(0,0,w,h);
     grid(); drawCandles(t);
@@ -1086,11 +1081,9 @@ function currentSlugFromQuery(){
   requestAnimationFrame(tick);
 })();
 
-/* ===== Knowledge Lab: syllabus + renderer (clickable) ===== */
-
+/* ===== Knowledge Lab ===== */
 const KL_KEY = 'kl.progress.v1';
-let KL_QUERY = '';   // 검색어
-
+let KL_QUERY = '';
 let SYLLABUS = JSON.parse(JSON.stringify(DEFAULT_SYLLABUS));
 
 function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
@@ -1216,7 +1209,7 @@ function renderKnowledgeLab(){
     `;
   }).join('');
 
-  if (window.__registerCards) window.__registerCards(host.parentElement || host);
+  window.__registerCards?.(host.parentElement || host);
 
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
@@ -1280,24 +1273,24 @@ function jumpToFirstIncomplete(){
   }
 }
 
-/* ===== Market News: render list (text version) ===== */
-async function renderMarketNews(){
-  const host = document.getElementById('news');
+/* ===== Market News：媒体列表 + 详情 ===== */
+async function renderMarketNewsList(){
+  const host = document.getElementById('news-list');
   if (!host) return;
-  host.innerHTML = '<p class="muted">불러오는 중…</p>';
+  host.innerHTML = '<li class="media-empty">불러오는 중…</li>';
   try{
     if (!marketNewsIndexCache){
       const res = await fetch('/api/market-news/index.json?_=' + Date.now());
       const rows = await res.json();
       if (Array.isArray(rows)) marketNewsIndexCache = rows;
     }
-    const rows = Array.isArray(marketNewsIndexCache) ? marketNewsIndexCache : [];
-    if (!Array.isArray(rows) || !rows.length) {
-      host.innerHTML = '<p class="muted">뉴스가 없습니다</p>';
-      return;
-    }
-    const html = await Promise.all(rows.map(async r=>{
-      const id = (typeof r === 'string') ? r : (r && (r.id || r.slug) ? (r.id || r.slug) : '');
+    const ids = (Array.isArray(marketNewsIndexCache) ? marketNewsIndexCache : [])
+      .map(r => typeof r === 'string' ? r : (r && (r.id || r.slug) ? (r.id || r.slug) : ''))
+      .filter(Boolean).slice(0, 60);
+
+    if (!ids.length){ host.innerHTML = '<li class="media-empty">뉴스가 없습니다</li>'; return; }
+
+    const html = await Promise.all(ids.map(async id=>{
       try{
         if (!marketNewsCache.has(id)){
           const dres = await fetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
@@ -1305,40 +1298,65 @@ async function renderMarketNews(){
           marketNewsCache.set(id, await dres.json());
         }
         const d = marketNewsCache.get(id) || {};
-        const title = String((d.title ?? (typeof r === 'object' ? r.title : '') ?? id ?? '')).trim();
-        const source = (d.source ?? (typeof r === 'object' ? r.source : '') ?? '').trim();
-        const whenRaw = d.date ?? (typeof r === 'object' ? r.date : '') ?? '';
-        const when = whenRaw ? new Date(whenRaw).toLocaleString() : '';
-        const summary = String((d.summary ?? (typeof r === 'object' ? r.summary : '') ?? '')).trim();
-        const tags = Array.isArray(d.tags) && d.tags.length ? d.tags : (Array.isArray(r && r.tags) ? r.tags : []);
-        const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
-        const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
-        const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
-        const imgUrl = (d && (d.hero || d.image || d.thumbnail || d.thumb)) || (typeof r === 'object' && (r.hero || r.image || r.thumbnail || r.thumb)) || '';
-        return `
-          <li class="card">
-            <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-              ${imgUrl ? `<div style="flex:0 0 160px"><img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(title||id)}" style="width:100%;height:96px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
-              <div style="flex:1;min-width:0">
-                <h3 style="margin:0 0 6px">${escapeHtml(title || id || 'Market News')}</h3>
-                <p class="meta">${[escapeHtml(source), escapeHtml(when)].filter(Boolean).join(' · ')}</p>
-                ${summary ? `<p style="margin:8px 0">${escapeHtml(summary)}</p>` : `<p class="muted">요약 정보가 없습니다.</p>`}
-                ${bullets ? `<ul style="margin-top:6px">${bullets}</ul>` : ''}
-                <p class="muted" style="margin-top:8px">${(tags && tags.length) ? tags.map(t=>`#${escapeHtml(t)}`).join(' ') : ''}</p>
-                ${link}
-              </div>
-            </div>
-          </li>`;
-      }catch{ return `<li class="card"><h3>${escapeHtml(id || String(r))}</h3><p class="muted">요약 정보가 없습니다.</p></li>`; }
+        const meta = [d.source, d.date ? new Date(d.date).toLocaleString() : ''].filter(Boolean).join(' · ');
+        return _mediaItem({
+          href: `#/market-news/${encodeURIComponent(id)}`,
+          title: d.title || id,
+          desc: d.summary || (Array.isArray(d.bullets) ? d.bullets[0] : ''),
+          meta,
+          img: d.hero || d.image || d.thumbnail || d.thumb || ''
+        });
+      }catch{ return null; }
     }));
-    host.innerHTML = `<ul style="display:grid;gap:12px">${html.join('')}</ul>`;
-    if (window.__registerCards) window.__registerCards(host.parentElement || host);
+
+    host.innerHTML = html.filter(Boolean).join('') || '<li class="media-empty">뉴스가 없습니다</li>';
   }catch{
-    host.innerHTML = '<p class="muted">불러오기에 실패했습니다</p>';
+    host.innerHTML = '<li class="media-empty">불러오기에 실패했습니다</li>';
   }
 }
 
-// -------- 라우터 구동 ----------
+function renderMarketNewsDetailView(){
+  outlet.innerHTML = `
+    <section aria-live="polite" data-route="market-news-detail">
+      <div id="news-detail"></div>
+    </section>
+  `;
+}
+
+async function renderMarketNewsDetail(id){
+  const host = document.getElementById('news-detail');
+  if (!host) return;
+  if (!id){ host.innerHTML = `<div class="card"><h2>유효한 ID가 필요합니다</h2><p class="muted"><a href="#/market-news">← 목록으로</a></p></div>`; return; }
+  host.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
+  try{
+    if (!marketNewsCache.has(id)){
+      const r = await fetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
+      if (!r.ok) throw 0;
+      marketNewsCache.set(id, await r.json());
+    }
+    const d = marketNewsCache.get(id) || {};
+    const meta = [d.source, d.date ? new Date(d.date).toLocaleString() : ''].filter(Boolean).join(' · ');
+    const bullets = Array.isArray(d.bullets) && d.bullets.length
+      ? `<ul>${d.bullets.map(b=>`<li>${escapeHtml(b)}</li>`).join('')}</ul>` : '';
+    host.innerHTML = `
+      <article class="card" style="padding:24px">
+        <h2 style="margin:0 0 6px">${escapeHtml(d.title || id)}</h2>
+        <p class="muted">${escapeHtml(meta)}</p>
+        ${d.hero || d.image ? `<img src="${escapeHtml(d.hero||d.image)}" alt="${escapeHtml(d.title||id)}" style="width:100%;border-radius:12px;margin:14px 0">` : ''}
+        ${d.summary ? `<p>${escapeHtml(d.summary)}</p>` : ''}
+        ${bullets}
+        ${d.url ? `<p style="margin-top:10px"><a class="icon-btn" href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a></p>` : ''}
+        <p class="muted" style="margin-top:16px"><a href="#/market-news">← 뉴스 목록으로</a></p>
+      </article>
+    `;
+    window.__registerCards?.(host);
+  }catch{
+    host.innerHTML = `<div class="card"><h2>뉴스를 불러올 수 없습니다</h2><p class="muted"><a href="#/market-news">← 목록으로</a></p></div>`;
+    window.__registerCards?.(host);
+  }
+}
+
+// -------- 路由启动 ----------
 async function handleRouteChange(){
   const { id, slug } = matchRoute();
   await renderRoute(id, slug);
