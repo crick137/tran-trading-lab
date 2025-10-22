@@ -732,7 +732,7 @@ async function loadAnalysesList(){
       }catch(e){ console.warn('updateEntryDOM', e); }
     }
 
-    const originalRaw = JSON.parse(list.dataset.raw||'[]);
+    const originalRaw = JSON.parse(list.dataset.raw || '[]');
     const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
     if (slugsOnly){
       list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
