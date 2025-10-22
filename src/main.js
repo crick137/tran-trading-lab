@@ -1,4 +1,4 @@
-// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons + News + Remote Syllabus) =====
+// ===== src/main.js (KO, preview + auto-open 1st, clickable lessons + News + Remote Syllabus with Home left-image/right-title) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
 import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
@@ -55,7 +55,65 @@ function matchRoute() {
   return { id: (routes[base] || 'home'), slug: '' };
 }
 
-function renderHomeView(){
+// ===================== 新增：主页工具（左图右标题） =====================
+function toCardItem(raw = {}, section = '') {
+  const obj = (typeof raw === 'object' && raw) ? raw : {};
+  const title = obj.title || obj.headline || obj.name || String(raw) || 'Untitled';
+  const cover = obj.hero || obj.image || obj.thumbnail || obj.thumb || obj.cover || '/placeholder.png';
+  const summary = obj.summary || obj.excerpt || obj.description || '';
+  const date = obj.date || obj.publishedAt || obj.time || '';
+  let href =
+    obj.href || obj.link || obj.url ||
+    (section === 'briefs'   && (obj.slug || raw) ? `#/daily-brief/${encodeURIComponent(obj.slug || String(raw))}` : null) ||
+    (section === 'news'     && (obj.id   || obj.slug || raw) ? `#/market-news/${encodeURIComponent(obj.id || obj.slug || String(raw))}` : null) ||
+    (section === 'articles' && (obj.slug || raw) ? `#/articles/${encodeURIComponent(obj.slug || String(raw))}` : '#');
+
+  return { title, cover, summary, date, href };
+}
+
+function mediaItemHTML(it) {
+  return `
+    <li class="media-item">
+      <a class="media-thumb" href="${it.href}">
+        <img src="${escapeHtml(it.cover)}" alt="${escapeHtml(it.title)}" loading="lazy" />
+      </a>
+      <div class="media-body">
+        <a class="media-title" href="${it.href}">${escapeHtml(it.title)}</a>
+        ${it.summary ? `<p class="media-desc">${escapeHtml(it.summary)}</p>` : ''}
+        ${it.date ? `<div class="media-meta">${escapeHtml(it.date)}</div>` : ''}
+      </div>
+    </li>`;
+}
+
+function sectionHTML(title, viewAllHref, items) {
+  const list = (items && items.length) ? items.map(mediaItemHTML).join('') : `<li class="media-empty">No items</li>`;
+  return `
+    <section class="home-section">
+      <div class="home-sec-header">
+        <h2>${title}</h2>
+        <a class="home-view-all" href="${viewAllHref}">View all</a>
+      </div>
+      <ul class="media-list">${list}</ul>
+    </section>`;
+}
+
+// limit concurrency to avoid hammering API
+async function fetchMany(details, limit = 4) {
+  const out = new Array(details.length);
+  let i = 0;
+  async function worker() {
+    while (i < details.length) {
+      const idx = i++;
+      try { out[idx] = await details[idx](); }
+      catch { out[idx] = null; }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, details.length) }, worker));
+  return out;
+}
+
+// ===================== 主页视图（左图右标题） =====================
+async function renderHomeView(){
   outlet.innerHTML = `
     <section aria-labelledby="home-hero-title">
       <div class="hero">
@@ -64,145 +122,87 @@ function renderHomeView(){
         <p>한 눈에 들어오는 데일리 브리프, 구조적 분석, 지식 탐구, 그리고 글로벌 마켓 뉴스.</p>
       </div>
 
-      <div class="feature-grid home-feature-grid" role="list">
-        <a href="#/daily-brief" class="card" role="listitem" aria-label="데일리 브리프로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <g class="float">
-                  <line x1="6" y1="4" x2="6" y2="20" class="stroke" />
-                  <rect x="4.5" y="9" width="3" height="6" rx="1.2" fill="url(#grad)" />
-                </g>
-                <g class="float" style="animation-delay:.2s">
-                  <line x1="12" y1="6" x2="12" y2="18" class="stroke" />
-                  <rect x="10.5" y="8" width="3" height="5" rx="1.2" fill="url(#grad)" />
-                </g>
-                <g class="float" style="animation-delay:.4s">
-                  <line x1="18" y1="3" x2="18" y2="21" class="stroke" />
-                  <rect x="16.5" y="11" width="3" height="6" rx="1.2" fill="url(#grad)" />
-                </g>
-              </svg>
-            </span>
-            데일리 브리프
+      <div id="home-sections" class="home-grid" aria-live="polite">
+        <section class="hero-card">
+          <div class="hero-body">
+            <h2 style="margin:0">오늘의 하이라이트</h2>
+            <p class="muted" style="margin:6px 0 0">Daily Brief · Market News · Articles</p>
           </div>
-          <p>매일 아침 시장을 읽는 시간.</p>
-        </a>
-
-        <a href="#/trade-journal" class="card" role="listitem" aria-label="분석 아카이브로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <polyline class="stroke" points="2,16 7,10 11,13 15,7 22,12" />
-                <circle cx="7" cy="10" r="1.6" fill="url(#grad)" class="pulse" />
-              </svg>
-            </span>
-            분석 아카이브
-          </div>
-          <p>지지·저항과 시나리오를 공개 기록한 라이브러리.</p>
-        </a>
-
-        <a href="#/knowledge-lab" class="card" role="listitem" aria-label="지식 연구소로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <g class="spin">
-                  <circle cx="12" cy="12" r="6" class="stroke" />
-                  <path d="M12 6v-2M12 20v-2M6 12H4M20 12h-2M16.2 7.8l1.4-1.4M6.4 18.6l1.4-1.4M7.8 7.8 6.4 6.4M17.6 17.6l-1.4-1.4" class="stroke" />
-                </g>
-              </svg>
-            </span>
-            지식 연구소
-          </div>
-          <p>Preschool부터 Graduation까지 단계별 로드맵.</p>
-        </a>
-
-        <a href="#/market-news" class="card" role="listitem" aria-label="마켓 뉴스로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <rect x="3" y="5" width="18" height="14" rx="2" class="stroke" />
-                <line x1="6" y1="10" x2="18" y2="10" class="stroke" style="animation-delay:.3s" />
-                <line x1="6" y1="14" x2="15" y2="14" class="stroke" style="animation-delay:.6s" />
-              </svg>
-            </span>
-            마켓 뉴스
-          </div>
-          <p>글로벌 거시 이벤트와 핵심 포인트를 요약.</p>
-        </a>
-
-        <a href="#/articles" class="card" role="listitem" aria-label="아티클로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <path d="M3 20l5-1 11-11a2.5 2.5 0 0 0-3.5-3.5L4.5 15l-1.5 5z" class="stroke" />
-                <circle cx="17.5" cy="6.5" r="1.5" fill="url(#grad)" class="pulse" />
-              </svg>
-            </span>
-            아티클
-          </div>
-          <p>거래 사고, 리스크 복기, 전략 인사이트 모음.</p>
-        </a>
-
-        <a href="#/about" class="card" role="listitem" aria-label="About로 이동">
-          <span class="glow" aria-hidden="true"></span>
-          <div class="title">
-            <span class="icon-wrap" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <defs>
-                  <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0" stop-color="#66e0ff" />
-                    <stop offset="1" stop-color="#7a7dff" />
-                  </linearGradient>
-                </defs>
-                <circle cx="12" cy="12" r="8" class="stroke" />
-                <polygon points="12,7 9,15 12,13 15,15" fill="url(#grad)" class="float" />
-              </svg>
-            </span>
-            About
-          </div>
-          <p>TRAN TRADING LAB의 철학과 다음 목표.</p>
-        </a>
+        </section>
+        <div class="home-col"><div class="home-loading">Loading…</div></div>
       </div>
     </section>
   `;
-  window.__registerCards?.(outlet);
+
+  const host = document.querySelector('#home-sections .home-col');
+  if (!host) return;
+
+  // 1) 데일리 브리프：index -> 详情
+  let briefIndex = [];
+  try {
+    const r = await fetch('/api/daily-brief/index.json?_=' + Date.now());
+    if (r.ok) briefIndex = await r.json();
+  } catch {}
+  const briefSlugs = (Array.isArray(briefIndex) ? briefIndex : []).slice(0, 6);
+  const briefDetails = await fetchMany(briefSlugs.map(slug => async () => {
+    const res = await fetch(`/api/daily-brief/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
+    if (!res.ok) return null;
+    const d = await res.json();
+    return toCardItem({ ...d, slug }, 'briefs');
+  }), 4);
+  const briefs = briefDetails.filter(Boolean);
+
+  // 2) 마켓 뉴스
+  let newsIndex = [];
+  try {
+    if (!marketNewsIndexCache){
+      const r = await fetch('/api/market-news/index.json?_=' + Date.now());
+      if (r.ok) marketNewsIndexCache = await r.json();
+    }
+    newsIndex = marketNewsIndexCache || [];
+  } catch {}
+  const newsIds = (Array.isArray(newsIndex) ? newsIndex : []).slice(0, 6).map(x => (typeof x === 'string') ? x : (x?.id || x?.slug || ''));
+  const newsDetails = await fetchMany(newsIds.map(id => async () => {
+    if (!id) return null;
+    if (!marketNewsCache.has(id)) {
+      const dres = await fetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
+      if (!dres.ok) return null;
+      marketNewsCache.set(id, await dres.json());
+    }
+    return toCardItem({ ...(marketNewsCache.get(id) || {}), id }, 'news');
+  }), 4);
+  const news = newsDetails.filter(Boolean);
+
+  // 3) 아티클
+  let artIndex = [];
+  try {
+    if (!articlesIndexCache){
+      const r = await fetch('/api/research/articles/index.json?_=' + Date.now());
+      if (r.ok) articlesIndexCache = await r.json();
+    }
+    artIndex = articlesIndexCache || [];
+  } catch {}
+  const artSlugs = (Array.isArray(artIndex) ? artIndex : []).slice(0, 6)
+    .map(x => typeof x === 'string' ? x : (x?.slug || ''))
+    .filter(Boolean);
+  const artDetails = await fetchMany(artSlugs.map(slug => async () => {
+    try {
+      const d = await loadArticleDetail(slug);
+      return toCardItem({ ...d, slug }, 'articles');
+    } catch { return null; }
+  }), 4);
+  const articles = artDetails.filter(Boolean);
+
+  host.innerHTML = [
+    sectionHTML('데일리 브리프', '#/daily-brief', briefs),
+    sectionHTML('마켓 뉴스', '#/market-news', news),
+    sectionHTML('아티클', '#/articles', articles),
+  ].join('');
+
+  window.__registerCards?.(host.parentElement || host);
 }
 
+// ===================== 你原有的各页面渲染（保持不动） =====================
 function renderTradeJournalDetailView(){
   outlet.innerHTML = `
     <section aria-label="거래 분석 상세">
@@ -503,11 +503,12 @@ function renderAboutView(){
   window.__registerCards?.(outlet);
 }
 
+// ===== 数据与工具（保持原样） =====
 async function renderRoute(routeId, slug){
   window.scrollTo({ top: 0, behavior: 'auto' });
   switch (routeId) {
     case 'home':
-      renderHomeView();
+      await renderHomeView(); // ← 重要：await 异步主页
       break;
     case 'daily-brief':
       renderDailyBriefListView();
@@ -526,7 +527,6 @@ async function renderRoute(routeId, slug){
         if (search) search.oninput = renderAnalysesListFiltered;
         if (bias) bias.onchange = renderAnalysesListFiltered;
       }
-      // Note: right-hand detail panel removed — detail renders inline or on detail route.
       break;
     case 'trade-journal-detail':
       renderTradeJournalDetailView();
@@ -553,12 +553,12 @@ async function renderRoute(routeId, slug){
       renderAboutView();
       break;
     default:
-      renderHomeView();
+      await renderHomeView();
   }
   if (window.__registerCards) window.__registerCards(outlet);
 }
 
-// 목록
+// 列表
 async function renderDailyBriefList(){
   const ul = document.getElementById('brief-list');
   if (!ul) return;
@@ -576,7 +576,7 @@ async function renderDailyBriefList(){
   }catch{ ul.innerHTML = '<li class="muted">자료가 없습니다</li>'; }
 }
 
-// 상세
+// 详情
 async function renderDailyBriefDetail(slug){
   const wrap = document.getElementById('daily-brief-detail');
   if (!wrap) return;
@@ -687,75 +687,64 @@ async function loadAnalysesList(){
   list.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     if (!analysesIndexCache){
-      // The backend may return either an array of full objects or an array of slugs (strings).
-      // If it's the latter, fetch each slug's JSON (with concurrency limit) and enrich the index so the UI has title/symbol/tf/date/tags/bias.
       analysesIndexCache = await fetchJSON(AIDX);
       if (Array.isArray(analysesIndexCache) && analysesIndexCache.length && typeof analysesIndexCache[0] === 'string'){
         const slugs = analysesIndexCache.slice();
-        // fetch details in batches with limited concurrency (default 6)
         const enriched = await fetchDetailsForSlugs(slugs, 6);
         analysesIndexCache = enriched;
       }
     }
     const items = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
     list.dataset.raw = JSON.stringify(items);
-      // render initial list (may render skeletons if items empty)
-      renderAnalysesListFiltered();
+    renderAnalysesListFiltered();
 
-      // progressive replacement: if raw array was slugs-only, we already fetched enriched in load, but
-      // ensure we progressively update each entry as its detail becomes available.
-      function updateEntryDOM(i, slug, obj){
-        try{
-          const host = document.getElementById('anal-list');
-          if (!host) return;
-          const entry = document.getElementById(`entry-${slug}`);
-          const img = obj.hero || obj.image || '';
-          const html = `
-            <article class="entry" id="entry-${slug}">
-              <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-                ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(obj.title||slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
-                <div style="flex:1;min-width:0">
-                  <div class="row">
-                    <h3 style="margin-right:6px">${escapeHtml(obj.title || slug)}</h3>
-                    ${badge(obj.bias)}
-                    <span class="meta">· ${escapeHtml(obj.symbol||'')} · ${escapeHtml(obj.tf||'')} · ${escapeHtml(obj.date||'')}</span>
-                    <div class="actions">
-                      <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(slug)}" aria-label="자세히 보기 ${escapeHtml(obj.title || slug)}">자세히 보기 →</a>
-                      <button class="icon-btn pv-btn" data-slug="${slug}" data-symbol="${escapeHtml(obj.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(obj.symbol || obj.title || slug)}">미리보기 차트</button>
-                    </div>
+    function updateEntryDOM(i, slug, obj){
+      try{
+        const host = document.getElementById('anal-list');
+        if (!host) return;
+        const entry = document.getElementById(`entry-${slug}`);
+        const img = obj.hero || obj.image || '';
+        const html = `
+          <article class="entry" id="entry-${slug}">
+            <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+              ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(obj.title||slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
+              <div style="flex:1;min-width:0">
+                <div class="row">
+                  <h3 style="margin-right:6px">${escapeHtml(obj.title || slug)}</h3>
+                  ${badge(obj.bias)}
+                  <span class="meta">· ${escapeHtml(obj.symbol||'')} · ${escapeHtml(obj.tf||'')} · ${escapeHtml(obj.date||'')}</span>
+                  <div class="actions">
+                    <a class="icon-btn" href="#/trade-journal/${encodeURIComponent(slug)}" aria-label="자세히 보기 ${escapeHtml(obj.title || slug)}">자세히 보기 →</a>
+                    <button class="icon-btn pv-btn" data-slug="${slug}" data-symbol="${escapeHtml(obj.symbol||'')}" data-ivl="60" aria-label="미리보기 차트 ${escapeHtml(obj.symbol || obj.title || slug)}">미리보기 차트</button>
                   </div>
-                  ${(obj.tags && obj.tags.length)? `<div class="row" style="margin-top:6px">${(obj.tags||[]).map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`: ''}
-                  <div class="preview" id="pv-${slug}" style="margin-top:10px;"></div>
                 </div>
+                ${(obj.tags && obj.tags.length)? `<div class="row" style="margin-top:6px">${(obj.tags||[]).map(t=>`<span class="pill">#${escapeHtml(t)}</span>`).join('')}</div>`: ''}
+                <div class="preview" id="pv-${slug}" style="margin-top:10px;"></div>
               </div>
-            </article>
-          `;
-          if (entry){ entry.outerHTML = html; }
-          else { host.insertAdjacentHTML('beforeend', html); }
-          try{
-            // ensure newly inserted entry has interactive handlers bound
-            const newEntry = document.getElementById(`entry-${slug}`);
-            if (newEntry) bindAnalysesEntryActions(newEntry);
-          }catch(e){}
-        }catch(e){ console.warn('updateEntryDOM', e); }
-      }
+            </div>
+          </article>
+        `;
+        if (entry){ entry.outerHTML = html; }
+        else { host.insertAdjacentHTML('beforeend', html); }
+        try{
+          const newEntry = document.getElementById(`entry-${slug}`);
+          if (newEntry) bindAnalysesEntryActions(newEntry);
+        }catch(e){}
+      }catch(e){ console.warn('updateEntryDOM', e); }
+    }
 
-      // If original index was an array of slugs, fetchDetailsForSlugsWithCallback will progressively call updateEntryDOM
-      const originalRaw = JSON.parse(list.dataset.raw||'[]');
-      const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
-      if (slugsOnly){
-        // render skeleton placeholders first
-        list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
-        fetchDetailsForSlugsWithCallback(originalRaw, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
-      } else {
-        // otherwise, progressively update entries if details are missing
-        const maybeSlugs = originalRaw.map(it => it && it.slug ? it.slug : it && typeof it==='string' ? it : null).filter(Boolean);
-        if (maybeSlugs.length){
-          fetchDetailsForSlugsWithCallback(maybeSlugs, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
-        }
+    const originalRaw = JSON.parse(list.dataset.raw||'[]');
+    const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
+    if (slugsOnly){
+      list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
+      fetchDetailsForSlugsWithCallback(originalRaw, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
+    } else {
+      const maybeSlugs = originalRaw.map(it => it && it.slug ? it.slug : it && typeof it==='string' ? it : null).filter(Boolean);
+      if (maybeSlugs.length){
+        fetchDetailsForSlugsWithCallback(maybeSlugs, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
       }
+    }
 
-    // 👉 URL에 slug가 없으면 첫 번째 항목을 자동으로 열고 미리보기 차트를 로드
     const slugInUrl = currentSlugFromQuery();
     const detailHost = document.getElementById('anal-detail');
     if (!slugInUrl && items.length && detailHost){
@@ -774,7 +763,6 @@ async function loadAnalysesList(){
   }
 }
 
-// 목록 + 미리보기 차트 버튼
 function renderAnalysesListFiltered(){
   const list = document.getElementById('anal-list');
   const q = (document.getElementById('anal-search')?.value||'').toLowerCase();
@@ -813,7 +801,6 @@ function renderAnalysesListFiltered(){
   if (htmlItems && htmlItems.trim()) {
     list.innerHTML = htmlItems;
   } else {
-    // if there's no search query, assume loading/empty and show skeletons; otherwise show no results
     if (!q) {
       list.innerHTML = Array.from({length:4}).map(()=>`
         <article class="entry skeleton">
@@ -829,7 +816,6 @@ function renderAnalysesListFiltered(){
     }
   }
 
-  // 미리보기 차트 토글 (on-demand 로드/해제)
   function bindEntryActions(root=document){
     root.querySelectorAll('.pv-btn').forEach(btn=>{
       btn.onclick = ()=>{
@@ -848,7 +834,6 @@ function renderAnalysesListFiltered(){
       };
     });
 
-    // inline expand: attach to detail links to render inline instead of navigating
     root.querySelectorAll('.entry .icon-btn[href^="#/trade-journal/"]').forEach(a=>{
       a.onclick = (e)=>{
         e.preventDefault();
@@ -864,10 +849,8 @@ function renderAnalysesListFiltered(){
   bindEntryActions(list);
 }
 
-// Bind actions for a single entry node (used when entries are inserted progressively)
 function bindAnalysesEntryActions(entryNode){
   if (!entryNode) return;
-  // bind pv button
   entryNode.querySelectorAll('.pv-btn').forEach(btn=>{
     btn.onclick = ()=>{
       const slug = btn.dataset.slug;
@@ -885,7 +868,6 @@ function bindAnalysesEntryActions(entryNode){
     };
   });
 
-  // bind inline expand
   entryNode.querySelectorAll('.entry .icon-btn[href^="#/trade-journal/"]').forEach(a=>{
     a.onclick = (e)=>{
       e.preventDefault();
@@ -898,12 +880,10 @@ function bindAnalysesEntryActions(entryNode){
   });
 }
 
-// Render inline detail inside the entry's preview container
 async function renderEntryDetailInline(slug){
   const host = document.getElementById(`pv-${slug}`);
   if (!host) return;
   if (host.dataset.rendered === '1'){
-    // collapse
     host.innerHTML = ''; host.dataset.rendered = '0';
     const btn = document.querySelector(`.pv-btn[data-slug="${slug}"]`);
     if (btn) btn.textContent = '미리보기 차트';
@@ -933,11 +913,9 @@ async function renderEntryDetailInline(slug){
     const btn = document.querySelector(`.pv-btn[data-slug="${slug}"]`);
     if (btn) btn.textContent = '차트 닫기';
     if (window.__registerCards) window.__registerCards(host);
-    // re-bind any pv buttons inside (none) and ensure focusability
   }catch(e){ host.innerHTML = `<p class="muted">자료를 불러올 수 없습니다</p>`; }
 }
 
-// 상세(우측 패널) + 주기 선택
 async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
@@ -1113,14 +1091,11 @@ function currentSlugFromQuery(){
 const KL_KEY = 'kl.progress.v1';
 let KL_QUERY = '';   // 검색어
 
-// SYLLABUS는 원격 데이터를 불러오면 덮어쓸 수 있도록 let으로 유지
-// 기본 강의 데이터는 공유 모듈의 복사본으로 시작 (원본 보호용)
 let SYLLABUS = JSON.parse(JSON.stringify(DEFAULT_SYLLABUS));
 
 function klLoad(){ try{ return JSON.parse(localStorage.getItem(KL_KEY)||'{}'); }catch{return{}} }
 function klSave(obj){ localStorage.setItem(KL_KEY, JSON.stringify(obj)); }
 
-// ★ 원격 syllabus가 존재하면 위 배열을 덮어씁니다
 let __syllabusLoaded = false;
 async function tryLoadRemoteSyllabus(){
   if (__syllabusLoaded) return;
@@ -1243,7 +1218,6 @@ function renderKnowledgeLab(){
 
   if (window.__registerCards) window.__registerCards(host.parentElement || host);
 
-  // 분류 접기/펼치기
   host.querySelectorAll('.lv-head').forEach(h=>{
     h.onclick = ()=>{
       const sec = document.querySelector(h.dataset.toggle);
@@ -1251,7 +1225,6 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 완료 체크: 왼쪽 점 버튼만 토글
   host.querySelectorAll('.kl-dot-btn').forEach(btn=>{
     btn.onclick = (e)=>{
       e.preventDefault();
@@ -1264,7 +1237,6 @@ function renderKnowledgeLab(){
     };
   });
 
-  // 진행도 초기화
   const resetBtn = document.getElementById('kl-reset');
   if (resetBtn){
     resetBtn.onclick = ()=>{
@@ -1325,7 +1297,6 @@ async function renderMarketNews(){
       return;
     }
     const html = await Promise.all(rows.map(async r=>{
-      // support index entries that are either strings (id) or objects ({ id, title, ... })
       const id = (typeof r === 'string') ? r : (r && (r.id || r.slug) ? (r.id || r.slug) : '');
       try{
         if (!marketNewsCache.has(id)){
@@ -1343,7 +1314,6 @@ async function renderMarketNews(){
         const bulletsArr = Array.isArray(d.bullets) ? d.bullets : [];
         const bullets = bulletsArr.length ? bulletsArr.map(b=>`<li>${escapeHtml(b)}</li>`).join('') : '';
         const link = d.url ? `<a href="${escapeHtml(d.url)}" target="_blank" rel="noopener">원문 보기</a>` : '';
-        // try common image fields
         const imgUrl = (d && (d.hero || d.image || d.thumbnail || d.thumb)) || (typeof r === 'object' && (r.hero || r.image || r.thumbnail || r.thumb)) || '';
         return `
           <li class="card">
@@ -1382,5 +1352,3 @@ window.addEventListener('hashchange', () => {
 document.addEventListener('DOMContentLoaded', () => {
   handleRouteChange().catch(err => console.error(err));
 });
-
-
