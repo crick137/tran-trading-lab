@@ -143,23 +143,35 @@ function cleanPaste(el){
     }
   });
 }
+
+/* === PATCH 1: attachCounter 只绑定一次 + rAF === */
 function attachCounter(el, where){
   if(!el) return;
+  if (el.dataset.counterBound === '1') return; // ✅ 防重复
+  el.dataset.counterBound = '1';
+
   let slot = where;
   if (!slot) {
     slot = document.createElement('div');
     slot.className = 'counter';
     el.insertAdjacentElement('afterend', slot);
   }
+
+  let rafId = 0;
   const update = () => {
-    const txt = el.value || '';
-    const lines = txt.split(/\r?\n/).filter(Boolean).length;
-    const chars = txt.length;
-    slot.textContent = `${lines} 行 · ${chars} 字`;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      const txt = el.value || '';
+      const lines = txt.split(/\r?\n/).filter(Boolean).length;
+      const chars = txt.length;
+      slot.textContent = `${lines} 行 · ${chars} 字`;
+    });
   };
-  el.addEventListener('input', update);
+  el.addEventListener('input', update, { passive: true });
   update();
 }
+
+/* 预览渲染 */
 function renderPreviewText(raw){
   const val = (raw || '').trim();
   if (!val) return '';
@@ -169,25 +181,58 @@ function renderPreviewText(raw){
   const lines = val.split(/\r?\n/).filter(Boolean).map(s=>s.trim());
   return `<ul>${lines.map(s=>`<li>${s}</li>`).join('')}</ul>`;
 }
+
+/* === PATCH 2: wireLivePreview 只绑定一次 + rAF === */
 function wireLivePreview(panelEl){
   if (!panelEl) return;
+  if (panelEl.dataset.livePreviewBound === '1') return; // ✅ 防重复
   const panes = $$('.preview-pane', panelEl);
   if (!panes.length) return;
   const src = $('textarea[data-preview], textarea', panelEl);
   if (!src) return;
-  const update = () => {
+
+  let rafId = 0;
+  const render = () => {
     const html = renderPreviewText(src.value);
     panes.forEach(p => p.innerHTML = html);
   };
-  src.addEventListener('input', update);
-  update();
+  const onInput = () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(render);
+  };
+
+  src.addEventListener('input', onInput, { passive: true });
+  panelEl.dataset.livePreviewBound = '1'; // ✅ 标记
+  render();
 }
+
+/* === PATCH 3: initTextareaUX 每个 textarea 仅初始化一次 === */
 function initTextareaUX(scope=document){
   scope = scope || document;
   $$('textarea', scope).forEach((ta)=>{
-    autosize(ta);
-    if (ta.dataset.autosize === 'false') { ta.removeEventListener('input', autosize); ta.style.height = ''; }
-    cleanPaste(ta);
+    if (ta.dataset.uxBound === '1') return; // ✅ 防重复
+    ta.dataset.uxBound = '1';
+
+    // 自动扩展（用被动监听 + 只绑定一次）
+    const fit = () => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; };
+    ta.addEventListener('input', fit, { passive: true });
+    fit();
+
+    // 粘贴净化
+    ta.addEventListener('paste', (e)=>{
+      if (!e.clipboardData) return;
+      const text = e.clipboardData.getData('text/plain');
+      if (text) {
+        e.preventDefault();
+        const start = ta.selectionStart, end = ta.selectionEnd;
+        const v = ta.value;
+        ta.value = v.slice(0, start) + text + v.slice(end);
+        ta.selectionStart = ta.selectionEnd = start + text.length;
+        ta.dispatchEvent(new Event('input', { bubbles:true }));
+      }
+    });
+
+    // 计数器（可用 .no-counter 关闭）
     if (!ta.classList.contains('no-counter')) attachCounter(ta);
   });
 }
@@ -316,9 +361,8 @@ function bindDailyBrief() {
   const ensureCounters = ()=>{ attachCounter(fields.bullets); attachCounter(fields.schedule); };
   ensureCounters();
 
-  const updatePreview = ()=> wireLivePreview($('#tab-brief'));
-  const observer = new MutationObserver(updatePreview);
-  observer.observe($('#tab-brief') || document.body, { childList: true, subtree: true });
+  // === PATCH 4: 移除会重复重绑的 MutationObserver（避免监听风暴） ===
+  // （原有观察器已删除）
 
   ensureDefaultSlug();
   refreshIndexView('daily-brief', indexView);
@@ -379,7 +423,7 @@ function bindDailyBrief() {
       populate(doc || {});
       if (fields.slug) fields.slug.value = today();
       if (msg) msg.textContent = `已载入 ${latest}，Slug 自动改为今日。`;
-      updatePreview();
+      wireLivePreview($('#tab-brief'));
     } catch (e) {
       if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
@@ -391,7 +435,7 @@ function bindDailyBrief() {
     window.open(`/#/daily-brief/${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
 
-  if (btnClear) btnClear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; updatePreview(); });
+  if (btnClear) btnClear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; wireLivePreview($('#tab-brief')); });
   if (btnRefresh) btnRefresh.addEventListener('click', () => { refreshIndexView('daily-brief', indexView); });
 }
 
