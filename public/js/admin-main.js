@@ -572,3 +572,63 @@ document.readyState==='loading' ? document.addEventListener('DOMContentLoaded', 
 
 /* Optional helper for external login form */
 window.Admin = { ...(window.Admin||{}), setToken:(t)=>{ __setToken(t); toast('Token 已更新'); } };
+
+/* ---------- HOTFIX: 清除覆盖点击的遮罩层 / 残留 modal ---------- */
+(function hotfixKillBlockers(){
+  // 注入一条兜底 CSS，先把常见类名的遮罩直接隐藏（不依赖具体 HTML）
+  const css = `
+  .login-overlay, .modal-backdrop, .lock-overlay, #admin-lock,
+  .backdrop, .overlay, .modal[aria-hidden="false"] { display:none !important; pointer-events:none !important; }
+  body.locked { pointer-events:auto !important; }
+  `;
+  if (!document.getElementById('admin-hotfix-overlay')) {
+    const s = document.createElement('style');
+    s.id = 'admin-hotfix-overlay';
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  // 检测当前屏幕中心是否被“不可点击元素”挡住；若是则强制移除
+  function autoUnblockOnce() {
+    const x = Math.floor(window.innerWidth/2), y = Math.floor(window.innerHeight/2);
+    let el = document.elementFromPoint(x, y);
+    // 如果拿到的是个“遮罩特征”的元素，或者是全屏固定定位的大 z-index，则移除
+    const isBlocker = (node) => {
+      if (!node || node === document.body) return false;
+      const cls = (node.className || '') + ' ' + (node.id || '');
+      if (/(login|overlay|backdrop|modal|lock)/i.test(cls)) return true;
+      const st = getComputedStyle(node);
+      const z  = parseInt(st.zIndex, 10) || 0;
+      const sz = node.getBoundingClientRect();
+      const full = (sz.width >= window.innerWidth*0.9 && sz.height >= window.innerHeight*0.9);
+      const fixedOrAbs = (st.position === 'fixed' || st.position === 'absolute');
+      return fixedOrAbs && full && z >= 10 && st.pointerEvents !== 'none';
+    };
+    let hit = null;
+    while (el && el !== document.body) {
+      if (isBlocker(el)) { hit = el; break; }
+      el = el.parentElement;
+    }
+    if (hit) {
+      console.warn('[admin] remove click blocker →', hit);
+      hit.remove();
+      document.body.classList.remove('locked');
+    }
+  }
+
+  // 初始化与每次 tab 切换后都尝试一次
+  document.addEventListener('DOMContentLoaded', autoUnblockOnce);
+  setTimeout(autoUnblockOnce, 0);
+  window.addEventListener('resize', () => setTimeout(autoUnblockOnce, 0));
+
+  // 暴露一个手动解锁的方法（需要时在控制台可调用）
+  window.Admin = { ...(window.Admin||{}), forceUnlock(){
+    try { autoUnblockOnce(); } catch {}
+    try {
+      document.querySelectorAll('.login-overlay,.modal-backdrop,.lock-overlay,#admin-lock,.overlay,.backdrop')
+        .forEach(n => n.remove());
+      document.body.classList.remove('locked');
+    } catch {}
+    console.log('[admin] forceUnlock done');
+  }};
+})();
