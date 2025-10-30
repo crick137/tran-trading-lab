@@ -29,7 +29,7 @@ async function __apiFetch(url, init = {}) {
   }
   opts.headers = headers;
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(new DOMException('timeout', 'AbortError')), 12000);
+  const timer = setTimeout(() => { try { ctrl.abort(); } catch(_){} }, 12000);
   opts.signal = ctrl.signal;
   try {
     const res = await fetch(url, opts);
@@ -84,7 +84,7 @@ const Draft = {
 const Snap = {
   key: (tab, ts) => `ttl:admin:snap:${tab}:${ts}`,
   save(tab, data) {
-    const ts = new Date().toISOString().replaceAll(':','').slice(0,15);
+    const ts = new Date().toISOString().split(':').join('').slice(0,15); // 避免 replaceAll 兼容问题
     try { localStorage.setItem(Snap.key(tab, ts), JSON.stringify(data)) } catch {}
     toast(`已创建发布快照 ${ts}`);
   }
@@ -124,12 +124,16 @@ function applyFields(obj, data){
 /* ---- Textarea UX ---- */
 function autosize(el){
   if(!el) return;
+  if (el.dataset.autosizeBound === '1') return;
+  el.dataset.autosizeBound = '1';
   const fit = () => { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; };
-  el.addEventListener('input', fit);
+  el.addEventListener('input', fit, { passive: true });
   fit();
 }
 function cleanPaste(el){
   if(!el) return;
+  if (el.dataset.cleanPasteBound === '1') return;
+  el.dataset.cleanPasteBound = '1';
   el.addEventListener('paste', (e)=>{
     if (!e.clipboardData) return;
     const text = e.clipboardData.getData('text/plain');
@@ -144,10 +148,10 @@ function cleanPaste(el){
   });
 }
 
-/* === PATCH 1: attachCounter 只绑定一次 + rAF === */
+/* === attachCounter: 只绑定一次 + rAF === */
 function attachCounter(el, where){
   if(!el) return;
-  if (el.dataset.counterBound === '1') return; // ✅ 防重复
+  if (el.dataset.counterBound === '1') return;
   el.dataset.counterBound = '1';
 
   let slot = where;
@@ -182,10 +186,10 @@ function renderPreviewText(raw){
   return `<ul>${lines.map(s=>`<li>${s}</li>`).join('')}</ul>`;
 }
 
-/* === PATCH 2: wireLivePreview 只绑定一次 + rAF === */
+/* === wireLivePreview: 只绑定一次 + rAF === */
 function wireLivePreview(panelEl){
   if (!panelEl) return;
-  if (panelEl.dataset.livePreviewBound === '1') return; // ✅ 防重复
+  if (panelEl.dataset.livePreviewBound === '1') return;
   const panes = $$('.preview-pane', panelEl);
   if (!panes.length) return;
   const src = $('textarea[data-preview], textarea', panelEl);
@@ -202,37 +206,18 @@ function wireLivePreview(panelEl){
   };
 
   src.addEventListener('input', onInput, { passive: true });
-  panelEl.dataset.livePreviewBound = '1'; // ✅ 标记
+  panelEl.dataset.livePreviewBound = '1';
   render();
 }
 
-/* === PATCH 3: initTextareaUX 每个 textarea 仅初始化一次 === */
+/* === initTextareaUX: 每个 textarea 仅初始化一次 === */
 function initTextareaUX(scope=document){
   scope = scope || document;
   $$('textarea', scope).forEach((ta)=>{
-    if (ta.dataset.uxBound === '1') return; // ✅ 防重复
+    if (ta.dataset.uxBound === '1') return;
     ta.dataset.uxBound = '1';
-
-    // 自动扩展（用被动监听 + 只绑定一次）
-    const fit = () => { ta.style.height = 'auto'; ta.style.height = (ta.scrollHeight + 2) + 'px'; };
-    ta.addEventListener('input', fit, { passive: true });
-    fit();
-
-    // 粘贴净化
-    ta.addEventListener('paste', (e)=>{
-      if (!e.clipboardData) return;
-      const text = e.clipboardData.getData('text/plain');
-      if (text) {
-        e.preventDefault();
-        const start = ta.selectionStart, end = ta.selectionEnd;
-        const v = ta.value;
-        ta.value = v.slice(0, start) + text + v.slice(end);
-        ta.selectionStart = ta.selectionEnd = start + text.length;
-        ta.dispatchEvent(new Event('input', { bubbles:true }));
-      }
-    });
-
-    // 计数器（可用 .no-counter 关闭）
+    autosize(ta);
+    cleanPaste(ta);
     if (!ta.classList.contains('no-counter')) attachCounter(ta);
   });
 }
@@ -357,12 +342,9 @@ function bindDailyBrief() {
     if (fields.interval) fields.interval.value = (doc.chart && doc.chart.interval) || '60';
   };
 
-  const draft = wireDraft('brief', fields, { onChange(){ wireLivePreview($('#tab-brief')); }});
-  const ensureCounters = ()=>{ attachCounter(fields.bullets); attachCounter(fields.schedule); };
-  ensureCounters();
-
-  // === PATCH 4: 移除会重复重绑的 MutationObserver（避免监听风暴） ===
-  // （原有观察器已删除）
+  const draft = wireDraft('brief', fields, { onChange(){ /* 预览已防重复 */ wireLivePreview($('#tab-brief')); }});
+  attachCounter(fields.bullets);
+  attachCounter(fields.schedule);
 
   ensureDefaultSlug();
   refreshIndexView('daily-brief', indexView);
@@ -646,7 +628,7 @@ function bindNews() {
       const list = await fetchIndex('market-news');
       if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
       const latest = typeof list[0] === 'string' ? list[0] : list[0]?.id;
-      if (!latest) throw new Error('索引数据无效');
+      if (!最新) throw new Error('索引数据无效');
       const doc = await fetchDocument('market-news', latest);
       populate(doc || {});
       if (fields.id) fields.id.value = `${today()}-1`;
@@ -956,283 +938,4 @@ function bindCourseContentEditor() {
   };
 
   const renderList = (syllabus) => {
-    if (!Array.isArray(syllabus) || !syllabus.length) {
-      listHost.innerHTML = '';
-      if (listMsg) listMsg.textContent = '未找到已发布的课程大纲';
-      return;
-    }
-    listHost.innerHTML = '';
-    if (listMsg) listMsg.remove();
-    syllabus.forEach((group) => {
-      const sec = document.createElement('section');
-      sec.className = 'lesson-group';
-      const h4 = document.createElement('h4');
-      const spanIcon = document.createElement('span'); spanIcon.textContent = group.icon || '📚';
-      const spanLevel = document.createElement('span'); spanLevel.textContent = group.level || '';
-      h4.appendChild(spanIcon); h4.appendChild(spanLevel);
-      sec.appendChild(h4);
-      const ul = document.createElement('div');
-      (Array.isArray(group.lessons) ? group.lessons : []).forEach((row) => {
-        const obj = typeof row === 'string' ? { name: row } : row || {};
-        const a = document.createElement('button');
-        a.type = 'button';
-        a.className = 'lesson-item';
-        a.textContent = obj.name || '';
-        if (obj.duration) { const sd = document.createElement('span'); sd.textContent = obj.duration; a.appendChild(sd); }
-        a.onclick = async () => {
-          listHost.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
-          a.classList.add('active');
-          state.current = { level: group.level || '', name: obj.name || '', link: obj.link || '', slug: obj.slug || '' };
-          if (msg) msg.textContent = '加载中…';
-          clearEditor();
-          try {
-            const s = state.current.slug || linkToSlug(state.current.link) || toSlug(state.current.name);
-            let doc = null;
-            if (s) {
-              const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(s)}.json?_=${Date.now()}`);
-              if (r.ok) doc = r.data || null;
-            }
-            populateEditor({ ...state.current, slug: s }, doc || {});
-            if (msg) msg.textContent = '';
-          } catch (e) {
-            populateEditor(state.current, {});
-            if (msg) msg.textContent = '加载失败: ' + (e.message || e);
-          }
-        };
-        ul.appendChild(a);
-      });
-      sec.appendChild(ul);
-      listHost.appendChild(sec);
-    });
-  };
-
-  const loadSyllabus = async () => {
-    if (listMsg) listMsg.textContent = '正在加载课程大纲…';
-    try {
-      const r = await __apiFetch('/api/research/syllabus.json?_=' + Date.now());
-      const arr = Array.isArray(r?.data?.syllabus) ? r.data.syllabus : Array.isArray(r?.data) ? r.data : [];
-      renderList(arr);
-      if (listMsg) listMsg.textContent = '';
-    } catch (e) { if (listMsg) listMsg.textContent = '加载失败: ' + (e.message || e); }
-  };
-
-  const getSlugOrSuggest = () => {
-    const input = (fields.slug?.value || '').trim();
-    if (input) return toSlug(input);
-    const fromSel = state.current?.slug || linkToSlug(state.current?.link) || toSlug(state.current?.name || '');
-    return fromSel;
-  };
-  const refreshArticlesIndexPreview = async () => {
-    try {
-      const indexView = document.getElementById('ra-index');
-      if (indexView) await refreshIndexView('research/articles', indexView);
-    } catch {}
-  };
-
-  if (btn.save) btn.save.addEventListener('click', async () => {
-    const slug = getSlugOrSuggest();
-    if (!slug) return msg && (msg.textContent = '请先选择课时，并填写有效的 slug');
-    if (msg) msg.textContent = '保存中…';
-    try {
-      const payload = {
-        slug,
-        title: fields.title?.value?.trim() || state.current?.name || slug,
-        excerpt: fields.excerpt?.value?.trim() || undefined,
-        hero: fields.hero?.value?.trim() || undefined,
-        date: new Date().toISOString(),
-        tags: splitLines((fields.tags?.value || '').replace(/,/g, '\n')),
-        body: fields.body?.value || ''
-      };
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-      unwrapResponse(r, 'SAVE_FAILED');
-      msg && (msg.textContent = '保存成功 ✓');
-      await refreshArticlesIndexPreview();
-    } catch (e) { if (msg) msg.textContent = '保存失败: ' + (e.message || e); }
-  });
-
-  if (btn.del) btn.del.addEventListener('click', async () => {
-    const slug = getSlugOrSuggest();
-    if (!slug) return msg && (msg.textContent = '请提供要删除的 slug');
-    if (!confirm(`确定删除课程内容：${slug}？`)) return;
-    if (msg) msg.textContent = '删除中…';
-    try {
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
-      unwrapResponse(r, 'DELETE_FAILED');
-      msg && (msg.textContent = '删除成功 ✓');
-      await refreshArticlesIndexPreview();
-    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
-  });
-
-  if (btn.prev) btn.prev.addEventListener('click', () => {
-    const slug = getSlugOrSuggest();
-    if (!slug) return;
-    window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
-  });
-  if (btn.open) btn.open.addEventListener('click', () => {
-    const slug = getSlugOrSuggest();
-    if (!slug) return;
-    window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
-  });
-
-  clearEditor();
-  loadSyllabus();
-}
-
-/* ---------------- Research Articles（独立文章） ---------------- */
-function bindResearchArticles() {
-  const fields = { slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body') };
-  const msg = $('#ra-msg');
-  const indexView = $('#ra-index');
-  const buttons = { publish: $('#ra-publish'), delete: $('#ra-delete'), reuse: $('#ra-reuse'), preview: $('#ra-preview'), clear: $('#ra-clear'), refresh: $('#ra-refresh') };
-
-  initTextareaUX($('#tab-articles'));
-  wireLivePreview($('#tab-articles'));
-  attachCounter(fields.excerpt);
-  attachCounter(fields.body);
-
-  const draft = wireDraft('research-articles', fields, { onChange(){ wireLivePreview($('#tab-articles')); }});
-
-  const clearForm = () => {
-    if (fields.slug) fields.slug.value = '';
-    if (fields.title) fields.title.value = '';
-    if (fields.excerpt) fields.excerpt.value = '';
-    if (fields.tags) fields.tags.value = '';
-    if (fields.hero) fields.hero.value = '';
-    if (fields.body) fields.body.value = '';
-  };
-  const populate = (doc) => {
-    if (!doc) return;
-    if (fields.slug) fields.slug.value = doc.slug || '';
-    if (fields.title) fields.title.value = doc.title || '';
-    if (fields.excerpt) fields.excerpt.value = doc.excerpt || '';
-    if (fields.tags) fields.tags.value = Array.isArray(doc.tags) ? doc.tags.join(', ') : '';
-    if (fields.hero) fields.hero.value = doc.hero || '';
-    if (fields.body) fields.body.value = doc.body || '';
-  };
-
-  refreshIndexView('research/articles', indexView);
-
-  if (buttons.publish) buttons.publish.addEventListener('click', async () => {
-    const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = '请输入 slug');
-    if (msg) msg.textContent = '正在发布...';
-    try {
-      const payload = {
-        slug,
-        title: fields.title?.value?.trim() || undefined,
-        excerpt: fields.excerpt?.value?.trim() || undefined,
-        tags: splitLines((fields.tags?.value || '').replace(/,/g, '\n')),
-        hero: fields.hero?.value?.trim() || undefined,
-        date: new Date().toISOString(),
-        body: fields.body?.value || ''
-      };
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
-      unwrapResponse(r, 'PUBLISH_FAILED');
-      if (msg) msg.textContent = '发布成功';
-      draft.clear();
-      await refreshIndexView('research/articles', indexView);
-    } catch (e) { if (msg) msg.textContent = '发布失败: ' + (e.message || e); }
-  });
-
-  if (buttons.delete) buttons.delete.addEventListener('click', async () => {
-    const slug = fields.slug?.value?.trim();
-    if (!slug) return msg && (msg.textContent = '请输入 slug');
-    if (!confirm(`确认删除研究文章：${slug}？`)) return;
-    if (msg) msg.textContent = '正在删除...';
-    try {
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
-      unwrapResponse(r, 'DELETE_FAILED');
-      if (msg) msg.textContent = '删除成功';
-      draft.clear();
-      await refreshIndexView('research/articles', indexView);
-    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
-  });
-
-  if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
-    if (msg) msg.textContent = '正在载入线上数据...';
-    try {
-      const list = await fetchIndex('research/articles');
-      if (!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
-      const latest = typeof list[0] === 'string' ? list[0] : list[0]?.slug;
-      if (!latest) throw new Error('索引数据无效');
-      const doc = await fetchDocument('research/articles', latest);
-      populate(doc || {});
-      if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
-      if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
-      wireLivePreview($('#tab-articles'));
-    } catch (e) { if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e); }
-  });
-
-  if (buttons.preview) buttons.preview.addEventListener('click', () => {
-    const slug = fields.slug?.value?.trim();
-    if (!slug) return;
-    window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
-  });
-
-  if (buttons.clear) buttons.clear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; wireLivePreview($('#tab-articles')); });
-  if (buttons.refresh) buttons.refresh.addEventListener('click', () => { refreshIndexView('research/articles', indexView); });
-}
-
-/* ---------------- 可选：沉浸模式按钮（状态守护，避免双监听） ---------------- */
-function bindImmersiveToggle(){
-  const ensureFocusCard = ()=>{
-    if (!document.body.classList.contains('immersive')) return;
-    const active = document.querySelector('.tab-panel.active');
-    if (!active) return;
-    document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
-    active.classList.add('focus-card');
-  };
-  ensureFocusCard();
-  document.addEventListener('click', (e)=>{
-    if (e.target.closest('.tab-btn')) {
-      setTimeout(ensureFocusCard, 0);
-    }
-  });
-  const mo = new MutationObserver(()=> ensureFocusCard());
-  mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
-}
-
-/* ---------------- Boot (defer until unlocked) ---------------- */
-(function init() {
-  const start = () => {
-    // 防重复启动
-    if (window.__ADMIN_STARTED__) return;
-    window.__ADMIN_STARTED__ = true;
-
-    setupTabs();
-    bindDiagnostics();
-    bindDailyBrief();
-    bindAnalyses();
-    bindNews();
-    bindResearchSyllabus();
-    bindCourseContentEditor();
-    bindResearchArticles();
-    bindImmersiveToggle();
-  };
-
-  // 已经有 token -> 直接启动
-  if (__ADMIN_TOKEN && __ADMIN_TOKEN.length > 0) {
-    start();
-    return;
-  }
-
-  // 未登录：完全跳过沉重初始化，等拿到 token 再启动
-  console.log('[admin] locked: skip heavy init until token is present');
-
-  // 1) 监听其它脚本设置 token（你登录成功时会 setItem）
-  window.addEventListener('storage', (e) => {
-    if (e.key === 'tran_admin_token' && e.newValue) {
-      __setToken(e.newValue);
-      start();
-    }
-  }, { once: true });
-
-  // 2) 也允许手动派发事件唤起（如登录脚本中：document.dispatchEvent(new Event("admin:unlocked"))）
-  document.addEventListener('admin:unlocked', () => start(), { once: true });
-
-  // 3) 兜底：登录页若直接刷新，刷新后有 token 会自动进来
-  setTimeout(() => {
-    const t = sessionStorage.getItem('tran_admin_token');
-    if (t) { __setToken(t); start(); }
-  }, 0);
-})();
+   
