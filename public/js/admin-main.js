@@ -15,7 +15,7 @@ function __setToken(value) {
   }
 }
 
-/* ---------------- Fetch (保持你的返回结构) ---------------- */
+/* ---------------- Fetch ---------------- */
 async function __apiFetch(url, init = {}) {
   if (window.Admin && typeof window.Admin.apiFetch === 'function') {
     return window.Admin.apiFetch(url, init);
@@ -41,7 +41,6 @@ async function __apiFetch(url, init = {}) {
     clearTimeout(timer);
   }
 }
-
 function unwrapResponse(response, context) {
   if (!response.ok) {
     const message = (response.data && (response.data.error || response.data.message)) || response.text || context || ('HTTP ' + response.status);
@@ -54,21 +53,16 @@ function unwrapResponse(response, context) {
 const today = () => new Date().toISOString().slice(0, 10);
 const splitLines = (value) => (value || '').split('\n').map((line) => line.trim()).filter((line) => line.length);
 const joinLines = (arr) => (Array.isArray(arr) ? arr.join('\n') : '');
-const safeStringify = (value) => {
-  try { return JSON.stringify(value, null, 2); }
-  catch { return ''; }
-};
+const safeStringify = (value) => { try { return JSON.stringify(value, null, 2); } catch { return ''; } };
 
 async function fetchIndex(prefix) {
   const r = await __apiFetch(`/api/${prefix}/index.json?_=${Date.now()}`);
   return unwrapResponse(r, 'FETCH_INDEX_FAILED');
 }
-
 async function fetchDocument(prefix, slug) {
   const r = await __apiFetch(`/api/${prefix}/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
   return unwrapResponse(r, 'FETCH_DOCUMENT_FAILED');
 }
-
 async function refreshIndexView(prefix, target) {
   if (!target) return;
   target.textContent = '正在加载...';
@@ -83,12 +77,8 @@ async function refreshIndexView(prefix, target) {
 /* ======= Draft / Snap / Toast / Shortcuts ======= */
 const Draft = {
   key: (tab) => `ttl:admin:draft:${tab}`,
-  load(tab) {
-    try { return JSON.parse(localStorage.getItem(Draft.key(tab)) || 'null') } catch { return null }
-  },
-  save(tab, data) {
-    try { localStorage.setItem(Draft.key(tab), JSON.stringify(data)) } catch {}
-  },
+  load(tab) { try { return JSON.parse(localStorage.getItem(Draft.key(tab)) || 'null') } catch { return null } },
+  save(tab, data) { try { localStorage.setItem(Draft.key(tab), JSON.stringify(data)) } catch {} },
   clear(tab) { localStorage.removeItem(Draft.key(tab)) }
 };
 const Snap = {
@@ -120,8 +110,7 @@ function collectFields(obj){
   const out = {};
   for (const [k, el] of Object.entries(obj || {})) {
     if (!el) continue;
-    out[k] = (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT')
-      ? el.value : null;
+    out[k] = (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : null;
   }
   return out;
 }
@@ -132,7 +121,7 @@ function applyFields(obj, data){
   }
 }
 
-/* ---- 写作体验增强 ---- */
+/* ---- Textarea UX ---- */
 function autosize(el){
   if(!el) return;
   const fit = () => { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; };
@@ -184,9 +173,8 @@ function wireLivePreview(panelEl){
   if (!panelEl) return;
   const panes = $$('.preview-pane', panelEl);
   if (!panes.length) return;
-  const srcs = $$('textarea[data-preview], textarea', panelEl);
-  if (!srcs.length) return;
-  const src = srcs[0];
+  const src = $('textarea[data-preview], textarea', panelEl);
+  if (!src) return;
   const update = () => {
     const html = renderPreviewText(src.value);
     panes.forEach(p => p.innerHTML = html);
@@ -198,14 +186,9 @@ function initTextareaUX(scope=document){
   scope = scope || document;
   $$('textarea', scope).forEach((ta)=>{
     autosize(ta);
-    if (ta.dataset.autosize === 'false') {
-      ta.removeEventListener('input', autosize);
-      ta.style.height = '';
-    }
+    if (ta.dataset.autosize === 'false') { ta.removeEventListener('input', autosize); ta.style.height = ''; }
     cleanPaste(ta);
-    if (!ta.classList.contains('no-counter')) {
-      attachCounter(ta);
-    }
+    if (!ta.classList.contains('no-counter')) attachCounter(ta);
   });
 }
 
@@ -213,21 +196,14 @@ function initTextareaUX(scope=document){
 function wireDraft(tab, fields, { onChange } = {}){
   const cached = Draft.load(tab);
   if (cached) applyFields(fields, cached);
-  const save = () => {
-    Draft.save(tab, collectFields(fields));
-    setDirty(true);
-    onChange && onChange();
-  };
+  const save = () => { Draft.save(tab, collectFields(fields)); setDirty(true); onChange && onChange(); };
   let t=null;
   for (const el of Object.values(fields)){
     if (!el || !el.addEventListener) continue;
     el.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(save, 250); });
     el.addEventListener('change', ()=>{ clearTimeout(t); t=setTimeout(save, 0); });
   }
-  return {
-    clear(){ Draft.clear(tab); setDirty(false); },
-    snapshot(data){ Snap.save(tab, data); },
-  };
+  return { clear(){ Draft.clear(tab); setDirty(false); }, snapshot(data){ Snap.save(tab, data); } };
 }
 
 /* ---- 快捷键 ---- */
@@ -240,9 +216,8 @@ document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){ document.getElementById('modal-close')?.click(); }
 });
 
-/* ---------------- Tabs（记住上次激活 + 沉浸守护） ---------------- */
+/* ---------------- Tabs（记住上次激活） ---------------- */
 const ACTIVE_TAB_KEY = 'ttl:admin:activeTab';
-
 function activateTab(name){
   const buttons = $$('.tab-btn');
   const panels = $$('.tab-panel');
@@ -253,20 +228,12 @@ function activateTab(name){
   if (activePanel) {
     initTextareaUX(activePanel);
     wireLivePreview(activePanel);
-    // 若处于沉浸模式，确保当前面板拥有 focus-card
-    if (document.body.classList.contains('immersive')) {
-      panels.forEach(p => p.classList.remove('focus-card'));
-      activePanel.classList.add('focus-card');
-    }
   }
 }
-
 function setupTabs() {
   const buttons = $$('.tab-btn');
   buttons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      activateTab(btn.dataset.tab);
-    });
+    btn.addEventListener('click', () => activateTab(btn.dataset.tab));
   });
   const saved = localStorage.getItem(ACTIVE_TAB_KEY);
   const first = buttons[0]?.dataset.tab;
@@ -326,10 +293,7 @@ function bindDailyBrief() {
   initTextareaUX($('#tab-brief'));
   wireLivePreview($('#tab-brief'));
 
-  const ensureDefaultSlug = () => {
-    if (fields.slug && !fields.slug.value) fields.slug.value = today();
-  };
-
+  const ensureDefaultSlug = () => { if (fields.slug && !fields.slug.value) fields.slug.value = today(); };
   const clearForm = () => {
     if (fields.slug) fields.slug.value = today();
     if (fields.title) fields.title.value = '';
@@ -338,7 +302,6 @@ function bindDailyBrief() {
     if (fields.symbol) fields.symbol.value = '';
     if (fields.interval) fields.interval.value = '60';
   };
-
   const populate = (doc) => {
     if (!doc) return;
     if (fields.slug) fields.slug.value = doc.slug || today();
@@ -349,14 +312,8 @@ function bindDailyBrief() {
     if (fields.interval) fields.interval.value = (doc.chart && doc.chart.interval) || '60';
   };
 
-  const draft = wireDraft('brief', fields, { onChange(){
-    wireLivePreview($('#tab-brief'));
-  }});
-
-  const ensureCounters = ()=>{
-    attachCounter(fields.bullets);
-    attachCounter(fields.schedule);
-  };
+  const draft = wireDraft('brief', fields, { onChange(){ wireLivePreview($('#tab-brief')); }});
+  const ensureCounters = ()=>{ attachCounter(fields.bullets); attachCounter(fields.schedule); };
   ensureCounters();
 
   const updatePreview = ()=> wireLivePreview($('#tab-brief'));
@@ -434,16 +391,8 @@ function bindDailyBrief() {
     window.open(`/#/daily-brief/${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
 
-  if (btnClear) btnClear.addEventListener('click', () => {
-    clearForm();
-    draft.clear();
-    if (msg) msg.textContent = '';
-    updatePreview();
-  });
-
-  if (btnRefresh) btnRefresh.addEventListener('click', () => {
-    refreshIndexView('daily-brief', indexView);
-  });
+  if (btnClear) btnClear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; updatePreview(); });
+  if (btnRefresh) btnRefresh.addEventListener('click', () => { refreshIndexView('daily-brief', indexView); });
 }
 
 /* ---------------- Analyses ---------------- */
@@ -466,9 +415,7 @@ function bindAnalyses() {
   attachCounter(fields.context);
   attachCounter(fields.view);
 
-  const draft = wireDraft('analyses', fields, { onChange(){
-    wireLivePreview($('#tab-analyses'));
-  }});
+  const draft = wireDraft('analyses', fields, { onChange(){ wireLivePreview($('#tab-analyses')); }});
 
   const clearForm = () => {
     if (fields.slug) fields.slug.value = '';
@@ -525,23 +472,14 @@ function bindAnalyses() {
         context: fields.context?.value?.trim() || undefined,
         view: fields.view?.value?.trim() || undefined,
         invalidation: fields.invalidation?.value?.trim() || undefined,
-        chart: {
-          symbol: fields.chartSymbol?.value?.trim() || undefined,
-          interval: fields.chartInterval?.value || '60'
-        }
+        chart: { symbol: fields.chartSymbol?.value?.trim() || undefined, interval: fields.chartInterval?.value || '60' }
       };
-      const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
       draft.clear();
       await refreshIndexView('analyses', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '发布失败: ' + (e.message || e); }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
@@ -555,9 +493,7 @@ function bindAnalyses() {
       if (msg) msg.textContent = '删除成功';
       draft.clear();
       await refreshIndexView('analyses', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
@@ -572,9 +508,7 @@ function bindAnalyses() {
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
       if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
       wireLivePreview($('#tab-analyses'));
-    } catch (e) {
-      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e); }
   });
 
   if (buttons.preview) buttons.preview.addEventListener('click', () => {
@@ -583,37 +517,23 @@ function bindAnalyses() {
     window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
 
-  if (buttons.clear) buttons.clear.addEventListener('click', () => {
-    clearForm();
-    draft.clear();
-    if (msg) msg.textContent = '';
-    wireLivePreview($('#tab-analyses'));
-  });
-
-  if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
-    refreshIndexView('analyses', indexView);
-  });
+  if (buttons.clear) buttons.clear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; wireLivePreview($('#tab-analyses')); });
+  if (buttons.refresh) buttons.refresh.addEventListener('click', () => { refreshIndexView('analyses', indexView); });
 }
 
 /* ---------------- Market News ---------------- */
 function bindNews() {
-  const fields = {
-    id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets')
-  };
+  const fields = { id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets') };
   const msg = $('#n-msg');
   const indexView = $('#n-index');
-  const buttons = {
-    publish: $('#n-publish'), delete: $('#n-delete'), reuse: $('#n-reuse'), preview: $('#n-preview'), clear: $('#n-clear'), refresh: $('#n-refresh')
-  };
+  const buttons = { publish: $('#n-publish'), delete: $('#n-delete'), reuse: $('#n-reuse'), preview: $('#n-preview'), clear: $('#n-clear'), refresh: $('#n-refresh') };
 
   initTextareaUX($('#tab-news'));
   wireLivePreview($('#tab-news'));
   attachCounter(fields.summary);
   attachCounter(fields.bullets);
 
-  const draft = wireDraft('news', fields, { onChange(){
-    wireLivePreview($('#tab-news'));
-  }});
+  const draft = wireDraft('news', fields, { onChange(){ wireLivePreview($('#tab-news')); }});
 
   const clearForm = () => {
     if (fields.id) fields.id.value = `${today()}-1`;
@@ -625,7 +545,6 @@ function bindNews() {
     if (fields.summary) fields.summary.value = '';
     if (fields.bullets) fields.bullets.value = '';
   };
-
   const populate = (doc) => {
     if (fields.id) fields.id.value = doc.id || `${today()}-1`;
     if (fields.title) fields.title.value = doc.title || '';
@@ -655,18 +574,12 @@ function bindNews() {
         summary: fields.summary?.value?.trim() || undefined,
         bullets: splitLines(fields.bullets?.value || '')
       };
-      const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
       draft.clear();
       await refreshIndexView('market-news', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '发布失败: ' + (e.message || e); }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
@@ -680,9 +593,7 @@ function bindNews() {
       if (msg) msg.textContent = '删除成功';
       draft.clear();
       await refreshIndexView('market-news', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
@@ -697,25 +608,12 @@ function bindNews() {
       if (fields.id) fields.id.value = `${today()}-1`;
       if (msg) msg.textContent = `已载入 ${latest}，ID 已更新为今日。`;
       wireLivePreview($('#tab-news'));
-    } catch (e) {
-      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e); }
   });
 
-  if (buttons.preview) buttons.preview.addEventListener('click', () => {
-    window.open('/#/market-news', '_blank', 'noopener');
-  });
-
-  if (buttons.clear) buttons.clear.addEventListener('click', () => {
-    clearForm();
-    draft.clear();
-    if (msg) msg.textContent = '';
-    wireLivePreview($('#tab-news'));
-  });
-
-  if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
-    refreshIndexView('market-news', indexView);
-  });
+  if (buttons.preview) buttons.preview.addEventListener('click', () => { window.open('/#/market-news', '_blank', 'noopener'); });
+  if (buttons.clear) buttons.clear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; wireLivePreview($('#tab-news')); });
+  if (buttons.refresh) buttons.refresh.addEventListener('click', () => { refreshIndexView('market-news', indexView); });
 }
 
 /* ---------------- Research Syllabus（结构化编辑器：仅前端） ---------------- */
@@ -738,51 +636,15 @@ function bindResearchSyllabus() {
   attachCounter(textarea);
 
   let syllabusData = [];
-
   const setMessage = (text) => { if (msg) msg.textContent = text || ''; };
 
-  const ensureLessonShape = (lesson = {}) => ({
-    name: lesson.name || '',
-    link: lesson.link || '',
-    type: lesson.type || '',
-    duration: lesson.duration || '',
-    desc: lesson.desc || ''
-  });
-
-  const ensureLevelShape = (level = {}) => {
-    const shaped = {
-      level: level.level || '',
-      desc: level.desc || '',
-      icon: level.icon || '',
-      lessons: Array.isArray(level.lessons) && level.lessons.length ? level.lessons.map(ensureLessonShape) : [ensureLessonShape()],
-      _collapsed: !!level._collapsed
-    };
-    return shaped;
-  };
-
-  const sanitize = (data) => data.map((level) => ({
-    level: level.level || '',
-    desc: level.desc || '',
-    icon: level.icon || '',
-    lessons: (Array.isArray(level.lessons) ? level.lessons : []).map((lesson) => ({
-      name: lesson.name || '',
-      link: lesson.link || '',
-      type: lesson.type || '',
-      duration: lesson.duration || '',
-      desc: lesson.desc || ''
-    }))
-  }));
+  const ensureLessonShape = (lesson = {}) => ({ name: lesson.name || '', link: lesson.link || '', type: lesson.type || '', duration: lesson.duration || '', desc: lesson.desc || '' });
+  const ensureLevelShape = (level = {}) => ({ level: level.level || '', desc: level.desc || '', icon: level.icon || '', lessons: Array.isArray(level.lessons) && level.lessons.length ? level.lessons.map(ensureLessonShape) : [ensureLessonShape()], _collapsed: !!level._collapsed });
+  const sanitize = (data) => data.map((level) => ({ level: level.level || '', desc: level.desc || '', icon: level.icon || '', lessons: (Array.isArray(level.lessons) ? level.lessons : []).map((lesson) => ({ name: lesson.name || '', link: lesson.link || '', type: lesson.type || '', duration: lesson.duration || '', desc: lesson.desc || '' })) }));
 
   const syncTextarea = () => { if (textarea) textarea.value = safeStringify(sanitize(syllabusData)); };
 
-  const moveLevel = (from, to) => {
-    if (to < 0 || to >= syllabusData.length) return;
-    const [item] = syllabusData.splice(from, 1);
-    syllabusData.splice(to, 0, item);
-    renderStructured();
-    syncTextarea();
-  };
-
+  const moveLevel = (from, to) => { if (to < 0 || to >= syllabusData.length) return; const [item] = syllabusData.splice(from, 1); syllabusData.splice(to, 0, item); renderStructured(); syncTextarea(); };
   const moveLesson = (levelIdx, from, to) => {
     const level = syllabusData[levelIdx];
     if (!level) return;
@@ -810,28 +672,19 @@ function bindResearchSyllabus() {
       const levelInput = document.createElement('input');
       levelInput.placeholder = 'Level name';
       levelInput.value = current.level;
-      levelInput.addEventListener('input', (e) => {
-        current.level = e.target.value;
-        syncTextarea();
-      });
+      levelInput.addEventListener('input', (e) => { current.level = e.target.value; syncTextarea(); });
       header.appendChild(levelInput);
 
       const descInput = document.createElement('input');
       descInput.placeholder = 'Description';
       descInput.value = current.desc;
-      descInput.addEventListener('input', (e) => {
-        current.desc = e.target.value;
-        syncTextarea();
-      });
+      descInput.addEventListener('input', (e) => { current.desc = e.target.value; syncTextarea(); });
       header.appendChild(descInput);
 
       const iconInput = document.createElement('input');
       iconInput.placeholder = 'Icon (emoji)';
       iconInput.value = current.icon;
-      iconInput.addEventListener('input', (e) => {
-        current.icon = e.target.value;
-        syncTextarea();
-      });
+      iconInput.addEventListener('input', (e) => { current.icon = e.target.value; syncTextarea(); });
       header.appendChild(iconInput);
 
       const actions = document.createElement('div');
@@ -839,11 +692,7 @@ function bindResearchSyllabus() {
 
       const addLessonBtn = document.createElement('button');
       addLessonBtn.textContent = '新增课程';
-      addLessonBtn.addEventListener('click', () => {
-        current.lessons.push(ensureLessonShape());
-        renderStructured();
-        syncTextarea();
-      });
+      addLessonBtn.addEventListener('click', () => { current.lessons.push(ensureLessonShape()); renderStructured(); syncTextarea(); });
       actions.appendChild(addLessonBtn);
 
       const upBtn = document.createElement('button');
@@ -860,10 +709,7 @@ function bindResearchSyllabus() {
 
       const toggleBtn = document.createElement('button');
       toggleBtn.textContent = current._collapsed ? '展开' : '收起';
-      toggleBtn.addEventListener('click', () => {
-        current._collapsed = !current._collapsed;
-        renderStructured();
-      });
+      toggleBtn.addEventListener('click', () => { current._collapsed = !current._collapsed; renderStructured(); });
       actions.appendChild(toggleBtn);
 
       const removeBtn = document.createElement('button');
@@ -891,28 +737,19 @@ function bindResearchSyllabus() {
         const nameInput = document.createElement('input');
         nameInput.placeholder = '课程标题';
         nameInput.value = lessonData.name;
-        nameInput.addEventListener('input', (e) => {
-          lessonData.name = e.target.value;
-          syncTextarea();
-        });
+        nameInput.addEventListener('input', (e) => { lessonData.name = e.target.value; syncTextarea(); });
         row.appendChild(nameInput);
 
         const linkInput = document.createElement('input');
         linkInput.placeholder = '课程链接 (#/articles/...)';
         linkInput.value = lessonData.link;
-        linkInput.addEventListener('input', (e) => {
-          lessonData.link = e.target.value;
-          syncTextarea();
-        });
+        linkInput.addEventListener('input', (e) => { lessonData.link = e.target.value; syncTextarea(); });
         row.appendChild(linkInput);
 
         const typeInput = document.createElement('input');
         typeInput.placeholder = '标签/类别 (可选)';
         typeInput.value = lessonData.type;
-        typeInput.addEventListener('input', (e) => {
-          lessonData.type = e.target.value;
-          syncTextarea();
-        });
+        typeInput.addEventListener('input', (e) => { lessonData.type = e.target.value; syncTextarea(); });
         row.appendChild(typeInput);
 
         const durationInput = document.createElement('input');
@@ -920,10 +757,7 @@ function bindResearchSyllabus() {
         durationInput.value = lessonData.duration;
         durationInput.style.maxWidth = '90px';
         durationInput.style.flex = '0 0 90px';
-        durationInput.addEventListener('input', (e) => {
-          lessonData.duration = e.target.value;
-          syncTextarea();
-        });
+        durationInput.addEventListener('input', (e) => { lessonData.duration = e.target.value; syncTextarea(); });
         row.appendChild(durationInput);
 
         const lessonActions = document.createElement('div');
@@ -945,16 +779,11 @@ function bindResearchSyllabus() {
         lessonRemove.textContent = '删除';
         lessonRemove.addEventListener('click', () => {
           if (current.lessons.length <= 1) {
-            lessonData.name = '';
-            lessonData.link = '';
-            lessonData.type = '';
-            lessonData.duration = '';
-            lessonData.desc = '';
+            lessonData.name = ''; lessonData.link = ''; lessonData.type = ''; lessonData.duration = ''; lessonData.desc = '';
           } else {
             current.lessons.splice(lessonIndex, 1);
           }
-          renderStructured();
-          syncTextarea();
+          renderStructured(); syncTextarea();
         });
         lessonActions.appendChild(lessonRemove);
 
@@ -965,13 +794,8 @@ function bindResearchSyllabus() {
         descArea.className = 'lesson-desc';
         descArea.placeholder = '课程简介 (可选)';
         descArea.value = lessonData.desc;
-        autosize(descArea);
-        cleanPaste(descArea);
-        attachCounter(descArea);
-        descArea.addEventListener('input', (e) => {
-          lessonData.desc = e.target.value;
-          syncTextarea();
-        });
+        autosize(descArea); cleanPaste(descArea); attachCounter(descArea);
+        descArea.addEventListener('input', (e) => { lessonData.desc = e.target.value; syncTextarea(); });
         lessonsWrap.appendChild(descArea);
       });
 
@@ -1007,49 +831,26 @@ function bindResearchSyllabus() {
       renderStructured();
       syncTextarea();
       setMessage('结构视图已根据 JSON 更新。');
-    } catch (e) {
-      setMessage('Apply 失败: ' + (e.message || e));
-    }
+    } catch (e) { setMessage('Apply 失败: ' + (e.message || e)); }
   };
 
   const saveOnline = async () => {
     setMessage('正在保存...');
     try {
       const payload = { syllabus: sanitize(syllabusData) };
-      const res = await __apiFetch('/api/research/syllabus', {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await __apiFetch('/api/research/syllabus', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       unwrapResponse(res, 'SAVE_FAILED');
       setMessage('保存成功。');
-    } catch (e) {
-      setMessage('Save 失败: ' + (e.message || e));
-    }
+    } catch (e) { setMessage('Save 失败: ' + (e.message || e)); }
   };
 
   if (btnLoad) btnLoad.addEventListener('click', () => loadOnline());
   if (btnSave) btnSave.addEventListener('click', () => saveOnline());
-  if (btnClear) btnClear.addEventListener('click', () => {
-    syllabusData = [];
-    renderStructured();
-    syncTextarea();
-    setMessage('已清空编辑器。');
-  });
+  if (btnClear) btnClear.addEventListener('click', () => { syllabusData = []; renderStructured(); syncTextarea(); setMessage('已清空编辑器。'); });
   if (btnPreview) btnPreview.addEventListener('click', () => window.open('/#/knowledge-lab', '_blank', 'noopener'));
-  if (btnAddLevel) btnAddLevel.addEventListener('click', () => {
-    syllabusData.push(ensureLevelShape({ level: '新课程阶段', lessons: [ensureLessonShape({ name: '课程标题' })] }));
-    renderStructured();
-    syncTextarea();
-  });
-  if (btnExpandAll) btnExpandAll.addEventListener('click', () => {
-    syllabusData.forEach((level) => { level._collapsed = false; });
-    renderStructured();
-  });
-  if (btnCollapseAll) btnCollapseAll.addEventListener('click', () => {
-    syllabusData.forEach((level) => { level._collapsed = true; });
-    renderStructured();
-  });
+  if (btnAddLevel) btnAddLevel.addEventListener('click', () => { syllabusData.push(ensureLevelShape({ level: '新课程阶段', lessons: [ensureLessonShape({ name: '课程标题' })] })); renderStructured(); syncTextarea(); });
+  if (btnExpandAll) btnExpandAll.addEventListener('click', () => { syllabusData.forEach((level) => { level._collapsed = false; }); renderStructured(); });
+  if (btnCollapseAll) btnCollapseAll.addEventListener('click', () => { syllabusData.forEach((level) => { level._collapsed = true; }); renderStructured(); });
   if (btnSyncJson) btnSyncJson.addEventListener('click', applyJsonToStructured);
 
   renderStructured();
@@ -1061,10 +862,7 @@ function bindCourseContentEditor() {
   const listHost = document.getElementById('lesson-list');
   const listMsg = document.getElementById('lesson-list-msg');
 
-  const meta = {
-    level: document.getElementById('lesson-level'),
-    name: document.getElementById('lesson-name')
-  };
+  const meta = { level: document.getElementById('lesson-level'), name: document.getElementById('lesson-name') };
   const fields = {
     slug: document.getElementById('lesson-slug'),
     title: document.getElementById('lesson-article-title'),
@@ -1081,26 +879,14 @@ function bindCourseContentEditor() {
     open: document.getElementById('lesson-open')
   };
 
-  if (!listHost) return; // HTML not present; skip
+  if (!listHost) return;
 
-  initTextareaUX($('#tab-articles-from-syllabus'));
-  wireLivePreview($('#tab-articles-from-syllabus'));
+  initTextareaUX($('#tab-syllabus'));
+  wireLivePreview($('#tab-syllabus'));
 
   const state = { current: null }; // { level, name, link, slug }
-
-  const toSlug = (text) => {
-    return String(text || '')
-      .toLowerCase()
-      .replace(/[#/]/g, ' ')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 120);
-  };
-  const linkToSlug = (link) => {
-    if (!link) return '';
-    const m = String(link).match(/#\/?articles\/?([A-Za-z0-9_-]+)/);
-    return m ? m[1] : '';
-  };
+  const toSlug = (text) => String(text || '').toLowerCase().replace(/[#/]/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 120);
+  const linkToSlug = (link) => { if (!link) return ''; const m = String(link).match(/#\/?articles\/?([A-Za-z0-9_-]+)/); return m ? m[1] : ''; };
 
   const clearEditor = () => {
     if (meta.level) meta.level.textContent = '-';
@@ -1112,13 +898,10 @@ function bindCourseContentEditor() {
     if (fields.hero) fields.hero.value = '';
     if (fields.body) fields.body.value = '';
   };
-
   const populateEditor = (lessonMeta, doc) => {
     if (meta.level) meta.level.textContent = lessonMeta.level || '-';
     if (meta.name) meta.name.textContent = lessonMeta.name || '';
-    const derivedSlug = lessonMeta.slug
-      || linkToSlug(lessonMeta.link)
-      || toSlug(lessonMeta.name || '');
+    const derivedSlug = lessonMeta.slug || linkToSlug(lessonMeta.link) || toSlug(lessonMeta.name || '');
     if (fields.slug) fields.slug.value = doc?.slug || derivedSlug;
     if (fields.title) fields.title.value = doc?.title || (lessonMeta.name || '');
     if (fields.excerpt) fields.excerpt.value = doc?.excerpt || '';
@@ -1151,9 +934,7 @@ function bindCourseContentEditor() {
         a.type = 'button';
         a.className = 'lesson-item';
         a.textContent = obj.name || '';
-        if (obj.duration) {
-          const sd = document.createElement('span'); sd.textContent = obj.duration; a.appendChild(sd);
-        }
+        if (obj.duration) { const sd = document.createElement('span'); sd.textContent = obj.duration; a.appendChild(sd); }
         a.onclick = async () => {
           listHost.querySelectorAll('.lesson-item').forEach(x => x.classList.remove('active'));
           a.classList.add('active');
@@ -1188,9 +969,7 @@ function bindCourseContentEditor() {
       const arr = Array.isArray(r?.data?.syllabus) ? r.data.syllabus : Array.isArray(r?.data) ? r.data : [];
       renderList(arr);
       if (listMsg) listMsg.textContent = '';
-    } catch (e) {
-      if (listMsg) listMsg.textContent = '加载失败: ' + (e.message || e);
-    }
+    } catch (e) { if (listMsg) listMsg.textContent = '加载失败: ' + (e.message || e); }
   };
 
   const getSlugOrSuggest = () => {
@@ -1199,7 +978,6 @@ function bindCourseContentEditor() {
     const fromSel = state.current?.slug || linkToSlug(state.current?.link) || toSlug(state.current?.name || '');
     return fromSel;
   };
-
   const refreshArticlesIndexPreview = async () => {
     try {
       const indexView = document.getElementById('ra-index');
@@ -1221,17 +999,11 @@ function bindCourseContentEditor() {
         tags: splitLines((fields.tags?.value || '').replace(/,/g, '\n')),
         body: fields.body?.value || ''
       };
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       unwrapResponse(r, 'SAVE_FAILED');
       msg && (msg.textContent = '保存成功 ✓');
       await refreshArticlesIndexPreview();
-    } catch (e) {
-      if (msg) msg.textContent = '保存失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '保存失败: ' + (e.message || e); }
   });
 
   if (btn.del) btn.del.addEventListener('click', async () => {
@@ -1244,9 +1016,7 @@ function bindCourseContentEditor() {
       unwrapResponse(r, 'DELETE_FAILED');
       msg && (msg.textContent = '删除成功 ✓');
       await refreshArticlesIndexPreview();
-    } catch (e) {
-      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
   });
 
   if (btn.prev) btn.prev.addEventListener('click', () => {
@@ -1254,7 +1024,6 @@ function bindCourseContentEditor() {
     if (!slug) return;
     window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
-
   if (btn.open) btn.open.addEventListener('click', () => {
     const slug = getSlugOrSuggest();
     if (!slug) return;
@@ -1267,23 +1036,17 @@ function bindCourseContentEditor() {
 
 /* ---------------- Research Articles（独立文章） ---------------- */
 function bindResearchArticles() {
-  const fields = {
-    slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body')
-  };
+  const fields = { slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body') };
   const msg = $('#ra-msg');
   const indexView = $('#ra-index');
-  const buttons = {
-    publish: $('#ra-publish'), delete: $('#ra-delete'), reuse: $('#ra-reuse'), preview: $('#ra-preview'), clear: $('#ra-clear'), refresh: $('#ra-refresh')
-  };
+  const buttons = { publish: $('#ra-publish'), delete: $('#ra-delete'), reuse: $('#ra-reuse'), preview: $('#ra-preview'), clear: $('#ra-clear'), refresh: $('#ra-refresh') };
 
   initTextareaUX($('#tab-articles'));
   wireLivePreview($('#tab-articles'));
   attachCounter(fields.excerpt);
   attachCounter(fields.body);
 
-  const draft = wireDraft('research-articles', fields, { onChange(){
-    wireLivePreview($('#tab-articles'));
-  }});
+  const draft = wireDraft('research-articles', fields, { onChange(){ wireLivePreview($('#tab-articles')); }});
 
   const clearForm = () => {
     if (fields.slug) fields.slug.value = '';
@@ -1293,7 +1056,6 @@ function bindResearchArticles() {
     if (fields.hero) fields.hero.value = '';
     if (fields.body) fields.body.value = '';
   };
-
   const populate = (doc) => {
     if (!doc) return;
     if (fields.slug) fields.slug.value = doc.slug || '';
@@ -1320,18 +1082,12 @@ function bindResearchArticles() {
         date: new Date().toISOString(),
         body: fields.body?.value || ''
       };
-      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
       draft.clear();
       await refreshIndexView('research/articles', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '发布失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '发布失败: ' + (e.message || e); }
   });
 
   if (buttons.delete) buttons.delete.addEventListener('click', async () => {
@@ -1345,9 +1101,7 @@ function bindResearchArticles() {
       if (msg) msg.textContent = '删除成功';
       draft.clear();
       await refreshIndexView('research/articles', indexView);
-    } catch (e) {
-      if (msg) msg.textContent = '删除失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '删除失败: ' + (e.message || e); }
   });
 
   if (buttons.reuse) buttons.reuse.addEventListener('click', async () => {
@@ -1362,9 +1116,7 @@ function bindResearchArticles() {
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
       if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
       wireLivePreview($('#tab-articles'));
-    } catch (e) {
-      if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
-    }
+    } catch (e) { if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e); }
   });
 
   if (buttons.preview) buttons.preview.addEventListener('click', () => {
@@ -1373,19 +1125,11 @@ function bindResearchArticles() {
     window.open(`/#/articles/${encodeURIComponent(slug)}`, '_blank', 'noopener');
   });
 
-  if (buttons.clear) buttons.clear.addEventListener('click', () => {
-    clearForm();
-    draft.clear();
-    if (msg) msg.textContent = '';
-    wireLivePreview($('#tab-articles'));
-  });
-
-  if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
-    refreshIndexView('research/articles', indexView);
-  });
+  if (buttons.clear) buttons.clear.addEventListener('click', () => { clearForm(); draft.clear(); if (msg) msg.textContent = ''; wireLivePreview($('#tab-articles')); });
+  if (buttons.refresh) buttons.refresh.addEventListener('click', () => { refreshIndexView('research/articles', indexView); });
 }
 
-/* ---------------- 可选：沉浸模式按钮（状态守护） ---------------- */
+/* ---------------- 可选：沉浸模式按钮（状态守护，避免双监听） ---------------- */
 function bindImmersiveToggle(){
   const ensureFocusCard = ()=>{
     if (!document.body.classList.contains('immersive')) return;
