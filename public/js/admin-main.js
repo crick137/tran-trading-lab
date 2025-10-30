@@ -2,8 +2,8 @@
 // Enhanced admin interactions: tabs, diagnostics, CRUD helpers (UX-only, no API changes)
 
 const Admin = window.Admin || {};
-const $ = Admin.$ || ((selector, root = document) => root.querySelector(selector));
-const $$ = Admin.$$ || ((selector, root = document) => Array.from(root.querySelectorAll(selector)));
+const $ = Admin.$ || ((selector, root = document) => (root || document).querySelector(selector));
+const $$ = Admin.$$ || ((selector, root = document) => Array.from((root || document).querySelectorAll(selector)));
 
 let __ADMIN_TOKEN = sessionStorage.getItem('tran_admin_token') || '';
 function __setToken(value) {
@@ -24,7 +24,6 @@ async function __apiFetch(url, init = {}) {
   if (!opts.method) opts.method = 'GET';
   const headers = new Headers(opts.headers || {});
   if (__ADMIN_TOKEN) headers.set('Authorization', 'Bearer ' + __ADMIN_TOKEN);
-  // 若 body 是字符串但没写 content-type，自动补
   if (!headers.has('content-type') && typeof opts.body === 'string') {
     headers.set('content-type', 'application/json;charset=utf-8');
   }
@@ -81,7 +80,7 @@ async function refreshIndexView(prefix, target) {
   }
 }
 
-/* ======= Draft / Snap / Toast / Shortcuts（保留并增强） ======= */
+/* ======= Draft / Snap / Toast / Shortcuts ======= */
 const Draft = {
   key: (tab) => `ttl:admin:draft:${tab}`,
   load(tab) {
@@ -114,7 +113,6 @@ function toast(msg, kind='info'){
 }
 function setDirty(on){
   __DIRTY = !!on;
-  // 给当前 tab 增/减红点
   const activeBtn = document.querySelector('.tab-btn.active');
   if (activeBtn) activeBtn.classList.toggle('badge', __DIRTY);
 }
@@ -134,12 +132,11 @@ function applyFields(obj, data){
   }
 }
 
-/* ---- 写作体验增强：自动扩展/净化/预览/计数器 ---- */
+/* ---- 写作体验增强 ---- */
 function autosize(el){
   if(!el) return;
   const fit = () => { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; };
   el.addEventListener('input', fit);
-  // 初始也执行一次
   fit();
 }
 function cleanPaste(el){
@@ -180,7 +177,6 @@ function renderPreviewText(raw){
   if (typeof window.md === 'function') {
     try { return window.md(val); } catch {}
   }
-  // 退化：按行渲染为列表
   const lines = val.split(/\r?\n/).filter(Boolean).map(s=>s.trim());
   return `<ul>${lines.map(s=>`<li>${s}</li>`).join('')}</ul>`;
 }
@@ -188,7 +184,6 @@ function wireLivePreview(panelEl){
   if (!panelEl) return;
   const panes = $$('.preview-pane', panelEl);
   if (!panes.length) return;
-  // 关联面板里的第一个 textarea（或带 data-preview 的）
   const srcs = $$('textarea[data-preview], textarea', panelEl);
   if (!srcs.length) return;
   const src = srcs[0];
@@ -200,26 +195,22 @@ function wireLivePreview(panelEl){
   update();
 }
 function initTextareaUX(scope=document){
+  scope = scope || document;
   $$('textarea', scope).forEach((ta)=>{
-    // 自动扩展（默认启用）
     autosize(ta);
-    // 允许 data-autosize=false 关闭
     if (ta.dataset.autosize === 'false') {
       ta.removeEventListener('input', autosize);
       ta.style.height = '';
     }
-    // 粘贴净化
     cleanPaste(ta);
-    // 计数器（针对长文本）
     if (!ta.classList.contains('no-counter')) {
       attachCounter(ta);
     }
   });
 }
 
-/* ---- 草稿接线：保存+红点+可选快照 ---- */
+/* ---- 草稿接线 ---- */
 function wireDraft(tab, fields, { onChange } = {}){
-  // 加载
   const cached = Draft.load(tab);
   if (cached) applyFields(fields, cached);
   const save = () => {
@@ -227,21 +218,19 @@ function wireDraft(tab, fields, { onChange } = {}){
     setDirty(true);
     onChange && onChange();
   };
-  // 监听（轻量去抖）
   let t=null;
   for (const el of Object.values(fields)){
     if (!el || !el.addEventListener) continue;
     el.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(save, 250); });
     el.addEventListener('change', ()=>{ clearTimeout(t); t=setTimeout(save, 0); });
   }
-  // 返回工具
   return {
     clear(){ Draft.clear(tab); setDirty(false); },
     snapshot(data){ Snap.save(tab, data); },
   };
 }
 
-/* ---- 快捷键（保持你的习惯） ---- */
+/* ---- 快捷键 ---- */
 document.addEventListener('keydown', (e)=>{
   const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
   const mod = isMac ? e.metaKey : e.ctrlKey;
@@ -251,37 +240,41 @@ document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){ document.getElementById('modal-close')?.click(); }
 });
 
-/* ---------------- Tabs（新增：记住上次激活） ---------------- */
+/* ---------------- Tabs（记住上次激活 + 沉浸守护） ---------------- */
 const ACTIVE_TAB_KEY = 'ttl:admin:activeTab';
+
 function activateTab(name){
   const buttons = $$('.tab-btn');
   const panels = $$('.tab-panel');
   buttons.forEach((b)=> b.classList.toggle('active', b.dataset.tab === name));
   panels.forEach((p)=> p.classList.toggle('active', p.id === 'tab-' + name));
   localStorage.setItem(ACTIVE_TAB_KEY, name);
-  // 每次切 Tab 做一次预览刷新 & 文本域 UX 初始化
   const activePanel = $('#tab-' + name);
   if (activePanel) {
     initTextareaUX(activePanel);
     wireLivePreview(activePanel);
+    // 若处于沉浸模式，确保当前面板拥有 focus-card
+    if (document.body.classList.contains('immersive')) {
+      panels.forEach(p => p.classList.remove('focus-card'));
+      activePanel.classList.add('focus-card');
+    }
   }
 }
+
 function setupTabs() {
   const buttons = $$('.tab-btn');
-  const panels = $$('.tab-panel');
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       activateTab(btn.dataset.tab);
     });
   });
-  // 恢复上次的
   const saved = localStorage.getItem(ACTIVE_TAB_KEY);
   const first = buttons[0]?.dataset.tab;
   const target = saved || first;
   if (target) activateTab(target);
 }
 
-/* ---------------- Diagnostics（保持你原来的行为） ---------------- */
+/* ---------------- Diagnostics ---------------- */
 function bindDiagnostics() {
   const btn = $('#run-diag');
   const wrap = $('#diag-wrap');
@@ -330,7 +323,6 @@ function bindDailyBrief() {
   const btnClear = $('#b-clear');
   const btnRefresh = $('#b-refresh');
 
-  // 文本域 UX
   initTextareaUX($('#tab-brief'));
   wireLivePreview($('#tab-brief'));
 
@@ -357,9 +349,7 @@ function bindDailyBrief() {
     if (fields.interval) fields.interval.value = (doc.chart && doc.chart.interval) || '60';
   };
 
-  // 草稿（写作红点/自动保存）
   const draft = wireDraft('brief', fields, { onChange(){
-    // 预览同步
     wireLivePreview($('#tab-brief'));
   }});
 
@@ -975,7 +965,6 @@ function bindResearchSyllabus() {
         descArea.className = 'lesson-desc';
         descArea.placeholder = '课程简介 (可选)';
         descArea.value = lessonData.desc;
-        // 文本域体验
         autosize(descArea);
         cleanPaste(descArea);
         attachCounter(descArea);
@@ -1095,8 +1084,6 @@ function bindCourseContentEditor() {
   if (!listHost) return; // HTML not present; skip
 
   initTextareaUX($('#tab-articles-from-syllabus'));
-  attachCounter(fields.excerpt);
-  attachCounter(fields.body);
   wireLivePreview($('#tab-articles-from-syllabus'));
 
   const state = { current: null }; // { level, name, link, slug }
@@ -1111,7 +1098,6 @@ function bindCourseContentEditor() {
   };
   const linkToSlug = (link) => {
     if (!link) return '';
-    // Expect pattern like "#/articles/<slug>"
     const m = String(link).match(/#\/?articles\/?([A-Za-z0-9_-]+)/);
     return m ? m[1] : '';
   };
@@ -1175,12 +1161,11 @@ function bindCourseContentEditor() {
           if (msg) msg.textContent = '加载中…';
           clearEditor();
           try {
-            // choose slug preference: explicit -> link -> derived from name
             const s = state.current.slug || linkToSlug(state.current.link) || toSlug(state.current.name);
             let doc = null;
             if (s) {
               const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(s)}.json?_=${Date.now()}`);
-              if (r.ok) doc = r.data || null; // ignore 404
+              if (r.ok) doc = r.data || null;
             }
             populateEditor({ ...state.current, slug: s }, doc || {});
             if (msg) msg.textContent = '';
@@ -1400,31 +1385,21 @@ function bindResearchArticles() {
   });
 }
 
-/* -/* ---------------- 可选：沉浸模式按钮（状态守护，避免双监听） ---------------- */
+/* ---------------- 可选：沉浸模式按钮（状态守护） ---------------- */
 function bindImmersiveToggle(){
-  // 不再绑定按钮的 click（index.html 已有一份切换逻辑）
-  // 这里只做“进入沉浸后确保 active 面板带 .focus-card”的守护
   const ensureFocusCard = ()=>{
     if (!document.body.classList.contains('immersive')) return;
     const active = document.querySelector('.tab-panel.active');
     if (!active) return;
-    // 清理旧的
     document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
-    // 给当前激活面板打标
     active.classList.add('focus-card');
   };
-
-  // 首次进入时兜底
   ensureFocusCard();
-
-  // 切换 Tab 后兜底
   document.addEventListener('click', (e)=>{
     if (e.target.closest('.tab-btn')) {
       setTimeout(ensureFocusCard, 0);
     }
   });
-
-  // 当外部脚本（index.html）切换沉浸模式时，也兜底一次
   const mo = new MutationObserver(()=> ensureFocusCard());
   mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
 }
