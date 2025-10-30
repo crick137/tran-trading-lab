@@ -6,7 +6,7 @@
   <title>管理后台 · TRAN TRADING LAB</title>
   <link rel="stylesheet" href="/styles/global.css" />
   <style>
-    /* ===== 基础暗色风格（保持你的语感） ===== */
+    /* ===== 基础暗色风格 ===== */
     body{margin:0;background:#0f1115;color:#eaecee;font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
     .container{max-width:1100px;margin:24px auto 48px auto;padding:0 16px;}
     .card{background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 12px 32px rgba(0,0,0,.35);}
@@ -28,15 +28,18 @@
     .tab-panel.active{display:block}
     .form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
     .form-grid .wide{grid-column:1 / -1}
-    .action-bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+
+    /* === 关键修复：按钮条不被遮、可点 === */
+    .action-bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;
+      position:sticky;bottom:8px;z-index:50;background:linear-gradient(180deg,#0f1115cc,#0f111500);padding-bottom:6px}
+
     .section-footer{margin-top:12px}
     pre{background:#0f1115;border:1px solid #2a2f36;border-radius:12px;padding:12px;overflow:auto;max-height:240px}
-    #pw-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:9999}
+
+    /* 登录遮罩交由 bootstrap 控制显隐，这里默认隐藏，防止误挡 */
+    #pw-overlay{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:9999}
     .login-box{width:min(92vw,420px);background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#eaecee}
-    .login-box h3{margin:0 0 10px}
-    .login-box p{margin:0 0 12px;color:#9aa0a6}
-    .login-box input{width:100%;margin-bottom:12px}
-    .login-box button{width:100%}
+
     a.inline-link{color:#3b82f6;text-decoration:none}
     a.inline-link:hover{text-decoration:underline}
 
@@ -55,24 +58,29 @@
 
     /* ===== 写作体验增强 ===== */
     .editor-wrap{position:relative;border:1px solid #2a2f36;border-radius:12px;background:linear-gradient(180deg,#0f1216,#0b0e12);overflow:hidden}
-    .editor-toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;background:linear-gradient(180deg,#0f1216,#0c0f13);border-bottom:1px solid #23262b}
+    .editor-toolbar{position:sticky;top:0;z-index:51;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;background:linear-gradient(180deg,#0f1216,#0c0f13);border-bottom:1px solid #23262b}
     .editor-btn{background:#141821;border:1px solid #2a2f36;border-radius:8px;color:#eaecee;padding:6px 8px;font-size:12px;cursor:pointer}
     .editor-btn:hover{border-color:#3b82f6}
     .editor-body{display:grid;grid-template-columns:1fr}
     .editor-pane{padding:0}
     .editor-pane textarea{border:0!important;border-radius:0!important;min-height:240px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;background:transparent!important}
     .preview-pane{display:none;border-left:1px dashed #23262b;padding:12px;overflow:auto;min-height:240px;background:#0e1116}
+
     .editor-wrap.split .editor-body{grid-template-columns:1fr 1fr}
     .editor-wrap.split .preview-pane{display:block}
+
     .editor-status{display:flex;gap:10px;align-items:center;padding:6px 8px;font-size:12px;color:#aeb6c5;border-top:1px solid #23262b;background:#0b0e12}
     .editor-status .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #22c55e22}
 
-    .immersive #admin-root > main > .tab-panel:not(.focus-card){
-  opacity:.06;
-  filter:blur(1px);
-  pointer-events:none;
-}
+    /* === 关键修复：展示层不吃点击，永不挡按钮 === */
+    .preview-pane,
+    .toast,
+    .counter{pointer-events:none !important;}
+    textarea{position:relative;z-index:1}
+
+    .immersive #admin-root > main > .tab-panel:not(.focus-card){opacity:.06;filter:blur(1px);pointer-events:none;}
     .focus-card{position:relative;z-index:10;box-shadow:0 12px 40px rgba(0,0,0,.7)}
+
     .kk-tip{color:#9aa3b7;font-size:12px}
     .slash-hint{color:#9aa3b7;font-size:12px;margin-top:6px}
     .toast{position:fixed;right:14px;bottom:14px;background:#12151a;border:1px solid #2a2f36;color:#eaecee;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}
@@ -82,7 +90,6 @@
     .toolbar-spacer{flex:1 1 auto}
     .kbd{border:1px solid #2a2f36;background:#0d1116;border-radius:6px;padding:2px 6px;font-family:ui-monospace,monospace;font-size:12px}
     .editor-pane textarea:focus{box-shadow:inset 0 0 0 1px #3b82f6}
-    .action-bar{position:sticky;bottom:8px;z-index:20;background:linear-gradient(180deg,#0f1115cc,#0f111500);padding-bottom:6px}
   </style>
 </head>
 <body>
@@ -536,55 +543,45 @@
     </main>
   </div>
 
-  <!-- 保持你的前端脚本顺序与模块化 -->
+  <!-- 你的前端脚本 -->
   <script type="module" src="/js/admin-bootstrap.js" defer></script>
   <script type="module" src="/js/admin-main.js" defer></script>
 
-  <!-- ===== 写作体验增强脚本（纯前端，不触 API） ===== -->
+  <!-- ===== 轻量编辑器增强（带节流与熔断） ===== -->
   <script type="module">
-  // 轻量 Markdown 渲染（常用子集；保持安全转义）
+  // 安全 Markdown 渲染 + 预览节流/熔断
   const md = (src='')=>{
     let s = String(src);
-
-    // 基本转义
     s = s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-
-    // 代码块 ```...```
-    s = s.replace(/```([\\s\\S]*?)```/g, (_, code) => {
+    s = s.replace(/```([\s\S]*?)```/g, (_, code) => {
       const inner = String(code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return '<pre style="background:#0b0e12;border:1px solid #23262b;border-radius:8px;padding:10px;overflow:auto"><code>'+inner+'</code></pre>';
     });
-
-    // 标题
-    s = s.replace(/^######\\s+(.+)$/gm,'<h6>$1</h6>')
-         .replace(/^#####\\s+(.+)$/gm,'<h5>$1</h5>')
-         .replace(/^####\\s+(.+)$/gm,'<h4>$1</h4>')
-         .replace(/^###\\s+(.+)$/gm,'<h3>$1</h3>')
-         .replace(/^##\\s+(.+)$/gm,'<h2>$1</h2>')
-         .replace(/^#\\s+(.+)$/gm,'<h1>$1</h1>');
-
-    // 粗斜体
-    s = s.replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>')
-         .replace(/\\*(.+?)\\*/g,'<em>$1</em>');
-
-    // 引用
-    s = s.replace(/^>\\s?(.*)$/gm,'<blockquote style="margin:8px 0;border-left:3px solid #334155;padding-left:10px;color:#aeb6c5">$1</blockquote>');
-
-    // 列表（将连续 li 包进 ul）
-    s = s.replace(/^(?:- |\\* |\\+ )(.*)$/gm,'<li>$1</li>');
-    s = s.replace(/(?:<li>.*?<\\/li>\\s*)+/gs, m => '<ul style="padding-left:18px;margin:8px 0">'+m+'</ul>');
-
-    // 链接 [text](url)
-    s = s.replace(/\\[(.+?)\\]\\((https?:[^\\s)]+)\\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
-
-    // 段落（已是块元素的行不再包裹）
-    s = s.replace(/^(?!<(?:h\\d|ul|pre|blockquote))(\\S.+)$/gm,'<p>$1</p>');
-
+    s = s.replace(/^######\s+(.+)$/gm,'<h6>$1</h6>')
+         .replace(/^#####\s+(.+)$/gm,'<h5>$1</h5>')
+         .replace(/^####\s+(.+)$/gm,'<h4>$1</h4>')
+         .replace(/^###\s+(.+)$/gm,'<h3>$1</h3>')
+         .replace(/^##\s+(.+)$/gm,'<h2>$1</h2>')
+         .replace(/^#\s+(.+)$/gm,'<h1>$1</h1>');
+    s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>');
+    s = s.replace(/^>\s?(.*)$/gm,'<blockquote style="margin:8px 0;border-left:3px solid #334155;padding-left:10px;color:#aeb6c5">$1</blockquote>');
+    s = s.replace(/^(?:- |\* |\+ )(.*)$/gm,'<li>$1</li>');
+    s = s.replace(/(?:<li>.*?<\/li>\s*)+/gs, m => '<ul style="padding-left:18px;margin:8px 0">'+m+'</ul>');
+    s = s.replace(/\[(.+?)\]\((https?:[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+    s = s.replace(/^(?!<(?:h\d|ul|pre|blockquote))(\S.+)$/gm,'<p>$1</p>');
     return s;
   };
 
   const $ = (sel, root=document)=>root.querySelector(sel);
   const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+
+  // 预览：rAF 节流 + 长文熔断
+  const HARD = 20000, SOFT = 8000;
+  const simpleList = (raw)=> {
+    const lines = (raw||'').split(/\r?\n/).filter(Boolean).slice(0, 200);
+    const esc = s => s.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+    return `<ul>${lines.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`;
+  };
 
   function setupEditor(editorWrap){
     const pane = editorWrap.querySelector('.editor-pane textarea');
@@ -592,39 +589,49 @@
     const statusEl = editorWrap.querySelector('.editor-status .msg');
     const toolbar = editorWrap.querySelector('.editor-toolbar');
     const scope = editorWrap.getAttribute('data-scope') || (pane && pane.id) || ('scope-'+Math.random().toString(36).slice(2,8));
-
     if(!pane) return;
 
-    // 本地草稿 key
+    // 本地草稿
     const KEY = 'draft:'+scope;
-
-    // 恢复草稿
     try{
       const saved = localStorage.getItem(KEY);
       if (saved && !pane.value) { pane.value = saved; toast('已从本地草稿恢复'); }
     }catch{}
 
-    const render = ()=>{ if (pv) pv.innerHTML = pane.value.trim() ? md(pane.value) : ''; };
+    let raf = 0, last = 0;
+    const render = ()=>{
+      const v = pane.value || '';
+      let html = '';
+      if (v.length > HARD) html = '<em>内容较长，已暂停实时预览（不影响发布）。</em>';
+      else if (v.length > SOFT) html = simpleList(v);
+      else html = v.trim() ? md(v) : '';
+      if (pv) pv.innerHTML = html;
+    };
+    const scheduleRender = ()=>{
+      const now = performance.now();
+      if (now - last < 120){ if (!raf) raf = requestAnimationFrame(()=>{ raf=0; last=performance.now(); render(); }); return; }
+      last = now; if (!raf) raf = requestAnimationFrame(()=>{ raf=0; render(); });
+    };
 
-    // 自动保存（轻量去抖）
-    let timer = null;
+    // 自动保存 + 预览
+    let t=null;
     const markDirty = ()=>{
-      if (statusEl) statusEl.textContent = '有未保存的草稿';
-      clearTimeout(timer);
-      timer = setTimeout(()=>{
-        try { localStorage.setItem(KEY, pane.value); if (statusEl) statusEl.textContent = '草稿已自动保存'; } catch {}
-        render();
-      }, 500);
+      statusEl && (statusEl.textContent='有未保存的草稿');
+      clearTimeout(t);
+      t = setTimeout(()=>{
+        try{ localStorage.setItem(KEY, pane.value); statusEl && (statusEl.textContent='草稿已自动保存'); }catch{}
+        scheduleRender();
+      }, 300);
     };
 
     pane.addEventListener('input', markDirty);
-    render();
+    scheduleRender();
 
-    // 快捷键：Ctrl+S 保存草稿；Ctrl+\\ 分栏；斜杠模板
+    // 快捷键
     pane.addEventListener('keydown', (e)=>{
       if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
         e.preventDefault();
-        try { localStorage.setItem(KEY, pane.value); if (statusEl) statusEl.textContent='已手动保存草稿'; toast('草稿已保存'); } catch {}
+        try{ localStorage.setItem(KEY, pane.value); statusEl && (statusEl.textContent='已手动保存草稿'); toast('草稿已保存'); }catch{}
       } else if ((e.ctrlKey||e.metaKey) && e.key==='\\'){
         e.preventDefault(); toggleSplit(editorWrap);
       } else if (e.key==='/' && !e.shiftKey){
@@ -634,56 +641,59 @@
         const menu = [
           {k:'/标题',v:'# 标题'},
           {k:'/小节',v:'## 小节'},
-          {k:'/要点',v:'- 要点 1\\n- 要点 2\\n- 要点 3'},
+          {k:'/要点',v:'- 要点 1\n- 要点 2\n- 要点 3'},
           {k:'/警示',v:'> ⚠ 风险提示：…'},
-          {k:'/代码',v:'```\\n示例代码\\n```'},
-          {k:'/投票',v:'- ✅ 选项 A\\n- ❌ 选项 B'},
+          {k:'/代码',v:'```\n示例代码\n```'},
+          {k:'/投票',v:'- ✅ 选项 A\n- ❌ 选项 B'},
         ];
-        const last = before.slice(before.lastIndexOf('\\n')+1);
+        const last = before.slice(before.lastIndexOf('\n')+1);
         const hit = menu.find(m=>last.trim()===m.k);
         if (hit){
           e.preventDefault();
-          const replaced = before.replace(/\\/?[^\\n]*$/, hit.v);
+          const replaced = before.replace(/\/?[^\n]*$/, hit.v);
           pane.value = replaced + after;
-          markDirty(); render();
+          markDirty(); scheduleRender();
         }
       }
     });
 
-    // 工具条按钮
+    // 工具条（带 try/catch，避免异常影响其它按钮）
     toolbar?.addEventListener('click', (e)=>{
-      const btn = e.target.closest('[data-cmd]');
-      if (!btn) return;
-      const cmd = btn.getAttribute('data-cmd');
-      if (cmd === 'split'){ toggleSplit(editorWrap); return; }
+      try{
+        const btn = e.target.closest('[data-cmd]');
+        if (!btn) return;
+        const cmd = btn.getAttribute('data-cmd');
+        if (cmd === 'split'){ toggleSplit(editorWrap); return; }
 
-      const selStart = pane.selectionStart, selEnd = pane.selectionEnd;
-      const sel = pane.value.slice(selStart, selEnd);
-      const wrapSel = (pre, post=pre)=>{
-        const v = pane.value;
-        const ins = (sel || '文本');
-        pane.value = v.slice(0,selStart) + pre + ins + post + v.slice(selEnd);
-        pane.focus();
-        pane.selectionStart = selStart + pre.length;
-        pane.selectionEnd   = pane.selectionStart + ins.length;
-      };
-      if (cmd==='bold')   wrapSel('**','**');
-      if (cmd==='italic') wrapSel('*','*');
-      if (cmd==='quote')  wrapSel('> ');
-      if (cmd==='code')   wrapSel('```\\n','\\n```');
-      if (cmd==='ul')     wrapSel('- ');
-      if (cmd==='h1')     wrapSel('# ');
-      if (cmd==='h2')     wrapSel('## ');
-      if (cmd==='link'){
-        const url = prompt('输入链接 URL：','https://');
-        if (url){
+        const s = pane.selectionStart, epos = pane.selectionEnd;
+        const sel = pane.value.slice(s, epos);
+        const wrapSel = (pre, post=pre)=>{
           const v = pane.value;
-          const text = sel || '链接文本';
-          pane.value = v.slice(0,selStart) + `[${text}](${url})` + v.slice(selEnd);
+          const ins = (sel || '文本');
+          pane.value = v.slice(0,s) + pre + ins + post + v.slice(epos);
+          pane.focus();
+          pane.selectionStart = s + pre.length;
+          pane.selectionEnd   = pane.selectionStart + ins.length;
+        };
+        if (cmd==='bold')   wrapSel('**','**');
+        if (cmd==='italic') wrapSel('*','*');
+        if (cmd==='quote')  wrapSel('> ');
+        if (cmd==='code')   wrapSel('```\n','\n```');
+        if (cmd==='ul')     wrapSel('- ');
+        if (cmd==='h1')     wrapSel('# ');
+        if (cmd==='h2')     wrapSel('## ');
+        if (cmd==='time')   wrapSel('', new Date().toISOString());
+        if (cmd==='link'){
+          const url = prompt('输入链接 URL：','https://');
+          if (url){
+            const v = pane.value;
+            const text = sel || '链接文本';
+            pane.value = v.slice(0,s) + `[${text}](${url})` + v.slice(epos);
+          }
         }
-      }
-      markDirty(); render();
-    });
+        markDirty(); scheduleRender();
+      }catch(err){ console.error('[inline-toolbar]', err); }
+    }, true);
   }
 
   function toggleSplit(wrap){
@@ -726,7 +736,10 @@
         document.querySelectorAll('.tab-panel.active .editor-wrap').forEach(w=>{
           const ta = w.querySelector('textarea');
           const pv = w.querySelector('.preview-pane');
-          if (ta && pv) pv.innerHTML = ta.value.trim()? md(ta.value) : '';
+          if (ta && pv) {
+            const v = ta.value || '';
+            pv.innerHTML = v.length > 20000 ? '<em>内容较长，已暂停实时预览。</em>' : (v.length>8000 ? (v.split(/\r?\n/).filter(Boolean).slice(0,200).map(x=>`<li>${x}</li>`).join('') || '') : md(v));
+          }
         });
         if (document.body.classList.contains('immersive')){
           document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
