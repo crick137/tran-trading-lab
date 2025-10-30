@@ -1192,15 +1192,47 @@ function bindImmersiveToggle(){
   mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
 }
 
-/* ---------------- Boot ---------------- */
+/* ---------------- Boot (defer until unlocked) ---------------- */
 (function init() {
-  setupTabs();
-  bindDiagnostics();
-  bindDailyBrief();
-  bindAnalyses();
-  bindNews();
-  bindResearchSyllabus();
-  bindCourseContentEditor();
-  bindResearchArticles();
-  bindImmersiveToggle();
+  const start = () => {
+    // 防重复启动
+    if (window.__ADMIN_STARTED__) return;
+    window.__ADMIN_STARTED__ = true;
+
+    setupTabs();
+    bindDiagnostics();
+    bindDailyBrief();
+    bindAnalyses();
+    bindNews();
+    bindResearchSyllabus();
+    bindCourseContentEditor();
+    bindResearchArticles();
+    bindImmersiveToggle();
+  };
+
+  // 已经有 token -> 直接启动
+  if (__ADMIN_TOKEN && __ADMIN_TOKEN.length > 0) {
+    start();
+    return;
+  }
+
+  // 未登录：完全跳过沉重初始化，等拿到 token 再启动
+  console.log('[admin] locked: skip heavy init until token is present');
+
+  // 1) 监听其它脚本设置 token（你登录成功时会 setItem）
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'tran_admin_token' && e.newValue) {
+      __setToken(e.newValue);
+      start();
+    }
+  }, { once: true });
+
+  // 2) 也允许手动派发事件唤起（如登录脚本中：document.dispatchEvent(new Event("admin:unlocked"))）
+  document.addEventListener('admin:unlocked', () => start(), { once: true });
+
+  // 3) 兜底：登录页若直接刷新，刷新后有 token 会自动进来
+  setTimeout(() => {
+    const t = sessionStorage.getItem('tran_admin_token');
+    if (t) { __setToken(t); start(); }
+  }, 0);
 })();
