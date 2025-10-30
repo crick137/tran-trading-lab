@@ -67,7 +67,11 @@
     .editor-status{display:flex;gap:10px;align-items:center;padding:6px 8px;font-size:12px;color:#aeb6c5;border-top:1px solid #23262b;background:#0b0e12}
     .editor-status .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #22c55e22}
 
-    .immersive #admin-root > main > *:not(.focus-card){opacity:.06;filter:blur(1px);pointer-events:none}
+    .immersive #admin-root > main > .tab-panel:not(.focus-card){
+  opacity:.06;
+  filter:blur(1px);
+  pointer-events:none;
+}
     .focus-card{position:relative;z-index:10;box-shadow:0 12px 40px rgba(0,0,0,.7)}
     .kk-tip{color:#9aa3b7;font-size:12px}
     .slash-hint{color:#9aa3b7;font-size:12px;margin-top:6px}

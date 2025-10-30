@@ -1400,17 +1400,33 @@ function bindResearchArticles() {
   });
 }
 
-/* ---------------- 可选：沉浸模式按钮 ---------------- */
+/* -/* ---------------- 可选：沉浸模式按钮（状态守护，避免双监听） ---------------- */
 function bindImmersiveToggle(){
-  const btn = $('#toggle-immersive');
-  if (!btn) return;
-  btn.addEventListener('click', ()=>{
-    document.body.classList.toggle('immersive');
-    if (!localStorage.getItem('writer.immersive.tip')) {
-      toast('已切换沉浸模式（再次点击可退出）');
-      localStorage.setItem('writer.immersive.tip', '1');
+  // 不再绑定按钮的 click（index.html 已有一份切换逻辑）
+  // 这里只做“进入沉浸后确保 active 面板带 .focus-card”的守护
+  const ensureFocusCard = ()=>{
+    if (!document.body.classList.contains('immersive')) return;
+    const active = document.querySelector('.tab-panel.active');
+    if (!active) return;
+    // 清理旧的
+    document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
+    // 给当前激活面板打标
+    active.classList.add('focus-card');
+  };
+
+  // 首次进入时兜底
+  ensureFocusCard();
+
+  // 切换 Tab 后兜底
+  document.addEventListener('click', (e)=>{
+    if (e.target.closest('.tab-btn')) {
+      setTimeout(ensureFocusCard, 0);
     }
   });
+
+  // 当外部脚本（index.html）切换沉浸模式时，也兜底一次
+  const mo = new MutationObserver(()=> ensureFocusCard());
+  mo.observe(document.body, { attributes:true, attributeFilter:['class'] });
 }
 
 /* ---------------- Boot ---------------- */
