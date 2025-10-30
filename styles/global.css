@@ -658,3 +658,16 @@ button.primary:hover{ filter: brightness(1.05); }
   .media-item { grid-template-columns: 1fr; }
   .media-thumb img { height: auto; max-height: 220px; }
 }
+/* ===== Admin-only 微调 ===== */
+.nav-tabs{ position: sticky; top: 0; z-index: 30; padding: 8px 0; backdrop-filter: blur(6px); }
+.nav-tabs .tab-btn.badge::after{
+  content:''; width:8px; height:8px; background:#ef4444; border-radius:50%; display:inline-block; margin-left:6px;
+}
+.action-bar{ position: sticky; bottom: 8px; z-index: 20; background: linear-gradient(180deg, #0f1115cc, #0f111500); padding-bottom: 6px; }
+.toast{
+  position: fixed; right: 14px; bottom: 14px; background: #12151a; border:1px solid #2a2f36; color:#eaecee;
+  padding: 10px 14px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.5); z-index: 2000; opacity: 0; transform: translateY(8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.toast.show{ opacity: 1; transform: translateY(0); }
+input,select,textarea{ min-height: 40px; }

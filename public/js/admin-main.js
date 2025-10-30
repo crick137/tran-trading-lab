@@ -1,5 +1,5 @@
 ﻿// public/js/admin-main.js
-// Enhanced admin interactions: tabs, diagnostics, CRUD helpers
+// Enhanced admin interactions: tabs, diagnostics, CRUD helpers (UX-only, no API changes)
 
 const Admin = window.Admin || {};
 const $ = Admin.$ || ((selector, root = document) => root.querySelector(selector));
@@ -15,6 +15,7 @@ function __setToken(value) {
   }
 }
 
+/* ---------------- Fetch (保持你的返回结构) ---------------- */
 async function __apiFetch(url, init = {}) {
   if (window.Admin && typeof window.Admin.apiFetch === 'function') {
     return window.Admin.apiFetch(url, init);
@@ -23,6 +24,10 @@ async function __apiFetch(url, init = {}) {
   if (!opts.method) opts.method = 'GET';
   const headers = new Headers(opts.headers || {});
   if (__ADMIN_TOKEN) headers.set('Authorization', 'Bearer ' + __ADMIN_TOKEN);
+  // 若 body 是字符串但没写 content-type，自动补
+  if (!headers.has('content-type') && typeof opts.body === 'string') {
+    headers.set('content-type', 'application/json;charset=utf-8');
+  }
   opts.headers = headers;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(new DOMException('timeout', 'AbortError')), 12000);
@@ -46,6 +51,7 @@ function unwrapResponse(response, context) {
   return response.data;
 }
 
+/* ---------------- Utils ---------------- */
 const today = () => new Date().toISOString().slice(0, 10);
 const splitLines = (value) => (value || '').split('\n').map((line) => line.trim()).filter((line) => line.length);
 const joinLines = (arr) => (Array.isArray(arr) ? arr.join('\n') : '');
@@ -75,19 +81,207 @@ async function refreshIndexView(prefix, target) {
   }
 }
 
+/* ======= Draft / Snap / Toast / Shortcuts（保留并增强） ======= */
+const Draft = {
+  key: (tab) => `ttl:admin:draft:${tab}`,
+  load(tab) {
+    try { return JSON.parse(localStorage.getItem(Draft.key(tab)) || 'null') } catch { return null }
+  },
+  save(tab, data) {
+    try { localStorage.setItem(Draft.key(tab), JSON.stringify(data)) } catch {}
+  },
+  clear(tab) { localStorage.removeItem(Draft.key(tab)) }
+};
+const Snap = {
+  key: (tab, ts) => `ttl:admin:snap:${tab}:${ts}`,
+  save(tab, data) {
+    const ts = new Date().toISOString().replaceAll(':','').slice(0,15);
+    try { localStorage.setItem(Snap.key(tab, ts), JSON.stringify(data)) } catch {}
+    toast(`已创建发布快照 ${ts}`);
+  }
+};
+let __DIRTY = false;
+window.addEventListener('beforeunload', (e)=>{
+  if (__DIRTY) { e.preventDefault(); e.returnValue = ''; }
+});
+function toast(msg, kind='info'){
+  let el = document.querySelector('.toast');
+  if(!el){ el = document.createElement('div'); el.className = 'toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el.__t);
+  el.__t = setTimeout(()=> el.classList.remove('show'), 2200);
+}
+function setDirty(on){
+  __DIRTY = !!on;
+  // 给当前 tab 增/减红点
+  const activeBtn = document.querySelector('.tab-btn.active');
+  if (activeBtn) activeBtn.classList.toggle('badge', __DIRTY);
+}
+function collectFields(obj){
+  const out = {};
+  for (const [k, el] of Object.entries(obj || {})) {
+    if (!el) continue;
+    out[k] = (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT')
+      ? el.value : null;
+  }
+  return out;
+}
+function applyFields(obj, data){
+  if (!data) return;
+  for (const [k, v] of Object.entries(data)) {
+    if (obj[k] && typeof v === 'string') obj[k].value = v;
+  }
+}
+
+/* ---- 写作体验增强：自动扩展/净化/预览/计数器 ---- */
+function autosize(el){
+  if(!el) return;
+  const fit = () => { el.style.height = 'auto'; el.style.height = (el.scrollHeight + 2) + 'px'; };
+  el.addEventListener('input', fit);
+  // 初始也执行一次
+  fit();
+}
+function cleanPaste(el){
+  if(!el) return;
+  el.addEventListener('paste', (e)=>{
+    if (!e.clipboardData) return;
+    const text = e.clipboardData.getData('text/plain');
+    if (text) {
+      e.preventDefault();
+      const start = el.selectionStart, end = el.selectionEnd;
+      const v = el.value;
+      el.value = v.slice(0, start) + text + v.slice(end);
+      el.selectionStart = el.selectionEnd = start + text.length;
+      el.dispatchEvent(new Event('input', { bubbles:true }));
+    }
+  });
+}
+function attachCounter(el, where){
+  if(!el) return;
+  let slot = where;
+  if (!slot) {
+    slot = document.createElement('div');
+    slot.className = 'counter';
+    el.insertAdjacentElement('afterend', slot);
+  }
+  const update = () => {
+    const txt = el.value || '';
+    const lines = txt.split(/\r?\n/).filter(Boolean).length;
+    const chars = txt.length;
+    slot.textContent = `${lines} 行 · ${chars} 字`;
+  };
+  el.addEventListener('input', update);
+  update();
+}
+function renderPreviewText(raw){
+  const val = (raw || '').trim();
+  if (!val) return '';
+  if (typeof window.md === 'function') {
+    try { return window.md(val); } catch {}
+  }
+  // 退化：按行渲染为列表
+  const lines = val.split(/\r?\n/).filter(Boolean).map(s=>s.trim());
+  return `<ul>${lines.map(s=>`<li>${s}</li>`).join('')}</ul>`;
+}
+function wireLivePreview(panelEl){
+  if (!panelEl) return;
+  const panes = $$('.preview-pane', panelEl);
+  if (!panes.length) return;
+  // 关联面板里的第一个 textarea（或带 data-preview 的）
+  const srcs = $$('textarea[data-preview], textarea', panelEl);
+  if (!srcs.length) return;
+  const src = srcs[0];
+  const update = () => {
+    const html = renderPreviewText(src.value);
+    panes.forEach(p => p.innerHTML = html);
+  };
+  src.addEventListener('input', update);
+  update();
+}
+function initTextareaUX(scope=document){
+  $$('textarea', scope).forEach((ta)=>{
+    // 自动扩展（默认启用）
+    autosize(ta);
+    // 允许 data-autosize=false 关闭
+    if (ta.dataset.autosize === 'false') {
+      ta.removeEventListener('input', autosize);
+      ta.style.height = '';
+    }
+    // 粘贴净化
+    cleanPaste(ta);
+    // 计数器（针对长文本）
+    if (!ta.classList.contains('no-counter')) {
+      attachCounter(ta);
+    }
+  });
+}
+
+/* ---- 草稿接线：保存+红点+可选快照 ---- */
+function wireDraft(tab, fields, { onChange } = {}){
+  // 加载
+  const cached = Draft.load(tab);
+  if (cached) applyFields(fields, cached);
+  const save = () => {
+    Draft.save(tab, collectFields(fields));
+    setDirty(true);
+    onChange && onChange();
+  };
+  // 监听（轻量去抖）
+  let t=null;
+  for (const el of Object.values(fields)){
+    if (!el || !el.addEventListener) continue;
+    el.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(save, 250); });
+    el.addEventListener('change', ()=>{ clearTimeout(t); t=setTimeout(save, 0); });
+  }
+  // 返回工具
+  return {
+    clear(){ Draft.clear(tab); setDirty(false); },
+    snapshot(data){ Snap.save(tab, data); },
+  };
+}
+
+/* ---- 快捷键（保持你的习惯） ---- */
+document.addEventListener('keydown', (e)=>{
+  const isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+  const mod = isMac ? e.metaKey : e.ctrlKey;
+  if (mod && e.key.toLowerCase() === 's'){ e.preventDefault(); document.querySelector('.tab-panel.active .primary')?.click(); }
+  if (mod && e.key.toLowerCase() === 'k'){ e.preventDefault(); document.querySelector('.tab-panel.active [id$="-preview"]')?.click(); }
+  if (mod && e.key.toLowerCase() === 'l'){ e.preventDefault(); document.querySelector('.tab-panel.active [id$="-reuse"]')?.click(); }
+  if (e.key === 'Escape'){ document.getElementById('modal-close')?.click(); }
+});
+
+/* ---------------- Tabs（新增：记住上次激活） ---------------- */
+const ACTIVE_TAB_KEY = 'ttl:admin:activeTab';
+function activateTab(name){
+  const buttons = $$('.tab-btn');
+  const panels = $$('.tab-panel');
+  buttons.forEach((b)=> b.classList.toggle('active', b.dataset.tab === name));
+  panels.forEach((p)=> p.classList.toggle('active', p.id === 'tab-' + name));
+  localStorage.setItem(ACTIVE_TAB_KEY, name);
+  // 每次切 Tab 做一次预览刷新 & 文本域 UX 初始化
+  const activePanel = $('#tab-' + name);
+  if (activePanel) {
+    initTextareaUX(activePanel);
+    wireLivePreview(activePanel);
+  }
+}
 function setupTabs() {
   const buttons = $$('.tab-btn');
   const panels = $$('.tab-panel');
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      buttons.forEach((b) => b.classList.toggle('active', b === btn));
-      panels.forEach((panel) => {
-        panel.classList.toggle('active', panel.id === 'tab-' + btn.dataset.tab);
-      });
+      activateTab(btn.dataset.tab);
     });
   });
+  // 恢复上次的
+  const saved = localStorage.getItem(ACTIVE_TAB_KEY);
+  const first = buttons[0]?.dataset.tab;
+  const target = saved || first;
+  if (target) activateTab(target);
 }
 
+/* ---------------- Diagnostics（保持你原来的行为） ---------------- */
 function bindDiagnostics() {
   const btn = $('#run-diag');
   const wrap = $('#diag-wrap');
@@ -117,8 +311,9 @@ function bindDiagnostics() {
   });
 }
 
+/* ---------------- Daily Brief ---------------- */
 function bindDailyBrief() {
-  const fields = {
+  const fields = { 
     slug: $('#b-slug'),
     title: $('#b-title'),
     bullets: $('#b-bullets'),
@@ -134,6 +329,10 @@ function bindDailyBrief() {
   const btnPreview = $('#b-preview');
   const btnClear = $('#b-clear');
   const btnRefresh = $('#b-refresh');
+
+  // 文本域 UX
+  initTextareaUX($('#tab-brief'));
+  wireLivePreview($('#tab-brief'));
 
   const ensureDefaultSlug = () => {
     if (fields.slug && !fields.slug.value) fields.slug.value = today();
@@ -157,6 +356,22 @@ function bindDailyBrief() {
     if (fields.symbol) fields.symbol.value = (doc.chart && doc.chart.symbol) || doc.symbol || '';
     if (fields.interval) fields.interval.value = (doc.chart && doc.chart.interval) || '60';
   };
+
+  // 草稿（写作红点/自动保存）
+  const draft = wireDraft('brief', fields, { onChange(){
+    // 预览同步
+    wireLivePreview($('#tab-brief'));
+  }});
+
+  const ensureCounters = ()=>{
+    attachCounter(fields.bullets);
+    attachCounter(fields.schedule);
+  };
+  ensureCounters();
+
+  const updatePreview = ()=> wireLivePreview($('#tab-brief'));
+  const observer = new MutationObserver(updatePreview);
+  observer.observe($('#tab-brief') || document.body, { childList: true, subtree: true });
 
   ensureDefaultSlug();
   refreshIndexView('daily-brief', indexView);
@@ -182,6 +397,7 @@ function bindDailyBrief() {
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
+      draft.clear();
       await refreshIndexView('daily-brief', indexView);
     } catch (e) {
       if (msg) msg.textContent = '发布失败: ' + (e.message || e);
@@ -198,6 +414,7 @@ function bindDailyBrief() {
       const r = await __apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
       if (msg) msg.textContent = '删除成功';
+      draft.clear();
       await refreshIndexView('daily-brief', indexView);
     } catch (e) {
       if (msg) msg.textContent = '删除失败: ' + (e.message || e);
@@ -215,6 +432,7 @@ function bindDailyBrief() {
       populate(doc || {});
       if (fields.slug) fields.slug.value = today();
       if (msg) msg.textContent = `已载入 ${latest}，Slug 自动改为今日。`;
+      updatePreview();
     } catch (e) {
       if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
@@ -228,7 +446,9 @@ function bindDailyBrief() {
 
   if (btnClear) btnClear.addEventListener('click', () => {
     clearForm();
+    draft.clear();
     if (msg) msg.textContent = '';
+    updatePreview();
   });
 
   if (btnRefresh) btnRefresh.addEventListener('click', () => {
@@ -236,6 +456,7 @@ function bindDailyBrief() {
   });
 }
 
+/* ---------------- Analyses ---------------- */
 function bindAnalyses() {
   const fields = {
     slug: $('#a-slug'), title: $('#a-title'), symbol: $('#a-symbol'), tf: $('#a-tf'), date: $('#a-date'), bias: $('#a-bias'),
@@ -247,6 +468,17 @@ function bindAnalyses() {
   const buttons = {
     publish: $('#a-publish'), delete: $('#a-delete'), reuse: $('#a-reuse'), preview: $('#a-preview'), clear: $('#a-clear'), refresh: $('#a-refresh')
   };
+
+  initTextareaUX($('#tab-analyses'));
+  wireLivePreview($('#tab-analyses'));
+  attachCounter(fields.supports);
+  attachCounter(fields.resistances);
+  attachCounter(fields.context);
+  attachCounter(fields.view);
+
+  const draft = wireDraft('analyses', fields, { onChange(){
+    wireLivePreview($('#tab-analyses'));
+  }});
 
   const clearForm = () => {
     if (fields.slug) fields.slug.value = '';
@@ -315,6 +547,7 @@ function bindAnalyses() {
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
+      draft.clear();
       await refreshIndexView('analyses', indexView);
     } catch (e) {
       if (msg) msg.textContent = '发布失败: ' + (e.message || e);
@@ -330,6 +563,7 @@ function bindAnalyses() {
       const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
       if (msg) msg.textContent = '删除成功';
+      draft.clear();
       await refreshIndexView('analyses', indexView);
     } catch (e) {
       if (msg) msg.textContent = '删除失败: ' + (e.message || e);
@@ -347,6 +581,7 @@ function bindAnalyses() {
       populate(doc || {});
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
       if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
+      wireLivePreview($('#tab-analyses'));
     } catch (e) {
       if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
@@ -360,7 +595,9 @@ function bindAnalyses() {
 
   if (buttons.clear) buttons.clear.addEventListener('click', () => {
     clearForm();
+    draft.clear();
     if (msg) msg.textContent = '';
+    wireLivePreview($('#tab-analyses'));
   });
 
   if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
@@ -368,6 +605,7 @@ function bindAnalyses() {
   });
 }
 
+/* ---------------- Market News ---------------- */
 function bindNews() {
   const fields = {
     id: $('#n-id'), title: $('#n-title'), source: $('#n-source'), url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'), summary: $('#n-summary'), bullets: $('#n-bullets')
@@ -377,6 +615,15 @@ function bindNews() {
   const buttons = {
     publish: $('#n-publish'), delete: $('#n-delete'), reuse: $('#n-reuse'), preview: $('#n-preview'), clear: $('#n-clear'), refresh: $('#n-refresh')
   };
+
+  initTextareaUX($('#tab-news'));
+  wireLivePreview($('#tab-news'));
+  attachCounter(fields.summary);
+  attachCounter(fields.bullets);
+
+  const draft = wireDraft('news', fields, { onChange(){
+    wireLivePreview($('#tab-news'));
+  }});
 
   const clearForm = () => {
     if (fields.id) fields.id.value = `${today()}-1`;
@@ -425,6 +672,7 @@ function bindNews() {
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
+      draft.clear();
       await refreshIndexView('market-news', indexView);
     } catch (e) {
       if (msg) msg.textContent = '发布失败: ' + (e.message || e);
@@ -440,6 +688,7 @@ function bindNews() {
       const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
       if (msg) msg.textContent = '删除成功';
+      draft.clear();
       await refreshIndexView('market-news', indexView);
     } catch (e) {
       if (msg) msg.textContent = '删除失败: ' + (e.message || e);
@@ -457,6 +706,7 @@ function bindNews() {
       populate(doc || {});
       if (fields.id) fields.id.value = `${today()}-1`;
       if (msg) msg.textContent = `已载入 ${latest}，ID 已更新为今日。`;
+      wireLivePreview($('#tab-news'));
     } catch (e) {
       if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
@@ -468,7 +718,9 @@ function bindNews() {
 
   if (buttons.clear) buttons.clear.addEventListener('click', () => {
     clearForm();
+    draft.clear();
     if (msg) msg.textContent = '';
+    wireLivePreview($('#tab-news'));
   });
 
   if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
@@ -476,6 +728,7 @@ function bindNews() {
   });
 }
 
+/* ---------------- Research Syllabus（结构化编辑器：仅前端） ---------------- */
 function bindResearchSyllabus() {
   const textarea = $('#r-json');
   const host = $('#r-structured');
@@ -490,6 +743,9 @@ function bindResearchSyllabus() {
   const btnSyncJson = $('#r-sync-json');
 
   if (!textarea && !host) return;
+
+  initTextareaUX($('#tab-syllabus'));
+  attachCounter(textarea);
 
   let syllabusData = [];
 
@@ -719,6 +975,10 @@ function bindResearchSyllabus() {
         descArea.className = 'lesson-desc';
         descArea.placeholder = '课程简介 (可选)';
         descArea.value = lessonData.desc;
+        // 文本域体验
+        autosize(descArea);
+        cleanPaste(descArea);
+        attachCounter(descArea);
         descArea.addEventListener('input', (e) => {
           lessonData.desc = e.target.value;
           syncTextarea();
@@ -807,7 +1067,7 @@ function bindResearchSyllabus() {
   loadOnline().catch(() => {});
 }
 
-// Course Content Editor: read syllabus only; edit per-lesson article content
+/* ---------------- Course Content Editor（按课时写文章） ---------------- */
 function bindCourseContentEditor() {
   const listHost = document.getElementById('lesson-list');
   const listMsg = document.getElementById('lesson-list-msg');
@@ -833,6 +1093,11 @@ function bindCourseContentEditor() {
   };
 
   if (!listHost) return; // HTML not present; skip
+
+  initTextareaUX($('#tab-articles-from-syllabus'));
+  attachCounter(fields.excerpt);
+  attachCounter(fields.body);
+  wireLivePreview($('#tab-articles-from-syllabus'));
 
   const state = { current: null }; // { level, name, link, slug }
 
@@ -874,6 +1139,7 @@ function bindCourseContentEditor() {
     if (fields.tags) fields.tags.value = Array.isArray(doc?.tags) ? doc.tags.join(', ') : '';
     if (fields.hero) fields.hero.value = doc?.hero || '';
     if (fields.body) fields.body.value = doc?.body || '';
+    wireLivePreview($('#tab-articles-from-syllabus'));
   };
 
   const renderList = (syllabus) => {
@@ -887,18 +1153,17 @@ function bindCourseContentEditor() {
     syllabus.forEach((group) => {
       const sec = document.createElement('section');
       sec.className = 'lesson-group';
-  const h4 = document.createElement('h4');
-  const spanIcon = document.createElement('span'); spanIcon.textContent = group.icon || '📚';
-  const spanLevel = document.createElement('span'); spanLevel.textContent = group.level || '';
-  h4.appendChild(spanIcon); h4.appendChild(spanLevel);
-  sec.appendChild(h4);
+      const h4 = document.createElement('h4');
+      const spanIcon = document.createElement('span'); spanIcon.textContent = group.icon || '📚';
+      const spanLevel = document.createElement('span'); spanLevel.textContent = group.level || '';
+      h4.appendChild(spanIcon); h4.appendChild(spanLevel);
+      sec.appendChild(h4);
       const ul = document.createElement('div');
       (Array.isArray(group.lessons) ? group.lessons : []).forEach((row) => {
         const obj = typeof row === 'string' ? { name: row } : row || {};
         const a = document.createElement('button');
         a.type = 'button';
         a.className = 'lesson-item';
-        // build label safely
         a.textContent = obj.name || '';
         if (obj.duration) {
           const sd = document.createElement('span'); sd.textContent = obj.duration; a.appendChild(sd);
@@ -957,13 +1222,6 @@ function bindCourseContentEditor() {
     } catch {}
   };
 
-  const toast = (text, ok = true) => {
-    if (!msg) return;
-    msg.textContent = text || '';
-    msg.style.color = ok ? '#22c55e' : '#f87171';
-    setTimeout(() => { if (msg) { msg.textContent = ''; msg.style.color = ''; } }, 1800);
-  };
-
   if (btn.save) btn.save.addEventListener('click', async () => {
     const slug = getSlugOrSuggest();
     if (!slug) return msg && (msg.textContent = '请先选择课时，并填写有效的 slug');
@@ -984,7 +1242,7 @@ function bindCourseContentEditor() {
         body: JSON.stringify(payload)
       });
       unwrapResponse(r, 'SAVE_FAILED');
-      toast('保存成功 ✓', true);
+      msg && (msg.textContent = '保存成功 ✓');
       await refreshArticlesIndexPreview();
     } catch (e) {
       if (msg) msg.textContent = '保存失败: ' + (e.message || e);
@@ -999,7 +1257,7 @@ function bindCourseContentEditor() {
     try {
       const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
-      toast('删除成功 ✓', true);
+      msg && (msg.textContent = '删除成功 ✓');
       await refreshArticlesIndexPreview();
     } catch (e) {
       if (msg) msg.textContent = '删除失败: ' + (e.message || e);
@@ -1018,15 +1276,11 @@ function bindCourseContentEditor() {
     window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`, '_blank', 'noopener');
   });
 
-  // allow quick slug suggestion when name changes manually
-  if (fields.slug && meta.name) {
-    fields.slug.placeholder = '例如: what-is-forex';
-  }
-
   clearEditor();
   loadSyllabus();
 }
 
+/* ---------------- Research Articles（独立文章） ---------------- */
 function bindResearchArticles() {
   const fields = {
     slug: $('#ra-slug'), title: $('#ra-title'), excerpt: $('#ra-excerpt'), tags: $('#ra-tags'), hero: $('#ra-hero'), body: $('#ra-body')
@@ -1036,6 +1290,15 @@ function bindResearchArticles() {
   const buttons = {
     publish: $('#ra-publish'), delete: $('#ra-delete'), reuse: $('#ra-reuse'), preview: $('#ra-preview'), clear: $('#ra-clear'), refresh: $('#ra-refresh')
   };
+
+  initTextareaUX($('#tab-articles'));
+  wireLivePreview($('#tab-articles'));
+  attachCounter(fields.excerpt);
+  attachCounter(fields.body);
+
+  const draft = wireDraft('research-articles', fields, { onChange(){
+    wireLivePreview($('#tab-articles'));
+  }});
 
   const clearForm = () => {
     if (fields.slug) fields.slug.value = '';
@@ -1079,6 +1342,7 @@ function bindResearchArticles() {
       });
       unwrapResponse(r, 'PUBLISH_FAILED');
       if (msg) msg.textContent = '发布成功';
+      draft.clear();
       await refreshIndexView('research/articles', indexView);
     } catch (e) {
       if (msg) msg.textContent = '发布失败: ' + (e.message || e);
@@ -1094,6 +1358,7 @@ function bindResearchArticles() {
       const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method: 'DELETE' });
       unwrapResponse(r, 'DELETE_FAILED');
       if (msg) msg.textContent = '删除成功';
+      draft.clear();
       await refreshIndexView('research/articles', indexView);
     } catch (e) {
       if (msg) msg.textContent = '删除失败: ' + (e.message || e);
@@ -1111,6 +1376,7 @@ function bindResearchArticles() {
       populate(doc || {});
       if (fields.slug && doc?.slug) fields.slug.value = `${doc.slug}-${today()}`;
       if (msg) msg.textContent = `已载入 ${latest}，Slug 已追加今日日期。`;
+      wireLivePreview($('#tab-articles'));
     } catch (e) {
       if (msg) msg.textContent = '载入线上数据失败: ' + (e.message || e);
     }
@@ -1124,7 +1390,9 @@ function bindResearchArticles() {
 
   if (buttons.clear) buttons.clear.addEventListener('click', () => {
     clearForm();
+    draft.clear();
     if (msg) msg.textContent = '';
+    wireLivePreview($('#tab-articles'));
   });
 
   if (buttons.refresh) buttons.refresh.addEventListener('click', () => {
@@ -1132,20 +1400,28 @@ function bindResearchArticles() {
   });
 }
 
+/* ---------------- 可选：沉浸模式按钮 ---------------- */
+function bindImmersiveToggle(){
+  const btn = $('#toggle-immersive');
+  if (!btn) return;
+  btn.addEventListener('click', ()=>{
+    document.body.classList.toggle('immersive');
+    if (!localStorage.getItem('writer.immersive.tip')) {
+      toast('已切换沉浸模式（再次点击可退出）');
+      localStorage.setItem('writer.immersive.tip', '1');
+    }
+  });
+}
+
+/* ---------------- Boot ---------------- */
 (function init() {
   setupTabs();
   bindDiagnostics();
   bindDailyBrief();
   bindAnalyses();
   bindNews();
+  bindResearchSyllabus();
   bindCourseContentEditor();
   bindResearchArticles();
+  bindImmersiveToggle();
 })();
-
-
-
-
-
-
-
-

@@ -6,50 +6,79 @@
   <title>管理后台 · TRAN TRADING LAB</title>
   <link rel="stylesheet" href="/styles/global.css" />
   <style>
+    /* ===== 基础暗色风格（保持你的语感） ===== */
     body{margin:0;background:#0f1115;color:#eaecee;font:14px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;}
     .container{max-width:1100px;margin:24px auto 48px auto;padding:0 16px;}
-    .card{background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 12px 32px rgba(0,0,0,.35);}    
+    .card{background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 12px 32px rgba(0,0,0,.35);}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
     .muted{color:#9aa0a6;}
     input,select,textarea{background:#0f1115;border:1px solid #2a2f36;color:#fff;padding:8px 10px;border-radius:10px;outline:none;width:100%;box-sizing:border-box;}
-    textarea{min-height:140px;font-family:inherit;}
+    textarea{min-height:140px;font-family:inherit}
     button{cursor:pointer;border-radius:10px;font-weight:600;}
     button.primary{background:#3b82f6;color:#fff;border:0;padding:8px 16px;}
     button.danger{background:transparent;color:#f87171;border:1px solid #f87171;padding:8px 16px;}
     button.ghost{background:transparent;color:#eaecee;border:1px solid #2a2f36;padding:8px 16px;}
-    button.primary:hover{filter:brightness(1.05);}    
-    button.ghost:hover{border-color:#3b82f6;}    
-    button.danger:hover{background:rgba(248,113,113,.1);}    
+    button.primary:hover{filter:brightness(1.05);}
+    button.ghost:hover{border-color:#3b82f6;}
+    button.danger:hover{background:rgba(248,113,113,.1);}
     .nav-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0;}
     .nav-tabs button{background:#121418;border:1px solid #2a2f36;color:#eaecee;padding:8px 14px;border-radius:10px;}
-    .nav-tabs button.active{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.25);}    
-    .tab-panel{display:none;}
-    .tab-panel.active{display:block;}
-    .form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
-    .form-grid .wide{grid-column:1 / -1;}
-    .action-bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
-    .section-footer{margin-top:12px;}
-    pre{background:#0f1115;border:1px solid #2a2f36;border-radius:12px;padding:12px;overflow:auto;max-height:240px;}
-    #pw-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:9999;}
-    .login-box{width:min(92vw,420px);background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#eaecee;}
-    .login-box h3{margin:0 0 10px;}
-    .login-box p{margin:0 0 12px;color:#9aa0a6;}
-    .login-box input{width:100%;margin-bottom:12px;}
-    .login-box button{width:100%;}
-    a.inline-link{color:#3b82f6;text-decoration:none;}
-    a.inline-link:hover{text-decoration:underline;}
-    .course-editor{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:16px;align-items:start;margin-top:12px;}
-    @media (max-width:900px){.course-editor{grid-template-columns:1fr;}}
-    #lesson-list{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:12px;max-height:520px;overflow:auto;}
-    .lesson-group{margin-bottom:12px;}
-    .lesson-group h4{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:6px;}
-    .lesson-item{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin:4px 0;color:#eaecee;background:transparent;}
-    .lesson-item:hover{border-color:#3b82f6;}
-    .lesson-item.active{border-color:#3b82f6;background:rgba(59,130,246,.12);}
-    .lesson-item span{display:block;font-size:12px;color:#9aa0a6;}
-    .lesson-editor{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:16px;}
-    .lesson-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px;}
-    .lesson-meta-value{margin:2px 0 0;font-weight:600;}
+    .nav-tabs button.active{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.25);}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .form-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+    .form-grid .wide{grid-column:1 / -1}
+    .action-bar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .section-footer{margin-top:12px}
+    pre{background:#0f1115;border:1px solid #2a2f36;border-radius:12px;padding:12px;overflow:auto;max-height:240px}
+    #pw-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:9999}
+    .login-box{width:min(92vw,420px);background:#15171a;border:1px solid #23262b;border-radius:14px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.5);color:#eaecee}
+    .login-box h3{margin:0 0 10px}
+    .login-box p{margin:0 0 12px;color:#9aa0a6}
+    .login-box input{width:100%;margin-bottom:12px}
+    .login-box button{width:100%}
+    a.inline-link{color:#3b82f6;text-decoration:none}
+    a.inline-link:hover{text-decoration:underline}
+
+    .course-editor{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:16px;align-items:start;margin-top:12px}
+    @media (max-width:900px){.course-editor{grid-template-columns:1fr}}
+    #lesson-list{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:12px;max-height:520px;overflow:auto}
+    .lesson-group{margin-bottom:12px}
+    .lesson-group h4{margin:0 0 6px;font-size:14px;display:flex;align-items:center;gap:6px}
+    .lesson-item{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;margin:4px 0;color:#eaecee;background:transparent;text-align:left}
+    .lesson-item:hover{border-color:#3b82f6}
+    .lesson-item.active{border-color:#3b82f6;background:rgba(59,130,246,.12)}
+    .lesson-item span{display:block;font-size:12px;color:#9aa0a6}
+    .lesson-editor{background:#10131a;border:1px solid #2a2f36;border-radius:12px;padding:16px}
+    .lesson-meta{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px}
+    .lesson-meta-value{margin:2px 0 0;font-weight:600}
+
+    /* ===== 写作体验增强 ===== */
+    .editor-wrap{position:relative;border:1px solid #2a2f36;border-radius:12px;background:linear-gradient(180deg,#0f1216,#0b0e12);overflow:hidden}
+    .editor-toolbar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;background:linear-gradient(180deg,#0f1216,#0c0f13);border-bottom:1px solid #23262b}
+    .editor-btn{background:#141821;border:1px solid #2a2f36;border-radius:8px;color:#eaecee;padding:6px 8px;font-size:12px;cursor:pointer}
+    .editor-btn:hover{border-color:#3b82f6}
+    .editor-body{display:grid;grid-template-columns:1fr}
+    .editor-pane{padding:0}
+    .editor-pane textarea{border:0!important;border-radius:0!important;min-height:240px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace;background:transparent!important}
+    .preview-pane{display:none;border-left:1px dashed #23262b;padding:12px;overflow:auto;min-height:240px;background:#0e1116}
+    .editor-wrap.split .editor-body{grid-template-columns:1fr 1fr}
+    .editor-wrap.split .preview-pane{display:block}
+    .editor-status{display:flex;gap:10px;align-items:center;padding:6px 8px;font-size:12px;color:#aeb6c5;border-top:1px solid #23262b;background:#0b0e12}
+    .editor-status .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #22c55e22}
+
+    .immersive #admin-root > main > *:not(.focus-card){opacity:.06;filter:blur(1px);pointer-events:none}
+    .focus-card{position:relative;z-index:10;box-shadow:0 12px 40px rgba(0,0,0,.7)}
+    .kk-tip{color:#9aa3b7;font-size:12px}
+    .slash-hint{color:#9aa3b7;font-size:12px;margin-top:6px}
+    .toast{position:fixed;right:14px;bottom:14px;background:#12151a;border:1px solid #2a2f36;color:#eaecee;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:2000;opacity:0;transform:translateY(8px);transition:opacity .2s ease,transform .2s ease}
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    .pill-btn{padding:6px 10px;border-radius:999px;border:1px solid #2a2f36;background:#11161d;color:#cfd6e3;font-size:12px}
+    .toolbar-spacer{flex:1 1 auto}
+    .kbd{border:1px solid #2a2f36;background:#0d1116;border-radius:6px;padding:2px 6px;font-family:ui-monospace,monospace;font-size:12px}
+    .editor-pane textarea:focus{box-shadow:inset 0 0 0 1px #3b82f6}
+    .action-bar{position:sticky;bottom:8px;z-index:20;background:linear-gradient(180deg,#0f1115cc,#0f111500);padding-bottom:6px}
   </style>
 </head>
 <body>
@@ -63,8 +92,14 @@
           <h2 style="margin:0">管理后台</h2>
           <div class="row">
             <button id="run-diag" class="ghost">运行诊断</button>
+            <button id="toggle-immersive" class="ghost">沉浸模式</button>
             <button id="logout-admin" class="danger">退出登录</button>
           </div>
+        </div>
+        <div class="kk-tip">
+          编辑器：支持 <span class="kbd">Ctrl</span>+<span class="kbd">\\</span> 开关左右分栏；
+          <span class="kbd">Ctrl</span>+<span class="kbd">S</span> 保存草稿（本地）；
+          输入 <span class="kbd">/</span> 唤起模板提示。
         </div>
         <div id="diag-wrap" style="display:none; margin-top:14px;">
           <div id="diag-status" class="muted">尚未运行诊断。</div>
@@ -76,15 +111,16 @@
         <button class="tab-btn active" data-tab="brief">每日简报</button>
         <button class="tab-btn" data-tab="analyses">市场分析</button>
         <button class="tab-btn" data-tab="news">市场快讯</button>
-        <button class="tab-btn" data-tab="syllabus">知识课程</button>
+        <button class="tab-btn" data-tab="syllabus">课程内容</button>
         <button class="tab-btn" data-tab="articles">研究文章</button>
       </nav>
 
-      <section id="tab-brief" class="card tab-panel active">
+      <!-- ====== 每日简报 ====== -->
+      <section id="tab-brief" class="card tab-panel active focus-target">
         <h3 style="margin-top:0">每日简报</h3>
         <div class="form-grid">
           <label>日期 (YYYY-MM-DD)
-            <input id="b-slug" placeholder="2025-10-19" />
+            <input id="b-slug" placeholder="2025-10-30" />
           </label>
           <label>标题
             <input id="b-title" placeholder="可选标题" />
@@ -100,11 +136,44 @@
               <option value="1D">日线</option>
             </select>
           </label>
+
           <label class="wide">重点 (一行一条)
-            <textarea id="b-bullets"></textarea>
+            <div class="editor-wrap" data-scope="brief-bullets">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="ul">• 列表</button>
+                <button class="editor-btn" data-cmd="bold">B 粗体</button>
+                <button class="editor-btn" data-cmd="italic">I 斜体</button>
+                <button class="editor-btn" data-cmd="quote">“ 引用</button>
+                <button class="editor-btn" data-cmd="code">代码</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane">
+                  <textarea id="b-bullets" placeholder="- 美元指数 …&#10;- 黄金 …"></textarea>
+                </div>
+                <div class="preview-pane" data-for="b-bullets"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span><span class="slash-hint">输入 <b>/</b> 呼出模板</span></div>
+            </div>
           </label>
+
           <label class="wide">行程安排 (一行一条)
-            <textarea id="b-schedule"></textarea>
+            <div class="editor-wrap" data-scope="brief-schedule">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="ul">• 列表</button>
+                <button class="editor-btn" data-cmd="time">⏱ 时间</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane">
+                  <textarea id="b-schedule" placeholder="- 20:30 美国初请失业金 …"></textarea>
+                </div>
+                <div class="preview-pane" data-for="b-schedule"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
         </div>
         <div class="action-bar">
@@ -121,11 +190,12 @@
         </div>
       </section>
 
-      <section id="tab-analyses" class="card tab-panel">
+      <!-- ====== 市场分析 ====== -->
+      <section id="tab-analyses" class="card tab-panel focus-target">
         <h3 style="margin-top:0">市场分析</h3>
         <div class="form-grid">
           <label>Slug
-            <input id="a-slug" placeholder="xauusd-2025-10-19" />
+            <input id="a-slug" placeholder="xauusd-2025-10-30" />
           </label>
           <label>标题
             <input id="a-title" placeholder="分析标题" />
@@ -137,7 +207,7 @@
             <input id="a-tf" placeholder="H1" />
           </label>
           <label>日期
-            <input id="a-date" placeholder="2025-10-19" />
+            <input id="a-date" placeholder="2025-10-30" />
           </label>
           <label>方向
             <select id="a-bias">
@@ -150,16 +220,67 @@
             <input id="a-tags" placeholder="xauusd, breakout" />
           </label>
           <label class="wide">支撑位 (一行一条)
-            <textarea id="a-supports"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="ul">• 列表</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="a-supports"></textarea></div>
+                <div class="preview-pane" data-for="a-supports"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">阻力位 (一行一条)
-            <textarea id="a-resistances"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="ul">• 列表</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="a-resistances"></textarea></div>
+                <div class="preview-pane" data-for="a-resistances"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">背景说明
-            <textarea id="a-context"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="h2">H2</button>
+                <button class="editor-btn" data-cmd="bold">B</button>
+                <button class="editor-btn" data-cmd="italic">I</button>
+                <button class="editor-btn" data-cmd="quote">“</button>
+                <button class="editor-btn" data-cmd="link">Link</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="a-context"></textarea></div>
+                <div class="preview-pane" data-for="a-context"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">交易思路
-            <textarea id="a-view"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="h2">H2</button>
+                <button class="editor-btn" data-cmd="bold">B</button>
+                <button class="editor-btn" data-cmd="ul">•</button>
+                <button class="editor-btn" data-cmd="code">code</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="a-view"></textarea></div>
+                <div class="preview-pane" data-for="a-view"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">失效条件
             <input id="a-invalidation" placeholder="什么情况下方案失效" />
@@ -190,11 +311,12 @@
         </div>
       </section>
 
-      <section id="tab-news" class="card tab-panel">
+      <!-- ====== 市场快讯 ====== -->
+      <section id="tab-news" class="card tab-panel focus-target">
         <h3 style="margin-top:0">市场快讯</h3>
         <div class="form-grid">
           <label>编号
-            <input id="n-id" placeholder="2025-10-19-1" />
+            <input id="n-id" placeholder="2025-10-30-1" />
           </label>
           <label>标题
             <input id="n-title" placeholder="快讯标题" />
@@ -206,16 +328,40 @@
             <input id="n-url" placeholder="https://example.com" />
           </label>
           <label>时间 (ISO)
-            <input id="n-date" placeholder="2025-10-19T08:00:00Z" />
+            <input id="n-date" placeholder="2025-10-30T08:00:00Z" />
           </label>
           <label class="wide">标签 (逗号分隔)
             <input id="n-tags" placeholder="fed, cpi" />
           </label>
           <label class="wide">摘要
-            <textarea id="n-summary"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="bold">B</button>
+                <button class="editor-btn" data-cmd="italic">I</button>
+                <button class="editor-btn" data-cmd="quote">“</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="n-summary"></textarea></div>
+                <div class="preview-pane" data-for="n-summary"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">要点 (一行一条)
-            <textarea id="n-bullets"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="ul">• 列表</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="n-bullets"></textarea></div>
+                <div class="preview-pane" data-for="n-bullets"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
         </div>
         <div class="action-bar">
@@ -232,9 +378,10 @@
         </div>
       </section>
 
-      <section id="tab-syllabus" class="card tab-panel">
+      <!-- ====== 课程内容（大纲+逐课正文编辑） ====== -->
+      <section id="tab-syllabus" class="card tab-panel focus-target">
         <h3 style="margin-top:0">课程内容</h3>
-        <p class="muted">课程大纲已固定在系统内。左侧选择课时，在右侧填写正文内容并保存，前台将自动读取对应文章。</p>
+        <p class="muted">左侧选择课时，在右侧填写正文内容并保存；前台自动按 slug 渲染。</p>
         <div class="course-editor">
           <aside id="lesson-list" aria-live="polite">
             <p class="muted" id="lesson-list-msg">正在加载课程大纲…</p>
@@ -252,13 +399,25 @@
             </div>
             <div class="form-grid">
               <label>文章标识 (Slug)
-                <input id="lesson-slug" placeholder="如：what-is-forex" />
+                <input id="lesson-slug" placeholder="what-is-forex" />
               </label>
               <label class="wide">文章标题
                 <input id="lesson-article-title" placeholder="默认使用课时标题，可修改" />
               </label>
               <label class="wide">摘要
-                <textarea id="lesson-article-excerpt" placeholder="用于列表和分享的简短摘要"></textarea>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button class="editor-btn" data-cmd="bold">B</button>
+                    <button class="editor-btn" data-cmd="italic">I</button>
+                    <div class="toolbar-spacer"></div>
+                    <button class="pill-btn" data-cmd="split">左右分栏</button>
+                  </div>
+                  <div class="editor-body">
+                    <div class="editor-pane"><textarea id="lesson-article-excerpt" placeholder="用于列表和分享的简短摘要"></textarea></div>
+                    <div class="preview-pane" data-for="lesson-article-excerpt"></div>
+                  </div>
+                  <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+                </div>
               </label>
               <label class="wide">标签 (逗号或换行分隔)
                 <textarea id="lesson-article-tags" placeholder="concept, beginner"></textarea>
@@ -267,7 +426,27 @@
                 <input id="lesson-article-hero" placeholder="https://example.com/cover.jpg" />
               </label>
               <label class="wide">正文内容
-                <textarea id="lesson-article-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace" placeholder="在此编写课程正文，每段之间可空一行。"></textarea>
+                <div class="editor-wrap">
+                  <div class="editor-toolbar">
+                    <button class="editor-btn" data-cmd="h1">H1</button>
+                    <button class="editor-btn" data-cmd="h2">H2</button>
+                    <button class="editor-btn" data-cmd="bold">B</button>
+                    <button class="editor-btn" data-cmd="italic">I</button>
+                    <button class="editor-btn" data-cmd="ul">•</button>
+                    <button class="editor-btn" data-cmd="quote">“</button>
+                    <button class="editor-btn" data-cmd="code">code</button>
+                    <button class="editor-btn" data-cmd="link">Link</button>
+                    <div class="toolbar-spacer"></div>
+                    <button class="pill-btn" data-cmd="split">左右分栏</button>
+                  </div>
+                  <div class="editor-body">
+                    <div class="editor-pane">
+                      <textarea id="lesson-article-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace" placeholder="在此编写课程正文，每段之间可空一行。"></textarea>
+                    </div>
+                    <div class="preview-pane" data-for="lesson-article-body"></div>
+                  </div>
+                  <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+                </div>
               </label>
             </div>
             <div class="action-bar">
@@ -283,17 +462,30 @@
         </div>
       </section>
 
-      <section id="tab-articles" class="card tab-panel">
+      <!-- ====== 研究文章 ====== -->
+      <section id="tab-articles" class="card tab-panel focus-target">
         <h3 style="margin-top:0">研究文章</h3>
         <div class="form-grid">
           <label>文章标识 (Slug)
-            <input id="ra-slug" placeholder="order-block-2025-10-19" />
+            <input id="ra-slug" placeholder="order-block-2025-10-30" />
           </label>
           <label class="wide">标题
             <input id="ra-title" placeholder="文章标题" />
           </label>
           <label class="wide">摘要
-            <textarea id="ra-excerpt" placeholder="用于列表和 SEO 的摘要"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="bold">B</button>
+                <button class="editor-btn" data-cmd="italic">I</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="ra-excerpt" placeholder="用于列表和 SEO 的摘要"></textarea></div>
+                <div class="preview-pane" data-for="ra-excerpt"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
           <label class="wide">标签 (逗号分隔)
             <input id="ra-tags" placeholder="smc, order block" />
@@ -302,7 +494,25 @@
             <input id="ra-hero" placeholder="https://example.com/cover.jpg" />
           </label>
           <label class="wide">正文 (Markdown)
-            <textarea id="ra-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"></textarea>
+            <div class="editor-wrap">
+              <div class="editor-toolbar">
+                <button class="editor-btn" data-cmd="h1">H1</button>
+                <button class="editor-btn" data-cmd="h2">H2</button>
+                <button class="editor-btn" data-cmd="bold">B</button>
+                <button class="editor-btn" data-cmd="italic">I</button>
+                <button class="editor-btn" data-cmd="ul">•</button>
+                <button class="editor-btn" data-cmd="quote">“</button>
+                <button class="editor-btn" data-cmd="code">code</button>
+                <button class="editor-btn" data-cmd="link">Link</button>
+                <div class="toolbar-spacer"></div>
+                <button class="pill-btn" data-cmd="split">左右分栏</button>
+              </div>
+              <div class="editor-body">
+                <div class="editor-pane"><textarea id="ra-body" style="min-height:260px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,'Liberation Mono',monospace"></textarea></div>
+                <div class="preview-pane" data-for="ra-body"></div>
+              </div>
+              <div class="editor-status"><span class="dot"></span><span class="msg">草稿未改动</span></div>
+            </div>
           </label>
         </div>
         <div class="action-bar">
@@ -322,7 +532,212 @@
     </main>
   </div>
 
-  <script type="module" src="/js/admin-bootstrap.js"></script>
-  <script type="module" src="/js/admin-main.js"></script>
+  <!-- 保持你的前端脚本顺序与模块化 -->
+  <script type="module" src="/js/admin-bootstrap.js" defer></script>
+  <script type="module" src="/js/admin-main.js" defer></script>
+
+  <!-- ===== 写作体验增强脚本（纯前端，不触 API） ===== -->
+  <script type="module">
+  // 轻量 Markdown 渲染（常用子集；保持安全转义）
+  const md = (src='')=>{
+    let s = String(src);
+
+    // 基本转义
+    s = s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+
+    // 代码块 ```...```
+    s = s.replace(/```([\\s\\S]*?)```/g, (_, code) => {
+      const inner = String(code).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return '<pre style="background:#0b0e12;border:1px solid #23262b;border-radius:8px;padding:10px;overflow:auto"><code>'+inner+'</code></pre>';
+    });
+
+    // 标题
+    s = s.replace(/^######\\s+(.+)$/gm,'<h6>$1</h6>')
+         .replace(/^#####\\s+(.+)$/gm,'<h5>$1</h5>')
+         .replace(/^####\\s+(.+)$/gm,'<h4>$1</h4>')
+         .replace(/^###\\s+(.+)$/gm,'<h3>$1</h3>')
+         .replace(/^##\\s+(.+)$/gm,'<h2>$1</h2>')
+         .replace(/^#\\s+(.+)$/gm,'<h1>$1</h1>');
+
+    // 粗斜体
+    s = s.replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>')
+         .replace(/\\*(.+?)\\*/g,'<em>$1</em>');
+
+    // 引用
+    s = s.replace(/^>\\s?(.*)$/gm,'<blockquote style="margin:8px 0;border-left:3px solid #334155;padding-left:10px;color:#aeb6c5">$1</blockquote>');
+
+    // 列表（将连续 li 包进 ul）
+    s = s.replace(/^(?:- |\\* |\\+ )(.*)$/gm,'<li>$1</li>');
+    s = s.replace(/(?:<li>.*?<\\/li>\\s*)+/gs, m => '<ul style="padding-left:18px;margin:8px 0">'+m+'</ul>');
+
+    // 链接 [text](url)
+    s = s.replace(/\\[(.+?)\\]\\((https?:[^\\s)]+)\\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    // 段落（已是块元素的行不再包裹）
+    s = s.replace(/^(?!<(?:h\\d|ul|pre|blockquote))(\\S.+)$/gm,'<p>$1</p>');
+
+    return s;
+  };
+
+  const $ = (sel, root=document)=>root.querySelector(sel);
+  const $$ = (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+
+  function setupEditor(editorWrap){
+    const pane = editorWrap.querySelector('.editor-pane textarea');
+    const pv = editorWrap.querySelector('.preview-pane');
+    const statusEl = editorWrap.querySelector('.editor-status .msg');
+    const toolbar = editorWrap.querySelector('.editor-toolbar');
+    const scope = editorWrap.getAttribute('data-scope') || (pane && pane.id) || ('scope-'+Math.random().toString(36).slice(2,8));
+
+    if(!pane) return;
+
+    // 本地草稿 key
+    const KEY = 'draft:'+scope;
+
+    // 恢复草稿
+    try{
+      const saved = localStorage.getItem(KEY);
+      if (saved && !pane.value) { pane.value = saved; toast('已从本地草稿恢复'); }
+    }catch{}
+
+    const render = ()=>{ if (pv) pv.innerHTML = pane.value.trim() ? md(pane.value) : ''; };
+
+    // 自动保存（轻量去抖）
+    let timer = null;
+    const markDirty = ()=>{
+      if (statusEl) statusEl.textContent = '有未保存的草稿';
+      clearTimeout(timer);
+      timer = setTimeout(()=>{
+        try { localStorage.setItem(KEY, pane.value); if (statusEl) statusEl.textContent = '草稿已自动保存'; } catch {}
+        render();
+      }, 500);
+    };
+
+    pane.addEventListener('input', markDirty);
+    render();
+
+    // 快捷键：Ctrl+S 保存草稿；Ctrl+\\ 分栏；斜杠模板
+    pane.addEventListener('keydown', (e)=>{
+      if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
+        e.preventDefault();
+        try { localStorage.setItem(KEY, pane.value); if (statusEl) statusEl.textContent='已手动保存草稿'; toast('草稿已保存'); } catch {}
+      } else if ((e.ctrlKey||e.metaKey) && e.key==='\\'){
+        e.preventDefault(); toggleSplit(editorWrap);
+      } else if (e.key==='/' && !e.shiftKey){
+        const pos = pane.selectionStart;
+        const before = pane.value.slice(0,pos);
+        const after  = pane.value.slice(pos);
+        const menu = [
+          {k:'/标题',v:'# 标题'},
+          {k:'/小节',v:'## 小节'},
+          {k:'/要点',v:'- 要点 1\\n- 要点 2\\n- 要点 3'},
+          {k:'/警示',v:'> ⚠ 风险提示：…'},
+          {k:'/代码',v:'```\\n示例代码\\n```'},
+          {k:'/投票',v:'- ✅ 选项 A\\n- ❌ 选项 B'},
+        ];
+        const last = before.slice(before.lastIndexOf('\\n')+1);
+        const hit = menu.find(m=>last.trim()===m.k);
+        if (hit){
+          e.preventDefault();
+          const replaced = before.replace(/\\/?[^\\n]*$/, hit.v);
+          pane.value = replaced + after;
+          markDirty(); render();
+        }
+      }
+    });
+
+    // 工具条按钮
+    toolbar?.addEventListener('click', (e)=>{
+      const btn = e.target.closest('[data-cmd]');
+      if (!btn) return;
+      const cmd = btn.getAttribute('data-cmd');
+      if (cmd === 'split'){ toggleSplit(editorWrap); return; }
+
+      const selStart = pane.selectionStart, selEnd = pane.selectionEnd;
+      const sel = pane.value.slice(selStart, selEnd);
+      const wrapSel = (pre, post=pre)=>{
+        const v = pane.value;
+        const ins = (sel || '文本');
+        pane.value = v.slice(0,selStart) + pre + ins + post + v.slice(selEnd);
+        pane.focus();
+        pane.selectionStart = selStart + pre.length;
+        pane.selectionEnd   = pane.selectionStart + ins.length;
+      };
+      if (cmd==='bold')   wrapSel('**','**');
+      if (cmd==='italic') wrapSel('*','*');
+      if (cmd==='quote')  wrapSel('> ');
+      if (cmd==='code')   wrapSel('```\\n','\\n```');
+      if (cmd==='ul')     wrapSel('- ');
+      if (cmd==='h1')     wrapSel('# ');
+      if (cmd==='h2')     wrapSel('## ');
+      if (cmd==='link'){
+        const url = prompt('输入链接 URL：','https://');
+        if (url){
+          const v = pane.value;
+          const text = sel || '链接文本';
+          pane.value = v.slice(0,selStart) + `[${text}](${url})` + v.slice(selEnd);
+        }
+      }
+      markDirty(); render();
+    });
+  }
+
+  function toggleSplit(wrap){
+    wrap.classList.toggle('split');
+    const pv = wrap.querySelector('.preview-pane');
+    if (pv && pv.style.display==='none') pv.style.display='';
+  }
+
+  function toast(msg='已保存'){
+    let t = document.querySelector('.toast');
+    if (!t){ t = document.createElement('div'); t.className='toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    requestAnimationFrame(()=> t.classList.add('show'));
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(()=> t.classList.remove('show'), 1800);
+  }
+
+  // 沉浸模式：仅高亮当前 Tab 卡片
+  const immersiveBtn = document.getElementById('toggle-immersive');
+  immersiveBtn?.addEventListener('click', ()=>{
+    document.body.classList.toggle('immersive');
+    document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
+    const active = document.querySelector('.tab-panel.active');
+    if (active) active.classList.add('focus-card');
+  });
+
+  // 初次绑定所有编辑器
+  $$('.editor-wrap').forEach(setupEditor);
+
+  // Tab 切换：刷新预览 & 聚焦沉浸
+  $$('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const name = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b===btn));
+      document.querySelectorAll('.tab-panel').forEach(p=>{
+        p.classList.toggle('active', p.id === 'tab-'+name);
+      });
+      // 刷新可见面板中的预览
+      setTimeout(()=>{
+        document.querySelectorAll('.tab-panel.active .editor-wrap').forEach(w=>{
+          const ta = w.querySelector('textarea');
+          const pv = w.querySelector('.preview-pane');
+          if (ta && pv) pv.innerHTML = ta.value.trim()? md(ta.value) : '';
+        });
+        if (document.body.classList.contains('immersive')){
+          document.querySelectorAll('.focus-card').forEach(el=>el.classList.remove('focus-card'));
+          const active = document.querySelector('.tab-panel.active');
+          if (active) active.classList.add('focus-card');
+        }
+      }, 0);
+    });
+  });
+
+  // 第一次进入的快捷提示
+  if (!localStorage.getItem('writer.hint')){
+    toast('提示：Ctrl+\\ 切换左右分栏，Ctrl+S 保存草稿');
+    localStorage.setItem('writer.hint','1');
+  }
+  </script>
 </body>
 </html>
