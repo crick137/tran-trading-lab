@@ -1,6 +1,7 @@
 // ===== src/main.js (KO, boards = left-image/right-title; Home restored to hero+feature cards) =====
 import './styles/global.css'
 import './components/x-tv-chart.js'
+import './components/x-market-news.js'
 import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
 
 const routes = {
@@ -291,7 +292,7 @@ function renderMarketNewsView(){
     <section aria-labelledby="news-title" data-route="market-news">
       <div class="card">
         <h2 id="news-title">마켓 뉴스</h2>
-        <ul id="news-list" class="media-list"><li class="media-empty">불러오는 중…</li></ul>
+        <x-market-news></x-market-news>
       </div>
     </section>
   `;
@@ -520,7 +521,6 @@ async function renderRoute(routeId, slug){
 
     case 'market-news':
       renderMarketNewsView();
-      await renderMarketNewsList();
       break;
     case 'market-news-detail':
       renderMarketNewsDetailView();
