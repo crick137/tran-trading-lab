@@ -1,5 +1,5 @@
-// ===== /public/components/x-articles.js =====
-// 动态文章列表组件（自动从 /api/research/articles/index.json 拉取最新文章）
+// ===== /src/components/x-articles.js =====
+// 动态文章列表组件：从 /api/research/articles/index.json 拉取最新文章
 
 class XArticles extends HTMLElement {
   async connectedCallback() {
@@ -21,7 +21,7 @@ class XArticles extends HTMLElement {
       const style = document.createElement('style');
       style.textContent = `
         #articles .list { display: grid; gap: 12px; }
-        #articles .item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border:1px solid #2a2f36; border-radius:12px; }
+        #articles .item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border:1px solid #2a2f36; border-radius:12px; cursor:pointer; }
         #articles .thumb { width: 120px; height: 80px; object-fit: cover; border-radius: 10px; flex-shrink: 0; background:#111; }
         #articles .body  { flex: 1; min-width: 0; }
         #articles .top   { display: flex; justify-content: space-between; gap: 8px; }
@@ -48,16 +48,17 @@ class XArticles extends HTMLElement {
 
       for (const slug of list) {
         try {
-          const res = await fetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { cache: 'no-store' });
+          const safeSlug = slug.replace(/[\\/]+/g, '-');
+          const res = await fetch(`/api/research/articles/${encodeURIComponent(safeSlug)}.json`, { cache: 'no-store' });
           if (!res.ok) continue;
           const art = await res.json();
           const item = document.createElement('article');
           item.className = 'item card';
-          item.addEventListener('click', ()=> window.location.hash = `#/articles/${slug}`);
+          item.addEventListener('click', ()=> window.location.hash = `#/articles/${safeSlug}`);
 
           const img = document.createElement('img');
           img.className = 'thumb';
-          img.alt = art.title || slug;
+          img.alt = art.title || safeSlug;
           img.src = art.hero || '/logo.png';
           item.appendChild(img);
 
@@ -68,7 +69,7 @@ class XArticles extends HTMLElement {
           top.className = 'top';
           const strong = document.createElement('strong');
           strong.className = 'title';
-          strong.textContent = art.title || slug;
+          strong.textContent = art.title || safeSlug;
           const date = document.createElement('span');
           date.className = 'badge date';
           date.textContent = (art.date||'').slice(0,10);

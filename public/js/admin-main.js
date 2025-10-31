@@ -227,57 +227,6 @@ function bindDailyBrief(){
   btnClear?.addEventListener('click',()=>{ clearForm(); Draft.clear('brief'); if(msg) msg.textContent=''; wireLivePreview($('#tab-brief')); });
   btnRefresh?.addEventListener('click',()=> refreshIndexView('daily-brief',indexView));
 }
-/* ---------------- Analyses ---------------- */
-function bindAnalyses(){
-  const f={ slug:$('#a-slug'), title:$('#a-title'), symbol:$('#a-symbol'), tf:$('#a-tf'), date:$('#a-date'), bias:$('#a-bias'), tags:$('#a-tags'), supports:$('#a-supports'), resistances:$('#a-resistances'), context:$('#a-context'), view:$('#a-view'), invalidation:$('#a-invalidation'), chartSymbol:$('#a-chart-symbol'), chartInterval:$('#a-chart-interval') };
-  const msg=$('#a-msg'), idx=$('#a-index');
-  const btn={ publish:$('#a-publish'), delete:$('#a-delete'), reuse:$('#a-reuse'), preview:$('#a-preview'), clear:$('#a-clear'), refresh:$('#a-refresh') };
-
-  initTextareaUX($('#tab-analyses')); wireLivePreview($('#tab-analyses'));
-  [f.supports,f.resistances,f.context,f.view].forEach(attachCounter);
-  const draft=wireDraft('analyses',f,{ onChange(){ wireLivePreview($('#tab-analyses')); }});
-
-  const clear=()=>{ if(f.slug)f.slug.value=''; if(f.title)f.title.value=''; if(f.symbol)f.symbol.value=''; if(f.tf)f.tf.value=''; if(f.date)f.date.value=today(); if(f.bias)f.bias.value='neutral'; ['tags','supports','resistances','context','view','invalidation','chartSymbol'].forEach(k=>f[k]&&(f[k].value='')); if(f.chartInterval)f.chartInterval.value='60'; };
-  const fill=doc=>{ if(!doc)return; f.slug&&(f.slug.value=doc.slug||''); f.title&&(f.title.value=doc.title||''); f.symbol&&(f.symbol.value=doc.symbol||''); f.tf&&(f.tf.value=doc.tf||doc.interval||''); f.date&&(f.date.value=doc.date||today()); f.bias&&(f.bias.value=doc.bias||'neutral'); f.tags&&(f.tags.value=Array.isArray(doc.tags)?doc.tags.join(', '):''); f.supports&&(f.supports.value=joinLines(doc.supports)); f.resistances&&(f.resistances.value=joinLines(doc.resistances)); f.context&&(f.context.value=doc.context||''); f.view&&(f.view.value=doc.view||''); f.invalidation&&(f.invalidation.value=doc.invalidation||''); f.chartSymbol&&(f.chartSymbol.value=(doc.chart&&doc.chart.symbol)||doc.chartSymbol||doc.symbol||''); f.chartInterval&&(f.chartInterval.value=(doc.chart&&doc.chart.interval)||doc.chartInterval||'60'); };
-
-  refreshIndexView('analyses', idx);
-
-  btn.publish?.addEventListener('click', async ()=>{
-    const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
-    if(msg) msg.textContent='正在发布...';
-    try{
-      const payload={ slug, title:f.title?.value?.trim()||undefined, symbol:f.symbol?.value?.trim()||undefined, tf:f.tf?.value?.trim()||undefined, date:f.date?.value?.trim()||today(), bias:f.bias?.value||'neutral', tags:splitLines((f.tags?.value||'').replace(/,/g,'\n')), supports:splitLines(f.supports?.value||''), resistances:splitLines(f.resistances?.value||''), context:f.context?.value?.trim()||undefined, view:f.view?.value?.trim()||undefined, invalidation:f.invalidation?.value?.trim()||undefined, chart:{ symbol:f.chartSymbol?.value?.trim()||undefined, interval:f.chartInterval?.value||'60' } };
-      const r=await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
-      unwrapResponse(r,'PUBLISH_FAILED');
-      if(msg) msg.textContent='发布成功 ✓'; draft.clear(); await refreshIndexView('analyses', idx);
-    }catch(e){ if(msg) msg.textContent='发布失败: '+(e.message||e); }
-  });
-
-  btn.delete?.addEventListener('click', async ()=>{
-    const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
-    if(!confirm(`确认删除市场分析：${slug}？`)) return;
-    if(msg) msg.textContent='正在删除...';
-    try{
-      const r=await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`,{method:'DELETE'});
-      unwrapResponse(r,'DELETE_FAILED');
-      if(msg) msg.textContent='删除成功 ✓'; draft.clear(); await refreshIndexView('analyses', idx);
-    }catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e); }
-  });
-
-  btn.reuse?.addEventListener('click', async ()=>{
-    if(msg) msg.textContent='正在载入线上数据...';
-    try{
-      const list=await fetchIndex('analyses'); if(!Array.isArray(list)||!list.length) throw new Error('暂无历史数据');
-      const latest=typeof list[0]==='string'?list[0]:list[0]?.slug; if(!latest) throw new Error('索引数据无效');
-      const doc=await fetchDocument('analyses', latest); fill(doc||{}); if(f.slug&&doc?.slug) f.slug.value=`${doc.slug}-${today()}`;
-      if(msg) msg.textContent=`已载入 ${latest}，Slug 已追加今日日期。`; wireLivePreview($('#tab-analyses'));
-    }catch(e){ if(msg) msg.textContent='载入线上数据失败: '+(e.message||e); }
-  });
-
-  btn.preview?.addEventListener('click', ()=>{ const slug=f.slug?.value?.trim(); if(!slug)return; window.open(`/#/trade-journal?slug=${encodeURIComponent(slug)}`,'_blank','noopener'); });
-  btn.clear?.addEventListener('click', ()=>{ clear(); draft.clear(); if(msg) msg.textContent=''; wireLivePreview($('#tab-analyses')); });
-  btn.refresh?.addEventListener('click', ()=> refreshIndexView('analyses', idx));
-}
 
 /* ---------------- Research Articles ---------------- */
 function bindResearchArticles(){
@@ -295,22 +244,24 @@ function bindResearchArticles(){
   refreshIndexView('research/articles', idx);
 
   btn.publish?.addEventListener('click', async ()=>{
-    const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
+    const slugRaw=f.slug?.value?.trim(); if(!slugRaw) return msg && (msg.textContent='请输入 slug');
+    const safeSlug=slugRaw.replace(/[\\/]+/g,'-');  // ✅ 修复：防止路径嵌套
     if(msg) msg.textContent='正在发布...';
     try{
-      const payload={ slug, title:f.title?.value?.trim()||undefined, excerpt:f.excerpt?.value?.trim()||undefined, tags:splitLines((f.tags?.value||'').replace(/,/g,'\n')), hero:f.hero?.value?.trim()||undefined, date:new Date().toISOString(), body:f.body?.value||'' };
-      const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
+      const payload={ slug:safeSlug, title:f.title?.value?.trim()||undefined, excerpt:f.excerpt?.value?.trim()||undefined, tags:splitLines((f.tags?.value||'').replace(/,/g,'\n')), hero:f.hero?.value?.trim()||undefined, date:new Date().toISOString(), body:f.body?.value||'' };
+      const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(safeSlug)}.json`,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
       unwrapResponse(r,'PUBLISH_FAILED');
       if(msg) msg.textContent='发布成功 ✓'; draft.clear(); await refreshIndexView('research/articles', idx);
     }catch(e){ if(msg) msg.textContent='发布失败: '+(e.message||e); }
   });
 
   btn.delete?.addEventListener('click', async ()=>{
-    const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
-    if(!confirm(`确认删除研究文章：${slug}？`)) return;
+    const slugRaw=f.slug?.value?.trim(); if(!slugRaw) return msg && (msg.textContent='请输入 slug');
+    const safeSlug=slugRaw.replace(/[\\/]+/g,'-');
+    if(!confirm(`确认删除研究文章：${safeSlug}？`)) return;
     if(msg) msg.textContent='正在删除...';
     try{
-      const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{method:'DELETE'});
+      const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(safeSlug)}.json`,{method:'DELETE'});
       unwrapResponse(r,'DELETE_FAILED');
       if(msg) msg.textContent='删除成功 ✓'; draft.clear(); await refreshIndexView('research/articles', idx);
     }catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e); }
@@ -326,7 +277,7 @@ function bindResearchArticles(){
     }catch(e){ if(msg) msg.textContent='载入线上数据失败: '+(e.message||e); }
   });
 
-  btn.preview?.addEventListener('click', ()=>{ const slug=f.slug?.value?.trim(); if(!slug)return; window.open(`/#/articles/${encodeURIComponent(slug)}`,'_blank','noopener'); });
+  btn.preview?.addEventListener('click', ()=>{ const slug=f.slug?.value?.trim(); if(!slug)return; const safeSlug=slug.replace(/[\\/]+/g,'-'); window.open(`/#/articles/${encodeURIComponent(safeSlug)}`,'_blank','noopener'); });
   btn.clear?.addEventListener('click', ()=>{ clear(); draft.clear(); if(msg) msg.textContent=''; wireLivePreview($('#tab-articles')); });
   btn.refresh?.addEventListener('click', ()=> refreshIndexView('research/articles', idx));
 }
@@ -339,7 +290,6 @@ function boot(){
     setupTabs();
     bindDiagnostics();
     bindDailyBrief();
-    bindAnalyses();
     bindResearchArticles();
     console.log('[admin] booted');
   }catch(e){
