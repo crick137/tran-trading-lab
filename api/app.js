@@ -197,6 +197,16 @@ async function genericHandler(req, pathname, PREFIX) {
     
     // 鍒楄〃 / 绱㈠紩
     if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
+      // research/articles: 强制以 Blob 列表为准，避免索引残留
+      if (PREFIX === 'research/articles') {
+        const blobs = await listByPrefix(`${PREFIX}/`);
+        const items = (blobs || [])
+          .filter(b => b.pathname && b.pathname.endsWith('.json'))
+          .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
+          .filter(s => s && s !== 'index')
+          .sort((a,b)=> (a > b ? -1 : 1));
+        return ok(items);
+      }
       const idx = await readIndexJson(`${PREFIX}/index.json`);
       const blobs = await listByPrefix(`${PREFIX}/`);
       const blobNames = new Set(
@@ -291,6 +301,7 @@ async function genericHandler(req, pathname, PREFIX) {
       } catch (e) {
         console.warn(`[API] ensureDeleted error for ${FILE}:`, e?.message || e);
       }
+      // 清理索引：兼容可能存在的上次写入（即便我们对 research/articles 已不再依赖索引）
       try { await removeFromIndex(PREFIX, slug); } catch (e) {
         console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
       }

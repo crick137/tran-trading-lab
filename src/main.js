@@ -40,6 +40,9 @@ const marketNewsCache = new Map();
 let articlesIndexCache = null;
 const articlesDetailCache = new Map();
 
+// ---- 通用规范化工具 ----
+function sanitizeSlug(v){ return String(v||'').replace(/[\\/]+/g, '-'); }
+
 // -------- 路由匹配 ----------
 function matchRoute() {
   const raw = location.hash || '#/';
@@ -330,13 +333,14 @@ function escapeHtml(text){
 // ===== Articles 数据 =====
 async function loadArticleDetail(slug){
   if (!slug) throw new Error('INVALID_SLUG');
-  if (!articlesDetailCache.has(slug)){
-    const res = await fetch(`/api/research/articles/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
+  const safe = sanitizeSlug(slug);
+  if (!articlesDetailCache.has(safe)){
+    const res = await fetch(`/api/research/articles/${encodeURIComponent(safe)}.json?_=${Date.now()}`);
     if (!res.ok) throw new Error('NOT_FOUND');
     const data = await res.json();
-    articlesDetailCache.set(slug, data || {});
+    articlesDetailCache.set(safe, data || {});
   }
-  return articlesDetailCache.get(slug) || {};
+  return articlesDetailCache.get(safe) || {};
 }
 
 /* ========== Articles 列表渲染（媒体列表） ========== */
@@ -350,6 +354,7 @@ async function renderArticlesList(){
     articlesIndexCache = Array.isArray(data) ? data : [];
     const slugs = articlesIndexCache
       .map(item => typeof item === 'string' ? item : (item && item.slug) ? item.slug : '')
+      .map(sanitizeSlug)
       .filter(Boolean).slice(0, 60);
 
     if (!slugs.length){ host.innerHTML = '<li class="media-empty">등록된 아티클이 없습니다</li>'; return; }
@@ -358,8 +363,9 @@ async function renderArticlesList(){
       try{
         const d = await loadArticleDetail(slug);
         const meta = [d.date ? new Date(d.date).toLocaleDateString() : '', Array.isArray(d.tags)? d.tags.slice(0,3).map(t=>`#${t}`).join(' ') : ''].filter(Boolean).join(' · ');
+        const safeSlug = sanitizeSlug(slug);
         return _mediaItem({
-          href: `#/articles/${encodeURIComponent(slug)}`,
+          href: `#/articles/${encodeURIComponent(safeSlug)}`,
           title: d.title || slug,
           desc: d.excerpt || (d.body ? String(d.body).slice(0,120)+'…' : ''),
           meta,
@@ -384,7 +390,7 @@ async function renderArticleDetail(slug){
   }
   host.innerHTML = `<div class="card"><h2>불러오는 중…</h2></div>`;
   try{
-    const detail = await loadArticleDetail(slug);
+    const detail = await loadArticleDetail(sanitizeSlug(slug));
     const title = detail?.title || slug;
     const date = detail?.date ? new Date(detail.date).toLocaleString() : '';
     const tags = Array.isArray(detail?.tags) && detail.tags.length ? detail.tags.map(t=>`#${t}`).join(' ') : '';
