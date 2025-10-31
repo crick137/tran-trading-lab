@@ -1,30 +1,80 @@
-// /server/handlers/research/articles/[slug].js
-import { readJSONViaFetch } from '../../../_lib/blob.js';
-import { jsonOK, notFound, badRequest } from '../../../_lib/http.js';
+import { writeJSON, readList, readJSONViaFetch, del } from '../../_lib/blob.js';
+import { jsonOK, badRequest, notFound } from '../../_lib/http.js';
 
 const PREFIX = 'research/articles';
+const INDEX  = `${PREFIX}/index.json`;
 
 export default async function handler(req) {
   const { method } = req;
-  if (method !== 'GET') {
-    return badRequest('METHOD_NOT_ALLOWED', 405);
+
+  /* ---------------- GET ---------------- */
+  if (method === 'GET') {
+    try {
+      const blobs = await readList(`${PREFIX}/`);
+      const items = blobs
+        .filter(b => b.pathname.endsWith('.json') && b.pathname !== INDEX)
+        .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
+        .sort((a, b) => (a > b ? -1 : 1));
+      return jsonOK(items);
+    } catch (err) {
+      console.error(`[GET] ${PREFIX}`, err);
+      return badRequest('INDEX_READ_ERROR');
+    }
   }
 
-  try {
-    // slug 形如 "2025/10/27" 或 "2025-10-27"
-    const url = new URL(req.url);
-    const parts = url.pathname.split('/');
-    const slug = parts.slice(-1)[0].replace('.json', '');
+  /* ---------------- POST (发布) ---------------- */
+  if (method === 'POST') {
+    try {
+      const payload = await req.json();
+      let { slug } = payload || {};
+      if (!slug) return badRequest('MISSING_SLUG');
+      slug = slug.replace(/[\\/]+/g, '-'); // 防止路径嵌套问题
 
-    // 有时路径带多层目录
-    const slugPath = parts.slice(parts.indexOf('articles') + 1).join('/');
-    const key = `${PREFIX}/${slugPath.replace('.json','')}.json`;
+      await writeJSON(`${PREFIX}/${slug}.json`, payload);
 
-    const data = await readJSONViaFetch(key);
-    if (!data) return notFound('ARTICLE_NOT_FOUND');
-    return jsonOK(data);
-  } catch (err) {
-    console.error('[GET] articles/[slug]', err);
-    return notFound('ARTICLE_READ_ERROR');
+      // 更新索引
+      let idx = [];
+      try {
+        const exist = await readJSONViaFetch(INDEX);
+        if (Array.isArray(exist)) idx = exist;
+      } catch {}
+      if (!idx.includes(slug)) idx.unshift(slug);
+
+      await writeJSON(INDEX, idx);
+      return jsonOK({ ok: true, slug, index: idx });
+    } catch (err) {
+      console.error(`[POST] ${PREFIX}`, err);
+      return badRequest('POST_ERROR');
+    }
   }
+
+  /* ---------------- DELETE (删除) ---------------- */
+  if (method === 'DELETE') {
+    try {
+      const payload = await req.json();
+      let { slug } = payload || {};
+      if (!slug) return badRequest('MISSING_SLUG');
+      slug = slug.replace(/[\\/]+/g, '-');
+
+      // 删除文件
+      await del(`${PREFIX}/${slug}.json`);
+
+      // 更新 index.json
+      let idx = [];
+      try {
+        const exist = await readJSONViaFetch(INDEX);
+        if (Array.isArray(exist)) {
+          idx = exist.filter(s => s !== slug);
+        }
+      } catch {}
+      await writeJSON(INDEX, idx);
+
+      return jsonOK({ ok: true, removed: slug, index: idx });
+    } catch (err) {
+      console.error(`[DELETE] ${PREFIX}`, err);
+      return badRequest('DELETE_ERROR');
+    }
+  }
+
+  return notFound('METHOD_NOT_ALLOWED');
 }
