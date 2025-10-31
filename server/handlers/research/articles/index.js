@@ -1,8 +1,8 @@
-import { writeJSON, readList, readJSONViaFetch, del } from '../../_lib/blob.js';
+import { writeJSON, readList, readJSONViaFetch, deleteObject } from '../../_lib/blob.js';
 import { jsonOK, badRequest, notFound } from '../../_lib/http.js';
 
 const PREFIX = 'research/articles';
-const INDEX  = `${PREFIX}/index.json`;
+const INDEX = `${PREFIX}/index.json`;
 
 export default async function handler(req) {
   const { method } = req;
@@ -54,22 +54,23 @@ export default async function handler(req) {
       const payload = await req.json();
       let { slug } = payload || {};
       if (!slug) return badRequest('MISSING_SLUG');
-      slug = slug.replace(/[\\/]+/g, '-');
+      const safeSlug = slug.replace(/[\\/]+/g, '-');
 
-      // 删除文件
-      await del(`${PREFIX}/${slug}.json`);
+      // 删除文件（同时尝试旧路径）
+      await deleteObject(`${PREFIX}/${safeSlug}.json`).catch(() => {});
+      await deleteObject(`${PREFIX}/${slug}.json`).catch(() => {});
 
       // 更新 index.json
       let idx = [];
       try {
         const exist = await readJSONViaFetch(INDEX);
         if (Array.isArray(exist)) {
-          idx = exist.filter(s => s !== slug);
+          idx = exist.filter(s => s !== safeSlug && s !== slug);
         }
       } catch {}
       await writeJSON(INDEX, idx);
 
-      return jsonOK({ ok: true, removed: slug, index: idx });
+      return jsonOK({ ok: true, removed: safeSlug, index: idx });
     } catch (err) {
       console.error(`[DELETE] ${PREFIX}`, err);
       return badRequest('DELETE_ERROR');
