@@ -595,7 +595,7 @@ function bindResearchArticles(){
   btn.delete?.addEventListener('click', async ()=>{
     const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
     if(!confirm(`确认删除研究文章：${slug}？`)) return;
-    ifmsg) msg.textContent='正在删除...';
+    if (msg) msg.textContent='正在删除...';
     try{ const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{method:'DELETE'}); unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功'; draft.clear(); await refreshIndexView('research/articles', idx);}catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e) }
   });
 
