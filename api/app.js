@@ -197,13 +197,16 @@ async function genericHandler(req, pathname, PREFIX) {
     
     // 鍒楄〃 / 绱㈠紩
     if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
-      // research/articles: 强制以 Blob 列表为准，避免索引残留
+      // research/articles: 强制以 Blob 列表为准，返回“已清洗的 slug”（/ -> -，去尾部下划线）
       if (PREFIX === 'research/articles') {
         const blobs = await listByPrefix(`${PREFIX}/`);
         const items = (blobs || [])
           .filter(b => b.pathname && b.pathname.endsWith('.json'))
           .map(b => b.pathname.replace(`${PREFIX}/`, '').replace('.json', ''))
-          .filter(s => s && s !== 'index')
+          .map(s => s.replace(/\/+/, '/'))
+          .map(s => s.replace(/\//g, '-'))
+          .map(s => s.replace(/_+$/,''))
+          .filter((s, i, arr) => s && s !== 'index' && arr.indexOf(s) === i)
           .sort((a,b)=> (a > b ? -1 : 1));
         return ok(items);
       }
@@ -238,6 +241,28 @@ async function genericHandler(req, pathname, PREFIX) {
   
     // 璇?
     if (req.method === 'GET') {
+      // 文章读取容错：对 research/articles 允许 slug 变体兜底（含日期型 2025-10-27 => 2025/10/27）
+      if (PREFIX === 'research/articles'){
+        const dateToNested = (s)=>{
+          const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})_?$/);
+          return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
+        };
+        const nestedToDash = (s)=> s && s.replace(/\//g,'-');
+        const dash = slug.replace(/[\\\\/]+/g,'-').replace(/_+$/,'');
+        const nested = dateToNested(dash) || dateToNested(slug) || null;
+        const candidates = Array.from(new Set([
+          slug,
+          dash,
+          slug.replace(/_+$/,''),
+          nested || '',
+          nested ? nestedToDash(nested) : ''
+        ].filter(Boolean)));
+        for (const s of candidates){
+          try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); }
+          catch { /* try next */ }
+        }
+        return err('NOT_FOUND', 404);
+      }
       try { return ok(await readJSONViaFetch(FILE)); }
       catch { return err('NOT_FOUND', 404); }
     }
@@ -285,6 +310,29 @@ async function genericHandler(req, pathname, PREFIX) {
     // 鍒?
         if (req.method === 'DELETE') {
       const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
+      if (PREFIX === 'research/articles'){
+        // 容错删除：尝试删除多个可能的文件名变体
+        const dateToNested = (s)=>{
+          const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})_?$/);
+          return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
+        };
+        const dash = slug.replace(/[\\\\/]+/g,'-').replace(/_+$/,'');
+        const nested = dateToNested(dash) || dateToNested(slug) || null;
+        const variants = Array.from(new Set([
+          slug,
+          dash,
+          slug.replace(/_+$/,''),
+          nested || ''
+        ].filter(Boolean)));
+        let any = false;
+        for (const s of variants){
+          const path = `${PREFIX}/${s}.json`;
+          try { await deleteObject(path); any = true; } catch (e) { /* ignore and continue */ }
+          try { await ensureDeleted(PREFIX, s); } catch (e) { /* ignore */ }
+          try { await removeFromIndex(PREFIX, s); } catch (e) { /* ignore */ }
+        }
+        return ok({ deleted: any, slug });
+      }
       try {
         await deleteObject(FILE);
       } catch (e) {
@@ -301,7 +349,6 @@ async function genericHandler(req, pathname, PREFIX) {
       } catch (e) {
         console.warn(`[API] ensureDeleted error for ${FILE}:`, e?.message || e);
       }
-      // 清理索引：兼容可能存在的上次写入（即便我们对 research/articles 已不再依赖索引）
       try { await removeFromIndex(PREFIX, slug); } catch (e) {
         console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
       }
