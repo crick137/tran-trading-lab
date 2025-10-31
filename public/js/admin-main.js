@@ -396,6 +396,7 @@ function bindNews(){
     try{ const r=await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`,{method:'DELETE'}); unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功'; Draft.clear('news'); await refreshIndexView('market-news', idx);}catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e) }
   });
 
+  // 🔧 修正这里的笔误：addEventListener（原来多了个反引号导致整个文件语法错误）
   btn.reuse?.addEventListener('click', async ()=>{
     if(msg) msg.textContent='正在载入线上数据...';
     try{
@@ -594,7 +595,7 @@ function bindResearchArticles(){
   btn.delete?.addEventListener('click', async ()=>{
     const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
     if(!confirm(`确认删除研究文章：${slug}？`)) return;
-    if(msg) msg.textContent='正在删除...';
+    ifmsg) msg.textContent='正在删除...';
     try{ const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{method:'DELETE'}); unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功'; draft.clear(); await refreshIndexView('research/articles', idx);}catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e) }
   });
 
