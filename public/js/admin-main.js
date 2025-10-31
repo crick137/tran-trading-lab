@@ -134,64 +134,6 @@ function attachCounter(el, where){
   })};
   el.addEventListener('input', update, {passive:true}); update();
 }
-
-/* ---- Inline toolbar (bold / italic / quote / code / list / split) ---- */
-function insertAtCursor(el, before = '', after = '') {
-  el.focus();
-  const s = el.selectionStart ?? el.value.length;
-  const e = el.selectionEnd ?? el.value.length;
-  const v = el.value;
-  const selected = v.slice(s, e);
-  if (before === '• ') {
-    const head = v.slice(0, s);
-    const body = v.slice(s, e);
-    const tail = v.slice(e);
-    const lines = body.split(/\r?\n/).map(x => x ? '• ' + x.replace(/^([•\-\*]\s+)/, '') : '• ');
-    const txt = lines.join('\n');
-    el.value = head + txt + tail;
-    const pos = head.length + txt.length;
-    el.setSelectionRange(pos, pos);
-  } else {
-    el.value = v.slice(0, s) + before + selected + after + v.slice(e);
-    const pos = s + before.length + selected.length + after.length;
-    el.setSelectionRange(pos, pos);
-  }
-  el.dispatchEvent(new Event('input', { bubbles: true }));
-}
-function bindInlineToolbar(scope) {
-  const root = scope || document;
-  root.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-md]');
-    if (!btn) return;
-    const container = btn.closest('.field, .editor, .grid, .card, .section, .tab-panel') || root;
-    const ta = container.querySelector('textarea');
-    if (!ta) return;
-    const cmd = btn.dataset.md;
-    switch (cmd) {
-      case 'bold':   insertAtCursor(ta, '**', '**'); break;
-      case 'italic': insertAtCursor(ta, '*', '*'); break;
-      case 'quote':  insertAtCursor(ta, '> ', ''); break;
-      case 'code':   insertAtCursor(ta, '`', '`'); break;
-      case 'list':   insertAtCursor(ta, '• ', ''); break;
-      case 'split': {
-        const block = [
-          '::: cols',
-          ':: left',
-          '左栏内容……',
-          ':: right',
-          '右栏内容……',
-          ':::',
-          ''
-        ].join('\n');
-        insertAtCursor(ta, block, '');
-        break;
-      }
-      default: return;
-    }
-  });
-}
-
-/* ---- Live preview (throttled) ---- */
 function renderPreviewText(raw){
   const val=(raw||'').trim(); if(!val) return '';
   if (typeof window.md==='function'){ try{ return window.md(val) }catch{} }
@@ -202,32 +144,12 @@ function wireLivePreview(panel){
   if(!panel || panel.dataset.livePreviewBound==='1') return;
   const panes = $$('.preview-pane', panel); if(!panes.length) return;
   const src = $('textarea[data-preview], textarea', panel); if(!src) return;
-  let raf=0, last=0;
-
-  const render = () => {
-    const val = src.value || '';
-    if (val.length > 10000) {
-      panes.forEach(p => p.innerHTML = '<em>内容较长，已暂停实时预览。</em>');
-      return;
-    }
-    let html = '';
-    try { html = renderPreviewText(val); } catch {}
-    panes.forEach(p => p.innerHTML = html);
-  };
-
-  const onInput = () => {
-    const now = performance.now();
-    if (now - last < 120) {
-      if (!raf) raf = requestAnimationFrame(() => { last = performance.now(); raf = 0; render(); });
-      return;
-    }
-    last = now;
-    if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); });
-  };
-
-  src.addEventListener('input', onInput, { passive: true });
-  panel.dataset.livePreviewBound='1';
-  render();
+  let raf=0; const render=()=>{ const html=renderPreviewText(src.value); panes.forEach(p=>p.innerHTML=html); };
+  const onInput=()=>{ if(raf) cancelAnimationFrame(raf); raf=requestAnimationFrame(render); };
+  src.addEventListener('input', onInput, {passive:true}); panel.dataset.livePreviewBound='1'; render();
+}
+function initTextareaUX(scope=document){
+  $$('textarea', scope).forEach(ta=>{ autosize(ta); cleanPaste(ta); if(!ta.classList.contains('no-counter')) attachCounter(ta); });
 }
 
 /* ---- Shortcuts ---- */
@@ -245,7 +167,7 @@ function activateTab(name){
   $$('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
   $$('.tab-panel').forEach(p=>p.classList.toggle('active', p.id==='tab-'+name));
   localStorage.setItem(ACTIVE_TAB_KEY,name);
-  const panel = $('#tab-'+name); if(panel){ initTextareaUX(panel); wireLivePreview(panel); bindInlineToolbar(panel); }
+  const panel = $('#tab-'+name); if(panel){ initTextareaUX(panel); wireLivePreview(panel); }
 }
 function setupTabs(){
   $$('.tab-btn').forEach(btn=> btn.addEventListener('click', ()=>activateTab(btn.dataset.tab)));
@@ -275,7 +197,7 @@ function bindDailyBrief(){
   const msg=$('#b-msg'), indexView=$('#b-index');
   const btnPublish=$('#b-publish'), btnDelete=$('#b-delete'), btnReuse=$('#b-reuse'), btnPreview=$('#b-preview'), btnClear=$('#b-clear'), btnRefresh=$('#b-refresh');
 
-  initTextareaUX($('#tab-brief')); wireLivePreview($('#tab-brief')); bindInlineToolbar($('#tab-brief'));
+  initTextareaUX($('#tab-brief')); wireLivePreview($('#tab-brief'));
   const ensureDefaultSlug=()=>{ if(fields.slug && !fields.slug.value) fields.slug.value=today(); };
   const clearForm=()=>{ if(fields.slug)fields.slug.value=today(); ['title','bullets','schedule','symbol'].forEach(k=>fields[k]&&(fields[k].value='')); if(fields.interval)fields.interval.value='60'; };
   const populate=doc=>{ if(!doc) return; if(fields.slug)fields.slug.value=doc.slug||today(); if(fields.title)fields.title.value=doc.title||''; if(fields.bullets)fields.bullets.value=joinLines(doc.bullets); if(fields.schedule)fields.schedule.value=joinLines(doc.schedule); if(fields.symbol)fields.symbol.value=(doc.chart&&doc.chart.symbol)||doc.symbol||''; if(fields.interval)fields.interval.value=(doc.chart&&doc.chart.interval)||'60'; };
@@ -322,7 +244,7 @@ function bindAnalyses(){
   const msg=$('#a-msg'), idx=$('#a-index');
   const btn={ publish:$('#a-publish'), delete:$('#a-delete'), reuse:$('#a-reuse'), preview:$('#a-preview'), clear:$('#a-clear'), refresh:$('#a-refresh') };
 
-  initTextareaUX($('#tab-analyses')); wireLivePreview($('#tab-analyses')); bindInlineToolbar($('#tab-analyses'));
+  initTextareaUX($('#tab-analyses')); wireLivePreview($('#tab-analyses'));
   [f.supports,f.resistances,f.context,f.view].forEach(attachCounter);
   const draft=wireDraft('analyses', f, { onChange(){ wireLivePreview($('#tab-analyses')); }});
 
@@ -369,7 +291,7 @@ function bindNews(){
   const msg=$('#n-msg'), idx=$('#n-index');
   const btn={ publish:$('#n-publish'), delete:$('#n-delete'), reuse:$('#n-reuse'), preview:$('#n-preview'), clear:$('#n-clear'), refresh:$('#n-refresh') };
 
-  initTextareaUX($('#tab-news')); wireLivePreview($('#tab-news')); bindInlineToolbar($('#tab-news'));
+  initTextareaUX($('#tab-news')); wireLivePreview($('#tab-news'));
   attachCounter(f.summary); attachCounter(f.bullets);
 
   wireDraft('news', f, { onChange(){ wireLivePreview($('#tab-news')); }});
@@ -396,12 +318,11 @@ function bindNews(){
     try{ const r=await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`,{method:'DELETE'}); unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功'; Draft.clear('news'); await refreshIndexView('market-news', idx);}catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e) }
   });
 
-  // 🔧 修正这里的笔误：addEventListener（原来多了个反引号导致整个文件语法错误）
   btn.reuse?.addEventListener('click', async ()=>{
     if(msg) msg.textContent='正在载入线上数据...';
     try{
       const list=await fetchIndex('market-news'); if(!Array.isArray(list)||!list.length) throw new Error('暂无历史数据');
-      const latest=typeof list[0]==='string'?list[0]:list[0]?.id; if(!latest) throw new Error('索引数据无效');
+      const latest=typeof list[0]==='string'?list[0]:list[0]?.id; if(!latest) throw new Error('索引数据无效'); // <- 修复
       const doc=await fetchDocument('market-news', latest); fill(doc||{}); if(f.id) f.id.value=`${today()}-1`;
       if(msg) msg.textContent=`已载入 ${latest}，ID 已更新为今日。`; wireLivePreview($('#tab-news'));
     }catch(e){ if(msg) msg.textContent='载入线上数据失败: '+(e.message||e) }
@@ -418,7 +339,7 @@ function bindResearchSyllabus(){
   const btnLoad=$('#r-load'), btnSave=$('#r-save'), btnClear=$('#r-clear'), btnPreview=$('#r-preview'), btnAddLevel=$('#r-add-level'), btnExpandAll=$('#r-expand-all'), btnCollapseAll=$('#r-collapse-all'), btnSyncJson=$('#r-sync-json');
   if(!textarea && !host) return;
 
-  initTextareaUX($('#tab-syllabus')); attachCounter(textarea); bindInlineToolbar($('#tab-syllabus'));
+  initTextareaUX($('#tab-syllabus')); attachCounter(textarea);
   let syllabusData=[]; const setMessage=t=>{ if(msg) msg.textContent=t||'' };
 
   const ensureLesson = (x={})=>({ name:x.name||'', link:x.link||'', type:x.type||'', duration:x.duration||'', desc:x.desc||'' });
@@ -503,7 +424,7 @@ function bindCourseContentEditor(){
   const btn={ save:$('#lesson-save'), del:$('#lesson-delete'), prev:$('#lesson-preview'), open:$('#lesson-open') };
   if(!listHost) return;
 
-  initTextareaUX($('#tab-syllabus')); wireLivePreview($('#tab-syllabus')); bindInlineToolbar($('#tab-syllabus'));
+  initTextareaUX($('#tab-syllabus')); wireLivePreview($('#tab-syllabus'));
 
   const state={ current:null };
   const toSlug=t=>String(t||'').toLowerCase().replace(/[#/]/g,' ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,120);
@@ -574,7 +495,7 @@ function bindResearchArticles(){
   const msg=$('#ra-msg'), idx=$('#ra-index');
   const btn={ publish:$('#ra-publish'), delete:$('#ra-delete'), reuse:$('#ra-reuse'), preview:$('#ra-preview'), clear:$('#ra-clear'), refresh:$('#ra-refresh') };
 
-  initTextareaUX($('#tab-articles')); wireLivePreview($('#tab-articles')); bindInlineToolbar($('#tab-articles')); attachCounter(f.excerpt); attachCounter(f.body);
+  initTextareaUX($('#tab-articles')); wireLivePreview($('#tab-articles')); attachCounter(f.excerpt); attachCounter(f.body);
   const draft=wireDraft('research-articles', f, { onChange(){ wireLivePreview($('#tab-articles')); }});
 
   const clear=()=>{ ['slug','title','excerpt','tags','hero','body'].forEach(k=>f[k]&&(f[k].value='')); };
@@ -595,7 +516,7 @@ function bindResearchArticles(){
   btn.delete?.addEventListener('click', async ()=>{
     const slug=f.slug?.value?.trim(); if(!slug) return msg && (msg.textContent='请输入 slug');
     if(!confirm(`确认删除研究文章：${slug}？`)) return;
-    if (msg) msg.textContent='正在删除...';
+    if(msg) msg.textContent='正在删除...';
     try{ const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{method:'DELETE'}); unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功'; draft.clear(); await refreshIndexView('research/articles', idx);}catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e) }
   });
 
