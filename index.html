@@ -53,6 +53,57 @@
 
     <main class="container" id="app" aria-live="polite"></main>
 
+    <!-- 👉 前端强制过滤 “2025/10/27”（不改后端逻辑） -->
+    <script>
+    (function () {
+      // 要屏蔽的 slug（两种写法都拦）
+      const BLOCK = new Set(['2025/10/27','2025-10-27']);
+      const RX_INDEX = /\/(api\/)?analyses\/index\.json(?:[?#]|$)/i;
+
+      // 拦截 fetch：当请求 analyses/index.json 时，过滤掉被屏蔽的项
+      const _fetch = window.fetch;
+      window.fetch = async function (input, init) {
+        const res = await _fetch(input, init);
+        try {
+          const url = (typeof input === 'string' ? input : input?.url) || '';
+          if (RX_INDEX.test(url)) {
+            const clone = res.clone();
+            let data = await clone.json();
+            const norm = (x)=> typeof x === 'string' ? x : (x?.slug || x?.id || '');
+            const drop = (arr)=> arr.filter(x => !BLOCK.has(norm(x)));
+            if (Array.isArray(data)) data = drop(data);
+            else if (data && Array.isArray(data.items)) data.items = drop(data.items);
+
+            return new Response(JSON.stringify(data), {
+              status: res.status,
+              statusText: res.statusText,
+              headers: { 'Content-Type':'application/json; charset=utf-8' }
+            });
+          }
+        } catch (e) {}
+        return res;
+      };
+
+      // 兜底：渲染后再扫 DOM，把仍含 “2025/10/27” 的卡片容器移除
+      function removeCards(){
+        const rx = /\b2025[\/-]10[\/-]27\b/;
+        const WRAPS = 'li,article,.card,.list-item,.item,.row,section,div';
+        document.querySelectorAll(WRAPS).forEach(el=>{
+          if (rx.test(el.textContent)) {
+            (el.closest(WRAPS) || el).remove();
+          }
+        });
+        // 同时隐藏包含该 slug 的链接
+        document.querySelectorAll(
+          'a[href*="2025%2F10%2F27"], a[href*="2025/10/27"], a[href*="2025-10-27"]'
+        ).forEach(a=>a.style.display='none');
+      }
+      document.addEventListener('DOMContentLoaded', removeCards);
+      // SPA 二次渲染时也处理
+      new MutationObserver(removeCards).observe(document.documentElement, { childList:true, subtree:true });
+    })();
+    </script>
+
     <!-- 앱 스크립트 -->
     <script type="module" src="/src/main.js"></script>
     <!-- 自动图片链接渲染（外链，安全） -->
