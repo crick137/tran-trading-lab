@@ -1,0 +1,107 @@
+{
+  "groups": [
+    {
+      "level": "코스 1 · 프리스쿨",
+      "lessons": [
+        { "name": "포렉스란 무엇인가?", "slug": "what-is-forex" },
+        { "name": "외환은 어떻게 거래하나요?", "slug": "how-to-trade-forex" },
+        { "name": "언제 외환을 거래할 수 있나요?", "slug": "when-to-trade-forex" },
+        { "name": "누가 외환을 거래하나요?", "slug": "who-trades-forex" },
+        { "name": "왜 외환을 거래하나요?", "slug": "why-trade-forex" },
+        { "name": "마진 거래 101", "slug": "margin-trading-101" }
+      ]
+    },
+    {
+      "level": "코스 2 · 킨더가튼",
+      "lessons": [
+        { "name": "외환 브로커 101", "slug": "forex-broker-101" },
+        { "name": "세 가지 분석 방법", "slug": "three-types-of-analysis" },
+        { "name": "차트의 종류", "slug": "types-of-charts" }
+      ]
+    },
+    {
+      "level": "코스 3 · 엘리멘터리",
+      "lessons": [
+        { "name": "서포트와 레지스턴스 레벨", "slug": "support-and-resistance" },
+        { "name": "일본식 캔들스틱", "slug": "japanese-candlesticks" },
+        { "name": "피보나치 기초", "slug": "fibonacci-basics" },
+        { "name": "이동평균 활용법", "slug": "moving-averages" },
+        { "name": "대표 보조지표", "slug": "core-indicators" }
+      ]
+    },
+    {
+      "level": "코스 4 · 미들 스쿨",
+      "lessons": [
+        { "name": "오실레이터와 모멘텀", "slug": "oscillators-and-momentum" },
+        { "name": "핵심 차트 패턴", "slug": "key-chart-patterns" },
+        { "name": "피벗 포인트의 활용", "slug": "pivot-points-101" }
+      ]
+    },
+    {
+      "level": "코스 5 · 서머 스쿨",
+      "lessons": [
+        { "name": "헬킨 아시 이해하기", "slug": "heikin-ashi-basics" },
+        { "name": "엘리어트 파동 이론", "slug": "elliott-wave-theory" },
+        { "name": "하모닉 프라이스 패턴", "slug": "harmonic-patterns" }
+      ]
+    },
+    {
+      "level": "코스 6 · 하이 스쿨",
+      "lessons": [
+        { "name": "트레이딩 다이버전스", "slug": "trading-divergence" },
+        { "name": "마켓 환경 파악", "slug": "market-environment" },
+        { "name": "브레이크아웃과 페이크아웃", "slug": "breakout-and-fakeout" },
+        { "name": "기초 펀더멘털 분석", "slug": "fundamental-basics" },
+        { "name": "통화 크로스 이해하기", "slug": "currency-crosses" },
+        { "name": "멀티 타임프레임 분석", "slug": "multi-timeframe-analysis" }
+      ]
+    },
+    {
+      "level": "코스 7 · 대학교 1학년",
+      "lessons": [
+        { "name": "마켓 센티먼트 읽기", "slug": "market-sentiment" },
+        { "name": "뉴스 트레이딩", "slug": "news-trading" },
+        { "name": "캐리 트레이드 이해하기", "slug": "carry-trade-basics" }
+      ]
+    },
+    {
+      "level": "코스 8 · 대학교 2학년",
+      "lessons": [
+        { "name": "미국 달러 인덱스 활용", "slug": "us-dollar-index" },
+        { "name": "인터마켓 상관관계", "slug": "intermarket-correlations" },
+        { "name": "주식시장으로 FX 분석하기", "slug": "stocks-for-fx" },
+        { "name": "국가별 프로필 분석", "slug": "country-profile-analysis" }
+      ]
+    },
+    {
+      "level": "코스 9 · 대학교 3학년",
+      "lessons": [
+        { "name": "나만의 트레이딩 플랜 만들기", "slug": "trading-plan-template" },
+        { "name": "나는 어떤 트레이더인가?", "slug": "what-kind-of-trader" },
+        { "name": "자신만의 트레이딩 시스템 구축", "slug": "build-your-trading-system" },
+        { "name": "트레이딩 저널 작성법", "slug": "trading-journal-method" },
+        { "name": "MetaTrader 4 사용법", "slug": "mt4-basics" }
+      ]
+    },
+    {
+      "level": "코스 10 · 대학교 4학년",
+      "lessons": [
+        { "name": "리스크 관리 기초", "slug": "risk-management-basics" },
+        { "name": "외환 트레이더가 무너지는 이유", "slug": "why-traders-fail" },
+        { "name": "포지션 사이징", "slug": "position-sizing" },
+        { "name": "손절 설정 전략", "slug": "stop-loss-strategies" },
+        { "name": "분할 진입과 분할 청산", "slug": "scale-in-scale-out" },
+        { "name": "통화 상관관계", "slug": "currency-correlation" }
+      ]
+    },
+    {
+      "level": "코스 11 · 졸업",
+      "lessons": [
+        { "name": "초보자가 자주 겪는 실수", "slug": "beginner-mistakes" },
+        { "name": "외환 사기 유형", "slug": "forex-scams" },
+        { "name": "심리 성향 테스트", "slug": "psych-profile-test" },
+        { "name": "졸업 연설", "slug": "commencement" }
+      ]
+    }
+  ]
+}
