@@ -1,4 +1,4 @@
-﻿// ===== /public/js/admin-main.js =====
+﻿// ===== /public/js/admin-main.js (rev: 2025-11-01) =====
 // Admin interactions: tabs, diagnostics, CRUD helpers (UX-only)
 
 const Admin = window.Admin || {};
@@ -47,6 +47,55 @@ const joinLines  = a => Array.isArray(a)? a.join('\n'): '';
 const safeStringify = v => { try{ return JSON.stringify(v,null,2) }catch{ return '' } };
 const escapeHTML = s => String(s??'').replace(/[&<>"]/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m]));
 
+/* 强制无缓存 JSON 拉取（用于读取静态或 API 索引） */
+async function fetchJSONNoCache(url){
+  const u = url + (url.includes('?')?'&':'?') + '_t=' + Date.now();
+  const r = await fetch(u, { cache: 'no-store', credentials: 'include' });
+  if (!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+/* 索引/文档读取（统一从 /api 前缀拿，天然可被服务端实时重建） */
+async function fetchIndex(prefix){
+  // 走 API，并带时间戳，避免 CDN 命中旧副本
+  const r = await __apiFetch(`/api/${prefix}/index.json?_=${Date.now()}`);
+  return unwrapResponse(r,'FETCH_INDEX_FAILED');
+}
+async function fetchDocument(prefix, slug){
+  const r = await __apiFetch(`/api/${prefix}/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
+  return unwrapResponse(r,'FETCH_DOCUMENT_FAILED');
+}
+
+/* 将列表渲染到“线上列表”视图 */
+function setIndexView(target, list){
+  if (!target) return;
+  try{
+    target.textContent = JSON.stringify(list ?? [], null, 2);
+  }catch{
+    target.textContent = '[]';
+  }
+}
+
+/* 从“线上列表”文本里做乐观更新：删除某项（后端慢半拍也能即时消失） */
+function optimisticRemoveFromIndex(target, keyName, keyValue){
+  if (!target) return;
+  try{
+    const cur = JSON.parse(target.textContent || '[]');
+    if (!Array.isArray(cur)) return;
+    const next = cur.filter(item=>{
+      if (typeof item === 'string') return item !== keyValue;
+      if (item && typeof item === 'object') {
+        const k = (keyName in item) ? keyName : (item.slug ? 'slug' : (item.id ? 'id' : keyName));
+        return item[k] !== keyValue;
+      }
+      return true;
+    });
+    if (next.length !== cur.length) {
+      setIndexView(target, next);
+    }
+  }catch{}
+}
+
 /* 多路回退读取 JSON（前台/后台共用） */
 async function getJSONWithFallbacks(urls){
   for (const u of urls){
@@ -58,20 +107,12 @@ async function getJSONWithFallbacks(urls){
   return null;
 }
 
-async function fetchIndex(prefix){
-  const r = await __apiFetch(`/api/${prefix}/index.json?_=${Date.now()}`);
-  return unwrapResponse(r,'FETCH_INDEX_FAILED');
-}
-async function fetchDocument(prefix, slug){
-  const r = await __apiFetch(`/api/${prefix}/${encodeURIComponent(slug)}.json?_=${Date.now()}`);
-  return unwrapResponse(r,'FETCH_DOCUMENT_FAILED');
-}
 async function refreshIndexView(prefix, target){
   if (!target) return;
   target.textContent = '正在加载...';
   try{
     const list = await fetchIndex(prefix);
-    target.textContent = JSON.stringify(list,null,2);
+    setIndexView(target, list);
   }catch(e){ target.textContent = '失败: '+(e.message||e); }
 }
 
@@ -221,7 +262,13 @@ function bindDailyBrief(){
     if(msg) msg.textContent='正在删除...';
     try{
       const r=await __apiFetch(`/api/daily-brief/${encodeURIComponent(slug)}.json`,{method:'DELETE'});
-      unwrapResponse(r,'DELETE_FAILED'); if(msg) msg.textContent='删除成功 ✓'; Draft.clear('brief'); await refreshIndexView('daily-brief',indexView);
+      unwrapResponse(r,'DELETE_FAILED');
+      if(msg) msg.textContent='删除成功 ✓';
+      // 乐观更新
+      optimisticRemoveFromIndex(indexView, 'slug', slug);
+      // 然后强刷一次，确保与服务端一致
+      await refreshIndexView('daily-brief',indexView);
+      Draft.clear('brief');
     }catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e); }
   });
 
@@ -275,7 +322,10 @@ function bindResearchArticles(){
     try{
       const r=await __apiFetch(`/api/research/articles/${encodeURIComponent(safeSlug)}.json`,{method:'DELETE'});
       unwrapResponse(r,'DELETE_FAILED');
-      if(msg) msg.textContent='删除成功 ✓'; draft.clear(); await refreshIndexView('research/articles', idx);
+      if(msg) msg.textContent='删除成功 ✓';
+      optimisticRemoveFromIndex(idx,'slug',safeSlug);
+      await refreshIndexView('research/articles', idx);
+      draft.clear();
     }catch(e){ if(msg) msg.textContent='删除失败: '+(e.message||e); }
   });
 
@@ -371,6 +421,8 @@ function bindAnalyses(){
       const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
       unwrapResponse(r,'DELETE_FAILED');
       msg && (msg.textContent='删除成功 ✓');
+      // 乐观更新 + 强刷
+      optimisticRemoveFromIndex(idx,'slug',slug);
       await refreshIndexView('analyses', idx);
     }catch(e){ msg && (msg.textContent='删除失败: '+(e.message||e)); }
   });
@@ -463,6 +515,7 @@ function bindMarketNews(){
       const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
       unwrapResponse(r,'DELETE_FAILED');
       msg && (msg.textContent='删除成功 ✓');
+      optimisticRemoveFromIndex(idx,'id',id);
       await refreshIndexView('market-news', idx);
     }catch(e){ msg && (msg.textContent='删除失败: '+(e.message||e)); }
   });
@@ -599,6 +652,8 @@ function bindSyllabus(){
       const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
       unwrapResponse(r,'DELETE_FAILED');
       f.msg.textContent = '删除成功 ✓';
+      optimisticRemoveFromIndex($('#ra-index'),'slug',slug);
+      await refreshIndexView('research/articles', $('#ra-index'));
     }catch(e){ f.msg.textContent = '删除失败：' + (e.message||e); }
   });
 
