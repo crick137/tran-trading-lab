@@ -294,6 +294,200 @@ function bindResearchArticles(){
   btn.refresh?.addEventListener('click', ()=> refreshIndexView('research/articles', idx));
 }
 
+/* ---------------- Analyses ---------------- */
+function bindAnalyses(){
+  const f = {
+    slug:$('#a-slug'), title:$('#a-title'), symbol:$('#a-symbol'), tf:$('#a-tf'),
+    date:$('#a-date'), bias:$('#a-bias'), tags:$('#a-tags'),
+    supports:$('#a-supports'), resistances:$('#a-resistances'),
+    context:$('#a-context'), view:$('#a-view'), invalidation:$('#a-invalidation'),
+    chartSymbol:$('#a-chart-symbol'), chartInterval:$('#a-chart-interval')
+  };
+  const msg = $('#a-msg'), idx = $('#a-index');
+
+  initTextareaUX($('#tab-analyses')); wireLivePreview($('#tab-analyses'));
+  attachCounter(f.supports); attachCounter(f.resistances);
+  attachCounter(f.context);  attachCounter(f.view);
+  const draft = wireDraft('analyses', f, { onChange(){ wireLivePreview($('#tab-analyses')); } });
+
+  const clear = ()=>{ for(const k in f){ if(f[k] && f[k].tagName) f[k].value=''; } if(f.chartInterval) f.chartInterval.value='60'; };
+  const fill  = (d={})=>{
+    f.slug&&(f.slug.value=d.slug||'');
+    f.title&&(f.title.value=d.title||'');
+    f.symbol&&(f.symbol.value=d.symbol||'');
+    f.tf&&(f.tf.value=d.tf||d.timeframe||'');
+    f.date&&(f.date.value=d.date||'');
+    f.bias&&(f.bias.value=d.bias||'neutral');
+    f.tags&&(f.tags.value=Array.isArray(d.tags)? d.tags.join(', '):'');
+    f.supports&&(f.supports.value=(Array.isArray(d.supports)? d.supports.join('\n'):(d.supports||'')));
+    f.resistances&&(f.resistances.value=(Array.isArray(d.resistances)? d.resistances.join('\n'):(d.resistances||'')));
+    f.context&&(f.context.value=d.context||'');
+    f.view&&(f.view.value=d.view||'');
+    f.invalidation&&(f.invalidation.value=d.invalidation||'');
+    f.chartSymbol&&(f.chartSymbol.value=(d.chart&&d.chart.symbol)||'');
+    f.chartInterval&&(f.chartInterval.value=(d.chart&&d.chart.interval)||'60');
+  };
+
+  // 首次渲染索引
+  refreshIndexView('analyses', idx);
+
+  // 发布
+  $('#a-publish')?.addEventListener('click', async ()=>{
+    const slug = (f.slug?.value||'').trim();
+    if(!slug){ msg && (msg.textContent='请输入 slug'); return; }
+    msg && (msg.textContent='正在发布...');
+    try{
+      const payload = {
+        slug,
+        title: f.title?.value?.trim()||undefined,
+        symbol: f.symbol?.value?.trim()||undefined,
+        tf: f.tf?.value?.trim()||undefined,
+        date: f.date?.value?.trim()||new Date().toISOString().slice(0,10),
+        bias: f.bias?.value||'neutral',
+        tags: splitLines((f.tags?.value||'').replace(/,/g,'\n')),
+        supports: splitLines(f.supports?.value||''),
+        resistances: splitLines(f.resistances?.value||''),
+        context: f.context?.value||'',
+        view: f.view?.value||'',
+        invalidation: f.invalidation?.value||'',
+        chart: { symbol: f.chartSymbol?.value?.trim()||undefined, interval: f.chartInterval?.value||'60' }
+      };
+      const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, {
+        method:'PUT', headers:{'content-type':'application/json'}, body: JSON.stringify(payload)
+      });
+      unwrapResponse(r,'PUBLISH_FAILED');
+      msg && (msg.textContent='发布成功 ✓');
+      draft.clear();
+      await refreshIndexView('analyses', idx);
+    }catch(e){ msg && (msg.textContent='发布失败: '+(e.message||e)); }
+  });
+
+  // 删除
+  $('#a-delete')?.addEventListener('click', async ()=>{
+    const slug = (f.slug?.value||'').trim(); if(!slug) return;
+    if(!confirm(`确认删除市场分析：${slug}？`)) return;
+    msg && (msg.textContent='正在删除...');
+    try{
+      const r = await __apiFetch(`/api/analyses/${encodeURIComponent(slug)}.json`, { method:'DELETE' });
+      unwrapResponse(r,'DELETE_FAILED');
+      msg && (msg.textContent='删除成功 ✓');
+      await refreshIndexView('analyses', idx);
+    }catch(e){ msg && (msg.textContent='删除失败: '+(e.message||e)); }
+  });
+
+  // 载入线上最新
+  $('#a-reuse')?.addEventListener('click', async ()=>{
+    msg && (msg.textContent='正在载入线上数据...');
+    try{
+      const list = await fetchIndex('analyses');
+      if(!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
+      const latest = typeof list[0]==='string' ? list[0] : (list[0]?.slug);
+      const doc = await fetchDocument('analyses', latest);
+      fill(doc||{});
+      msg && (msg.textContent=`已载入 ${latest}。`);
+    }catch(e){ msg && (msg.textContent='载入线上数据失败: '+(e.message||e)); }
+  });
+
+  $('#a-preview')?.addEventListener('click', ()=>{
+    const slug = (f.slug?.value||'').trim(); if(!slug) return;
+    window.open(`/#/analyses/${encodeURIComponent(slug)}`,'_blank','noopener');
+  });
+  $('#a-clear')?.addEventListener('click', ()=>{ clear(); draft.clear(); msg && (msg.textContent=''); });
+  $('#a-refresh')?.addEventListener('click', ()=> refreshIndexView('analyses', idx));
+}
+
+/* ---------------- Market News ---------------- */
+function bindMarketNews(){
+  const f = {
+    id: $('#n-id'), title: $('#n-title'), source: $('#n-source'),
+    url: $('#n-url'), date: $('#n-date'), tags: $('#n-tags'),
+    summary: $('#n-summary'), bullets: $('#n-bullets')
+  };
+  const msg = $('#n-msg'), idx = $('#n-index');
+
+  initTextareaUX($('#tab-news')); wireLivePreview($('#tab-news'));
+  attachCounter(f.summary); attachCounter(f.bullets);
+  const draft = wireDraft('market-news', f, { onChange(){ wireLivePreview($('#tab-news')); } });
+
+  const clear = ()=>{ for(const k in f){ if(f[k] && f[k].tagName) f[k].value=''; } };
+  const fill  = (d={})=>{
+    f.id&&(f.id.value=d.id||'');
+    f.title&&(f.title.value=d.title||'');
+    f.source&&(f.source.value=d.source||d.provider||'');
+    f.url&&(f.url.value=d.url||d.link||'');
+    f.date&&(f.date.value=d.date||d.time||'');
+    f.tags&&(f.tags.value=Array.isArray(d.tags)? d.tags.join(', '):'');
+    f.summary&&(f.summary.value=d.summary||d.excerpt||'');
+    f.bullets&&(f.bullets.value=(Array.isArray(d.bullets)? d.bullets.join('\n'): (d.bullets||'')));
+  };
+
+  // 首次渲染索引
+  refreshIndexView('market-news', idx);
+
+  // 发布（索引维护在服务端 POST /api/market-news/index.json）
+  $('#n-publish')?.addEventListener('click', async ()=>{
+    let id = (f.id?.value||'').trim();
+    if(!id){
+      const t = new Date();
+      id = t.toISOString().replace(/[-:TZ.]/g,'').slice(0,14);
+      if(f.id) f.id.value = id;
+    }
+    msg && (msg.textContent='正在发布...');
+    try{
+      const payload = {
+        id,
+        title: f.title?.value?.trim()||'',
+        source: f.source?.value?.trim()||'',
+        url: f.url?.value?.trim()||'',
+        date: f.date?.value?.trim()||new Date().toISOString(),
+        tags: splitLines((f.tags?.value||'').replace(/,/g,'\n')),
+        summary: f.summary?.value||'',
+        bullets: splitLines(f.bullets?.value||'')
+      };
+      const r = await __apiFetch(`/api/market-news/index.json`, {
+        method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(payload)
+      });
+      unwrapResponse(r,'PUBLISH_FAILED');
+      msg && (msg.textContent='发布成功 ✓');
+      draft.clear();
+      await refreshIndexView('market-news', idx);
+    }catch(e){ msg && (msg.textContent='发布失败: '+(e.message||e)); }
+  });
+
+  // 删除
+  $('#n-delete')?.addEventListener('click', async ()=>{
+    const id = (f.id?.value||'').trim(); if(!id) return;
+    if(!confirm(`确认删除快讯：${id}？`)) return;
+    msg && (msg.textContent='正在删除...');
+    try{
+      const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
+      unwrapResponse(r,'DELETE_FAILED');
+      msg && (msg.textContent='删除成功 ✓');
+      await refreshIndexView('market-news', idx);
+    }catch(e){ msg && (msg.textContent='删除失败: '+(e.message||e)); }
+  });
+
+  // 载入线上最新
+  $('#n-reuse')?.addEventListener('click', async ()=>{
+    msg && (msg.textContent='正在载入线上数据...');
+    try{
+      const list = await fetchIndex('market-news');
+      if(!Array.isArray(list) || !list.length) throw new Error('暂无历史数据');
+      const latest = typeof list[0]==='string' ? list[0] : (list[0]?.id || list[0]?.slug);
+      const doc = await fetchDocument('market-news', latest);
+      fill(doc||{});
+      msg && (msg.textContent=`已载入 ${latest}。`);
+    }catch(e){ msg && (msg.textContent='载入线上数据失败: '+(e.message||e)); }
+  });
+
+  $('#n-preview')?.addEventListener('click', ()=>{
+    const id = (f.id?.value||'').trim(); if(!id) return;
+    window.open(`/#/market-news/${encodeURIComponent(id)}`,'_blank','noopener');
+  });
+  $('#n-clear')?.addEventListener('click', ()=>{ clear(); draft.clear(); msg && (msg.textContent=''); });
+  $('#n-refresh')?.addEventListener('click', ()=> refreshIndexView('market-news', idx));
+}
+
 /* ---------------- Syllabus（前后台共用 /research/syllabus.json） ---------------- */
 function bindSyllabus(){
   const wrap = $('#lesson-list');
@@ -420,9 +614,9 @@ function bindSyllabus(){
   (async ()=>{
     msgEl && (msgEl.textContent = '正在加载课程大纲…');
     const syl = await getJSONWithFallbacks([
-      '/research/syllabus.json',           // ✅ 推荐单一数据源（public）
-      '/server/research/syllabus.json',    // 兼容：若你把它放在 server 下
-      '/public/research/syllabus.json'     // 某些部署结构下也可命中
+      '/research/syllabus.json',
+      '/server/research/syllabus.json',
+      '/public/research/syllabus.json'
     ]);
     if (!syl){ msgEl && (msgEl.textContent = '加载失败：找不到 /research/syllabus.json'); return; }
     renderList(syl);
@@ -438,7 +632,9 @@ function boot(){
     bindDiagnostics();
     bindDailyBrief();
     bindResearchArticles();
-    bindSyllabus();              // ✅ 新增：课程内容从前台同源 JSON 读入
+    bindAnalyses();        // 市场分析
+    bindMarketNews();      // 市场快讯
+    bindSyllabus();        // 课程大纲
     console.log('[admin] booted');
   }catch(e){
     console.error('[admin] boot error:', e);
