@@ -45,6 +45,11 @@ const today = () => new Date().toISOString().slice(0,10);
 const splitLines = v => (v||'').split('\n').map(s=>s.trim()).filter(Boolean);
 const joinLines  = a => Array.isArray(a)? a.join('\n'): '';
 const safeStringify = v => { try{ return JSON.stringify(v,null,2) }catch{ return '' } };
+const toSlug = (s='') => String(s)
+  .toLowerCase()
+  .trim()
+  .replace(/[^\p{Letter}\p{Number}]+/gu,'-')
+  .replace(/^-+|-+$/g,'');
 
 async function fetchIndex(prefix){
   const r = await __apiFetch(`/api/${prefix}/index.json?_=${Date.now()}`);
@@ -245,7 +250,7 @@ function bindResearchArticles(){
 
   btn.publish?.addEventListener('click', async ()=>{
     const slugRaw=f.slug?.value?.trim(); if(!slugRaw) return msg && (msg.textContent='请输入 slug');
-    const safeSlug=slugRaw.replace(/[\\/]+/g,'-');  // ✅ 修复：防止路径嵌套
+    const safeSlug=slugRaw.replace(/[\\/]+/g,'-');
     if(msg) msg.textContent='正在发布...';
     try{
       const payload={ slug:safeSlug, title:f.title?.value?.trim()||undefined, excerpt:f.excerpt?.value?.trim()||undefined, tags:splitLines((f.tags?.value||'').replace(/,/g,'\n')), hero:f.hero?.value?.trim()||undefined, date:new Date().toISOString(), body:f.body?.value||'' };
@@ -282,6 +287,312 @@ function bindResearchArticles(){
   btn.refresh?.addEventListener('click', ()=> refreshIndexView('research/articles', idx));
 }
 
+/* ---------------- Market News (快讯) ---------------- */
+function bindMarketNews(){
+  const f = {
+    id:      $('#n-id'),
+    title:   $('#n-title'),
+    source:  $('#n-source'),
+    url:     $('#n-url'),
+    date:    $('#n-date'),
+    tags:    $('#n-tags'),
+    summary: $('#n-summary'),
+    bullets: $('#n-bullets')
+  };
+  const msg = $('#n-msg'), idx = $('#n-index');
+  const btn = {
+    publish: $('#n-publish'),
+    delete:  $('#n-delete'),
+    reuse:   $('#n-reuse'),
+    preview: $('#n-preview'),
+    clear:   $('#n-clear'),
+    refresh: $('#n-refresh')
+  };
+
+  const panel = $('#tab-news');
+  if (!panel) return;
+  initTextareaUX(panel); wireLivePreview(panel);
+  attachCounter(f.summary); attachCounter(f.bullets);
+
+  // 草稿
+  wireDraft('market-news', f, { onChange(){ wireLivePreview(panel); } });
+
+  const ensureId = ()=>{
+    if (!f.id) return;
+    if (!f.id.value) {
+      const t = new Date();
+      const z = s=>String(s).padStart(2,'0');
+      const id = `${t.getFullYear()}-${z(t.getMonth()+1)}-${z(t.getDate())}-${z(t.getHours())}${z(t.getMinutes())}${z(t.getSeconds())}`;
+      f.id.value = id;
+    }
+  };
+
+  const clear=()=>{ ['id','title','source','url','date','tags','summary','bullets'].forEach(k=>f[k]&&(f[k].value='')); };
+
+  async function fetchLatestId(){
+    const list = await fetchIndex('market-news');
+    if (Array.isArray(list) && list.length) {
+      return typeof list[0]==='string'? list[0] : (list[0]?.id || list[0]?.slug || '');
+    }
+    return '';
+  }
+  async function fetchById(id){
+    const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json?_=${Date.now()}`);
+    return unwrapResponse(r,'FETCH_NEWS_FAILED');
+  }
+  function fill(d){
+    if(!d) return;
+    if(f.id)      f.id.value      = d.id || d.slug || '';
+    if(f.title)   f.title.value   = d.title || '';
+    if(f.source)  f.source.value  = d.source || '';
+    if(f.url)     f.url.value     = d.url || d.link || '';
+    if(f.date)    f.date.value    = d.date || d.publishedAt || '';
+    if(f.tags)    f.tags.value    = Array.isArray(d.tags)? d.tags.join(', '): (d.tags || '');
+    if(f.summary) f.summary.value = d.summary || d.excerpt || '';
+    if(f.bullets) f.bullets.value = joinLines(d.bullets);
+  }
+
+  refreshIndexView('market-news', idx);
+
+  btn.publish?.addEventListener('click', async ()=>{
+    ensureId(); if (msg) msg.textContent='正在发布...';
+    try{
+      const payload = {
+        id:   (f.id?.value||'').trim(),
+        title:   f.title?.value?.trim() || undefined,
+        source:  f.source?.value?.trim() || undefined,
+        url:     f.url?.value?.trim() || undefined,
+        date:    f.date?.value?.trim() || new Date().toISOString(),
+        tags:    splitLines((f.tags?.value||'').replace(/,/g,'\n')),
+        summary: f.summary?.value || '',
+        bullets: splitLines(f.bullets?.value || '')
+      };
+      if (!payload.id) throw new Error('缺少编号 (id)');
+      // 走 index 写入（会顺带维护索引）
+      const r = await __apiFetch('/api/market-news/index.json', {
+        method:'POST', body: JSON.stringify(payload)
+      });
+      unwrapResponse(r,'PUBLISH_FAILED');
+      if (msg) msg.textContent='发布成功 ✓';
+      await refreshIndexView('market-news', idx);
+    }catch(e){ if (msg) msg.textContent='发布失败: '+(e.message||e); }
+  });
+
+  btn.delete?.addEventListener('click', async ()=>{
+    const id = f.id?.value?.trim(); if (!id) return msg && (msg.textContent='请输入编号');
+    if (!confirm(`确认删除快讯：${id}？`)) return;
+    if (msg) msg.textContent='正在删除...';
+    try{
+      const r = await __apiFetch(`/api/market-news/${encodeURIComponent(id)}.json`, { method:'DELETE' });
+      unwrapResponse(r,'DELETE_FAILED');
+      if (msg) msg.textContent='删除成功 ✓';
+      await refreshIndexView('market-news', idx);
+    }catch(e){ if (msg) msg.textContent='删除失败: '+(e.message||e); }
+  });
+
+  btn.reuse?.addEventListener('click', async ()=>{
+    if (msg) msg.textContent='正在载入线上数据...';
+    try{
+      const latest = await fetchLatestId();
+      if (!latest) throw new Error('暂无历史数据');
+      const doc = await fetchById(latest);
+      fill(doc||{});
+      if (msg) msg.textContent=`已载入 ${latest}`;
+      wireLivePreview(panel);
+    }catch(e){ if (msg) msg.textContent='载入线上数据失败: '+(e.message||e); }
+  });
+
+  btn.preview?.addEventListener('click', ()=>{
+    const id = f.id?.value?.trim(); if (!id) return;
+    window.open(`/#/market-news/${encodeURIComponent(id)}`,'_blank','noopener');
+  });
+  btn.clear?.addEventListener('click', ()=>{ clear(); if(msg) msg.textContent=''; wireLivePreview(panel); });
+  btn.refresh?.addEventListener('click', ()=> refreshIndexView('market-news', idx));
+
+  // 小辅助：如果没填 id，输入标题时给出建议 id
+  f.title?.addEventListener('input', ()=>{
+    if (f.id && !f.id.value) {
+      const hint = `${toSlug(f.title.value||'news')}-${Date.now().toString().slice(-6)}`;
+      f.id.placeholder = hint;
+    }
+  });
+}
+
+/* ---------------- Syllabus (Knowledge) ---------------- */
+function bindSyllabusEditor(){
+  const wrap = $('#tab-syllabus');
+  if (!wrap) return;
+
+  // 左侧列表 & 右侧字段
+  const listWrap   = $('#lesson-list');
+  const listMsg    = $('#lesson-list-msg');
+  const levelEl    = $('#lesson-level');
+  const nameEl     = $('#lesson-name');
+
+  const f = {
+    slug:    $('#lesson-slug'),
+    title:   $('#lesson-article-title'),
+    excerpt: $('#lesson-article-excerpt'),
+    tags:    $('#lesson-article-tags'),
+    hero:    $('#lesson-article-hero'),
+    body:    $('#lesson-article-body'),
+  };
+
+  const btn = {
+    save:    $('#lesson-save'),
+    del:     $('#lesson-delete'),
+    preview: $('#lesson-preview'),
+    open:    $('#lesson-open'),
+  };
+
+  initTextareaUX(wrap);
+
+  const esc = s => String(s ?? '');
+
+  function normalizeSyllabus(raw){
+    let groups = [];
+    if (Array.isArray(raw)) groups = raw;
+    else if (raw && Array.isArray(raw.groups)) groups = raw.groups;
+    else if (raw && typeof raw === 'object'){
+      groups = Object.entries(raw).map(([k,v])=>{
+        const lessons = Array.isArray(v) ? v : (Array.isArray(v?.lessons) ? v.lessons : []);
+        return { level: k, lessons };
+      });
+    }
+    return groups.map(g=>{
+      const level = g.level || g.title || g.name || '-';
+      const lessons = (Array.isArray(g.lessons)? g.lessons: []).map(it=>{
+        const name  = it.name || it.title || it.lesson || it.slug || 'Lesson';
+        const slug  = it.slug || toSlug(name);
+        const phase = it.level || it.phase || level;
+        return { name, slug, level: phase };
+      });
+      return { level, lessons };
+    });
+  }
+
+  async function fetchSyllabus(){
+    const urls = [
+      '/api/research/syllabus.json',
+      '/api/research/syllabus',
+      '/server/research/syllabus/index',
+      '/research/syllabus.json',
+    ];
+    for (const u of urls){
+      try{
+        const r = await fetch(u, { cache:'no-store' });
+        if (!r.ok) continue;
+        return await r.json();
+      }catch{}
+    }
+    throw new Error('SYLLABUS_NOT_FOUND');
+  }
+
+  function renderList(groups){
+    if (!listWrap) return;
+    const html = groups.map(g=>{
+      const items = (g.lessons||[]).map(ls=>(
+        `<button class="lesson-item" data-slug="${ls.slug}" data-name="${esc(ls.name)}" data-level="${esc(ls.level||g.level)}">
+           ${esc(ls.name)}<span>${esc(ls.slug)}</span>
+         </button>`
+      )).join('');
+      return `<div class="lesson-group">
+        <h4>${esc(g.level || '-')}</h4>
+        ${items || `<p class="muted" style="margin:6px 0 14px">此组暂无课时</p>`}
+      </div>`;
+    }).join('') || `<p class="muted">大纲为空</p>`;
+    listWrap.innerHTML = html;
+
+    $$('.lesson-item', listWrap).forEach(el=>{
+      el.addEventListener('click', ()=>{
+        $$('.lesson-item', listWrap).forEach(b=>b.classList.toggle('active', b===el));
+        const slug  = el.getAttribute('data-slug')  || '';
+        const name  = el.getAttribute('data-name')  || '';
+        const level = el.getAttribute('data-level') || '-';
+
+        levelEl && (levelEl.textContent = level);
+        nameEl  && (nameEl.textContent  = name);
+
+        if (f.slug   && !f.slug.value)   f.slug.value  = slug;
+        if (f.title  && !f.title.value)  f.title.value = name;
+        if (f.excerpt && !f.excerpt.value) f.excerpt.value = '';
+        toast(`已选课时：${name}`);
+      });
+    });
+  }
+
+  async function loadSyllabus(){
+    if (listMsg) listMsg.textContent = '正在加载课程大纲…';
+    try{
+      const raw = await fetchSyllabus();
+      const groups = normalizeSyllabus(raw);
+      if (listMsg) listMsg.style.display = 'none';
+      renderList(groups);
+    }catch(e){
+      if (listMsg){
+        listMsg.style.display = '';
+        listMsg.textContent = '加载失败：' + (e.message||e);
+      }
+    }
+  }
+
+  // 与“研究文章”复用接口
+  async function putArticle(payload){
+    const slug = payload.slug;
+    const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{
+      method:'PUT',
+      headers:{'content-type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    return unwrapResponse(r,'SAVE_FAILED');
+  }
+  async function delArticle(slug){
+    const r = await __apiFetch(`/api/research/articles/${encodeURIComponent(slug)}.json`,{
+      method:'DELETE'
+    });
+    return unwrapResponse(r,'DELETE_FAILED');
+  }
+
+  btn.save?.addEventListener('click', async ()=>{
+    const slug = (f.slug?.value||'').trim().replace(/[\\/]+/g,'-');
+    if (!slug) return toast('请填写 Slug');
+    try{
+      const payload = {
+        slug,
+        title:   f.title?.value?.trim()   || undefined,
+        excerpt: f.excerpt?.value?.trim() || undefined,
+        tags:    splitLines((f.tags?.value || '').replace(/,/g,'\n')),
+        hero:    f.hero?.value?.trim()    || undefined,
+        date:    new Date().toISOString(),
+        body:    f.body?.value || ''
+      };
+      await putArticle(payload);
+      toast('已保存');
+    }catch(e){ toast('保存失败：' + (e.message||e)); }
+  });
+
+  btn.del?.addEventListener('click', async ()=>{
+    const slug = (f.slug?.value||'').trim().replace(/[\\/]+/g,'-');
+    if (!slug) return toast('请填写 Slug');
+    if (!confirm(`确认删除文章：${slug}？`)) return;
+    try{ await delArticle(slug); toast('已删除'); }catch(e){ toast('删除失败：' + (e.message||e)); }
+  });
+
+  btn.preview?.addEventListener('click', ()=>{
+    const slug = (f.slug?.value||'').trim().replace(/[\\/]+/g,'-');
+    if (!slug) return toast('请填写 Slug');
+    window.open(`/#/articles/${encodeURIComponent(slug)}`,'_blank','noopener');
+  });
+
+  btn.open?.addEventListener('click', ()=>{
+    const slug = (f.slug?.value||'').trim().replace(/[\\/]+/g,'-');
+    if (!slug) return toast('请填写 Slug');
+    window.open(`/api/research/articles/${encodeURIComponent(slug)}.json`,'_blank','noopener');
+  });
+
+  loadSyllabus();
+}
+
 /* ---------------- Boot ---------------- */
 let __BOOTED=false;
 function boot(){
@@ -290,7 +601,9 @@ function boot(){
     setupTabs();
     bindDiagnostics();
     bindDailyBrief();
+    bindMarketNews();       // ✅ 新增：市场快讯
     bindResearchArticles();
+    bindSyllabusEditor();   // ✅ 新增：课程内容
     console.log('[admin] booted');
   }catch(e){
     console.error('[admin] boot error:', e);
