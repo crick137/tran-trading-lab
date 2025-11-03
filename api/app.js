@@ -489,6 +489,22 @@ export default async function handler(req, res) {
     else if (pathname.startsWith('/api/analyses')) {
       out = await genericHandler(req, pathname, 'analyses');
     }
+    else if ((req.method === 'POST') && (pathname === '/api/market-news' || pathname === '/api/market-news/index' || pathname === '/api/market-news/index.json')) {
+      // Admin publishes Market News via POST /api/market-news/index.json
+      const unauthorized = requireAuthIfConfigured(req); if (unauthorized) out = unauthorized; else {
+        const body = await readBody(req);
+        const id = body?.id || body?.slug;
+        if (!id) out = err('MISSING_ID', 400);
+        else {
+          try { await writeJSON(`market-news/${id}.json`, body); }
+          catch (e) { console.error('[API] market-news write failed:', e); out = err('WRITE_FAILED', 500); }
+          if (!out) {
+            try { await upsertIndex('market-news', id); } catch (e) { console.warn('[API] upsertIndex error', e?.message || e); }
+            out = ok({ saved: true, id });
+          }
+        }
+      }
+    }
     else if (pathname.startsWith('/api/market-news')) {
       out = await genericHandler(req, pathname, 'market-news');
     }
