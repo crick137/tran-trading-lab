@@ -263,8 +263,20 @@ async function genericHandler(req, pathname, PREFIX) {
         }
         return err('NOT_FOUND', 404);
       }
-      try { return ok(await readJSONViaFetch(FILE)); }
-      catch { return err('NOT_FOUND', 404); }
+      // Other prefixes: tolerate URL-encoded slashes in slug (e.g., 2025%2F10%2F27)
+      const __candidates = Array.from(new Set([
+        slug,
+        (function(){ try { return decodeURIComponent(slug); } catch { return slug; } })(),
+        (function(){
+          try { const once = decodeURIComponent(slug); return decodeURIComponent(once); }
+          catch { return slug; }
+        })()
+      ].filter(Boolean)));
+      for (const s of __candidates){
+        try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); }
+        catch { /* try next */ }
+      }
+      return err('NOT_FOUND', 404);
     }
   
     // 鍐欐搷浣滃寮烘棩蹇?
