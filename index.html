@@ -31,6 +31,21 @@
       "sameAs": []
     }
     </script>
+    <style>
+      /* ===== 뉴스 스트림 기본样式（不侵入全局） ===== */
+      .ttl-news { padding:16px;border:1px solid #222;border-radius:12px;background:#0a0b0eA0; backdrop-filter: blur(2px) }
+      .ttl-news h3 { margin:0 0 10px 0; font-size:1.05rem; letter-spacing:.2px }
+      .ttl-news ul { list-style:none; padding:0; margin:0 }
+      .ttl-news li { margin:8px 0; line-height:1.45 }
+      .ttl-news small { opacity:.7 }
+      .ttl-news a { text-decoration:underline }
+      .ttl-grid { display:grid; gap:16px; grid-template-columns: 1fr }
+      @media (min-width: 960px){ .ttl-grid { grid-template-columns: 1fr 1fr } }
+      /* 路由页的容器样式 */
+      .ttl-page { max-width: 980px; margin: 24px auto; padding: 0 16px }
+      .ttl-page h2 { margin: 0 0 12px 0; font-size: 1.25rem }
+      .ttl-muted { opacity: .6 }
+    </style>
   </head>
   <body>
     <a href="#app" class="skip-link">Skip to main content</a>
@@ -51,6 +66,15 @@
       <a href="#/about">About</a>
     </nav>
 
+    <!-- 🧩 首页内嵌：뉴스 스트림（最近10条） -->
+    <section class="container" aria-label="뉴스 스트림(홈)">
+      <div id="ttl-home-news" class="ttl-news" aria-live="polite">
+        <h3>뉴스 스트림 <small class="ttl-muted">(최근 10개)</small></h3>
+        <ul id="ttl-home-news-list"><li class="ttl-muted">로딩중…</li></ul>
+      </div>
+    </section>
+
+    <!-- SPA 主容器 -->
     <main class="container" id="app" aria-live="polite"></main>
 
     <!-- 👉 前端强制过滤 “2025/10/27”（不改后端逻辑） -->
@@ -104,7 +128,79 @@
     })();
     </script>
 
-    <!-- 앱 스크립트 -->
+    <!-- 🧠 뉴스 스트림 渲染脚本（首页 + 路由页两用） -->
+    <script>
+      const NEWS_URL = '/news.json';       // 如采用 Gist/KV 代理，可替换为 /api/news
+      const TG_CHANNEL = 'https://t.me/';  // 可填你的频道链接（可选）
+
+      async function loadNews() {
+        try {
+          const r = await fetch(NEWS_URL + '?_=' + Date.now(), { cache: 'no-store' });
+          if (!r.ok) throw 0;
+          return await r.json();
+        } catch {
+          return [];
+        }
+      }
+
+      // 首页模块渲染（最近10条）
+      async function renderHomeNews() {
+        const box = document.getElementById('ttl-home-news-list');
+        if (!box) return;
+        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
+        const list = await loadNews();
+        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
+        box.innerHTML = '';
+        list.slice(0, 10).forEach(n => {
+          const d = new Date(n.isoDate || n.ts || Date.now());
+          const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+          const li = document.createElement('li');
+          li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
+          box.appendChild(li);
+        });
+      }
+
+      // 路由页渲染：#/market-news
+      async function renderRoute() {
+        const hash = location.hash || '#/';
+        if (hash.startsWith('#/market-news')) {
+          const app = document.getElementById('app');
+          if (!app) return;
+          app.innerHTML = `
+            <section class="ttl-page">
+              <h2>마켓 뉴스</h2>
+              <p class="ttl-muted">30분마다 업데이트 · 출처 링크 포함</p>
+              <div class="ttl-grid">
+                <div class="ttl-news"><h3>실시간 스트림</h3><ul id="ttl-route-news"></ul></div>
+                <div class="ttl-news"><h3>공지</h3><p class="ttl-muted">투자 자문이 아닙니다. 숫자와 시간은 지연/오류가 있을 수 있어 “~ / 대략” 표기를 사용합니다.</p><p><a href="${TG_CHANNEL}" target="_blank">📌 TG에서 실시간 보기</a></p></div>
+              </div>
+            </section>
+          `;
+          const ul = document.getElementById('ttl-route-news');
+          ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
+          const list = await loadNews();
+          if (!list.length) { ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
+          ul.innerHTML = '';
+          list.slice(0, 30).forEach(n => {
+            const d = new Date(n.isoDate || n.ts || Date.now());
+            const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+            const li = document.createElement('li');
+            li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
+            ul.appendChild(li);
+          });
+        }
+      }
+
+      // 初次渲染 + 轮询（每5分钟刷新一次首页模块）
+      document.addEventListener('DOMContentLoaded', () => {
+        renderHomeNews();
+        renderRoute();
+        setInterval(renderHomeNews, 5 * 60 * 1000);
+        window.addEventListener('hashchange', renderRoute);
+      });
+    </script>
+
+    <!-- 앱 스크립트（你原有的 SPA 脚本，保持不变） -->
     <script type="module" src="/src/main.js"></script>
     <!-- 自动图片链接渲染（外链，安全） -->
     <script src="/js/auto-image.js" defer></script>
