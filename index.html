@@ -3,24 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TRAN TRADING LAB | 시스�?외환 트레이딩 �?/title>
-    <meta name="description" content="TRAN TRADING LAB �?데일�?브리�? 분석 아카이브, 지�?연구�? 마켓 뉴스, 아티�? />
-    <meta property="og:title" content="TRAN TRADING LAB | 시스�?외환 트레이딩 �? />
-    <meta property="og:description" content="데일�?브리�? 구조�?분석, 지�?로드�? 글로벌 마켓 뉴스까지 �?곳에�?정리하세�?" />
+    <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
+    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+
+    <meta property="og:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta property="og:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tran-trading-lab.vercel.app/" />
     <meta property="og:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <meta property="og:locale" content="ko_KR" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta name="twitter:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
+    <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
+
     <meta name="theme-color" content="#0a0b0e" />
     <meta name="robots" content="index,follow" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TRAN TRADING LAB | 시스�?외환 트레이딩 �? />
-    <meta name="twitter:description" content="데일�?브리�? 구조�?분석, 지�?로드�? 글로벌 마켓 뉴스까지 �?곳에�?정리하세�?" />
-    <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <link rel="canonical" href="https://tran-trading-lab.vercel.app/" />
     <link rel="stylesheet" href="/styles/global.css" />
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -31,60 +35,60 @@
       "sameAs": []
     }
     </script>
+
     <style>
-      /* ===== 뉴스 스트�?기본样式（不侵入全局�?===== */
-      .ttl-news { padding:16px;border:1px solid #222;border-radius:12px;background:#0a0b0eA0; backdrop-filter: blur(2px) }
-      .ttl-news h3 { margin:0 0 10px 0; font-size:1.05rem; letter-spacing:.2px }
+      /* 뉴스 스트림 최소 스타일(전역 침범 X) */
+      .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
+      .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
       .ttl-news ul { list-style:none; padding:0; margin:0 }
       .ttl-news li { margin:8px 0; line-height:1.45 }
       .ttl-news small { opacity:.7 }
       .ttl-news a { text-decoration:underline }
-      .ttl-grid { display:grid; gap:16px; grid-template-columns: 1fr }
-      @media (min-width: 960px){ .ttl-grid { grid-template-columns: 1fr 1fr } }
-      /* 路由页的容器样式 */
-      .ttl-page { max-width: 980px; margin: 24px auto; padding: 0 16px }
-      .ttl-page h2 { margin: 0 0 12px 0; font-size: 1.25rem }
-      .ttl-muted { opacity: .6 }
+      .ttl-grid { display:grid; gap:16px; grid-template-columns:1fr }
+      @media (min-width:960px){ .ttl-grid { grid-template-columns:1fr 1fr } }
+      .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
+      .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
+      .ttl-muted { opacity:.6 }
     </style>
   </head>
+
   <body>
     <a href="#app" class="skip-link">Skip to main content</a>
-    <!-- 배경 동효�?캔버�?(data-enabled�?�?오프) -->
+
+    <!-- 배경 효과 캔버스 -->
     <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
 
-    <!-- 상단 내비게이�?-->
+    <!-- 상단 내비게이션 -->
     <nav class="nav" aria-label="Primary">
-      <a href="#/" class="brand" aria-label="홈으�?>
+      <a href="#/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
         TRAN TRADING LAB
       </a>
-      <a href="#/daily-brief">데일�?브리�?/a>
+      <a href="#/daily-brief">데일리 브리프</a>
       <a href="#/trade-journal">분석 아카이브</a>
-      <a href="#/knowledge-lab">지�?연구�?/a>
+      <a href="#/knowledge-lab">지식 연구소</a>
       <a href="#/market-news">마켓 뉴스</a>
-      <a href="#/articles">아티�?/a>
+      <a href="#/articles">아티클</a>
       <a href="#/about">About</a>
     </nav>
 
-    <!-- 🧩 首页内嵌：뉴�?스트림（最�?0条） -->
-    <section class="container" aria-label="뉴스 스트�?�?">
+    <!-- 홈 상단: 뉴스 스트림(최근 10개) -->
+    <section class="container" aria-label="뉴스 스트림">
       <div id="ttl-home-news" class="ttl-news" aria-live="polite">
-        <h3>뉴스 스트�?<small class="ttl-muted">(최근 10�?</small></h3>
-        <ul id="ttl-home-news-list"><li class="ttl-muted">로딩중�?/li></ul>
+        <h3>뉴스 스트림 <small class="ttl-muted">(최근 10개)</small></h3>
+        <ul id="ttl-home-news-list"><li class="ttl-muted">로딩중…</li></ul>
       </div>
     </section>
 
-    <!-- SPA 主容�?-->
+    <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 👉 前端强制过滤 �?025/10/27”（不改后端逻辑�?-->
+    <!-- analyses/index.json 전면 필터 (특정 slug 숨김) -->
     <script>
     (function () {
-      // 要屏蔽的 slug（两种写法都拦）
       const BLOCK = new Set(['2025/10/27','2025-10-27']);
       const RX_INDEX = /\/(api\/)?analyses\/index\.json(?:[?#]|$)/i;
 
-      // 拦截 fetch：当请求 analyses/index.json 时，过滤掉被屏蔽的项
       const _fetch = window.fetch;
       window.fetch = async function (input, init) {
         const res = await _fetch(input, init);
@@ -108,48 +112,40 @@
         return res;
       };
 
-      // 兜底：渲染后再扫 DOM，把仍含 �?025/10/27�?的卡片容器移�?
       function removeCards(){
         const rx = /\b2025[\/-]10[\/-]27\b/;
         const WRAPS = 'li,article,.card,.list-item,.item,.row,section,div';
         document.querySelectorAll(WRAPS).forEach(el=>{
-          if (rx.test(el.textContent)) {
-            (el.closest(WRAPS) || el).remove();
-          }
+          if (rx.test(el.textContent)) (el.closest(WRAPS) || el).remove();
         });
-        // 同时隐藏包含�?slug 的链�?
         document.querySelectorAll(
           'a[href*="2025%2F10%2F27"], a[href*="2025/10/27"], a[href*="2025-10-27"]'
         ).forEach(a=>a.style.display='none');
       }
       document.addEventListener('DOMContentLoaded', removeCards);
-      // SPA 二次渲染时也处理
       new MutationObserver(removeCards).observe(document.documentElement, { childList:true, subtree:true });
     })();
     </script>
 
-    <!-- 🧠 뉴스 스트�?渲染脚本（首�?+ 路由页两用） -->
+    <!-- 뉴스 스트림 렌더 스크립트 -->
     <script>
-      const NEWS_URL = '/api/news';       // 如采�?Gist/KV 代理，可替换�?/api/news
-      const TG_CHANNEL = 'https://t.me/';  // 可填你的频道链接（可选）
+      const NEWS_URL   = '/api/news';
+      const TG_CHANNEL = ''; // 선택사항: 'https://t.me/yourchannel'
 
       async function loadNews() {
         try {
           const r = await fetch(NEWS_URL + '?_=' + Date.now(), { cache: 'no-store' });
           if (!r.ok) throw 0;
           return await r.json();
-        } catch {
-          return [];
-        }
+        } catch { return []; }
       }
 
-      // 首页模块渲染（最�?0条）
       async function renderHomeNews() {
         const box = document.getElementById('ttl-home-news-list');
         if (!box) return;
-        box.innerHTML = '<li class="ttl-muted">로딩중�?/li>';
+        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
         const list = await loadNews();
-        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스�?불러�?�?없습니다.</li>'; return; }
+        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
         box.innerHTML = '';
         list.slice(0, 10).forEach(n => {
           const d = new Date(n.isoDate || n.ts || Date.now());
@@ -160,7 +156,6 @@
         });
       }
 
-      // 路由页渲染：#/market-news
       async function renderRoute() {
         const hash = location.hash || '#/';
         if (hash.startsWith('#/market-news')) {
@@ -169,17 +164,24 @@
           app.innerHTML = `
             <section class="ttl-page">
               <h2>마켓 뉴스</h2>
-              <p class="ttl-muted">30분마�?업데이트 · 출처 링크 포함</p>
+              <p class="ttl-muted">30분마다 업데이트 · 출처 링크 포함</p>
               <div class="ttl-grid">
-                <div class="ttl-news"><h3>실시�?스트�?/h3><ul id="ttl-route-news"></ul></div>
-                <div class="ttl-news"><h3>공지</h3><p class="ttl-muted">투자 자문�?아닙니다. 숫자와 시간은 지�?오류가 있을 �?있어 “~ / 대략�?표기�?사용합니�?</p><p><a href="${TG_CHANNEL}" target="_blank">📌 TG에서 실시�?보기</a></p></div>
+                <div class="ttl-news">
+                  <h3>실시간 스트림</h3>
+                  <ul id="ttl-route-news"></ul>
+                </div>
+                <div class="ttl-news">
+                  <h3>공지</h3>
+                  <p class="ttl-muted">투자 자문이 아닙니다. 숫자와 시간은 지연/오류가 있을 수 있어 “~ / 대략” 표기를 사용합니다.</p>
+                  ${TG_CHANNEL ? `<p><a href="${TG_CHANNEL}" target="_blank">📌 TG에서 실시간 보기</a></p>` : ''}
+                </div>
               </div>
             </section>
           `;
           const ul = document.getElementById('ttl-route-news');
-          ul.innerHTML = '<li class="ttl-muted">로딩중�?/li>';
+          ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
           const list = await loadNews();
-          if (!list.length) { ul.innerHTML = '<li class="ttl-muted">뉴스�?불러�?�?없습니다.</li>'; return; }
+          if (!list.length) { ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
           ul.innerHTML = '';
           list.slice(0, 30).forEach(n => {
             const d = new Date(n.isoDate || n.ts || Date.now());
@@ -191,7 +193,6 @@
         }
       }
 
-      // 初次渲染 + 轮询（每5分钟刷新一次首页模块）
       document.addEventListener('DOMContentLoaded', () => {
         renderHomeNews();
         renderRoute();
@@ -200,12 +201,8 @@
       });
     </script>
 
-    <!-- �?스크립트（你原有�?SPA 脚本，保持不变） -->
+    <!-- 앱 스크립트 -->
     <script type="module" src="/src/main.js"></script>
-    <!-- 自动图片链接渲染（外链，安全�?-->
     <script src="/js/auto-image.js" defer></script>
   </body>
 </html>
-
-
-
