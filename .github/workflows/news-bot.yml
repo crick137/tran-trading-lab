@@ -1,0 +1,31 @@
+name: news-bot
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # 每30分钟
+  workflow_dispatch: {}       # 允许手动运行
+permissions:
+  contents: write             # 允许提交 public/news.json
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci || npm i
+      - run: npm i dayjs rss-parser string-similarity
+      - name: Generate news.json & send TG
+        run: node scripts/news/index.js
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      - name: Commit news.json
+        run: |
+          if [ -f public/news.json ]; then
+            git config user.name "news-bot"
+            git config user.email "bot@users.noreply.github.com"
+            git add public/news.json
+            git commit -m "chore: update news feed" || echo "no changes"
+            git push
+          fi
