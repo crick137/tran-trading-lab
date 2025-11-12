@@ -20,67 +20,50 @@
     }
     </script>
     <style>
-      /* 新闻流样式 */
-      .ttl-news {
-        padding: 16px;
-        border: 1px solid #222;
-        border-radius: 12px;
-        background: #0a0b0ee6;
-        backdrop-filter: blur(2px);
+      /* 统一样式 */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #0a0b0e;
+        color: #ffffff;
       }
-      .ttl-news h3 {
-        margin: 0 0 10px;
-        font-size: 1.05rem;
-        letter-spacing: .2px;
-      }
-      .ttl-news ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      .ttl-news li {
-        margin: 8px 0;
-        line-height: 1.45;
-      }
-      .ttl-news small {
-        opacity: .7;
-      }
-      .ttl-news a {
-        text-decoration: underline;
-      }
-      .ttl-grid {
-        display: grid;
-        gap: 16px;
-        grid-template-columns: 1fr;
-      }
-      @media (min-width: 960px) {
-        .ttl-grid {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
+
       .ttl-page {
         max-width: 980px;
         margin: 24px auto;
-        padding: 0 16px;
-      }
-      .ttl-page h2 {
-        margin: 0 0 12px;
-        font-size: 1.25rem;
-      }
-      .ttl-muted {
-        opacity: .6;
+        padding: 16px;
+        background: #1a1b1f;
+        border-radius: 12px;
       }
 
-      /* 顶部价格滚动条 */
-      #price-tape {
-        position: sticky;
-        top: 0;
-        z-index: 10000;
-        background: #000;
-        border-bottom: 1px solid #151515;
+      .ttl-page h2 {
+        font-size: 1.5rem;
+        color: #e1e1e1;
       }
-      #price-tape .tradingview-widget-container {
-        max-width: 100%;
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      th, td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+      }
+
+      th {
+        background-color: #333;
+        color: #fff;
+      }
+
+      td {
+        background-color: #222;
+      }
+
+      .ttl-muted {
+        opacity: 0.6;
+        font-size: 0.9rem;
       }
     </style>
   </head>
@@ -88,30 +71,27 @@
   <body>
     <a href="#app" class="skip-link">Skip to main content</a>
 
-    <!-- 背景效果画布 -->
-    <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
-
-    <!-- 顶部轮播价格条（TradingView Ticker Tape） -->
+    <!-- 顶部价格滚动条（TradingView Ticker Tape） -->
     <div id="price-tape" aria-label="가격 티커">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-          "symbols": [
-            { "proName": "FX_IDC:USDKRW", "title": "USD/KRW" },
-            { "proName": "OANDA:USDCAD", "title": "USD/CAD" },
-            { "proName": "OANDA:AUDUSD", "title": "AUD/USD" },
-            { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
-            { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-            { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-            { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-          ],
-          "showSymbolLogo": true,
-          "isTransparent": true,
-          "displayMode": "adaptive",
-          "colorTheme": "dark",
-          "locale": "ko"
-        }
+          {
+            "symbols": [
+              { "proName": "FX_IDC:USDKRW", "title": "USD/KRW" },
+              { "proName": "OANDA:USDCAD", "title": "USD/CAD" },
+              { "proName": "OANDA:AUDUSD", "title": "AUD/USD" },
+              { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
+              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+            ],
+            "showSymbolLogo": true,
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "colorTheme": "dark",
+            "locale": "ko"
+          }
         </script>
       </div>
     </div>
@@ -141,10 +121,10 @@
       async function fetchEventsData() {
         try {
           const response = await fetch(EVENTS_URL);
-          if (!response.ok) throw new Error('Data not found');
+          if (!response.ok) throw new Error('数据加载失败');
           return await response.json();
         } catch (error) {
-          console.error('Error fetching events data:', error);
+          console.error('数据加载错误:', error);
           return [];
         }
       }
@@ -154,12 +134,26 @@
         const data = await fetchEventsData();
 
         if (!data.length) {
-          app.innerHTML = '<p>加载失败，无法获取数据。</p>';
+          app.innerHTML = '<p class="ttl-muted">加载失败，无法获取数据。</p>';
           return;
         }
 
-        let htmlContent = '<h2>오늘의金融事件</h2><table><thead><tr><th>时间</th><th>经济指标</th><th>实际</th><th>预测</th><th>前值</th></tr></thead><tbody>';
-        
+        let htmlContent = `
+          <section class="ttl-page">
+            <h2>今天的金融事件</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>时间</th>
+                  <th>经济指标</th>
+                  <th>实际</th>
+                  <th>预测</th>
+                  <th>前值</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
         data.forEach(event => {
           htmlContent += `
             <tr>
@@ -171,7 +165,8 @@
             </tr>
           `;
         });
-        htmlContent += '</tbody></table>';
+
+        htmlContent += '</tbody></table></section>';
         app.innerHTML = htmlContent;
       }
 
