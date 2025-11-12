@@ -27,6 +27,6 @@
   ],
 
   "crons": [
-    { "path": "/api/cron/fetch-news", "schedule": "*/20 * * * *" }
+    { "path": "/api/cron/fetch-news", "schedule": "*/20 * * * *" }  // 每20分钟执行一次抓取
   ]
 }
