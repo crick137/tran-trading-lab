@@ -67,23 +67,25 @@
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-          "symbols": [
-            { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
-            { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
-            { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
-            { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
-            { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-            { "proName": "TVC:DXY",         "title": "DXY" },
-            { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-            { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-          ],
-          "showSymbolLogo": true,
-          "isTransparent": true,
-          "displayMode": "adaptive",
-          "colorTheme": "dark",
-          "locale": "ko"
-        }
+      {
+  "symbols": [
+    { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+    { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+    { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+    { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+    { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+    { "proName": "TVC:KOSPL",       "title": "KOSPL" },
+    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+    { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" },
+    { "proName": "KOSDAQ:KQ",       "title": "KOSDAQ" },
+    { "proName": "KOSPI:KS11",      "title": "KOSPI" }
+  ],
+  "showSymbolLogo": true,
+  "isTransparent": true,
+  "displayMode": "adaptive",  // 删除多余的逗号
+  "colorTheme": "dark",
+  "locale": "ko"
+}
         </script>
       </div>
     </div>
@@ -104,50 +106,6 @@
 
     <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
-
-    <!-- analyses/index.json 전면 필터 (특정 slug 숨김) -->
-    <script>
-    (function () {
-      const BLOCK = new Set(['2025/10/27','2025-10-27']);
-      const RX_INDEX = /\/(api\/)?analyses\/index\.json(?:[?#]|$)/i;
-
-      const _fetch = window.fetch;
-      window.fetch = async function (input, init) {
-        const res = await _fetch(input, init);
-        try {
-          const url = (typeof input === 'string' ? input : input?.url) || '';
-          if (RX_INDEX.test(url)) {
-            const clone = res.clone();
-            let data = await clone.json();
-            const norm = (x)=> typeof x === 'string' ? x : (x?.slug || x?.id || '');
-            const drop = (arr)=> arr.filter(x => !BLOCK.has(norm(x)));
-            if (Array.isArray(data)) data = drop(data);
-            else if (data && Array.isArray(data.items)) data.items = drop(data.items);
-
-            return new Response(JSON.stringify(data), {
-              status: res.status,
-              statusText: res.statusText,
-              headers: { 'Content-Type':'application/json; charset=utf-8' }
-            });
-          }
-        } catch (e) {}
-        return res;
-      };
-
-      function removeCards(){
-        const rx = /\b2025[\/-]10[\/-]27\b/;
-        const WRAPS = 'li,article,.card,.list-item,.item,.row,section,div';
-        document.querySelectorAll(WRAPS).forEach(el=>{
-          if (rx.test(el.textContent)) (el.closest(WRAPS) || el).remove();
-        });
-        document.querySelectorAll(
-          'a[href*="2025%2F10%2F27"], a[href*="2025/10/27"], a[href*="2025-10-27"]'
-        ).forEach(a=>a.style.display='none');
-      }
-      document.addEventListener('DOMContentLoaded', removeCards);
-      new MutationObserver(removeCards).observe(document.documentElement, { childList:true, subtree:true });
-    })();
-    </script>
 
     <!-- 뉴스 스트림 렌더 스크립트 -->
     <script>
@@ -216,7 +174,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();              // 没有首页块会自动跳过
+        renderHomeNews();
         renderRoute();
         setInterval(renderHomeNews, 5 * 60 * 1000);
         window.addEventListener('hashchange', renderRoute);
