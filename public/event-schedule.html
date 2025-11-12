@@ -5,25 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
     <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
-    <meta property="og:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
-    <meta property="og:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://tran-trading-lab.vercel.app/" />
-    <meta property="og:image" content="https://tran-trading-lab.vercel.app/logo.png" />
-    <meta property="og:locale" content="ko_KR" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
-    <meta name="twitter:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
-    <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
-
     <meta name="theme-color" content="#0a0b0e" />
     <meta name="robots" content="index,follow" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="canonical" href="https://tran-trading-lab.vercel.app/" />
     <link rel="stylesheet" href="/styles/global.css" />
-
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -34,37 +19,69 @@
       "sameAs": []
     }
     </script>
-
     <style>
-      /* 新闻流最小样式 (不影响全局) */
-      .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
-      .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
-      .ttl-news ul { list-style:none; padding:0; margin:0 }
-      .ttl-news li { margin:8px 0; line-height:1.45 }
-      .ttl-news small { opacity:.7 }
-      .ttl-news a { text-decoration:underline }
-      .ttl-grid { display:grid; gap:16px; grid-template-columns:1fr }
-      @media (min-width:960px){ .ttl-grid { grid-template-columns:1fr 1fr } }
-      .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
-      .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
-      .ttl-muted { opacity:.6 }
+      /* 新闻流样式 */
+      .ttl-news {
+        padding: 16px;
+        border: 1px solid #222;
+        border-radius: 12px;
+        background: #0a0b0ee6;
+        backdrop-filter: blur(2px);
+      }
+      .ttl-news h3 {
+        margin: 0 0 10px;
+        font-size: 1.05rem;
+        letter-spacing: .2px;
+      }
+      .ttl-news ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .ttl-news li {
+        margin: 8px 0;
+        line-height: 1.45;
+      }
+      .ttl-news small {
+        opacity: .7;
+      }
+      .ttl-news a {
+        text-decoration: underline;
+      }
+      .ttl-grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 960px) {
+        .ttl-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      .ttl-page {
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .ttl-page h2 {
+        margin: 0 0 12px;
+        font-size: 1.25rem;
+      }
+      .ttl-muted {
+        opacity: .6;
+      }
 
-      /* 顶部价格滚动条（黑色背景） */
-      #price-tape{
+      /* 顶部价格滚动条 */
+      #price-tape {
         position: sticky;
         top: 0;
         z-index: 10000;
-        background: #000; /* 黑色背景 */
+        background: #000;
         border-bottom: 1px solid #151515;
       }
       #price-tape .tradingview-widget-container {
         max-width: 100%;
       }
-      
-      /* 页面样式 */
-      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-      th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
-      th { background-color: #f4f4f4; }
     </style>
   </head>
 
@@ -79,22 +96,22 @@
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-          {
-            "symbols": [
-              { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
-              { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
-              { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
-              { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
-              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-            ],
-            "showSymbolLogo": true,
-            "isTransparent": true,
-            "displayMode": "adaptive",
-            "colorTheme": "dark",
-            "locale": "ko"
-          }
+        {
+          "symbols": [
+            { "proName": "FX_IDC:USDKRW", "title": "USD/KRW" },
+            { "proName": "OANDA:USDCAD", "title": "USD/CAD" },
+            { "proName": "OANDA:AUDUSD", "title": "AUD/USD" },
+            { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
+            { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+            { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+            { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+          ],
+          "showSymbolLogo": true,
+          "isTransparent": true,
+          "displayMode": "adaptive",
+          "colorTheme": "dark",
+          "locale": "ko"
+        }
         </script>
       </div>
     </div>
@@ -110,68 +127,60 @@
       <a href="#/knowledge-lab">지식 연구소</a>
       <a href="#/market-news">마켓 뉴스</a>
       <a href="#/articles">아티클</a>
+      <a href="event-schedule.html">오늘의 금융 이벤트</a>
       <a href="#/about">About</a>
     </nav>
 
-    <!-- 今日行程表和金融数据 -->
-    <main class="container" id="app" aria-live="polite">
-      <h1>今日行程表和金融数据</h1>
+    <!-- 主要内容 -->
+    <main class="container" id="app" aria-live="polite"></main>
 
-      <!-- 今日行程表 -->
-      <section>
-        <h2>今日金融数据</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>时间</th>
-              <th>经济指标</th>
-              <th>实际</th>
-              <th>预测</th>
-              <th>前值</th>
-            </tr>
-          </thead>
-          <tbody id="financial-data">
-            <tr><td colspan="5">加载中...</td></tr>
-          </tbody>
-        </table>
-      </section>
-    </main>
-
-    <!-- 数据加载脚本 -->
+    <!-- 数据加载和渲染 -->
     <script>
-      // API 请求 (使用Twelve Data API)
-      const API_URL = "https://api.twelvedata.com/time_series?symbol=USD/JPY&interval=1min&apikey=5e917b1bbcc44f1b8f8a91e3d9b0d03c"; // 这里的API密钥是示例，实际使用时需要替换
+      const EVENTS_URL = 'https://api.example.com/events';  // 这里替换成实际的API地址
 
-      async function fetchData() {
+      async function fetchEventsData() {
         try {
-          const response = await fetch(API_URL);
-          const data = await response.json();
-          console.log(data);
-
-          // 将获取到的数据插入到表格
-          const financialDataContainer = document.getElementById('financial-data');
-          if (data && data.values) {
-            data.values.forEach(item => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${item.datetime}</td>
-                <td>USD/JPY</td>
-                <td>${item.close}</td>
-                <td>-</td>
-                <td>-</td>
-              `;
-              financialDataContainer.appendChild(row);
-            });
-          }
+          const response = await fetch(EVENTS_URL);
+          if (!response.ok) throw new Error('Data not found');
+          return await response.json();
         } catch (error) {
-          console.error('数据加载失败', error);
+          console.error('Error fetching events data:', error);
+          return [];
         }
       }
 
-      document.addEventListener('DOMContentLoaded', fetchData);
+      async function renderEventData() {
+        const app = document.getElementById('app');
+        const data = await fetchEventsData();
+
+        if (!data.length) {
+          app.innerHTML = '<p>加载失败，无法获取数据。</p>';
+          return;
+        }
+
+        let htmlContent = '<h2>오늘의金融事件</h2><table><thead><tr><th>时间</th><th>经济指标</th><th>实际</th><th>预测</th><th>前值</th></tr></thead><tbody>';
+        
+        data.forEach(event => {
+          htmlContent += `
+            <tr>
+              <td>${event.time}</td>
+              <td>${event.indicator}</td>
+              <td>${event.actual}</td>
+              <td>${event.forecast}</td>
+              <td>${event.previous}</td>
+            </tr>
+          `;
+        });
+        htmlContent += '</tbody></table>';
+        app.innerHTML = htmlContent;
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        renderEventData();
+      });
     </script>
 
+    <!-- 应用脚本 -->
     <script type="module" src="/src/main.js"></script>
-    <script src="/js/auto-image.js" defer></script>
   </body>
 </html>
