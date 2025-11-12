@@ -5,28 +5,27 @@
   "trailingSlash": false,
 
   "rewrites": [
-    { "source": "/api/daily-brief", "destination": "/api/app" },
-    { "source": "/api/daily-brief/(.*)", "destination": "/api/app" },
+    { "source": "/api/daily-brief",       "destination": "/api/app" },
+    { "source": "/api/daily-brief/(.*)",  "destination": "/api/app" },
 
-    { "source": "/api/analyses", "destination": "/api/app" },
-    { "source": "/api/analyses/(.*)", "destination": "/api/app" },
+    { "source": "/api/analyses",          "destination": "/api/app" },
+    { "source": "/api/analyses/(.*)",     "destination": "/api/app" },
 
-    { "source": "/api/market-news", "destination": "/api/app" },
-    { "source": "/api/market-news/(.*)", "destination": "/api/app" },
+    { "source": "/api/market-news",       "destination": "/api/app" },
+    { "source": "/api/market-news/(.*)",  "destination": "/api/app" },
 
-    { "source": "/api/research", "destination": "/api/app" },
-    { "source": "/api/research/(.*)", "destination": "/api/app" },
+    { "source": "/api/research",          "destination": "/api/app" },
+    { "source": "/api/research/(.*)",     "destination": "/api/app" },
 
-    { "source": "/api/:match*", "destination": "/api/:match*" },
+    { "source": "/admin",                 "destination": "/admin/index.html" },
+    { "source": "/admin/(.*)",            "destination": "/admin/index.html" },
+    { "source": "/admin-lite",            "destination": "/admin-lite.html" },
 
-    { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/(.*)", "destination": "/admin/index.html" },
-    { "source": "/admin-lite", "destination": "/admin-lite.html" },
-
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)",                  "destination": "/index.html" }
   ],
 
   "crons": [
-    { "path": "/api/cron/fetch-news", "schedule": "*/20 * * * *" }  // 每20分钟执行一次抓取
+    { "path": "/api/cron/fetch-news", "schedule": "0 * * * *" }
   ]
 }
+
