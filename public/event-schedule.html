@@ -3,102 +3,57 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
-    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+    <title>오늘의 금융 이벤트 | TRAN TRADING LAB</title>
+    <meta name="description" content="실시간 경제일정 / 경제지표 캘린더 (TradingView 위젯)" />
     <meta name="theme-color" content="#0a0b0e" />
-    <meta name="robots" content="index,follow" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/styles/global.css" />
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "TRAN TRADING LAB",
-      "url": "https://tran-trading-lab.vercel.app/",
-      "logo": "https://tran-trading-lab.vercel.app/logo.png",
-      "sameAs": []
-    }
-    </script>
     <style>
-      /* 统一样式 */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #0a0b0e;
-        color: #ffffff;
-      }
+      /* 顶部价格滚动条（黑色） */
+      #price-tape{position:sticky;top:0;z-index:10000;background:#000;border-bottom:1px solid #151515}
+      #price-tape .tradingview-widget-container{max-width:100%}
 
-      .ttl-page {
-        max-width: 980px;
-        margin: 24px auto;
-        padding: 16px;
-        background: #1a1b1f;
-        border-radius: 12px;
-      }
-
-      .ttl-page h2 {
-        font-size: 1.5rem;
-        color: #e1e1e1;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 16px;
-      }
-
-      th, td {
-        padding: 12px;
-        text-align: center;
-        border-bottom: 1px solid #333;
-      }
-
-      th {
-        background-color: #333;
-        color: #fff;
-      }
-
-      td {
-        background-color: #222;
-      }
-
-      .ttl-muted {
-        opacity: 0.6;
-        font-size: 0.9rem;
-      }
+      /* 页面容器，和站内风格统一 */
+      .ttl-page{max-width:1100px;margin:24px auto;padding:16px}
+      .ttl-card{border:1px solid #1c1c1c;background:#0b0c10cc;border-radius:14px;padding:16px}
+      .ttl-title{margin:8px 0 14px;font-size:1.35rem}
+      .ttl-muted{opacity:.65}
+      .tv-wrap{min-height:700px}
+      /* 让 TradingView 容器铺满卡片 */
+      .tradingview-widget-container, .tradingview-widget-container__widget{width:100%}
     </style>
   </head>
 
   <body>
-    <a href="#app" class="skip-link">Skip to main content</a>
-
-    <!-- 顶部价格滚动条（TradingView Ticker Tape） -->
+    <!-- 顶部价格滚动条 -->
     <div id="price-tape" aria-label="가격 티커">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-          {
-            "symbols": [
-              { "proName": "FX_IDC:USDKRW", "title": "USD/KRW" },
-              { "proName": "OANDA:USDCAD", "title": "USD/CAD" },
-              { "proName": "OANDA:AUDUSD", "title": "AUD/USD" },
-              { "proName": "OANDA:XAUUSD", "title": "XAU/USD" },
-              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-            ],
-            "showSymbolLogo": true,
-            "isTransparent": true,
-            "displayMode": "adaptive",
-            "colorTheme": "dark",
-            "locale": "ko"
-          }
+{
+  "symbols": [
+    { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+    { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+    { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+    { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+    { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+    { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+  ],
+  "showSymbolLogo": true,
+  "isTransparent": true,
+  "displayMode": "adaptive",
+  "colorTheme": "dark",
+  "locale": "ko"
+}
         </script>
       </div>
     </div>
 
-    <!-- 顶部导航 -->
+    <!-- 顶部导航（与你 index.html 相同） -->
     <nav class="nav" aria-label="Primary">
-      <a href="#/" class="brand" aria-label="홈으로">
+      <a href="/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
         TRAN TRADING LAB
       </a>
@@ -107,75 +62,35 @@
       <a href="#/knowledge-lab">지식 연구소</a>
       <a href="#/market-news">마켓 뉴스</a>
       <a href="#/articles">아티클</a>
-      <a href="event-schedule.html">오늘의 금융 이벤트</a>
+      <a href="/event-schedule.html" aria-current="page">오늘의 금융 이벤트</a>
       <a href="#/about">About</a>
     </nav>
 
-    <!-- 主要内容 -->
-    <main class="container" id="app" aria-live="polite"></main>
+    <!-- 页面主体 -->
+    <main class="ttl-page">
+      <section class="ttl-card">
+        <h2 class="ttl-title">오늘의 금융 이벤트 <span class="ttl-muted">· 실시간 달력</span></h2>
 
-    <!-- 数据加载和渲染 -->
-    <script>
-      const EVENTS_URL = 'https://api.example.com/events';  // 这里替换成实际的API地址
+        <!-- TradingView 经济日历（免配置、实时） -->
+        <div class="tradingview-widget-container tv-wrap">
+          <div class="tradingview-widget-container__widget"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+{
+  "width": "100%",
+  "height": "720",
+  "colorTheme": "dark",
+  "isTransparent": true,
+  "locale": "zh_CN"
+}
+          </script>
+        </div>
 
-      async function fetchEventsData() {
-        try {
-          const response = await fetch(EVENTS_URL);
-          if (!response.ok) throw new Error('数据加载失败');
-          return await response.json();
-        } catch (error) {
-          console.error('数据加载错误:', error);
-          return [];
-        }
-      }
+        <p class="ttl-muted" style="margin-top:10px">
+          数据来源：TradingView 经济日历 · 免费公开数据（可能有数分钟延迟，仅供参考，不构成投资建议）
+        </p>
+      </section>
+    </main>
 
-      async function renderEventData() {
-        const app = document.getElementById('app');
-        const data = await fetchEventsData();
-
-        if (!data.length) {
-          app.innerHTML = '<p class="ttl-muted">加载失败，无法获取数据。</p>';
-          return;
-        }
-
-        let htmlContent = `
-          <section class="ttl-page">
-            <h2>今天的金融事件</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>时间</th>
-                  <th>经济指标</th>
-                  <th>实际</th>
-                  <th>预测</th>
-                  <th>前值</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
-
-        data.forEach(event => {
-          htmlContent += `
-            <tr>
-              <td>${event.time}</td>
-              <td>${event.indicator}</td>
-              <td>${event.actual}</td>
-              <td>${event.forecast}</td>
-              <td>${event.previous}</td>
-            </tr>
-          `;
-        });
-
-        htmlContent += '</tbody></table></section>';
-        app.innerHTML = htmlContent;
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        renderEventData();
-      });
-    </script>
-
-    <!-- 应用脚本 -->
-    <script type="module" src="/src/main.js"></script>
+    <!-- 注意：这个独立页面不要加载 /src/main.js，避免 SPA 把内容清空 -->
   </body>
 </html>
