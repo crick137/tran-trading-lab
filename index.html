@@ -37,7 +37,7 @@
     </script>
 
     <style>
-      /* 新闻流最小样式 (不影响全局) */
+      /* 뉴스 스트림 최소 스타일(전역 침범 X) */
       .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
       .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
       .ttl-news ul { list-style:none; padding:0; margin:0 }
@@ -58,16 +58,22 @@
         background: #000; /* 黑色背景 */
         border-bottom: 1px solid #151515;
       }
-      #price-tape .tradingview-widget-container {
-        max-width: 100%;
-      }
+      #price-tape .tradingview-widget-container { max-width: 100%; }
+
+      /* 新增：带缩略图的新闻卡片样式（不影响其它页面） */
+      .ttl-list{list-style:none;margin:0;padding:0}
+      .ttl-item{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:10px;
+        border:1px solid #1b1d22;background:#0d0f14;border-radius:10px}
+      .ttl-item + .ttl-item{margin-top:10px}
+      .ttl-thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;background:#111}
+      .ttl-meta small{opacity:.65}
     </style>
   </head>
 
   <body>
     <a href="#app" class="skip-link">Skip to main content</a>
 
-    <!-- 背景效果画布 -->
+    <!-- 배경 효과 캔버스 -->
     <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
 
     <!-- 顶部轮播价格条（TradingView Ticker Tape） -->
@@ -75,27 +81,27 @@
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-          {
-            "symbols": [
-              { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
-              { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
-              { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
-              { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
-              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-            ],
-            "showSymbolLogo": true,
-            "isTransparent": true,
-            "displayMode": "adaptive",
-            "colorTheme": "dark",
-            "locale": "ko"
-          }
+{
+  "symbols": [
+    { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+    { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+    { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+    { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+    { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+    { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+  ],
+  "showSymbolLogo": true,
+  "isTransparent": true,
+  "displayMode": "adaptive",
+  "colorTheme": "dark",
+  "locale": "ko"
+}
         </script>
       </div>
     </div>
 
-    <!-- 顶部导航 -->
+    <!-- 상단 내비게이션 -->
     <nav class="nav" aria-label="Primary">
       <a href="#/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
@@ -110,43 +116,75 @@
       <a href="#/about">About</a>
     </nav>
 
-    <!-- SPA 主要内容 -->
+    <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 新闻流渲染脚本 -->
+    <!-- 뉴스渲染脚本（不改你的 /api/news） -->
     <script>
       const NEWS_URL   = '/api/news';
-      const TG_CHANNEL = ''; // 可选: 'https://t.me/yourchannel'
+      const TG_CHANNEL = ''; // 例如 'https://t.me/yourchannel'
 
-      async function loadNews() {
-        try {
-          const r = await fetch(NEWS_URL + '?_=' + Date.now(), { cache: 'no-store' });
-          if (!r.ok) throw 0;
+      async function loadNews(){
+        try{
+          const r = await fetch(NEWS_URL + '?_=' + Date.now(), { cache:'no-store' });
+          if(!r.ok) throw 0;
           return await r.json();
-        } catch { return []; }
+        }catch{ return []; }
       }
 
-      async function renderHomeNews() {
-        const box = document.getElementById('ttl-home-news-list');
-        if (!box) return;
-        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
-        const list = await loadNews();
-        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
-        box.innerHTML = '';
-        list.slice(0, 10).forEach(n => {
-          const d = new Date(n.isoDate || n.ts || Date.now());
-          const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      // -------- 新增：缩略图/图标工具 ----------
+      const getDomain = (url)=>{ try{ return new URL(url).hostname; }catch{return ''; } };
+      const getFavicon = (url)=>{
+        const d = getDomain(url);
+        return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : '/favicon.png';
+      };
+      const getThumb = (n)=>(
+        n.image || n.thumbnail || n.thumb ||
+        (n.enclosure && n.enclosure.url) ||
+        (Array.isArray(n.enclosures) && n.enclosures[0]?.url) || ''
+      );
+      const fmtTime = (ts)=>{
+        const d = new Date(ts || Date.now());
+        return d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+      };
+
+      function renderNewsList(ul, list, limit=30){
+        ul.classList.add('ttl-list');
+        ul.innerHTML = '';
+        list.slice(0, limit).forEach(n=>{
+          const link = n.link || n.url || '#';
+          const img  = getThumb(n) || getFavicon(link);
+          const when = fmtTime(n.isoDate || n.pubDate || n.ts);
+          const text = n.summaryKo || n.title || n.summary || '';
+
           const li = document.createElement('li');
-          li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
-          box.appendChild(li);
+          li.className = 'ttl-item';
+          li.innerHTML = `
+            <img class="ttl-thumb" src="${img}" alt="" onerror="this.src='${getFavicon(link)}'">
+            <div class="ttl-meta">
+              <div><b>[${when}]</b> ${text}</div>
+              <div><small><a href="${link}" target="_blank" rel="noreferrer">원문</a> · ${getDomain(link) || 'source'}</small></div>
+            </div>`;
+          ul.appendChild(li);
         });
       }
 
-      async function renderRoute() {
+      // 首页（如果有对应容器则渲染，没有就跳过）
+      async function renderHomeNews(){
+        const box = document.getElementById('ttl-home-news-list');
+        if(!box) return;
+        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
+        const list = await loadNews();
+        if(!list.length){ box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
+        renderNewsList(box, list, 10);
+      }
+
+      // 라우트：마켓 뉴스
+      async function renderRoute(){
         const hash = location.hash || '#/';
-        if (hash.startsWith('#/market-news')) {
+        if(hash.startsWith('#/market-news')){
           const app = document.getElementById('app');
-          if (!app) return;
+          if(!app) return;
           app.innerHTML = `
             <section class="ttl-page">
               <h2>마켓 뉴스</h2>
@@ -167,28 +205,21 @@
           const ul = document.getElementById('ttl-route-news');
           ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
           const list = await loadNews();
-          if (!list.length) { ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
-          ul.innerHTML = '';
-          list.slice(0, 30).forEach(n => {
-            const d = new Date(n.isoDate || n.ts || Date.now());
-            const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            const li = document.createElement('li');
-            li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
-            ul.appendChild(li);
-          });
+          if(!list.length){ ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
+          renderNewsList(ul, list, 30);
         }
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();              // 如果没有首页模块会跳过
+      document.addEventListener('DOMContentLoaded', ()=>{
+        renderHomeNews();
         renderRoute();
-        setInterval(renderHomeNews, 5 * 60 * 1000);
+        setInterval(renderHomeNews, 5*60*1000);
         window.addEventListener('hashchange', renderRoute);
       });
     </script>
 
-    <!-- 应用脚本 -->
+    <!-- 앱 스크립트 -->
     <script type="module" src="/src/main.js"></script>
     <script src="/js/auto-image.js" defer></script>
   </body>
-</html> 
+</html>
