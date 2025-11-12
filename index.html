@@ -50,25 +50,17 @@
       .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
       .ttl-muted { opacity:.6 }
 
-      /* 顶部价格滚动条（纯黑背景） */
+      /* 顶部价格滚动条（黑色背景） */
       #price-tape{
         position: sticky;
         top: 0;
         z-index: 10000;
-        background: #000;
+        background: #000; /* 黑色背景 */
         border-bottom: 1px solid #151515;
       }
-      #price-tape .tradingview-widget-container { max-width: 100% }
-
-      /* 数据板块样式（无需配置的前端直连） */
-      .ttl-board{max-width:980px;margin:24px auto;padding:0 16px}
-      .ttl-grid2{display:grid;grid-template-columns:1fr;gap:16px}
-      @media(min-width:960px){.ttl-grid2{grid-template-columns:1fr 1fr}}
-      .card{border:1px solid #222;background:#0f1115;border-radius:12px;padding:16px}
-      .kv{display:flex;justify-content:space-between;align-items:baseline}
-      .kv b{font-size:1.1rem}
-      .price{font-size:1.25rem}
-      .chg.up{color:#19c37d}.chg.down{color:#ff4d4f}
+      #price-tape .tradingview-widget-container {
+        max-width: 100%;
+      }
     </style>
   </head>
 
@@ -82,24 +74,23 @@
     <div id="price-tape" aria-label="가격 티커">
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
-        <!-- 注意：此处必须是“纯 JSON”，不能有注释/尾逗号 -->
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-{
-  "symbols": [
-    { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
-    { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
-    { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
-    { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
-    { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-    { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
-  ],
-  "showSymbolLogo": true,
-  "isTransparent": true,
-  "displayMode": "adaptive",
-  "colorTheme": "dark",
-  "locale": "ko"
-}
+          {
+            "symbols": [
+              { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+              { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+              { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+              { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+            ],
+            "showSymbolLogo": true,
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "colorTheme": "dark",
+            "locale": "ko"
+          }
         </script>
       </div>
     </div>
@@ -115,14 +106,13 @@
       <a href="#/knowledge-lab">지식 연구소</a>
       <a href="#/market-news">마켓 뉴스</a>
       <a href="#/articles">아티클</a>
-      <a href="#/data-board">데이터 보드</a>
       <a href="#/about">About</a>
     </nav>
 
     <!-- SPA 主要内容 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 新闻流 & 数据板 路由/渲染脚本（前端直连，无需配置） -->
+    <!-- 新闻流渲染脚本 -->
     <script>
       const NEWS_URL   = '/api/news';
       const TG_CHANNEL = ''; // 可选: 'https://t.me/yourchannel'
@@ -135,45 +125,24 @@
         } catch { return []; }
       }
 
-      /* ===== 数据板块：零配置公共 API 直连 ===== */
-      async function getJSON(url){
-        const r = await fetch(url, {cache:'no-store'});
-        if(!r.ok) throw 0;
-        return r.json();
-      }
-      async function loadBoardData(){
-        const [btc, eth, usd, eur] = await Promise.allSettled([
-          getJSON('https://api.coindesk.com/v1/bpi/currentprice/BTC.json'),             // BTC/USD (CoinDesk)
-          getJSON('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT'),        // ETH/USDT (Binance)
-          getJSON('https://open.er-api.com/v6/latest/USD'),                              // USD base -> KRW/JPY
-          getJSON('https://open.er-api.com/v6/latest/EUR')                               // EUR base -> USD
-        ]);
-        const out = {};
-        if (btc.status==='fulfilled')
-          out['BTC/USDT'] = { price: Number(btc.value?.bpi?.USD?.rate_float)||0, src:'CoinDesk' };
-        if (eth.status==='fulfilled')
-          out['ETH/USDT'] = { price: Number(eth.value?.price)||0, src:'Binance' };
-        if (usd.status==='fulfilled'){
-          out['USD/KRW'] = { price: Number(usd.value?.rates?.KRW)||0, src:'open.er-api.com' };
-          out['USD/JPY'] = { price: Number(usd.value?.rates?.JPY)||0, src:'open.er-api.com' };
-        }
-        if (eur.status==='fulfilled')
-          out['EUR/USD'] = { price: Number(eur.value?.rates?.USD)||0, src:'open.er-api.com' };
-        return out;
-      }
-      function renderBoard(container, data){
-        const rows = Object.entries(data).map(([k,v]) => `
-          <div class="card">
-            <div class="kv"><b>${k}</b><span class="price">${(v.price||'-').toLocaleString('ko-KR')}</span></div>
-            <small class="ttl-muted">SRC: ${v.src}</small>
-          </div>`).join('');
-        container.innerHTML = `<div class="ttl-grid2">${rows}</div>`;
+      async function renderHomeNews() {
+        const box = document.getElementById('ttl-home-news-list');
+        if (!box) return;
+        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
+        const list = await loadNews();
+        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
+        box.innerHTML = '';
+        list.slice(0, 10).forEach(n => {
+          const d = new Date(n.isoDate || n.ts || Date.now());
+          const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+          const li = document.createElement('li');
+          li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
+          box.appendChild(li);
+        });
       }
 
-      /* ===== 路由渲染 ===== */
       async function renderRoute() {
         const hash = location.hash || '#/';
-
         if (hash.startsWith('#/market-news')) {
           const app = document.getElementById('app');
           if (!app) return;
@@ -207,38 +176,12 @@
             ul.appendChild(li);
           });
         }
-        else if (hash.startsWith('#/data-board')) {
-          const app = document.getElementById('app');
-          if (!app) return;
-          app.innerHTML = `
-            <section class="ttl-board">
-              <h2>실시간 데이터 보드</h2>
-              <p class="ttl-muted">1분마다 자동 갱신</p>
-              <div id="board"></div>
-            </section>
-          `;
-          const mount = document.getElementById('board');
-          async function refresh(){
-            try {
-              const d = await loadBoardData();
-              renderBoard(mount, d);
-            } catch {
-              mount.innerHTML = '<p class="ttl-muted">데이터를 불러올 수 없습니다.</p>';
-            }
-          }
-          refresh();
-          if (window.ttlBoardTimer) clearInterval(window.ttlBoardTimer);
-          window.ttlBoardTimer = setInterval(refresh, 60 * 1000);
-        }
-        else {
-          // 其它路由可按需扩展；这里留空即可
-          const app = document.getElementById('app');
-          if (app) app.innerHTML = '';
-        }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
+        renderHomeNews();              // 如果没有首页模块会跳过
         renderRoute();
+        setInterval(renderHomeNews, 5 * 60 * 1000);
         window.addEventListener('hashchange', renderRoute);
       });
     </script>
