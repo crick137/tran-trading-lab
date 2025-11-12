@@ -37,7 +37,7 @@
     </script>
 
     <style>
-      /* 뉴스 스트림 최소 스타일(전역 침범 X) */
+      /* 新闻流最小样式 (不影响全局) */
       .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
       .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
       .ttl-news ul { list-style:none; padding:0; margin:0 }
@@ -51,15 +51,23 @@
       .ttl-muted { opacity:.6 }
 
       /* 顶部价格滚动条 */
-      #price-tape{position:sticky;top:0;z-index:10000;background:#0a0b0e;border-bottom:1px solid #151515}
-      #price-tape .tradingview-widget-container{max-width:100%}
+      #price-tape{
+        position: sticky;
+        top: 0;
+        z-index: 10000;
+        background: #000;  /* 设置为黑色背景 */
+        border-bottom: 1px solid #151515;
+      }
+      #price-tape .tradingview-widget-container {
+        max-width: 100%;
+      }
     </style>
   </head>
 
   <body>
     <a href="#app" class="skip-link">Skip to main content</a>
 
-    <!-- 배경 효과 캔버스 -->
+    <!-- 背景效果画布 -->
     <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
 
     <!-- 顶部轮播价格条（TradingView Ticker Tape） -->
@@ -67,30 +75,30 @@
       <div class="tradingview-widget-container">
         <div class="tradingview-widget-container__widget"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-      {
-  "symbols": [
-    { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
-    { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
-    { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
-    { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
-    { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
-    { "proName": "TVC:KOSPL",       "title": "KOSPL" },
-    { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
-    { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" },
-    { "proName": "KOSDAQ:KQ",       "title": "KOSDAQ" },
-    { "proName": "KOSPI:KS11",      "title": "KOSPI" }
-  ],
-  "showSymbolLogo": true,
-  "isTransparent": true,
-  "displayMode": "adaptive",  // 删除多余的逗号
-  "colorTheme": "dark",
-  "locale": "ko"
-}
+          {
+            "symbols": [
+              { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+              { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+              { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+              { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+              { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+              { "proName": "TVC:KOSPL",       "title": "KOSPL" },
+              { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+              { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" },
+              { "proName": "KOSDAQ:KQ",       "title": "KOSDAQ" },
+              { "proName": "KOSPI:KS11",      "title": "KOSPI" }
+            ],
+            "showSymbolLogo": true,
+            "isTransparent": true,
+            "displayMode": "adaptive",
+            "colorTheme": "dark",
+            "locale": "ko"
+          }
         </script>
       </div>
     </div>
 
-    <!-- 상단 내비게이션 -->
+    <!-- 顶部导航 -->
     <nav class="nav" aria-label="Primary">
       <a href="#/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
@@ -104,13 +112,13 @@
       <a href="#/about">About</a>
     </nav>
 
-    <!-- SPA 메인 -->
+    <!-- SPA 主要内容 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 뉴스 스트림 렌더 스크립트 -->
+    <!-- 新闻流渲染脚本 -->
     <script>
       const NEWS_URL   = '/api/news';
-      const TG_CHANNEL = ''; // 선택사항: 'https://t.me/yourchannel'
+      const TG_CHANNEL = ''; // 可选: 'https://t.me/yourchannel'
 
       async function loadNews() {
         try {
@@ -174,14 +182,14 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();
+        renderHomeNews();              // 如果没有首页模块会跳过
         renderRoute();
         setInterval(renderHomeNews, 5 * 60 * 1000);
         window.addEventListener('hashchange', renderRoute);
       });
     </script>
 
-    <!-- 앱 스크립트 -->
+    <!-- 应用脚本 -->
     <script type="module" src="/src/main.js"></script>
     <script src="/js/auto-image.js" defer></script>
   </body>
