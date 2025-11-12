@@ -3,19 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TRAN TRADING LAB | 금융 데이터</title>
-    <meta name="description" content="TRAN TRADING LAB — 실시간 금융 데이터, 경제 일정" />
-
-    <meta property="og:title" content="TRAN TRADING LAB | 금융 데이터" />
-    <meta property="og:description" content="실시간 금융 데이터와 경제 일정을 한 눈에 확인하세요." />
+    <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
+    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+    <meta property="og:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta property="og:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tran-trading-lab.vercel.app/" />
     <meta property="og:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <meta property="og:locale" content="ko_KR" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TRAN TRADING LAB | 금융 데이터" />
-    <meta name="twitter:description" content="실시간 금융 데이터와 경제 일정을 한 눈에 확인하세요." />
+    <meta name="twitter:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
+    <meta name="twitter:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
     <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
 
     <meta name="theme-color" content="#0a0b0e" />
@@ -25,30 +24,47 @@
     <link rel="canonical" href="https://tran-trading-lab.vercel.app/" />
     <link rel="stylesheet" href="/styles/global.css" />
 
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TRAN TRADING LAB",
+      "url": "https://tran-trading-lab.vercel.app/",
+      "logo": "https://tran-trading-lab.vercel.app/logo.png",
+      "sameAs": []
+    }
+    </script>
+
     <style>
-      /* 今日事件板块样式 */
-      .event-schedule { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
-      .event-schedule h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
-      .event-schedule ul { list-style:none; padding:0; margin:0 }
-      .event-schedule li { margin:8px 0; line-height:1.45 }
-      .event-schedule small { opacity:.7 }
-      .event-schedule .time { font-weight:bold; margin-right:10px; }
-      .event-schedule .impact { color: orange; }
-      .event-schedule .actual { font-weight: bold; }
-      .event-schedule .forecast { color: #00b894; }
-      .event-schedule .previous { color: #ff7675; }
+      /* 新闻流最小样式 (不影响全局) */
+      .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
+      .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
+      .ttl-news ul { list-style:none; padding:0; margin:0 }
+      .ttl-news li { margin:8px 0; line-height:1.45 }
+      .ttl-news small { opacity:.7 }
+      .ttl-news a { text-decoration:underline }
+      .ttl-grid { display:grid; gap:16px; grid-template-columns:1fr }
+      @media (min-width:960px){ .ttl-grid { grid-template-columns:1fr 1fr } }
+      .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
+      .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
+      .ttl-muted { opacity:.6 }
 
       /* 顶部价格滚动条（黑色背景） */
-      #price-tape {
+      #price-tape{
         position: sticky;
         top: 0;
         z-index: 10000;
-        background: #000;
+        background: #000; /* 黑色背景 */
         border-bottom: 1px solid #151515;
       }
       #price-tape .tradingview-widget-container {
         max-width: 100%;
       }
+      
+      /* 页面样式 */
+      table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+      th, td { padding: 10px; text-align: center; border: 1px solid #ddd; }
+      th { background-color: #f4f4f4; }
     </style>
   </head>
 
@@ -97,106 +113,64 @@
       <a href="#/about">About</a>
     </nav>
 
-    <!-- 今日事件板块 -->
-    <section class="ttl-page">
-      <h2>오늘의 금융事件</h2>
-      <div class="event-schedule">
-        <h3>오늘의 주요 일정</h3>
-        <ul>
-          <li>
-            <span class="time">09:30</span>
-            <span class="impact">중</span>
-            <span>중국 소비자 물가 상승률 MoM</span>
-            <span class="actual">0.2%</span> <span class="forecast">0.1%</span> <span class="previous">0.1%</span>
-          </li>
-          <li>
-            <span class="time">10:30</span>
-            <span class="impact">고</span>
-            <span>미국 소매 판매 지수</span>
-            <span class="actual">-0.3%</span> <span class="forecast">-0.2%</span> <span class="previous">0.2%</span>
-          </li>
-        </ul>
-      </div>
-    </section>
+    <!-- 今日行程表和金融数据 -->
+    <main class="container" id="app" aria-live="polite">
+      <h1>今日行程表和金融数据</h1>
 
-    <!-- SPA 主要内容 -->
-    <main class="container" id="app" aria-live="polite"></main>
+      <!-- 今日行程表 -->
+      <section>
+        <h2>今日金融数据</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>时间</th>
+              <th>经济指标</th>
+              <th>实际</th>
+              <th>预测</th>
+              <th>前值</th>
+            </tr>
+          </thead>
+          <tbody id="financial-data">
+            <tr><td colspan="5">加载中...</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
 
-    <!-- 新闻流渲染脚本 -->
+    <!-- 数据加载脚本 -->
     <script>
-      const NEWS_URL = '/api/news';
-      const TG_CHANNEL = ''; // 可选: 'https://t.me/yourchannel'
+      // API 请求 (使用Twelve Data API)
+      const API_URL = "https://api.twelvedata.com/time_series?symbol=USD/JPY&interval=1min&apikey=5e917b1bbcc44f1b8f8a91e3d9b0d03c"; // 这里的API密钥是示例，实际使用时需要替换
 
-      async function loadNews() {
+      async function fetchData() {
         try {
-          const r = await fetch(NEWS_URL + '?_=' + Date.now(), { cache: 'no-store' });
-          if (!r.ok) throw 0;
-          return await r.json();
-        } catch { return []; }
-      }
+          const response = await fetch(API_URL);
+          const data = await response.json();
+          console.log(data);
 
-      async function renderHomeNews() {
-        const box = document.getElementById('ttl-home-news-list');
-        if (!box) return;
-        box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
-        const list = await loadNews();
-        if (!list.length) { box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
-        box.innerHTML = '';
-        list.slice(0, 10).forEach(n => {
-          const d = new Date(n.isoDate || n.ts || Date.now());
-          const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-          const li = document.createElement('li');
-          li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
-          box.appendChild(li);
-        });
-      }
-
-      async function renderRoute() {
-        const hash = location.hash || '#/';
-        if (hash.startsWith('#/market-news')) {
-          const app = document.getElementById('app');
-          if (!app) return;
-          app.innerHTML = `
-            <section class="ttl-page">
-              <h2>마켓 뉴스</h2>
-              <p class="ttl-muted">30분마다 업데이트 · 출처 링크 포함</p>
-              <div class="ttl-grid">
-                <div class="ttl-news">
-                  <h3>실시간 스트림</h3>
-                  <ul id="ttl-route-news"></ul>
-                </div>
-                <div class="ttl-news">
-                  <h3>공지</h3>
-                  <p class="ttl-muted">투자 자문이 아닙니다. 숫자와 시간은 지연/오류가 있을 수 있어 “~ / 대략” 표기를 사용합니다.</p>
-                  ${TG_CHANNEL ? `<p><a href="${TG_CHANNEL}" target="_blank">📌 TG에서 실시간 보기</a></p>` : ''}
-                </div>
-              </div>
-            </section>
-          `;
-          const ul = document.getElementById('ttl-route-news');
-          ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
-          const list = await loadNews();
-          if (!list.length) { ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
-          ul.innerHTML = '';
-          list.slice(0, 30).forEach(n => {
-            const d = new Date(n.isoDate || n.ts || Date.now());
-            const when = d.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
-            const li = document.createElement('li');
-            li.innerHTML = `<b>[${when}]</b> ${n.summaryKo} <a href="${n.link}" target="_blank" rel="noreferrer">원문</a>`;
-            ul.appendChild(li);
-          });
+          // 将获取到的数据插入到表格
+          const financialDataContainer = document.getElementById('financial-data');
+          if (data && data.values) {
+            data.values.forEach(item => {
+              const row = document.createElement('tr');
+              row.innerHTML = `
+                <td>${item.datetime}</td>
+                <td>USD/JPY</td>
+                <td>${item.close}</td>
+                <td>-</td>
+                <td>-</td>
+              `;
+              financialDataContainer.appendChild(row);
+            });
+          }
+        } catch (error) {
+          console.error('数据加载失败', error);
         }
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();
-        renderRoute();
-        setInterval(renderHomeNews, 5 * 60 * 1000);
-        window.addEventListener('hashchange', renderRoute);
-      });
+      document.addEventListener('DOMContentLoaded', fetchData);
     </script>
 
-    <!-- 应用脚本 -->
     <script type="module" src="/src/main.js"></script>
     <script src="/js/auto-image.js" defer></script>
   </body>
