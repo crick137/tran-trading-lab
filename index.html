@@ -37,13 +37,13 @@
     </script>
 
     <style>
-      /* 新闻流最小样式 (不影响全局) */
-      .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
-      .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
-      .ttl-news ul { list-style:none; padding:0; margin:0 }
-      .ttl-news li { margin:8px 0; line-height:1.45 }
-      .ttl-news small { opacity:.7 }
-      .ttl-news a { text-decoration:underline }
+      /* 今日行程和金融数据板块样式 */
+      .ttl-data { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
+      .ttl-data h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
+      .ttl-data ul { list-style:none; padding:0; margin:0 }
+      .ttl-data li { margin:8px 0; line-height:1.45 }
+      .ttl-data small { opacity:.7 }
+      .ttl-data a { text-decoration:underline }
       .ttl-grid { display:grid; gap:16px; grid-template-columns:1fr }
       @media (min-width:960px){ .ttl-grid { grid-template-columns:1fr 1fr } }
       .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
@@ -108,6 +108,34 @@
       <a href="#/articles">아티클</a>
       <a href="#/about">About</a>
     </nav>
+
+    <!-- 今日行程与金融数据板块 -->
+    <section class="ttl-page">
+      <h2>오늘의 데이터</h2>
+      <div class="ttl-grid">
+        <!-- 今日行程 -->
+        <div class="ttl-data">
+          <h3>오늘의 행程</h3>
+          <ul>
+            <li>09:00 - 10:00 AM: 시장 분석</li>
+            <li>10:30 - 12:00 PM: 뉴스 업데이트</li>
+            <li>01:00 - 03:00 PM: 금융 연구</li>
+            <li>04:00 - 06:00 PM: 거래 전략</li>
+          </ul>
+        </div>
+
+        <!-- 金融数据 -->
+        <div class="ttl-data">
+          <h3>실시간 금융 데이터</h3>
+          <ul>
+            <li><strong>USD/KRW:</strong> 1,188.00</li>
+            <li><strong>BTC/USDT:</strong> $42,000</li>
+            <li><strong>S&P 500:</strong> 4,500.00</li>
+            <li><strong>Nasdaq 100:</strong> 14,500.00</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
     <!-- SPA 主要内容 -->
     <main class="container" id="app" aria-live="polite"></main>
