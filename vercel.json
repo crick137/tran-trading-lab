@@ -3,7 +3,6 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
-
   "rewrites": [
     { "source": "/api/daily-brief",       "destination": "/api/app" },
     { "source": "/api/daily-brief/(.*)",  "destination": "/api/app" },
@@ -23,9 +22,7 @@
 
     { "source": "/(.*)",                  "destination": "/index.html" }
   ],
-
   "crons": [
     { "path": "/api/cron/fetch-news", "schedule": "0 * * * *" }
   ]
 }
-
