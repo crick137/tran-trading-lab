@@ -1,0 +1,21 @@
+name: Fetch RSS News
+
+on:
+  schedule:
+    # 每小时执行一次（根据需要修改时间）
+    - cron: '0 * * * *'
+
+jobs:
+  fetch-rss:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Fetch RSS and update data
+        run: |
+          # 调用 Vercel API 或者直接触发构建以更新新闻数据
+          curl -X GET https://your-vercel-project-url/api/news
