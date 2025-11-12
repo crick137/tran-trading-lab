@@ -1,21 +1,21 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TRAN TRADING LAB | 시스템 외환 트레이딩 랩</title>
-    <meta name="description" content="TRAN TRADING LAB — 데일리 브리프, 분석 아카이브, 지식 연구소, 마켓 뉴스, 아티클" />
+    <title>TRAN TRADING LAB | 금융 데이터</title>
+    <meta name="description" content="TRAN TRADING LAB — 실시간 금융 데이터, 경제 일정" />
 
-    <meta property="og:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
-    <meta property="og:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
+    <meta property="og:title" content="TRAN TRADING LAB | 금융 데이터" />
+    <meta property="og:description" content="실시간 금융 데이터와 경제 일정을 한 눈에 확인하세요." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://tran-trading-lab.vercel.app/" />
     <meta property="og:image" content="https://tran-trading-lab.vercel.app/logo.png" />
     <meta property="og:locale" content="ko_KR" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="TRAN TRADING LAB | 시스템 외환 트레이딩 랩" />
-    <meta name="twitter:description" content="데일리 브리프, 구조적 분석, 지식 로드맵, 글로벌 마켓 뉴스까지 한 곳에서 정리하세요." />
+    <meta name="twitter:title" content="TRAN TRADING LAB | 금융 데이터" />
+    <meta name="twitter:description" content="실시간 금융 데이터와 경제 일정을 한 눈에 확인하세요." />
     <meta name="twitter:image" content="https://tran-trading-lab.vercel.app/logo.png" />
 
     <meta name="theme-color" content="#0a0b0e" />
@@ -25,37 +25,25 @@
     <link rel="canonical" href="https://tran-trading-lab.vercel.app/" />
     <link rel="stylesheet" href="/styles/global.css" />
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "TRAN TRADING LAB",
-      "url": "https://tran-trading-lab.vercel.app/",
-      "logo": "https://tran-trading-lab.vercel.app/logo.png",
-      "sameAs": []
-    }
-    </script>
-
     <style>
-      /* 新闻流最小样式 (不影响全局) */
-      .ttl-news { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
-      .ttl-news h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
-      .ttl-news ul { list-style:none; padding:0; margin:0 }
-      .ttl-news li { margin:8px 0; line-height:1.45 }
-      .ttl-news small { opacity:.7 }
-      .ttl-news a { text-decoration:underline }
-      .ttl-grid { display:grid; gap:16px; grid-template-columns:1fr }
-      @media (min-width:960px){ .ttl-grid { grid-template-columns:1fr 1fr } }
-      .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
-      .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
-      .ttl-muted { opacity:.6 }
+      /* 今日事件板块样式 */
+      .event-schedule { padding:16px; border:1px solid #222; border-radius:12px; background:#0a0b0ee6; backdrop-filter:blur(2px) }
+      .event-schedule h3 { margin:0 0 10px; font-size:1.05rem; letter-spacing:.2px }
+      .event-schedule ul { list-style:none; padding:0; margin:0 }
+      .event-schedule li { margin:8px 0; line-height:1.45 }
+      .event-schedule small { opacity:.7 }
+      .event-schedule .time { font-weight:bold; margin-right:10px; }
+      .event-schedule .impact { color: orange; }
+      .event-schedule .actual { font-weight: bold; }
+      .event-schedule .forecast { color: #00b894; }
+      .event-schedule .previous { color: #ff7675; }
 
       /* 顶部价格滚动条（黑色背景） */
-      #price-tape{
+      #price-tape {
         position: sticky;
         top: 0;
         z-index: 10000;
-        background: #000; /* 黑色背景 */
+        background: #000;
         border-bottom: 1px solid #151515;
       }
       #price-tape .tradingview-widget-container {
@@ -106,16 +94,37 @@
       <a href="#/knowledge-lab">지식 연구소</a>
       <a href="#/market-news">마켓 뉴스</a>
       <a href="#/articles">아티클</a>
-      <a href="event-schedule.html">오늘의 금융 이벤트</a>
       <a href="#/about">About</a>
     </nav>
+
+    <!-- 今日事件板块 -->
+    <section class="ttl-page">
+      <h2>오늘의 금융事件</h2>
+      <div class="event-schedule">
+        <h3>오늘의 주요 일정</h3>
+        <ul>
+          <li>
+            <span class="time">09:30</span>
+            <span class="impact">중</span>
+            <span>중국 소비자 물가 상승률 MoM</span>
+            <span class="actual">0.2%</span> <span class="forecast">0.1%</span> <span class="previous">0.1%</span>
+          </li>
+          <li>
+            <span class="time">10:30</span>
+            <span class="impact">고</span>
+            <span>미국 소매 판매 지수</span>
+            <span class="actual">-0.3%</span> <span class="forecast">-0.2%</span> <span class="previous">0.2%</span>
+          </li>
+        </ul>
+      </div>
+    </section>
 
     <!-- SPA 主要内容 -->
     <main class="container" id="app" aria-live="polite"></main>
 
     <!-- 新闻流渲染脚本 -->
     <script>
-      const NEWS_URL   = '/api/news';
+      const NEWS_URL = '/api/news';
       const TG_CHANNEL = ''; // 可选: 'https://t.me/yourchannel'
 
       async function loadNews() {
@@ -180,7 +189,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();              // 如果没有首页模块会跳过
+        renderHomeNews();
         renderRoute();
         setInterval(renderHomeNews, 5 * 60 * 1000);
         window.addEventListener('hashchange', renderRoute);
@@ -191,4 +200,4 @@
     <script type="module" src="/src/main.js"></script>
     <script src="/js/auto-image.js" defer></script>
   </body>
-</html> 
+</html>
