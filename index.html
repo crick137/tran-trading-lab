@@ -49,6 +49,10 @@
       .ttl-page { max-width:980px; margin:24px auto; padding:0 16px }
       .ttl-page h2 { margin:0 0 12px; font-size:1.25rem }
       .ttl-muted { opacity:.6 }
+
+      /* 顶部价格滚动条 */
+      #price-tape{position:sticky;top:0;z-index:10000;background:#0a0b0e;border-bottom:1px solid #151515}
+      #price-tape .tradingview-widget-container{max-width:100%}
     </style>
   </head>
 
@@ -57,6 +61,32 @@
 
     <!-- 배경 효과 캔버스 -->
     <canvas id="bgfx" data-enabled="true" aria-hidden="true"></canvas>
+
+    <!-- 顶部轮播价格条（TradingView Ticker Tape） -->
+    <div id="price-tape" aria-label="가격 티커">
+      <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            { "proName": "FX_IDC:USDKRW",   "title": "USD/KRW" },
+            { "proName": "OANDA:USDCAD",    "title": "USD/CAD" },
+            { "proName": "OANDA:AUDUSD",    "title": "AUD/USD" },
+            { "proName": "OANDA:XAUUSD",    "title": "XAU/USD" },
+            { "proName": "BINANCE:BTCUSDT", "title": "BTC/USDT" },
+            { "proName": "TVC:DXY",         "title": "DXY" },
+            { "proName": "FOREXCOM:SPXUSD", "title": "S&P 500" },
+            { "proName": "FOREXCOM:NSXUSD", "title": "Nasdaq 100" }
+          ],
+          "showSymbolLogo": true,
+          "isTransparent": true,
+          "displayMode": "adaptive",
+          "colorTheme": "dark",
+          "locale": "ko"
+        }
+        </script>
+      </div>
+    </div>
 
     <!-- 상단 내비게이션 -->
     <nav class="nav" aria-label="Primary">
@@ -71,14 +101,6 @@
       <a href="#/articles">아티클</a>
       <a href="#/about">About</a>
     </nav>
-
-    <!-- 홈 상단: 뉴스 스트림(최근 10개) -->
-    <section class="container" aria-label="뉴스 스트림">
-      <div id="ttl-home-news" class="ttl-news" aria-live="polite">
-        <h3>뉴스 스트림 <small class="ttl-muted">(최근 10개)</small></h3>
-        <ul id="ttl-home-news-list"><li class="ttl-muted">로딩중…</li></ul>
-      </div>
-    </section>
 
     <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
@@ -194,7 +216,7 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        renderHomeNews();
+        renderHomeNews();              // 没有首页块会自动跳过
         renderRoute();
         setInterval(renderHomeNews, 5 * 60 * 1000);
         window.addEventListener('hashchange', renderRoute);
