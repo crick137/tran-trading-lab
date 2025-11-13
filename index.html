@@ -51,15 +51,12 @@
 
       /* 顶部价格滚动条（黑色背景） */
       #price-tape{
-        position: sticky;
-        top: 0;
-        z-index: 10000;
-        background: #000;
-        border-bottom: 1px solid #151515;
+        position: sticky; top: 0; z-index: 10000;
+        background: #000; border-bottom: 1px solid #151515;
       }
       #price-tape .tradingview-widget-container { max-width: 100%; }
 
-      /* === 뉴스卡片（带封面） === */
+      /* === 뉴스卡片（文章配图优先） === */
       .ttl-list{list-style:none;margin:0;padding:0}
       .ttl-item{
         display:grid;grid-template-columns:160px 1fr;gap:14px;
@@ -67,8 +64,11 @@
       }
       .ttl-item + .ttl-item{margin-top:12px}
       .ttl-cover{
-        width:160px;height:90px;object-fit:cover;border-radius:10px;background:#111;border:1px solid #1b1d22
+        width:160px;height:90px;object-fit:cover;border-radius:10px;
+        background:#111;border:1px solid #1b1d22
       }
+      /* 如果是 Logo/图标作为封面，用 contain 居中不拉伸 */
+      .ttl-cover.is-logo{ object-fit:contain; padding:10px; background:#0f1218; border:1px solid #1d2230 }
       .ttl-titleline{font-weight:600;line-height:1.45}
       .ttl-source{margin-top:6px}
       @media (max-width:560px){
@@ -127,7 +127,7 @@
     <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 뉴스渲染脚本：不改你的 /api/news -->
+    <!-- 뉴스脚本（不改 /api/news；用 /api/og-image 提升为文章配图；固定展示 10 条） -->
     <script>
       const NEWS_URL   = '/api/news';
       const TG_CHANNEL = '';
@@ -140,48 +140,74 @@
         }catch{ return []; }
       }
 
-      // ====== 工具：封面与时间 ======
-      const getDomain = (url)=>{ try{ return new URL(url).hostname; }catch{return ''; } };
-      const getFavicon = (url)=>{
+      // ===== 工具：域名 / 图标 / 时间 =====
+      const getDomain = url => { try{ return new URL(url).hostname; }catch{ return ''; } };
+      const getFavicon = url => {
         const d = getDomain(url);
         return d ? `https://www.google.com/s2/favicons?domain=${d}&sz=128` : '/favicon.png';
       };
-      const rssThumb = (n)=>( n.image || n.thumbnail || n.thumb ||
+      const rssThumb = n => (
+        n.image || n.thumbnail || n.thumb ||
         (n.enclosure && n.enclosure.url) ||
-        (Array.isArray(n.enclosures) && n.enclosures[0]?.url) || '' );
-      const mshot = (link)=> link ? `https://s.wordpress.com/mshots/v1/${encodeURIComponent(link)}?w=640&h=360` : '';
-      const pickCover = (n)=>{
-        const link = n.link || n.url || '';
-        return rssThumb(n) || mshot(link) || getFavicon(link);
-      };
-      const fmtTime = (ts)=>{
+        (Array.isArray(n.enclosures) && n.enclosures[0]?.url) || ''
+      );
+      const fmtTime = ts => {
         const d = new Date(ts || Date.now());
         return d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
       };
 
-      function renderNewsList(ul, list, limit=10){
+      // 首图策略：先用 feed 自带图；没有就先用 favicon（以 Logo 样式展示），随后异步请求 /api/og-image 查找文章图，若命中再升级替换
+      async function upgradeCover(imgEl, link){
+        if(!link) return;
+        try{
+          const r = await fetch(`/api/og-image?url=${encodeURIComponent(link)}`, { cache:'force-cache' });
+          if(!r.ok) return;
+          const data = await r.json();
+          if(data && data.image){
+            imgEl.src = data.image;
+            imgEl.classList.remove('is-logo');
+          }
+        }catch{}
+      }
+
+      // 渲染卡片：固定 10 行；不足时用占位
+      function renderNewsList(ul, list, limit = 10){
         ul.classList.add('ttl-list');
         ul.innerHTML = '';
-        list.slice(0, limit).forEach(n=>{
+
+        const rows = list.slice(0, limit);
+        while(rows.length < limit){
+          rows.push({ placeholder:true, link:'#', title:'업데이트 대기중…', ts: Date.now() });
+        }
+
+        rows.forEach(n=>{
           const link   = n.link || n.url || '#';
-          const cover  = pickCover(n);
-          const when   = fmtTime(n.isoDate || n.pubDate || n.ts);
-          const text   = n.summaryKo || n.title || n.summary || '제목 없음';
-          const source = getDomain(link) || 'source';
+          const when   = n.placeholder ? '—' : fmtTime(n.isoDate || n.pubDate || n.ts);
+          const text   = n.placeholder ? '업데이트 대기중…' : (n.summaryKo || n.title || n.summary || '제목 없음');
+          const source = n.placeholder ? '' : (getDomain(link) || 'source');
+
+          // 先确定首图（feed 自带 > favicon），随后异步升级为 og:image
+          const firstCover = rssThumb(n) || getFavicon(link);
+          const isLogo     = !rssThumb(n); // 没有 feed 图时，先用 logo 展示
 
           const li = document.createElement('li');
           li.className = 'ttl-item';
           li.innerHTML = `
-            <img class="ttl-cover"
-                 src="${cover}"
-                 alt=""
-                 loading="lazy" decoding="async" referrerpolicy="no-referrer"
-                 onerror="this.onerror=null;this.src='${getFavicon(link)}'">
+            <img class="ttl-cover ${isLogo ? 'is-logo' : ''}"
+                 src="${firstCover}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
             <div>
               <div class="ttl-titleline">[${when}] ${text}</div>
-              <div class="ttl-source"><small><a href="${link}" target="_blank" rel="noreferrer">원문</a> · ${source}</small></div>
+              <div class="ttl-source">
+                <small>${n.placeholder ? '잠시 후 새 소식' : `<a href="${link}" target="_blank" rel="noreferrer">원문</a> · ${source}`}</small>
+              </div>
             </div>`;
           ul.appendChild(li);
+
+          // 升级为文章配图
+          if(!n.placeholder && link){
+            const imgEl = li.querySelector('img');
+            upgradeCover(imgEl, link);
+          }
         });
       }
 
@@ -191,7 +217,6 @@
         if(!box) return;
         box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
         const list = await loadNews();
-        if(!list.length){ box.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
         renderNewsList(box, list, 10); // 固定 10 条
       }
 
@@ -221,7 +246,6 @@
           const ul = document.getElementById('ttl-route-news');
           ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
           const list = await loadNews();
-          if(!list.length){ ul.innerHTML = '<li class="ttl-muted">뉴스를 불러올 수 없습니다.</li>'; return; }
           renderNewsList(ul, list, 10); // 固定 10 条
         }
       }
