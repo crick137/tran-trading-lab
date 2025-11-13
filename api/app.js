@@ -1,7 +1,7 @@
 ﻿// api/app.js
 export const config = { runtime: 'nodejs' };
 
-// 鈥斺€?渚濊禆锛歛pi/_lib/http.js, api/_lib/blob.js
+// 依赖：api/_lib/http.js, api/_lib/blob.js
 import { jsonOK, badRequest, requireAuth as _requireAuth } from './_lib/http.js';
 import {
   writeJSON,
@@ -15,13 +15,9 @@ import { DEFAULT_SYLLABUS } from '../data/syllabus.js';
 
 const ENABLE_CORS = false;
 
-/* ---------- 鍩虹鍝嶅簲宸ュ叿锛氫粛杩斿洖 Web Response ---------- */
-function ok(data, status = 200) {
-  return jsonOK(data, status);
-}
-function err(message = 'BAD_REQUEST', status = 400) {
-  return badRequest(message, status);
-}
+/* ---------- 基础响应工具 ---------- */
+function ok(data, status = 200) { return jsonOK(data, status); }
+function err(message = 'BAD_REQUEST', status = 400) { return badRequest(message, status); }
 function withHeaders(init = {}) {
   const h = new Headers(init.headers || {});
   if (ENABLE_CORS) {
@@ -32,11 +28,11 @@ function withHeaders(init = {}) {
   return { ...init, headers: h };
 }
 
-/* ---------- Header 涓?URL 鍏煎 ---------- */
+/* ---------- Header / URL 兼容 ---------- */
 function getHeader(req, name) {
   const h = req.headers || {};
   const key = String(name).toLowerCase();
-  if (typeof h.get === 'function') return h.get(name); // Web Request
+  if (typeof h.get === 'function') return h.get(name); // WHATWG Request
   return h[key] || h[name] || null;                    // Node IncomingMessage
 }
 
@@ -52,7 +48,7 @@ function getURL(req) {
   }
 }
 
-/* ---------- 璇诲彇璇锋眰浣擄細Edge/Web/Node 鐨嗗彲 ---------- */
+/* ---------- 读取请求体（Edge/Web/Node 通用） ---------- */
 async function readBody(req) {
   try {
     const ct = (getHeader(req, 'content-type') || '').toLowerCase();
@@ -79,7 +75,7 @@ async function readBody(req) {
   }
 }
 
-/* ---------- Blob 宸ュ叿 ---------- */
+/* ---------- Blob 工具 ---------- */
 async function listByPrefix(prefix) {
   try {
     if (typeof _listByPrefix === 'function') return await _listByPrefix(prefix);
@@ -95,46 +91,60 @@ function normPath(path) {
 }
 
 async function readIndexJson(path) {
-  try { return await readJSONViaFetch(path, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch { return []; }
+  try {
+    return await readJSONViaFetch(path, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 });
+  } catch { return []; }
 }
 
 async function upsertIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
   try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
+  if (!Array.isArray(arr)) arr = [];
   arr = [key, ...arr.filter(x => x !== key)];
   try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
     console.warn('[INDEX] upsertIndex fast-path failed, continuing:', e?.message || e);
   }
 }
 
-// Maintain a rich index for analyses: array of objects with metadata
+// analyses 富索引：保存对象
 async function upsertAnalysesIndex(prefix, meta) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
   try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
   if (!Array.isArray(arr)) arr = [];
-  // normalize existing entries to objects { slug, ... }
-  arr = arr.map(x => (typeof x === 'string') ? { slug: x } : (x && typeof x === 'object') ? x : null).filter(Boolean);
-  // remove existing same slug
+  // 统一为对象形态
+  arr = arr
+    .map(x => (typeof x === 'string') ? { slug: x } : (x && typeof x === 'object') ? x : null)
+    .filter(Boolean);
+  // 去重
   arr = arr.filter(x => x.slug !== meta.slug);
-  // put newest first
+  // 最新靠前
   arr.unshift(meta);
   try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
     console.warn('[INDEX] upsertAnalysesIndex failed, continuing:', e?.message || e);
   }
 }
 
+// ✅ 修复点：既能删字符串项，也能删对象项（按 slug/id 匹配）
 async function removeFromIndex(prefix, key) {
   const INDEX = `${prefix}/index.json`;
   let arr = [];
   try { arr = await readJSONViaFetch(INDEX, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch {}
-  arr = arr.filter(x => x !== key);
+  if (!Array.isArray(arr)) arr = [];
+  const K = String(key);
+  arr = arr.filter(x => {
+    if (typeof x === 'string') return x !== K;
+    if (x && typeof x === 'object') {
+      const s = String(x.slug ?? x.id ?? '');
+      return s !== K;
+    }
+    return true;
+  });
   try { await writeJSON(INDEX, arr, { timeoutMs: 2000, retries: 1, retryDelayMs: 200 }); } catch (e) {
-    console.warn('[INDEX] removeFromIndex fast-path failed, continuing:', e?.message || e);
+    console.warn('[INDEX] removeFromIndex failed, continuing:', e?.message || e);
   }
 }
-
 
 async function ensureDeleted(prefix, slug) {
   const FILE = `${prefix}/${slug}.json`;
@@ -155,9 +165,7 @@ function requireAuthIfConfigured(req) {
   if (!process.env.ADMIN_PASSWORD) return null;
   try {
     const cookie = getHeader(req, 'cookie') || '';
-    if (cookie && /(?:^|;\s*)tran_admin=ok(?:;|$)/.test(cookie)) {
-      return null; // cookie 会话已登录
-    }
+    if (cookie && /(?:^|;\s*)tran_admin=ok(?:;|$)/.test(cookie)) return null;
   } catch {}
   return _requireAuth(req);
 }
@@ -171,12 +179,12 @@ async function handleAdmin(req, pathname) {
     const pass = body?.password || body?.pwd || '';
     if (!process.env.ADMIN_PASSWORD) return err('ADMIN_PASSWORD_NOT_SET', 500);
     if (pass !== process.env.ADMIN_PASSWORD) return err('INVALID_PASSWORD', 401);
-    // 浣犵殑鍓嶇骞舵湭鐪熸璁剧疆 cookie锛岃繖閲屾寜鈥滃彧楠岃瘉涓€娆♀€濈殑杞绘ā寮?
+    // 你的前端没设置 cookie，这里返回一次性 token 供前端存储
     return ok({ ok: true, token: 'ok' });
   }
 
   if (sub === '/verify' && req.method === 'GET') {
-    // 杞绘ā寮忥細鍙鑳藉埌杈捐繖閲岋紝灏辫涓哄凡鐧诲綍
+    // 前端到得了这里就视为已登录
     return ok({ authed: true });
   }
 
@@ -187,17 +195,15 @@ async function handleAdmin(req, pathname) {
   return err('ADMIN_NO_ROUTE', 404);
 }
 
-/* ---------- 閫氱敤 CRUD ---------- */
+/* ---------- 通用 CRUD ---------- */
 async function genericHandler(req, pathname, PREFIX) {
   try {
     const p = normPath(pathname);
-    
-    // 鏃ュ織璁板綍
     console.log(`[API] ${req.method} ${pathname} (PREFIX: ${PREFIX})`);
-    
-    // 鍒楄〃 / 绱㈠紩
+
+    // 列表 / 索引
     if ([`/api/${PREFIX}`, `/api/${PREFIX}/index`, `/api/${PREFIX}/index.json`].includes(p)) {
-      // research/articles: 强制以 Blob 列表为准，返回“已清洗的 slug”（/ -> -，去尾部下划线）
+      // research/articles：以 Blob 列表为准，清洗 slug
       if (PREFIX === 'research/articles') {
         const blobs = await listByPrefix(`${PREFIX}/`);
         const items = (blobs || [])
@@ -210,6 +216,8 @@ async function genericHandler(req, pathname, PREFIX) {
           .sort((a,b)=> (a > b ? -1 : 1));
         return ok(items);
       }
+
+      // 其它前缀：优先用 index.json，但只返回“有实际 blob 文件存在”的项
       const idx = await readIndexJson(`${PREFIX}/index.json`);
       const blobs = await listByPrefix(`${PREFIX}/`);
       const blobNames = new Set(
@@ -232,70 +240,54 @@ async function genericHandler(req, pathname, PREFIX) {
       const items = Array.from(blobNames).sort((a,b)=> (a > b ? -1 : 1));
       return ok(items);
     }
-  
-    // 鍗曢」
+
+    // 单项
     const m = p.match(new RegExp(`^/api/${PREFIX}/([^/]+?)(?:\\.json)?$`));
     if (!m) return err(`${PREFIX.toUpperCase()}_NO_ROUTE`, 404);
     const slug = m[1];
     const FILE = `${PREFIX}/${slug}.json`;
-  
-    // 璇?
+
+    // 读
     if (req.method === 'GET') {
-      // 文章读取容错：对 research/articles 允许 slug 变体兜底（含日期型 2025-10-27 => 2025/10/27）
       if (PREFIX === 'research/articles'){
         const dateToNested = (s)=>{
           const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})_?$/);
           return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
         };
         const nestedToDash = (s)=> s && s.replace(/\//g,'-');
-        const dash = slug.replace(/[\\\\/]+/g,'-').replace(/_+$/,'');
+        const dash = slug.replace(/[\\\/]+/g,'-').replace(/_+$/,'');
         const nested = dateToNested(dash) || dateToNested(slug) || null;
         const candidates = Array.from(new Set([
-          slug,
-          dash,
-          slug.replace(/_+$/,''),
-          nested || '',
-          nested ? nestedToDash(nested) : ''
+          slug, dash, slug.replace(/_+$/,''), nested || '', nested ? nestedToDash(nested) : ''
         ].filter(Boolean)));
         for (const s of candidates){
-          try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); }
-          catch { /* try next */ }
+          try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); } catch {}
         }
         return err('NOT_FOUND', 404);
       }
-      // Other prefixes: tolerate URL-encoded slashes in slug (e.g., 2025%2F10%2F27)
       const __candidates = Array.from(new Set([
         slug,
         (function(){ try { return decodeURIComponent(slug); } catch { return slug; } })(),
-        (function(){
-          try { const once = decodeURIComponent(slug); return decodeURIComponent(once); }
-          catch { return slug; }
-        })()
+        (function(){ try { const once = decodeURIComponent(slug); return decodeURIComponent(once); } catch { return slug; } })()
       ].filter(Boolean)));
       for (const s of __candidates){
-        try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); }
-        catch { /* try next */ }
+        try { return ok(await readJSONViaFetch(`${PREFIX}/${s}.json`)); } catch {}
       }
       return err('NOT_FOUND', 404);
     }
-  
-    // 鍐欐搷浣滃寮烘棩蹇?
+
+    // 写（新增/覆盖）
     if (['PUT','POST'].includes(req.method)) {
       console.log(`[API] Writing to ${PREFIX}/${slug}.json`);
-      const unauthorized = requireAuthIfConfigured(req); 
-      if (unauthorized) {
-        console.warn(`[API] Unauthorized access attempt`);
-        return unauthorized;
-      }
-      
+      const unauthorized = requireAuthIfConfigured(req);
+      if (unauthorized) return unauthorized;
+
       const body = await readBody(req);
       console.log(`[API] Body received:`, body);
-      
+
       try {
         await writeJSON(FILE, body);
-        // update index: default behavior is to keep an index of slugs,
-        // but for analyses we also maintain a rich index with metadata to speed up frontend
-        try{
+        try {
           if (PREFIX === 'analyses'){
             const meta = {
               slug,
@@ -310,7 +302,7 @@ async function genericHandler(req, pathname, PREFIX) {
           } else {
             await upsertIndex(PREFIX, slug);
           }
-        }catch(e){ console.warn('[API] index update error', e?.message || e); }
+        } catch (e) { console.warn('[API] index update error', e?.message || e); }
         console.log(`[API] Write successful`);
         return ok({ saved: true, slug });
       } catch (e) {
@@ -318,55 +310,44 @@ async function genericHandler(req, pathname, PREFIX) {
         return err((e && e.message) ? e.message : 'WRITE_FAILED', 500);
       }
     }
-  
-    // 鍒?
-        if (req.method === 'DELETE') {
-      const unauthorized = requireAuthIfConfigured(req); if (unauthorized) return unauthorized;
+
+    // 删
+    if (req.method === 'DELETE') {
+      const unauthorized = requireAuthIfConfigured(req);
+      if (unauthorized) return unauthorized;
+
       if (PREFIX === 'research/articles'){
-        // 容错删除：尝试删除多个可能的文件名变体
         const dateToNested = (s)=>{
           const m = String(s||'').match(/^(\d{4})-(\d{2})-(\d{2})_?$/);
           return m ? `${m[1]}/${m[2]}/${m[3]}` : null;
         };
-        const dash = slug.replace(/[\\\\/]+/g,'-').replace(/_+$/,'');
+        const dash = slug.replace(/[\\\/]+/g,'-').replace(/_+$/,'');
         const nested = dateToNested(dash) || dateToNested(slug) || null;
-        const variants = Array.from(new Set([
-          slug,
-          dash,
-          slug.replace(/_+$/,''),
-          nested || ''
-        ].filter(Boolean)));
+        const variants = Array.from(new Set([ slug, dash, slug.replace(/_+$/,''), nested || '' ].filter(Boolean)));
         let any = false;
         for (const s of variants){
           const path = `${PREFIX}/${s}.json`;
-          try { await deleteObject(path); any = true; } catch (e) { /* ignore and continue */ }
-          try { await ensureDeleted(PREFIX, s); } catch (e) { /* ignore */ }
-          try { await removeFromIndex(PREFIX, s); } catch (e) { /* ignore */ }
+          try { await deleteObject(path); any = true; } catch {}
+          try { await ensureDeleted(PREFIX, s); } catch {}
+          try { await removeFromIndex(PREFIX, s); } catch {}
         }
         return ok({ deleted: any, slug });
       }
-      try {
-        await deleteObject(FILE);
-      } catch (e) {
+
+      try { await deleteObject(FILE); } catch (e) {
         console.error(`[API] Delete failed for ${FILE}:`, e);
-        const msg = (e && e.message) ? e.message : 'DELETE_FAILED';
-        return err(msg, 500);
+        return err((e && e.message) ? e.message : 'DELETE_FAILED', 500);
       }
       try {
         const okGone = await ensureDeleted(PREFIX, slug);
-        if (!okGone) {
-          console.warn(`[API] Delete verify failed for ${FILE}`);
-          return err('DELETE_VERIFY_FAILED', 500);
-        }
-      } catch (e) {
-        console.warn(`[API] ensureDeleted error for ${FILE}:`, e?.message || e);
-      }
+        if (!okGone) { console.warn(`[API] Delete verify failed for ${FILE}`); return err('DELETE_VERIFY_FAILED', 500); }
+      } catch (e) { console.warn(`[API] ensureDeleted error for ${FILE}:`, e?.message || e); }
       try { await removeFromIndex(PREFIX, slug); } catch (e) {
         console.warn(`[API] removeFromIndex failed for ${PREFIX}/${slug}:`, e?.message || e);
       }
       return ok({ deleted: true, slug });
     }
-  
+
     return err('METHOD_NOT_ALLOWED', 405);
   } catch (e) {
     console.error(`[API] Error in genericHandler:`, e);
@@ -374,7 +355,7 @@ async function genericHandler(req, pathname, PREFIX) {
   }
 }
 
-/* ---------- Research 鍙 ---------- */
+/* ---------- Research 只读 ---------- */
 async function handleResearch(req, pathname) {
   const p = normPath(pathname);
   if (req.method !== 'GET') return err('METHOD_NOT_ALLOWED', 405);
@@ -382,17 +363,11 @@ async function handleResearch(req, pathname) {
   if (/^\/api\/research\/syllabus(?:\.json)?$/.test(p)) {
     try {
       const data = await readJSONViaFetch('research/syllabus.json');
-      if (Array.isArray(data?.syllabus) && data.syllabus.length) {
-        return ok(data);
-      }
-    } catch (_) {
-      // ignore — fall back to embedded default below
-    }
+      if (Array.isArray(data?.syllabus) && data.syllabus.length) return ok(data);
+    } catch (_) {}
     try {
       await writeJSON('research/syllabus.json', { syllabus: DEFAULT_SYLLABUS, updatedAt: new Date().toISOString() });
-    } catch (seedErr) {
-      console.warn('[syllabus seed] unable to persist default syllabus:', seedErr?.message || seedErr);
-    }
+    } catch (seedErr) { console.warn('[syllabus seed] unable to persist default syllabus:', seedErr?.message || seedErr); }
     return ok({ syllabus: DEFAULT_SYLLABUS });
   }
   if (/^\/api\/research\/articles(?:\.json)?$/.test(p)) {
@@ -404,22 +379,18 @@ async function handleResearch(req, pathname) {
 
 async function handleResearchSyllabusWrite(req) {
   if (!['PUT','POST','DELETE'].includes(req.method)) return err('METHOD_NOT_ALLOWED', 405);
-
   const unauthorized = requireAuthIfConfigured(req);
   if (unauthorized) return unauthorized;
 
   try {
     let syllabus = [];
-
-    if (req.method === 'DELETE') {
-      syllabus = [];
-    } else {
+    if (req.method === 'DELETE') syllabus = [];
+    else {
       const body = await readBody(req);
       const raw = Array.isArray(body?.syllabus) ? body.syllabus : Array.isArray(body) ? body : null;
       if (!Array.isArray(raw)) return err('INVALID_SYLLABUS_ARRAY', 400);
       syllabus = raw;
     }
-
     await writeJSON('research/syllabus.json', { syllabus, updatedAt: new Date().toISOString() });
     return ok({ saved: true, count: syllabus.length });
   } catch (e) {
@@ -428,70 +399,82 @@ async function handleResearchSyllabusWrite(req) {
   }
 }
 
-/* ---------- 鎶?Web Response 鍐欏洖鍒?Node res ---------- */
+/* ---------- og:image 提取（文章配图） ---------- */
+async function handleOgImage(urlObj) {
+  const target = urlObj.searchParams.get('url') || '';
+  if (!target) return err('MISSING_URL', 400);
+  try {
+    const r = await fetch(target, { redirect: 'follow', headers: { 'user-agent': 'Mozilla/5.0 (compatible; TTL-Bot/1.0)' } });
+    const html = await r.text();
+
+    // 简单提取 og/twitter image
+    const pick = (re) => {
+      const m = html.match(re);
+      return m && m[1] ? m[1] : '';
+    };
+    const og = pick(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+               pick(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["'][^>]*>/i);
+    const tw = pick(/<meta[^>]*name=["']twitter:image["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+               pick(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']twitter:image["'][^>]*>/i);
+    const linkImg = pick(/<link[^>]*rel=["']image_src["'][^>]*href=["']([^"']+)["'][^>]*>/i);
+
+    const image = og || tw || linkImg || '';
+    return ok({ image: image || null });
+  } catch (e) {
+    console.warn('[og-image] parse fail:', e?.message || e);
+    return ok({ image: null });
+  }
+}
+
+/* ---------- 将 Web Response 写回 Node res ---------- */
 async function sendNodeResponse(res, out) {
-  // out 鏄竴涓?Web Response锛坖sonOK/badRequest 杩斿洖鐨勶級
   if (out && typeof out === 'object' && typeof out.text === 'function' && out.headers) {
     const status = out.status || 200;
     const headersObj = {};
-    try {
-      for (const [k, v] of out.headers.entries()) headersObj[k] = v;
-    } catch (_) {}
+    try { for (const [k, v] of out.headers.entries()) headersObj[k] = v; } catch {}
     const bodyText = await out.text();
     res.writeHead(status, headersObj);
     res.end(bodyText);
     return;
   }
-  // 瀹归敊锛氶潪 Response锛屾寜 JSON 杈撳嚭
   res.setHeader('content-type', 'application/json; charset=utf-8');
   res.statusCode = 200;
   res.end(JSON.stringify(out ?? {}));
 }
 
-/* ---------- 涓昏矾鐢卞叆鍙ｏ紙Node 椋庢牸锛?---------- */
+/* ---------- 主入口（Node 形态） ---------- */
 export default async function handler(req, res) {
   try {
     const url = getURL(req);
     const pathname = normPath(url.pathname || '/');
 
-    if (req.method === 'OPTIONS') {
-      const r = new Response(null, withHeaders({ status: 204 }));
-      return sendNodeResponse(res, r);
-    }
-    if (req.method === 'HEAD') {
-      const r = new Response(null, withHeaders({ status: 200 }));
-      return sendNodeResponse(res, r);
-    }
+    if (req.method === 'OPTIONS') return sendNodeResponse(res, new Response(null, withHeaders({ status: 204 })));
+    if (req.method === 'HEAD')    return sendNodeResponse(res, new Response(null, withHeaders({ status: 200 })));
 
-    // 鍋ュ悍妫€鏌?
+    // 健康检查
     if (req.method === 'GET' && pathname === '/api/ping') {
-      const r = ok({
-        ok: true,
-        ts: Date.now(),
-        runtime: 'node',
-        env: process.env.VERCEL_ENV || 'local',
-      });
-      return sendNodeResponse(res, r);
+      return sendNodeResponse(res, ok({
+        ok: true, ts: Date.now(), runtime: 'node', env: process.env.VERCEL_ENV || 'local',
+      }));
     }
 
     let out;
     console.log(`[API] Request received: ${req.method} ${pathname}`);
-    
-    // 澧炲己璺敱鍒嗗彂鏃ュ織
+
     if (pathname.startsWith('/api/admin')) {
-      console.log(`[API] Handling admin route: ${pathname}`);
       out = await handleAdmin(req, pathname);
     }
     else if (pathname.startsWith('/api/daily-brief')) {
-      console.log(`[API] Handling daily-brief route: ${pathname}`);
       out = await genericHandler(req, pathname, 'daily-brief');
     }
     else if (pathname.startsWith('/api/analyses')) {
       out = await genericHandler(req, pathname, 'analyses');
     }
     else if ((req.method === 'POST') && (pathname === '/api/market-news' || pathname === '/api/market-news/index' || pathname === '/api/market-news/index.json')) {
-      // Admin publishes Market News via POST /api/market-news/index.json
-      const unauthorized = requireAuthIfConfigured(req); if (unauthorized) out = unauthorized; else {
+      // Admin 发布 Market News（带鉴权）
+      const unauthorized = requireAuthIfConfigured(req);
+      if (unauthorized) out = unauthorized;
+      else {
         const body = await readBody(req);
         const id = body?.id || body?.slug;
         if (!id) out = err('MISSING_ID', 400);
@@ -515,11 +498,14 @@ export default async function handler(req, res) {
     else if (pathname.startsWith('/api/research/articles/')) {
       out = await genericHandler(req, pathname, 'research/articles');
     }
-    else if (pathname === '/api/research/articles' || pathname === '/api/research/articles.json') {
+    else if (pathname === '/api/research/articles' || pathname === '/api/research/articles.json')) {
       out = await handleResearch(req, pathname);
     }
     else if (pathname.startsWith('/api/research')) {
       out = await handleResearch(req, pathname);
+    }
+    else if (pathname === '/api/og-image' && req.method === 'GET') {
+      out = await handleOgImage(getURL(req));
     }
     else {
       out = err('NO_ROUTE', 404);
@@ -532,12 +518,3 @@ export default async function handler(req, res) {
     return sendNodeResponse(res, err('INTERNAL_ERROR', 500));
   }
 }
-
-
-
-
-
-
-
-
-
