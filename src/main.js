@@ -4,6 +4,33 @@ import './components/x-tv-chart.js'
 import './components/x-market-news.js'
 import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
 
+/* ---------- 隐藏黑名单（方案A） ---------- */
+const HIDE_SLUGS = new Set([
+  'xauusd-h1-2025-10-31',  // ← 要隐藏的这条；继续加即可
+]);
+
+function makeSlugFromObj(x) {
+  const sym  = (x.symbol || x.sym || '').toString().toLowerCase();
+  const tf   = (x.tf || x.timeframe || '').toString().toLowerCase();
+  const date = (x.date || x.day || '').toString().replaceAll(/[./]/g, '-');
+  return (x.slug || [sym, tf, date].filter(Boolean).join('-')).toString();
+}
+
+function shouldHide(x) {
+  const s = typeof x === 'string' ? x : makeSlugFromObj(x || {});
+  return HIDE_SLUGS.has(s) || x?.hidden === true || x?.status === 'deleted';
+}
+
+// 兜底：即使脚本后续步骤没跑，也强制把这些 data-slug 隐藏
+(function injectHideStyle() {
+  if (!HIDE_SLUGS.size) return;
+  const css = [...HIDE_SLUGS].map(s => `[data-slug="${s}"]{display:none!important}`).join('');
+  const el = document.createElement('style');
+  el.textContent = css;
+  document.head.appendChild(el);
+})();
+/* -------------------------------------- */
+
 const routes = {
   '': 'home',
   '#/': 'home',
@@ -649,10 +676,12 @@ async function fetchDetailsForSlugs(slugs, concurrency = 6){
     while (idx < slugs.length){
       const i = idx++;
       const slug = String(slugs[i]);
+      if (shouldHide(slug)) { results[i] = null; continue; }
       try{
         const detail = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`);
         analysesDetailCache.set(slug, detail || {});
-        results[i] = Object.assign({ slug }, (detail && typeof detail === 'object') ? detail : {});
+        const obj = Object.assign({ slug }, (detail && typeof detail === 'object') ? detail : {});
+        results[i] = shouldHide(obj) ? null : obj;
       }catch(_){
         results[i] = { slug, title: slug, symbol: '', tf: '', date: '', tags: [], bias: '' };
       }
@@ -661,7 +690,7 @@ async function fetchDetailsForSlugs(slugs, concurrency = 6){
 
   const workers = Array.from({ length: Math.min(concurrency, slugs.length) }, () => worker());
   await Promise.all(workers);
-  return results;
+  return results.filter(Boolean);
 }
 
 // Like fetchDetailsForSlugs but invoke onDetail(index, slug, detail) as each detail is fetched
@@ -671,14 +700,15 @@ async function fetchDetailsForSlugsWithCallback(slugs, onDetail, concurrency = 6
     while (idx < slugs.length){
       const i = idx++;
       const slug = String(slugs[i]);
+      if (shouldHide(slug)) { try{ onDetail?.(i, slug, null); }catch{} continue; }
       try{
         const detail = await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`);
         analysesDetailCache.set(slug, detail || {});
         const obj = Object.assign({ slug }, (detail && typeof detail === 'object') ? detail : {});
-        try{ onDetail?.(i, slug, obj); }catch{}
+        if (!shouldHide(obj)) try{ onDetail?.(i, slug, obj); }catch{}
       }catch(_){
         const obj = { slug, title: slug, symbol: '', tf: '', date: '', tags: [], bias: '' };
-        try{ onDetail?.(i, slug, obj); }catch{}
+        if (!shouldHide(obj)) try{ onDetail?.(i, slug, obj); }catch{}
       }
     }
   }
@@ -694,23 +724,29 @@ async function loadAnalysesList(){
     if (!analysesIndexCache){
       analysesIndexCache = await fetchJSON(AIDX);
       if (Array.isArray(analysesIndexCache) && analysesIndexCache.length && typeof analysesIndexCache[0] === 'string'){
-        const slugs = analysesIndexCache.slice();
+        const slugs = analysesIndexCache.filter(s => !shouldHide(s)).slice();
         const enriched = await fetchDetailsForSlugs(slugs, 6);
         analysesIndexCache = enriched;
       }
     }
-    const items = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
+    const itemsRaw = Array.isArray(analysesIndexCache) ? analysesIndexCache : [];
+    const items = itemsRaw.filter(it => !shouldHide(it));
     list.dataset.raw = JSON.stringify(items);
     renderAnalysesListFiltered();
 
     function updateEntryDOM(i, slug, obj){
       try{
+        if (!obj || shouldHide(obj)) {
+          const gone = document.getElementById(`entry-${slug}`);
+          if (gone) gone.remove();
+          return;
+        }
         const host = document.getElementById('anal-list');
         if (!host) return;
         const entry = document.getElementById(`entry-${slug}`);
         const img = obj.hero || obj.image || '';
         const html = `
-          <article class="entry" id="entry-${slug}">
+          <article class="entry" id="entry-${slug}" data-slug="${slug}">
             <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
               ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(obj.title||slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
               <div style="flex:1;min-width:0">
@@ -739,22 +775,22 @@ async function loadAnalysesList(){
     }
 
     const originalRaw = JSON.parse(list.dataset.raw || '[]');
-    const slugsOnly = Array.isArray(originalRaw) && originalRaw.length && typeof originalRaw[0] === 'string';
-    if (slugsOnly){
-      list.innerHTML = Array.from({length:Math.max(4, originalRaw.length)}).map((_,i)=>`<article class="entry skeleton" id="entry-${originalRaw[i]||i}"><div class="row"><h3 style="margin-right:6px"><span class="skeleton-text" style="width:220px;display:inline-block;height:18px;background:#2a2e36;border-radius:6px"></span></h3></div><div style="margin-top:8px"><span class="skeleton-box" style="display:block;width:100%;height:220px;background:#202226;border-radius:8px"></span></div></article>`).join('');
-      fetchDetailsForSlugsWithCallback(originalRaw, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
-    } else {
-      const maybeSlugs = originalRaw.map(it => it && it.slug ? it.slug : it && typeof it==='string' ? it : null).filter(Boolean);
-      if (maybeSlugs.length){
-        fetchDetailsForSlugsWithCallback(maybeSlugs, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
-      }
+    const maybeSlugs = originalRaw
+      .map(it => it && it.slug ? it.slug : it && typeof it==='string' ? it : null)
+      .filter(Boolean)
+      .filter(s => !shouldHide(s));
+
+    if (maybeSlugs.length){
+      // 骨架可选：略
+      fetchDetailsForSlugsWithCallback(maybeSlugs, (i, slug, obj)=>{ updateEntryDOM(i, slug, obj); }, 6).catch(()=>{});
     }
 
     const slugInUrl = currentSlugFromQuery();
     const detailHost = document.getElementById('anal-detail');
-    if (!slugInUrl && items.length && detailHost){
-      await renderAnalysisDetailBySlug(items[0].slug);
-      const first = items[0];
+    const visibleItems = originalRaw.filter(it => !shouldHide(it));
+    if (!slugInUrl && visibleItems.length && detailHost){
+      await renderAnalysisDetailBySlug(visibleItems[0].slug);
+      const first = visibleItems[0];
       const host = document.getElementById(`pv-${first.slug}`);
       if (host && !host.dataset.rendered){
         host.innerHTML = `<x-tv-chart symbol="${escapeHtml(first.symbol || '')}" interval="60" ratio="16:9" min_height="220"></x-tv-chart>`;
@@ -773,17 +809,20 @@ function renderAnalysesListFiltered(){
   const q = (document.getElementById('anal-search')?.value||'').toLowerCase();
   const bias = (document.getElementById('anal-bias')?.value||'');
   const raw = JSON.parse(list.dataset.raw||'[]');
-  const items = raw.filter(it=>{
-    const hay = [it.title, it.symbol, it.tf, it.date, ...(it.tags||[])].join(' ').toLowerCase();
-    const hit = hay.includes(q);
-    const okBias = !bias || it.bias===bias;
-    return hit && okBias;
-  });
+
+  const items = raw
+    .filter(it => !shouldHide(it))
+    .filter(it=>{
+      const hay = [it.title, it.symbol, it.tf, it.date, ...(it.tags||[])].join(' ').toLowerCase();
+      const hit = hay.includes(q);
+      const okBias = !bias || it.bias===bias;
+      return hit && okBias;
+    });
 
   const htmlItems = items.map(it=>{
     const img = it.hero || it.image || '';
     return `
-    <article class="entry" id="entry-${it.slug}">
+    <article class="entry" id="entry-${it.slug}" data-slug="${it.slug}">
       <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
         ${img ? `<div style="flex:0 0 140px"><img src="${escapeHtml(img)}" alt="${escapeHtml(it.title||it.slug)}" style="width:100%;height:88px;object-fit:cover;border-radius:8px;display:block"></div>` : ''}
         <div style="flex:1;min-width:0">
@@ -900,6 +939,8 @@ async function renderEntryDetailInline(slug){
       analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${slug}.json`));
     }
     const d = analysesDetailCache.get(slug) || {};
+    if (shouldHide({ ...d, slug })) { host.innerHTML = ''; return; }
+
     const ivl = (d.chart?.interval) || '60';
     const sym = (d.chart?.symbol) || d.symbol || '';
     const title = escapeHtml(d.title || slug);
@@ -925,12 +966,15 @@ async function renderAnalysisDetailBySlug(slug){
   const box = document.getElementById('anal-detail');
   if (!box) return;
   if (!slug){ box.innerHTML = `<p class="muted">좌측에서 항목을 선택하면 상세 내용을 볼 수 있습니다。</p>`; return; }
+  if (shouldHide(slug)) { box.innerHTML = `<p class="muted">표시할 수 없는 항목입니다</p>`; return; }
   box.innerHTML = `<p class="muted">불러오는 중…</p>`;
   try{
     if (!analysesDetailCache.has(slug)){
       analysesDetailCache.set(slug, await fetchJSON(`/api/analyses/${encodeURIComponent(slug)}.json`));
     }
     const d = analysesDetailCache.get(slug) || {};
+    if (shouldHide({ ...d, slug })) { box.innerHTML = `<p class="muted">표시할 수 없는 항목입니다</p>`; return; }
+
     const ivl = (d.chart?.interval) || '60';
     const sym  = (d.chart?.symbol)   || d.symbol || '';
     const title = d.title || slug;
