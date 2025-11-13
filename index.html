@@ -56,7 +56,7 @@
       }
       #price-tape .tradingview-widget-container { max-width: 100%; }
 
-      /* === 뉴스卡片（文章配图优先） === */
+      /* === 뉴스카드（文章配图优先） === */
       .ttl-list{list-style:none;margin:0;padding:0}
       .ttl-item{
         display:grid;grid-template-columns:160px 1fr;gap:14px;
@@ -67,7 +67,7 @@
         width:160px;height:90px;object-fit:cover;border-radius:10px;
         background:#111;border:1px solid #1b1d22
       }
-      /* 如果是 Logo/图标作为封面，用 contain 居中不拉伸 */
+      /* favicon/Logo 情况：居中不拉伸 */
       .ttl-cover.is-logo{ object-fit:contain; padding:10px; background:#0f1218; border:1px solid #1d2230 }
       .ttl-titleline{font-weight:600;line-height:1.45}
       .ttl-source{margin-top:6px}
@@ -127,7 +127,7 @@
     <!-- SPA 메인 -->
     <main class="container" id="app" aria-live="polite"></main>
 
-    <!-- 뉴스脚本（不改 /api/news；用 /api/og-image 提升为文章配图；固定展示 10 条） -->
+    <!-- 뉴스脚本（不改 /api/news；如有 /api/og-image 则升级为文章配图；固定展示 10 条） -->
     <script>
       const NEWS_URL   = '/api/news';
       const TG_CHANNEL = '';
@@ -140,7 +140,7 @@
         }catch{ return []; }
       }
 
-      // ===== 工具：域名 / 图标 / 时间 =====
+      // 工具：域名 / 图标 / 时间
       const getDomain = url => { try{ return new URL(url).hostname; }catch{ return ''; } };
       const getFavicon = url => {
         const d = getDomain(url);
@@ -156,7 +156,7 @@
         return d.toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
       };
 
-      // 首图策略：先用 feed 自带图；没有就先用 favicon（以 Logo 样式展示），随后异步请求 /api/og-image 查找文章图，若命中再升级替换
+      // 升级封面：尝试从 /api/og-image 获取 og:image
       async function upgradeCover(imgEl, link){
         if(!link) return;
         try{
@@ -170,7 +170,7 @@
         }catch{}
       }
 
-      // 渲染卡片：固定 10 行；不足时用占位
+      // 渲染卡片：固定 10 条；不足用占位
       function renderNewsList(ul, list, limit = 10){
         ul.classList.add('ttl-list');
         ul.innerHTML = '';
@@ -186,9 +186,8 @@
           const text   = n.placeholder ? '업데이트 대기중…' : (n.summaryKo || n.title || n.summary || '제목 없음');
           const source = n.placeholder ? '' : (getDomain(link) || 'source');
 
-          // 先确定首图（feed 自带 > favicon），随后异步升级为 og:image
           const firstCover = rssThumb(n) || getFavicon(link);
-          const isLogo     = !rssThumb(n); // 没有 feed 图时，先用 logo 展示
+          const isLogo     = !rssThumb(n);
 
           const li = document.createElement('li');
           li.className = 'ttl-item';
@@ -203,7 +202,6 @@
             </div>`;
           ul.appendChild(li);
 
-          // 升级为文章配图
           if(!n.placeholder && link){
             const imgEl = li.querySelector('img');
             upgradeCover(imgEl, link);
@@ -211,13 +209,13 @@
         });
       }
 
-      // 首页（如无容器则自动跳过）
+      // 首页（如果没有容器会自动跳过）
       async function renderHomeNews(){
         const box = document.getElementById('ttl-home-news-list');
         if(!box) return;
         box.innerHTML = '<li class="ttl-muted">로딩중…</li>';
         const list = await loadNews();
-        renderNewsList(box, list, 10); // 固定 10 条
+        renderNewsList(box, list, 10);
       }
 
       // 路由：마켓 뉴스
@@ -246,7 +244,7 @@
           const ul = document.getElementById('ttl-route-news');
           ul.innerHTML = '<li class="ttl-muted">로딩중…</li>';
           const list = await loadNews();
-          renderNewsList(ul, list, 10); // 固定 10 条
+          renderNewsList(ul, list, 10);
         }
       }
 
