@@ -1,3 +1,173 @@
-@import "../../styles/global.css";
-/* Market News component root */
-x-market-news{ display:block }
+/* ========== 全局基础 ========== */
+
+:root {
+  --bg: #0d0f12;
+  --bg2: #13161b;
+  --card: rgba(20,22,27,0.84);
+  --border: rgba(255,255,255,0.05);
+  --text: #e8ecf1;
+  --text2: #a3a8b3;
+  --accent: #4da3ff;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", "Pretendard", system-ui, sans-serif;
+  overflow-y: scroll;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+/* ========== 标准卡片 ========== */
+.card {
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius: var(--radius);
+  padding:16px;
+  backdrop-filter: blur(8px);
+}
+
+/* 行布局 */
+.row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text);
+}
+.badge:hover {
+  background: rgba(255,255,255,0.18);
+}
+
+/* ========== Skeleton Placeholder ========== */
+.skeleton-box {
+  background: rgba(255,255,255,0.06);
+  border-radius: 8px;
+  animation: skeletonFlash 1.2s linear infinite alternate;
+}
+.skeleton-text {
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px;
+  animation: skeletonFlash 1.2s linear infinite alternate;
+}
+@keyframes skeletonFlash {
+  from { opacity: .25; }
+  to   { opacity: .6;  }
+}
+
+/* ========== 价格顶部条 ========== */
+.price-bar {
+  width: 100%;
+  height: 38px;
+  background: #000000cc;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 16px;
+  overflow-x: auto;
+}
+.price-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.price-up { color:#58e09b; }
+.price-down { color:#ff6b6b; }
+
+/* ========== 新闻列表（x-market-news） ========== */
+x-market-news {
+  display: block;
+}
+x-market-news .mn-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 20px;
+}
+x-market-news .mn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap: 22px;
+}
+
+x-market-news .mn-card {
+  background: rgba(15,17,21,0.85);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  transition: .28s ease;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  cursor: pointer;
+}
+x-market-news .mn-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.55);
+}
+
+x-market-news .mn-media img {
+  width: 100%;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+x-market-news .mn-media img.loaded {
+  opacity: 1;
+}
+
+x-market-news .mn-title {
+  margin: 12px 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+}
+x-market-news .mn-sub {
+  color: var(--text2);
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+x-market-news .mn-meta {
+  font-size: 12px;
+  color: #76808f;
+  margin-top: auto;
+}
+
+/* ========== 顶部导航可点击（解决事件阻塞） ========== */
+header, nav, .nav, .top-nav {
+  position: relative;
+  z-index: 200;
+}
