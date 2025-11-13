@@ -9,18 +9,17 @@
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/styles/global.css" />
-
     <style>
-      /* 页面基色（避免白屏闪烁） */
+      /* 强制整页深色，避免出现白屏闪烁 */
       html,body{background:#0a0b0e;color:#d5d8df;margin:0}
       a{color:#c2c7d0;text-decoration:none}
 
-      /* 顶部价格滚动条 */
+      /* 顶部价格滚动条（黑色） */
       #price-tape{position:sticky;top:0;z-index:10000;background:#000;border-bottom:1px solid #151515}
       #price-tape .tradingview-widget-container{max-width:100%}
 
-      /* 顶部独立导航（与 SPA 解耦） */
-      .nav{display:flex;gap:18px;align-items:center;padding:10px 16px;background:#0a0b0e;border-bottom:1px solid #151515; position:relative; z-index:1001;}
+      /* 顶部独立导航（不依赖 SPA 路由） */
+      .nav{display:flex;gap:18px;align-items:center;padding:10px 16px;background:#0a0b0e;border-bottom:1px solid #151515}
       .nav .brand{margin-right:auto;display:flex;align-items:center;gap:10px;color:#d5d8df;font-weight:700}
       .nav .logo{height:22px;width:auto;border-radius:4px}
       .nav a[aria-current="page"]{color:#fff}
@@ -32,10 +31,8 @@
       .ttl-muted{opacity:.65}
       .widget{min-height:760px}
       .tradingview-widget-container, .tradingview-widget-container__widget{width:100%}
-      /* 让日历容器在下层，避免 iframe 覆盖导航点击 */
-      #tv-box{position:relative; z-index:1;}
 
-      /* 加载失败提示 */
+      /* 失败提示（默认隐藏，仅在确实加载不出时出现） */
       .fail{display:none;margin-top:12px;padding:12px;border:1px dashed #334155;border-radius:10px;background:#0e1117}
       .btn{padding:8px 12px;border:1px solid #334155;border-radius:10px;background:#121826;color:#e7ecf3;cursor:pointer}
       .btn:hover{background:#0f172a}
@@ -68,7 +65,7 @@
       </div>
     </div>
 
-    <!-- 顶部导航（静态页内的 #/… 链接将被脚本重写为 /#/…） -->
+    <!-- 顶部导航 -->
     <nav class="nav" aria-label="Primary">
       <a href="/" class="brand" aria-label="홈으로">
         <img src="/logo.png" alt="TRAN Trading Lab" class="logo" />
@@ -83,7 +80,7 @@
       <a href="#/about">About</a>
     </nav>
 
-    <!-- 主体：TradingView 经济日历 -->
+    <!-- 主体：TradingView 经济日历（暗色、韩语、100% 宽度） -->
     <main class="ttl-page">
       <section class="ttl-card">
         <h2 class="ttl-title">오늘의 금융 이벤트 <span class="ttl-muted">· 실시간 달력</span></h2>
@@ -110,8 +107,8 @@
       </section>
     </main>
 
-    <!-- TradingView 加载状态与重试 -->
     <script>
+      // 温和防误报：等待 12s 后检查，共 3 次；确实加载不出才显示提示
       (function(){
         const fail = document.getElementById('tv-fail');
         function isLoaded(){ return !!document.querySelector('.tradingview-widget-container__widget iframe'); }
@@ -133,7 +130,7 @@
           s.type = 'text/javascript';
           s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
           s.async = true;
-          s.textContent = JSON.stringify({
+          s.text = JSON.stringify({
             width: "100%",
             height: "760",
             colorTheme: "dark",
@@ -143,19 +140,6 @@
           box.appendChild(s);
           if (fail) fail.style.display='none';
           setTimeout(poll, 12000);
-        });
-      })();
-    </script>
-
-    <!-- 把静态页中的 #/ 路由跳回 SPA（/index.html#/...） -->
-    <script>
-      (function fixSpaLinksFromStaticPage() {
-        var root = location.origin + '/';
-        document.querySelectorAll('a[href^="#/"]').forEach(function (a) {
-          a.addEventListener('click', function (e) {
-            e.preventDefault();
-            location.href = root + a.getAttribute('href'); // "/#/xxx"
-          });
         });
       })();
     </script>
