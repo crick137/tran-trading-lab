@@ -25,4 +25,4 @@
   "crons": [
     { "path": "/api/cron/fetch-news", "schedule": "0 * * * *" }
   ]
-}完整版给我 
+}
