@@ -671,3 +671,4 @@ button.primary:hover{ filter: brightness(1.05); }
 }
 .toast.show{ opacity: 1; transform: translateY(0); }
 input,select,textarea{ min-height: 40px; }
+#anal-list .entry[id*="/"] { display: none !important; }
