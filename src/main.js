@@ -6,7 +6,8 @@ import { DEFAULT_SYLLABUS } from '../data/syllabus.js'
 
 /* ---------- 隐藏黑名单（方案A） ---------- */
 const HIDE_SLUGS = new Set([
-  'xauusd-h1-2025-10-31',  // ← 要隐藏的这条；继续加即可
+  'xauusd-h1-2025-10-31',
+  'few', // ← 多加这个，保险
 ]);
 
 function makeSlugFromObj(x) {
