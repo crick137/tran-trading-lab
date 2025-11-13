@@ -1,4 +1,4 @@
-﻿// === api/app.js (stable indexes + robust delete + og:image + auth bypass cookie) ===
+﻿// === api/app.js (stable indexes + robust delete + og:image + auth bypass cookie + force-delete) ===
 export const config = { runtime: 'nodejs' };
 
 import { jsonOK, badRequest, requireAuth as _requireAuth } from './_lib/http.js';
@@ -140,6 +140,26 @@ async function handleAdmin(req, pathname){
   if (sub==='/verify' && req.method==='GET')  return ok({ authed:true });
   if (sub==='/logout' && req.method==='POST') return ok({ ok:true });
   return err('ADMIN_NO_ROUTE',404);
+}
+
+/* ---------- 管理员强制删除（支持完整路径 analyses/2025/10/27.json） ---------- */
+async function handleForceDelete(req){
+  const unauthorized = requireAuthIfConfigured(req);
+  if (unauthorized) return unauthorized;
+
+  const body = await readBody(req);
+  let p = String(body?.path || body?.p || '').replace(/^\/+/, '');
+  if (!p) return err('MISSING_PATH', 400);
+  if (!/^analyses\//.test(p)) return err('INVALID_PATH', 400);
+  if (!p.endsWith('.json')) p += '.json';
+
+  const slug = p.replace(/^analyses\//, '').replace(/\.json$/, '');
+
+  try { await deleteObject(p); } catch {}
+  try { await ensureDeleted('analyses', slug); } catch {}
+  try { await removeFromIndex('analyses', slug); } catch {}
+
+  return ok({ deleted: true, path: p, slug });
 }
 
 /* ---------- 通用 CRUD ---------- */
@@ -333,7 +353,11 @@ export default async function handler(req,res){
     if (pathname==='/api/daily-brief/index.json' && req.method==='GET') out = await stableIndex('daily-brief');
     else if (pathname==='/api/research/articles/index.json' && req.method==='GET') out = await stableIndex('research/articles');
 
+    // 管理接口
+    else if (pathname === '/api/admin/force-delete' && req.method === 'POST') out = await handleForceDelete(req);
     else if (pathname.startsWith('/api/admin')) out = await handleAdmin(req, pathname);
+
+    // 业务资源
     else if (pathname.startsWith('/api/daily-brief')) out = await genericHandler(req, pathname, 'daily-brief');
     else if (pathname.startsWith('/api/analyses')) out = await genericHandler(req, pathname, 'analyses');
 
