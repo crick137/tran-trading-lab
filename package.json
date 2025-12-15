@@ -1,0 +1,39 @@
+{
+  "name": "tran-trading-lab",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.2",
+    "@vercel/blob": "^0.22.3",
+    "@vercel/kv": "^3.0.0",
+    "@vercel/node": "^5.5.5",
+    "dayjs": "^1.11.19",
+    "lucide-react": "^0.555.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-is": "^19.2.0",
+    "recharts": "^3.5.1",
+    "rss-parser": "^3.13.0",
+    "string-similarity": "^4.0.4",
+    "three": "^0.181.2",
+    "undici": "^6.22.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.4.22",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^5.4.21"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}

@@ -1,0 +1,60 @@
+// Integration instructions for TranTradingTerminal.jsx
+// Add these imports after line 26:
+
+import ParticleBackground from './common/ParticleBackground';
+import MouseGlowTrail from './common/MouseGlowTrail';
+import CommandPalette from './common/CommandPalette';
+import ThemeSwitcher from './common/ThemeSwitcher';
+import MatrixRain from './common/MatrixRain';
+import ScanlineEffect from './common/ScanlineEffect';
+import NeonPulse from './common/NeonPulse';
+import ThemeEditor from './common/ThemeEditor';
+import { useTheme } from '../hooks/useTheme';
+import ThreeDView from './views/ThreeDView';
+
+// Add state variables in component (around line 240):
+const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+const [themeEditorOpen, setThemeEditorOpen] = useState(false);
+const { theme, matrixRainEnabled } = useTheme();
+
+// Add keyboard shortcut in useEffect:
+const handleKeyDown = (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    setCommandPaletteOpen(true);
+  }
+};
+window.addEventListener('keydown', handleKeyDown);
+
+// Add '3d-view' case in renderContent switch statement:
+case '3d-view':
+  return <ThreeDView />;
+
+// Add navigation item in sidebar (after tools):
+<NavItem 
+  onClick={() => setActiveTab('3d-view')} 
+  icon={<Box size={20} />} 
+  label="3D 시각화 (3D View)" 
+  active={activeTab === '3d-view'} 
+  collapsed={collapsed} 
+/>
+
+// Add before closing </div> in return statement:
+{matrixRainEnabled && <MatrixRain />}
+{theme.effects?.scanlines && <ScanlineEffect />}
+
+<CommandPalette
+  isOpen={commandPaletteOpen}
+  onClose={() => setCommandPaletteOpen(false)}
+  onNavigate={(tab) => {
+    setActiveTab(tab);
+    setCommandPaletteOpen(false);
+  }}
+/>
+
+<ThemeSwitcher />
+
+<ThemeEditor 
+  isOpen={themeEditorOpen} 
+  onClose={() => setThemeEditorOpen(false)} 
+/>
