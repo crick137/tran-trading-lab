@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lesson 1 - TRAN Trading Lab</title>
+    <meta name="description" content="TRAN Trading Lab 课程视频 - Lesson 1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d26a, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        .video-wrapper {
+            background: rgba(20, 20, 30, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow:
+                0 0 40px rgba(0, 210, 106, 0.1),
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            /* 16:9 Aspect Ratio */
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+        }
+
+        .controls-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 210, 106, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 210, 106, 0.1);
+        }
+
+        .controls-info p {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .controls-info strong {
+            color: #00d26a;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: #00d26a;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #00ff88;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .video-wrapper {
+                padding: 10px;
+                border-radius: 12px;
+            }
+
+            .video-container {
+                border-radius: 8px;
+            }
+
+            video {
+                border-radius: 8px;
+            }
+        }
+
+        /* Custom video controls styling */
+        video::-webkit-media-controls-panel {
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+        }
+
+        video::-webkit-media-controls-play-button {
+            filter: brightness(1.2);
+        }
+
+        /* Glow effect on hover */
+        .video-wrapper:hover {
+            box-shadow:
+                0 0 60px rgba(0, 210, 106, 0.15),
+                0 10px 40px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: box-shadow 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">TRAN Trading Lab</div>
+            <h1>Lesson 1</h1>
+            <p class="subtitle">交易课程视频</p>
+        </header>
+
+        <div class="video-wrapper">
+            <div class="video-container">
+                <video controls preload="metadata" poster="" playsinline>
+                    <source src="lesson1.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放，请更新浏览器或使用其他浏览器。
+                </video>
+            </div>
+            <div class="controls-info">
+                <p><strong>提示：</strong>点击视频开始播放。支持全屏观看、倍速播放等功能。</p>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 TRAN Trading Lab. All rights reserved.</p>
+            <p><a href="https://www.trantradinglab.com">返回主站</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>
