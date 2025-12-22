@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
     Activity, Clock, Wifi, TrendingUp, TrendingDown,
     Bell, Settings, Search, Command, Shield,
@@ -8,6 +8,7 @@ import {
 import UserAuthModal from './UserAuthModal'
 import { useAppState, useAppActions } from '../context/AppContext'
 import { useI18n } from '../hooks/useI18n'
+import { useMarketData } from '../hooks/useMarketData'
 
 // 语言选项
 const LANGUAGES = [
@@ -19,14 +20,6 @@ const LANGUAGES = [
 // 最高等级 TopBar
 function TopBar() {
     const [time, setTime] = useState(new Date())
-    const [marketData, setMarketData] = useState({
-        btc: { price: 0, change: 0, prevPrice: 0 },
-        eth: { price: 0, change: 0, prevPrice: 0 },
-        spy: { price: 0, change: 0, prevPrice: 0 },
-        dxy: { price: 0, change: 0, prevPrice: 0 },
-        gold: { price: 0, change: 0, prevPrice: 0 },
-        vix: { price: 0, change: 0, prevPrice: 0 },
-    })
     const [flash, setFlash] = useState({})
     const [showLangMenu, setShowLangMenu] = useState(false)
     const [showUserMenu, setShowUserMenu] = useState(false)
@@ -46,6 +39,26 @@ function TopBar() {
     } = useAppActions()
 
     const { t } = useI18n()
+
+    // 获取实时市场数据
+    const { data: liveData } = useMarketData()
+
+    // 将实时数据转换为TopBar需要的格式
+    const marketData = useMemo(() => {
+        const btcData = liveData['BTC/USDT'] || {}
+        const ethData = liveData['ETH/USDT'] || {}
+        const spyData = liveData['SPY'] || {}
+        const goldData = liveData['GOLD'] || {}
+
+        return {
+            btc: { price: btcData.price || 0, change: btcData.change || 0 },
+            eth: { price: ethData.price || 0, change: ethData.change || 0 },
+            spy: { price: spyData.price || 0, change: spyData.change || 0 },
+            dxy: { price: liveData['DXY']?.price || 0, change: liveData['DXY']?.change || 0 },
+            gold: { price: goldData.price || 0, change: goldData.change || 0 },
+            vix: { price: liveData['VIX']?.price || 0, change: liveData['VIX']?.change || 0 },
+        }
+    }, [liveData])
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000)

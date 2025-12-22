@@ -22,6 +22,8 @@ const YAHOO_SYMBOLS = {
     'SSE': '000001.SS',
     'DAX': '^GDAXI',
     'FTSE': '^FTSE',
+    'VIX': '^VIX',
+    'DXY': 'DX-Y.NYB',
     // 商品
     'GOLD': 'GC=F',
     'SILVER': 'SI=F',
@@ -141,6 +143,8 @@ function getYahooFallbackData(symbols) {
         'BRENT': { price: 74.56 + (Math.random() - 0.5) * 1, change: -0.67 + (Math.random() - 0.5) * 0.5 },
         'NG': { price: 3.245 + (Math.random() - 0.5) * 0.1, change: 2.34 + (Math.random() - 0.5) * 0.5 },
         'COPPER': { price: 4.2345 + (Math.random() - 0.5) * 0.1, change: 0.56 + (Math.random() - 0.5) * 0.3 },
+        'VIX': { price: 15.23 + (Math.random() - 0.5) * 2, change: -1.5 + (Math.random() - 0.5) * 1 },
+        'DXY': { price: 103.45 + (Math.random() - 0.5) * 0.5, change: 0.12 + (Math.random() - 0.5) * 0.2 },
     }
 
     const result = {}
