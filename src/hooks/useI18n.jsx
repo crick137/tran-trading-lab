@@ -40,7 +40,6 @@ const translations = {
             short: '숏',
             leverage: '레버리지',
             position: '포지션',
-            position: '포지션',
             pnl: '손익',
         },
         auth: {
@@ -154,81 +153,87 @@ const translations = {
                     pos3: '감정적 거래 피하기',
                 }
             },
-            dashboard_ui: {
-                marketStats: {
-                    high: '24h 고가',
-                    low: '24h 저가',
-                    vol: '24h 거래량',
-                    rank: '시장 순위',
-                    change: '등락폭'
-                },
-                sections: {
-                    markets: '시장',
-                    positions: '포지션',
-                    orderBook: '오더북',
-                    trades: '체결',
-                    chart: '차트'
-                },
-                cols: {
-                    symbol: '심볼',
-                    price: '가격',
-                    change24h: '24h',
-                    change7d: '7D',
-                    side: '방향',
-                    size: '수량',
-                    entry: '진입가',
-                    mark: '현재가',
-                    pnl: '손익 (ROE%)',
-                    action: '액션',
-                    spread: '스프레드',
-                    total: '합계',
-                    time: '시간'
-                },
-                status: {
-                    connected: '연결됨',
-                    connecting: '연결 중...',
-                    secure: '보안',
-                    server: '서버',
-                    live: '실시간'
-                },
-                account: {
-                    simulation: '시뮬레이션',
-                    balance: '가용 잔고',
-                    equity: '총 자산',
-                    usedMargin: '증거금',
-                    unrealized: '미실현 손익',
-                    cumulative: '누적 손익',
-                    winRate: '승률',
-                    reset: '초기화'
-                },
-                actions: {
-                    trade: '거래',
-                    close: '청산',
-                    closeAll: '모두 청산',
-                    search: '검색...',
-                    addToWatchlist: '관심 등록',
-                    removeFromWatchlist: '관심 해제'
-                },
-                categories: {
-                    all: '전체',
-                    watchlist: '관심',
-                    index: '지수',
-                    crypto: '암호화폐',
-                    forex: '외환',
-                    commodity: '원자재'
-                },
-                msg: {
-                    noPositions: '보유 포지션 없음',
-                    openPositionSuccess: '포지션 진입 성공',
-                    pnlTotal: '총 손익'
-                }
+        },
+        dashboard_ui: {
+            marketStats: {
+                high: '24h 고가',
+                low: '24h 저가',
+                vol: '24h 거래량',
+                rank: '시장 순위',
+                change: '등락폭'
             },
-            symbols: {
-                'SPY': 'S&P 500', 'QQQ': '나스닥 100', 'DIA': '다우존스', 'NIKKEI': '니케이 225', 'HSI': '항셍지수',
-                'BTC/USDT': '비트코인', 'ETH/USDT': '이더리움', 'SOL/USDT': '솔라나', 'XRP/USDT': '리플',
-                'GOLD': '금', 'SILVER': '은', 'WTI': 'WTI 원유', 'BRENT': '브렌트 유',
-                'EUR/USD': '유로/달러', 'GBP/USD': '파운드/달러', 'USD/JPY': '달러/엔'
+            sections: {
+                markets: '시장',
+                positions: '포지션',
+                orderBook: '오더북',
+                trades: '체결',
+                chart: '차트'
             },
+            cols: {
+                symbol: '심볼',
+                price: '가격',
+                change24h: '24h',
+                change7d: '7D',
+                side: '방향',
+                size: '수량',
+                entry: '진입가',
+                mark: '현재가',
+                pnl: '손익 (ROE%)',
+                action: '액션',
+                spread: '스프레드',
+                total: '합계',
+                time: '시간'
+            },
+            status: {
+                connected: '연결됨',
+                connecting: '연결 중...',
+                secure: '보안',
+                server: '서버',
+                live: '실시간'
+            },
+            account: {
+                simulation: '시뮬레이션',
+                balance: '가용 잔고',
+                equity: '총 자산',
+                usedMargin: '증거금',
+                unrealized: '미실현 손익',
+                cumulative: '누적 손익',
+                winRate: '승률',
+                reset: '초기화'
+            },
+            actions: {
+                trade: '거래',
+                close: '청산',
+                closeAll: '모두 청산',
+                search: '검색...',
+                addToWatchlist: '관심 등록',
+                removeFromWatchlist: '관심 해제'
+            },
+            categories: {
+                all: '전체',
+                watchlist: '관심',
+                index: '지수',
+                crypto: '암호화폐',
+                forex: '외환',
+                commodity: '원자재'
+            },
+            msg: {
+                noPositions: '보유 포지션 없음',
+                openPositionSuccess: '포지션 진입 성공',
+                pnlTotal: '총 손익'
+            }
+        },
+        symbols: {
+            'SPY': 'S&P 500', 'QQQ': '나스닥 100', 'DIA': '다우존스', 'NIKKEI': '니케이 225', 'HSI': '항셍지수',
+            'SSE': '상해종합', 'DAX': '독일 DAX', 'FTSE': 'FTSE 100', 'CAC40': 'CAC 40', 'STOXX50': '유로스톡스 50',
+            'BTC/USDT': '비트코인', 'ETH/USDT': '이더리움', 'SOL/USDT': '솔라나', 'XRP/USDT': '리플',
+            'BNB/USDT': '바이낸스 코인', 'AVAX/USDT': '아발란체', 'DOGE/USDT': '도지코인', 'ADA/USDT': '카르다노',
+            'LINK/USDT': '체인링크', 'DOT/USDT': '폴카닷', 'MATIC/USDT': '폴리곤', 'UNI/USDT': '유니스왑',
+            'ATOM/USDT': '코스모스', 'LTC/USDT': '라이트코인', 'APT/USDT': '앱토스', 'OP/USDT': '옵티미즘', 'ARB/USDT': '아비트럼',
+            'GOLD': '금', 'SILVER': '은', 'WTI': 'WTI 원유', 'BRENT': '브렌트 유',
+            'NG': '천연가스', 'COPPER': '구리', 'PLATINUM': '백금', 'PALLADIUM': '팔라듐',
+            'EUR/USD': '유로/달러', 'GBP/USD': '파운드/달러', 'USD/JPY': '달러/엔',
+            'USD/CNH': '달러/위안', 'AUD/USD': '호주달러/달러', 'USD/CHF': '달러/스위스프랑', 'NZD/USD': '뉴질랜드달러/달러', 'EUR/GBP': '유로/파운드'
         },
         views: {
             brief: {
@@ -352,7 +357,6 @@ const translations = {
             short: '做空',
             leverage: '杠杆',
             position: '持仓',
-            position: '持仓',
             pnl: '盈亏',
         },
         auth: {
@@ -466,81 +470,87 @@ const translations = {
                     pos3: '避免情绪化交易',
                 }
             },
-            dashboard_ui: {
-                marketStats: {
-                    high: '24h 最高',
-                    low: '24h 最低',
-                    vol: '24h 成交量',
-                    rank: '市场排名',
-                    change: '涨跌幅'
-                },
-                sections: {
-                    markets: '市场列表',
-                    positions: '持仓',
-                    orderBook: '订单簿',
-                    trades: '最新成交',
-                    chart: '图表'
-                },
-                cols: {
-                    symbol: '币种',
-                    price: '价格',
-                    change24h: '24h',
-                    change7d: '7D',
-                    side: '方向',
-                    size: '数量',
-                    entry: '开仓价',
-                    mark: '标记价',
-                    pnl: '盈亏 (ROE%)',
-                    action: '操作',
-                    spread: '价差',
-                    total: '总计',
-                    time: '时间'
-                },
-                status: {
-                    connected: '已连接',
-                    connecting: '连接中...',
-                    secure: '安全',
-                    server: '服务器',
-                    live: '实时'
-                },
-                account: {
-                    simulation: '模拟交易',
-                    balance: '可用余额',
-                    equity: '总权益',
-                    usedMargin: '占用保证金',
-                    unrealized: '未实现盈亏',
-                    cumulative: '累计盈亏',
-                    winRate: '胜率',
-                    reset: '重置'
-                },
-                actions: {
-                    trade: '交易',
-                    close: '平仓',
-                    closeAll: '全部平仓',
-                    search: '搜索...',
-                    addToWatchlist: '添加自选',
-                    removeFromWatchlist: '取消自选'
-                },
-                categories: {
-                    all: '全部',
-                    watchlist: '自选',
-                    index: '指数',
-                    crypto: '加密货币',
-                    forex: '外汇',
-                    commodity: '大宗商品'
-                },
-                msg: {
-                    noPositions: '当前无持仓',
-                    openPositionSuccess: '开仓成功',
-                    pnlTotal: '总盈亏'
-                }
+        },
+        dashboard_ui: {
+            marketStats: {
+                high: '24h 最高',
+                low: '24h 最低',
+                vol: '24h 成交量',
+                rank: '市场排名',
+                change: '涨跌幅'
             },
-            symbols: {
-                'SPY': '标普 500', 'QQQ': '纳斯达克 100', 'DIA': '道琼斯', 'NIKKEI': '日经 225', 'HSI': '恒生指数',
-                'BTC/USDT': '比特币', 'ETH/USDT': '以太坊', 'SOL/USDT': '索拉纳', 'XRP/USDT': '瑞波币',
-                'GOLD': '黄金', 'SILVER': '白银', 'WTI': 'WTI 原油', 'BRENT': '布伦特原油',
-                'EUR/USD': '欧元/美元', 'GBP/USD': '英镑/美元', 'USD/JPY': '美元/日元'
+            sections: {
+                markets: '市场列表',
+                positions: '持仓',
+                orderBook: '订单簿',
+                trades: '最新成交',
+                chart: '图表'
             },
+            cols: {
+                symbol: '币种',
+                price: '价格',
+                change24h: '24h',
+                change7d: '7D',
+                side: '方向',
+                size: '数量',
+                entry: '开仓价',
+                mark: '标记价',
+                pnl: '盈亏 (ROE%)',
+                action: '操作',
+                spread: '价差',
+                total: '总计',
+                time: '时间'
+            },
+            status: {
+                connected: '已连接',
+                connecting: '连接中...',
+                secure: '安全',
+                server: '服务器',
+                live: '实时'
+            },
+            account: {
+                simulation: '模拟交易',
+                balance: '可用余额',
+                equity: '总权益',
+                usedMargin: '占用保证金',
+                unrealized: '未实现盈亏',
+                cumulative: '累计盈亏',
+                winRate: '胜率',
+                reset: '重置'
+            },
+            actions: {
+                trade: '交易',
+                close: '平仓',
+                closeAll: '全部平仓',
+                search: '搜索...',
+                addToWatchlist: '添加自选',
+                removeFromWatchlist: '取消自选'
+            },
+            categories: {
+                all: '全部',
+                watchlist: '自选',
+                index: '指数',
+                crypto: '加密货币',
+                forex: '外汇',
+                commodity: '大宗商品'
+            },
+            msg: {
+                noPositions: '当前无持仓',
+                openPositionSuccess: '开仓成功',
+                pnlTotal: '总盈亏'
+            }
+        },
+        symbols: {
+            'SPY': '标普 500', 'QQQ': '纳斯达克 100', 'DIA': '道琼斯', 'NIKKEI': '日经 225', 'HSI': '恒生指数',
+            'SSE': '上证综指', 'DAX': '德国 DAX', 'FTSE': 'FTSE 100', 'CAC40': 'CAC 40', 'STOXX50': '欧洲斯托克 50',
+            'BTC/USDT': '比特币', 'ETH/USDT': '以太坊', 'SOL/USDT': '索拉纳', 'XRP/USDT': '瑞波币',
+            'BNB/USDT': '币安币', 'AVAX/USDT': '雪崩', 'DOGE/USDT': '狗狗币', 'ADA/USDT': '艾达币',
+            'LINK/USDT': '链接', 'DOT/USDT': '波卡点', 'MATIC/USDT': '多边形', 'UNI/USDT': 'Uniswap',
+            'ATOM/USDT': '宇宙币', 'LTC/USDT': '莱特币', 'APT/USDT': 'Aptos', 'OP/USDT': 'Optimism', 'ARB/USDT': 'Arbitrum',
+            'GOLD': '黄金', 'SILVER': '白银', 'WTI': 'WTI 原油', 'BRENT': '布伦特原油',
+            'NG': '天然气', 'COPPER': '铜', 'PLATINUM': '铂金', 'PALLADIUM': '钯',
+            'EUR/USD': '欧元/美元', 'GBP/USD': '英镑/美元', 'USD/JPY': '美元/日元',
+            'USD/CNH': '美元/人民币', 'AUD/USD': '澳元/美元', 'USD/CHF': '美元/瑞郎', 'NZD/USD': '纽元/美元', 'EUR/GBP': '欧元/英镑'
         },
         views: {
             brief: {
@@ -664,7 +674,6 @@ const translations = {
             short: 'Short',
             leverage: 'Leverage',
             position: 'Position',
-            position: 'Position',
             pnl: 'PnL',
         },
         auth: {
@@ -778,81 +787,87 @@ const translations = {
                     pos3: 'Avoid emotional trading',
                 }
             },
-            dashboard_ui: {
-                marketStats: {
-                    high: '24h High',
-                    low: '24h Low',
-                    vol: '24h Vol',
-                    rank: 'Rank',
-                    change: 'Change'
-                },
-                sections: {
-                    markets: 'Markets',
-                    positions: 'Positions',
-                    orderBook: 'Order Book',
-                    trades: 'Trades',
-                    chart: 'Chart'
-                },
-                cols: {
-                    symbol: 'Symbol',
-                    price: 'Price',
-                    change24h: '24h',
-                    change7d: '7D',
-                    side: 'Side',
-                    size: 'Size',
-                    entry: 'Entry',
-                    mark: 'Mark',
-                    pnl: 'PnL (ROE%)',
-                    action: 'Action',
-                    spread: 'Spread',
-                    total: 'Total',
-                    time: 'Time'
-                },
-                status: {
-                    connected: 'Connected',
-                    connecting: 'Connecting...',
-                    secure: 'Secure',
-                    server: 'Server',
-                    live: 'LIVE'
-                },
-                account: {
-                    simulation: 'Simulation',
-                    balance: 'Balance',
-                    equity: 'Equity',
-                    usedMargin: 'Margin',
-                    unrealized: 'Unrealized PnL',
-                    cumulative: 'Total PnL',
-                    winRate: 'Win Rate',
-                    reset: 'Reset'
-                },
-                actions: {
-                    trade: 'Trade',
-                    close: 'Close',
-                    closeAll: 'Close All',
-                    search: 'Search...',
-                    addToWatchlist: 'Watch',
-                    removeFromWatchlist: 'Unwatch'
-                },
-                categories: {
-                    all: 'All',
-                    watchlist: 'Watchlist',
-                    index: 'Index',
-                    crypto: 'Crypto',
-                    forex: 'Forex',
-                    commodity: 'Commodity'
-                },
-                msg: {
-                    noPositions: 'No open positions',
-                    openPositionSuccess: 'Position opened',
-                    pnlTotal: 'Total PnL'
-                }
+        },
+        dashboard_ui: {
+            marketStats: {
+                high: '24h High',
+                low: '24h Low',
+                vol: '24h Vol',
+                rank: 'Rank',
+                change: 'Change'
             },
-            symbols: {
-                'SPY': 'S&P 500', 'QQQ': 'Nasdaq 100', 'DIA': 'Dow Jones', 'NIKKEI': 'Nikkei 225', 'HSI': 'Hang Seng',
-                'BTC/USDT': 'Bitcoin', 'ETH/USDT': 'Ethereum', 'SOL/USDT': 'Solana', 'XRP/USDT': 'Ripple',
-                'GOLD': 'Gold', 'SILVER': 'Silver', 'WTI': 'WTI Crude', 'BRENT': 'Brent Crude',
-                'EUR/USD': 'Euro/USD', 'GBP/USD': 'GBP/USD', 'USD/JPY': 'USD/JPY'
+            sections: {
+                markets: 'Markets',
+                positions: 'Positions',
+                orderBook: 'Order Book',
+                trades: 'Trades',
+                chart: 'Chart'
             },
+            cols: {
+                symbol: 'Symbol',
+                price: 'Price',
+                change24h: '24h',
+                change7d: '7D',
+                side: 'Side',
+                size: 'Size',
+                entry: 'Entry',
+                mark: 'Mark',
+                pnl: 'PnL (ROE%)',
+                action: 'Action',
+                spread: 'Spread',
+                total: 'Total',
+                time: 'Time'
+            },
+            status: {
+                connected: 'Connected',
+                connecting: 'Connecting...',
+                secure: 'Secure',
+                server: 'Server',
+                live: 'LIVE'
+            },
+            account: {
+                simulation: 'Simulation',
+                balance: 'Balance',
+                equity: 'Equity',
+                usedMargin: 'Margin',
+                unrealized: 'Unrealized PnL',
+                cumulative: 'Total PnL',
+                winRate: 'Win Rate',
+                reset: 'Reset'
+            },
+            actions: {
+                trade: 'Trade',
+                close: 'Close',
+                closeAll: 'Close All',
+                search: 'Search...',
+                addToWatchlist: 'Watch',
+                removeFromWatchlist: 'Unwatch'
+            },
+            categories: {
+                all: 'All',
+                watchlist: 'Watchlist',
+                index: 'Index',
+                crypto: 'Crypto',
+                forex: 'Forex',
+                commodity: 'Commodity'
+            },
+            msg: {
+                noPositions: 'No open positions',
+                openPositionSuccess: 'Position opened',
+                pnlTotal: 'Total PnL'
+            }
+        },
+        symbols: {
+            'SPY': 'S&P 500', 'QQQ': 'Nasdaq 100', 'DIA': 'Dow Jones', 'NIKKEI': 'Nikkei 225', 'HSI': 'Hang Seng',
+            'SSE': 'Shanghai Composite', 'DAX': 'German DAX', 'FTSE': 'FTSE 100', 'CAC40': 'CAC 40', 'STOXX50': 'Euro Stoxx 50',
+            'BTC/USDT': 'Bitcoin', 'ETH/USDT': 'Ethereum', 'SOL/USDT': 'Solana', 'XRP/USDT': 'Ripple',
+            'BNB/USDT': 'BNB', 'AVAX/USDT': 'Avalanche', 'DOGE/USDT': 'Dogecoin', 'ADA/USDT': 'Cardano',
+            'LINK/USDT': 'Chainlink', 'DOT/USDT': 'Polkadot', 'MATIC/USDT': 'Polygon', 'UNI/USDT': 'Uniswap',
+            'ATOM/USDT': 'Cosmos', 'LTC/USDT': 'Litecoin', 'APT/USDT': 'Aptos', 'OP/USDT': 'Optimism', 'ARB/USDT': 'Arbitrum',
+            'GOLD': 'Gold', 'SILVER': 'Silver', 'WTI': 'WTI Crude', 'BRENT': 'Brent Crude',
+            'NG': 'Natural Gas', 'COPPER': 'Copper', 'PLATINUM': 'Platinum', 'PALLADIUM': 'Palladium',
+            'EUR/USD': 'Euro/USD', 'GBP/USD': 'GBP/USD', 'USD/JPY': 'USD/JPY',
+            'USD/CNH': 'USD/CNH', 'AUD/USD': 'AUD/USD', 'USD/CHF': 'USD/CHF', 'NZD/USD': 'NZD/USD', 'EUR/GBP': 'EUR/GBP'
         },
         views: {
             brief: {
