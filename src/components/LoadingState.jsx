@@ -11,7 +11,14 @@ export function FullScreenLoader({ message = '加载中...' }) {
         <div style={styles.fullScreen}>
             <div style={styles.loaderCard}>
                 <div style={styles.spinnerWrapper}>
-                    <div style={styles.spinner} />
+                    {/* 品牌Logo */}
+                    <img
+                        src="/tran-logo.png"
+                        alt="TRAN"
+                        style={styles.brandLogo}
+                    />
+                    {/* 旋转环 */}
+                    <div style={styles.spinnerRing} />
                     <div style={styles.spinnerGlow} />
                 </div>
                 <span style={styles.loaderText}>{message}</span>
@@ -206,28 +213,42 @@ const styles = {
     },
     spinnerWrapper: {
         position: 'relative',
+        width: 100,
+        height: 100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    brandLogo: {
         width: 60,
         height: 60,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        position: 'relative',
+        zIndex: 2,
+        boxShadow: '0 0 30px rgba(0, 210, 106, 0.3)',
     },
-    spinner: {
-        width: '100%',
-        height: '100%',
+    spinnerRing: {
+        position: 'absolute',
+        inset: 0,
         border: '3px solid rgba(255, 255, 255, 0.05)',
         borderTopColor: '#00d26a',
+        borderRightColor: '#00d4ff',
         borderRadius: '50%',
-        animation: 'spin 1s linear infinite',
+        animation: 'spin 1.5s linear infinite',
     },
     spinnerGlow: {
         position: 'absolute',
-        inset: -10,
+        inset: -15,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(0, 210, 106, 0.2) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(0, 210, 106, 0.25) 0%, transparent 70%)',
         animation: 'pulse 2s ease-in-out infinite',
     },
     loaderText: {
         fontSize: 14,
-        color: 'rgba(255, 255, 255, 0.5)',
+        color: 'rgba(255, 255, 255, 0.6)',
         fontWeight: 500,
+        letterSpacing: '0.05em',
     },
 
     // 骨架屏
