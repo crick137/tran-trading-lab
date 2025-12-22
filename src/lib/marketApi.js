@@ -3,6 +3,11 @@
  * 数据源：Binance（加密货币）、Yahoo Finance（股指/商品）、exchangerate.host（外汇）
  */
 
+// API 基础 URL 配置
+// 生产环境使用相对路径（Vercel Serverless Functions）
+// 开发环境使用本地代理服务器
+const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:3001' : ''
+
 // Yahoo Finance符号映射
 const YAHOO_SYMBOLS = {
     // 韩国
@@ -71,7 +76,7 @@ export async function fetchBinancePrices() {
  */
 export async function fetchYahooFinance() {
     try {
-        const response = await fetch('http://localhost:3001/api/yahoo/quotes')
+        const response = await fetch(`${API_BASE_URL}/api/yahoo/quotes`)
         const result = await response.json()
 
         if (result.success) {
@@ -90,7 +95,7 @@ export async function fetchYahooFinance() {
  */
 export async function fetchForexRates() {
     try {
-        const response = await fetch('http://localhost:3001/api/forex/rates')
+        const response = await fetch(`${API_BASE_URL}/api/forex/rates`)
         const result = await response.json()
 
         if (result.success) {
