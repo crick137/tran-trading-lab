@@ -131,6 +131,39 @@
   --gradient-border: linear-gradient(135deg, rgba(0, 210, 106, 0.4) 0%, rgba(0, 144, 255, 0.3) 50%, rgba(168, 85, 247, 0.3) 100%);
 }
 
+/* === 日间模式变量 === */
+[data-theme="light"] {
+  --bg-void: #f8fafc;
+  --bg-deep: #f1f5f9;
+  --bg-terminal: #e2e8f0;
+  --bg-panel: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.85);
+
+  --border-subtle: rgba(0, 0, 0, 0.03);
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-medium: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-light: rgba(0, 0, 0, 0.05);
+
+  --text-primary: rgba(0, 0, 0, 0.9);
+  --text-secondary: rgba(0, 0, 0, 0.7);
+  --text-tertiary: rgba(0, 0, 0, 0.5);
+  --text-muted: rgba(0, 0, 0, 0.35);
+
+  --accent-green: #059669;
+  --accent-green-bright: #10b981;
+  --accent-green-glow: rgba(5, 150, 105, 0.3);
+  --accent-green-dim: rgba(5, 150, 105, 0.1);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
