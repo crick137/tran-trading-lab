@@ -114,6 +114,126 @@ const emailTemplates = {
                 </div>
             `
         }
+    },
+
+    // 订阅确认邮件
+    confirmSubscription: (name, unsubscribeUrl, lang = 'ko') => {
+        const content = {
+            ko: {
+                subject: '🎉 TRAN Trading Lab 구독을 환영합니다!',
+                greeting: `안녕하세요, ${name}님!`,
+                message: 'TRAN Trading Lab 뉴스레터를 구독해 주셔서 감사합니다. 이제 최신 암호화폐 분석, 시장 동향, 거래 팁을 받으실 수 있습니다.',
+                benefits: ['실시간 시장 분석', 'AI 매매 신호', '독점 거래 전략'],
+                unsubscribe: '구독을 취소하려면'
+            },
+            zh: {
+                subject: '🎉 欢迎订阅 TRAN Trading Lab!',
+                greeting: `您好，${name}！`,
+                message: '感谢您订阅 TRAN Trading Lab 邮件通知。您将收到最新的加密货币分析、市场动态和交易技巧。',
+                benefits: ['实时市场分析', 'AI 交易信号', '独家交易策略'],
+                unsubscribe: '如需退订，请点击'
+            },
+            en: {
+                subject: '🎉 Welcome to TRAN Trading Lab Newsletter!',
+                greeting: `Hello, ${name}!`,
+                message: 'Thank you for subscribing to TRAN Trading Lab newsletter. You will receive the latest crypto analysis, market trends, and trading tips.',
+                benefits: ['Real-time market analysis', 'AI trading signals', 'Exclusive trading strategies'],
+                unsubscribe: 'To unsubscribe, click'
+            }
+        }
+        const t = content[lang] || content.en
+        return {
+            subject: t.subject,
+            html: `
+                <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); color: #fff; padding: 48px; border-radius: 20px; border: 1px solid rgba(0,210,106,0.2);">
+                    <div style="text-align: center; margin-bottom: 32px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #00d26a, #00ff88); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">✓</div>
+                        <h1 style="color: #00ff88; margin: 0; font-size: 28px;">TRAN Trading Lab</h1>
+                    </div>
+                    <h2 style="color: #fff; margin: 0 0 16px; font-size: 22px;">${t.greeting}</h2>
+                    <p style="color: rgba(255,255,255,0.8); line-height: 1.7; font-size: 15px;">${t.message}</p>
+                    <div style="background: rgba(0, 210, 106, 0.1); border: 1px solid rgba(0, 210, 106, 0.2); border-radius: 14px; padding: 24px; margin: 28px 0;">
+                        <ul style="color: rgba(255,255,255,0.9); margin: 0; padding: 0 0 0 20px; line-height: 2;">
+                            ${t.benefits.map(b => `<li>${b}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.4); font-size: 12px; margin-top: 36px; text-align: center;">
+                        ${t.unsubscribe}: <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.5);">here</a>
+                    </p>
+                </div>
+            `
+        }
+    },
+
+    // 内容更新邮件
+    contentUpdate: (title, content, unsubscribeUrl, lang = 'ko') => {
+        const labels = {
+            ko: { readMore: '자세히 보기', unsubscribe: '구독 취소' },
+            zh: { readMore: '阅读更多', unsubscribe: '退订' },
+            en: { readMore: 'Read More', unsubscribe: 'Unsubscribe' }
+        }
+        const t = labels[lang] || labels.en
+        return {
+            subject: `📈 [TRAN] ${title}`,
+            html: `
+                <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); color: #fff; padding: 48px; border-radius: 20px; border: 1px solid rgba(0,212,255,0.2);">
+                    <div style="text-align: center; margin-bottom: 28px;">
+                        <h1 style="color: #00d4ff; margin: 0; font-size: 24px;">TRAN Trading Lab</h1>
+                        <p style="color: rgba(255,255,255,0.4); margin: 8px 0 0; font-size: 12px;">Newsletter Update</p>
+                    </div>
+                    <div style="background: rgba(0, 212, 255, 0.05); border-left: 4px solid #00d4ff; padding: 20px 24px; border-radius: 0 12px 12px 0; margin-bottom: 24px;">
+                        <h2 style="color: #fff; margin: 0 0 8px; font-size: 20px;">${title}</h2>
+                    </div>
+                    <div style="color: rgba(255,255,255,0.85); line-height: 1.8; font-size: 15px; white-space: pre-wrap;">${content}</div>
+                    <a href="${process.env.APP_URL || 'https://www.trantradinglab.com'}" 
+                       style="display: inline-block; background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; padding: 14px 32px; border-radius: 12px; text-decoration: none; font-weight: 600; margin-top: 28px;">
+                        ${t.readMore} →
+                    </a>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; padding-top: 20px; text-align: center;">
+                        <a href="${unsubscribeUrl}" style="color: rgba(255,255,255,0.4); font-size: 12px; text-decoration: none;">${t.unsubscribe}</a>
+                    </div>
+                </div>
+            `
+        }
+    },
+
+    // 退订确认邮件
+    unsubscribeConfirm: (lang = 'ko') => {
+        const content = {
+            ko: {
+                subject: 'TRAN Trading Lab 구독이 취소되었습니다',
+                title: '구독이 취소되었습니다',
+                message: '더 이상 TRAN Trading Lab의 뉴스레터를 받지 않으실 것입니다. 다시 구독하시려면 웹사이트를 방문해 주세요.',
+                resubscribe: '다시 구독하기'
+            },
+            zh: {
+                subject: '您已退订 TRAN Trading Lab',
+                title: '退订成功',
+                message: '您将不再收到 TRAN Trading Lab 的邮件通知。如需重新订阅，请访问我们的网站。',
+                resubscribe: '重新订阅'
+            },
+            en: {
+                subject: 'You have unsubscribed from TRAN Trading Lab',
+                title: 'Unsubscribed Successfully',
+                message: 'You will no longer receive newsletters from TRAN Trading Lab. To re-subscribe, please visit our website.',
+                resubscribe: 'Re-subscribe'
+            }
+        }
+        const t = content[lang] || content.en
+        return {
+            subject: t.subject,
+            html: `
+                <div style="font-family: 'Inter', sans-serif; max-width: 600px; margin: 0 auto; background: #0d1117; color: #fff; padding: 48px; border-radius: 20px; text-align: center;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 24px; background: rgba(255,255,255,0.05); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">👋</div>
+                    <h1 style="color: #fff; margin: 0 0 16px; font-size: 24px;">${t.title}</h1>
+                    <p style="color: rgba(255,255,255,0.6); line-height: 1.6; font-size: 15px; margin-bottom: 28px;">${t.message}</p>
+                    <a href="${process.env.APP_URL || 'https://www.trantradinglab.com'}" 
+                       style="display: inline-block; background: rgba(255,255,255,0.1); color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-size: 14px;">
+                        ${t.resubscribe}
+                    </a>
+                </div>
+            `
+        }
     }
 }
 

@@ -197,6 +197,220 @@ app.post('/api/email/test', async (req, res) => {
     }
 })
 
+// ============================================
+// Newsletter Subscription APIs
+// ============================================
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { randomBytes } from 'crypto'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+const SUBSCRIBERS_FILE = join(__dirname, 'data', 'subscribers.json')
+
+// 确保数据目录存在
+if (!existsSync(join(__dirname, 'data'))) {
+    mkdirSync(join(__dirname, 'data'), { recursive: true })
+}
+
+// 读取订阅者列表
+function getSubscribers() {
+    try {
+        if (!existsSync(SUBSCRIBERS_FILE)) {
+            return { subscribers: [], lastUpdated: null }
+        }
+        const data = readFileSync(SUBSCRIBERS_FILE, 'utf-8')
+        return JSON.parse(data)
+    } catch (e) {
+        return { subscribers: [], lastUpdated: null }
+    }
+}
+
+// 保存订阅者列表
+function saveSubscribers(data) {
+    data.lastUpdated = new Date().toISOString()
+    writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(data, null, 2), 'utf-8')
+}
+
+// 订阅API
+app.post('/api/newsletter/subscribe', async (req, res) => {
+    try {
+        const { email, name, language } = req.body
+
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ success: false, error: 'Valid email required' })
+        }
+
+        const data = getSubscribers()
+
+        // 检查是否已订阅
+        if (data.subscribers.some(s => s.email.toLowerCase() === email.toLowerCase())) {
+            return res.status(400).json({ success: false, error: 'Email already subscribed' })
+        }
+
+        // 生成退订token
+        const token = randomBytes(32).toString('hex')
+        const subscriber = {
+            email: email.toLowerCase(),
+            name: name || email.split('@')[0],
+            language: language || 'ko',
+            subscribedAt: new Date().toISOString(),
+            token
+        }
+
+        data.subscribers.push(subscriber)
+        saveSubscribers(data)
+
+        // 发送确认邮件
+        try {
+            const { sendEmail, emailTemplates } = await import('./emailService.js')
+            const appUrl = process.env.APP_URL || 'https://www.trantradinglab.com'
+            const unsubscribeUrl = `${appUrl}/api/newsletter/unsubscribe?token=${token}`
+            const template = emailTemplates.confirmSubscription(subscriber.name, unsubscribeUrl, subscriber.language)
+            await sendEmail(email, template)
+        } catch (emailErr) {
+            console.error('Failed to send confirmation email:', emailErr.message)
+        }
+
+        console.log(`📧 New subscriber: ${email}`)
+        res.json({ success: true, message: 'Subscribed successfully' })
+    } catch (error) {
+        console.error('Subscribe error:', error.message)
+        res.status(500).json({ success: false, error: error.message })
+    }
+})
+
+// 退订API
+app.get('/api/newsletter/unsubscribe', async (req, res) => {
+    try {
+        const { token } = req.query
+
+        if (!token) {
+            return res.status(400).send('<h2>Invalid unsubscribe link</h2>')
+        }
+
+        const data = getSubscribers()
+        const index = data.subscribers.findIndex(s => s.token === token)
+
+        if (index === -1) {
+            return res.status(404).send('<h2>Subscription not found</h2>')
+        }
+
+        const subscriber = data.subscribers[index]
+        data.subscribers.splice(index, 1)
+        saveSubscribers(data)
+
+        // 发送退订确认邮件
+        try {
+            const { sendEmail, emailTemplates } = await import('./emailService.js')
+            const template = emailTemplates.unsubscribeConfirm(subscriber.language)
+            await sendEmail(subscriber.email, template)
+        } catch (emailErr) {
+            console.error('Failed to send unsubscribe confirmation:', emailErr.message)
+        }
+
+        console.log(`📧 Unsubscribed: ${subscriber.email}`)
+
+        // 返回友好的HTML页面
+        res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <title>Unsubscribed - TRAN Trading Lab</title>
+                <style>
+                    body { font-family: 'Inter', sans-serif; background: #0d1117; color: #fff; display: flex; 
+                           align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+                    .container { text-align: center; padding: 40px; }
+                    h1 { color: #00ff88; }
+                    a { color: #00d4ff; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>✓ 退订成功</h1>
+                    <p>您已成功退订 TRAN Trading Lab 邮件通知。</p>
+                    <p><a href="${process.env.APP_URL || 'https://www.trantradinglab.com'}">返回首页</a></p>
+                </div>
+            </body>
+            </html>
+        `)
+    } catch (error) {
+        console.error('Unsubscribe error:', error.message)
+        res.status(500).send('<h2>Error processing request</h2>')
+    }
+})
+
+// 获取订阅者列表（管理员）
+app.get('/api/newsletter/subscribers', async (req, res) => {
+    try {
+        const data = getSubscribers()
+        res.json({
+            success: true,
+            count: data.subscribers.length,
+            subscribers: data.subscribers.map(s => ({
+                email: s.email,
+                name: s.name,
+                language: s.language,
+                subscribedAt: s.subscribedAt
+            })),
+            lastUpdated: data.lastUpdated
+        })
+    } catch (error) {
+        console.error('Get subscribers error:', error.message)
+        res.status(500).json({ success: false, error: error.message })
+    }
+})
+
+// 发送群发邮件（管理员）
+app.post('/api/newsletter/send', async (req, res) => {
+    try {
+        const { title, content, adminKey } = req.body
+
+        // 简单的管理员验证（生产环境应使用更安全的方式）
+        const validAdminKey = process.env.ADMIN_KEY || 'tran-admin-2024'
+        if (adminKey !== validAdminKey) {
+            return res.status(403).json({ success: false, error: 'Unauthorized' })
+        }
+
+        if (!title || !content) {
+            return res.status(400).json({ success: false, error: 'Title and content required' })
+        }
+
+        const { sendEmail, emailTemplates } = await import('./emailService.js')
+        const data = getSubscribers()
+        const appUrl = process.env.APP_URL || 'https://www.trantradinglab.com'
+
+        let successCount = 0
+        let failCount = 0
+
+        for (const subscriber of data.subscribers) {
+            try {
+                const unsubscribeUrl = `${appUrl}/api/newsletter/unsubscribe?token=${subscriber.token}`
+                const template = emailTemplates.contentUpdate(title, content, unsubscribeUrl, subscriber.language)
+                await sendEmail(subscriber.email, template)
+                successCount++
+                // 避免发送过快
+                await new Promise(r => setTimeout(r, 200))
+            } catch (e) {
+                failCount++
+                console.error(`Failed to send to ${subscriber.email}:`, e.message)
+            }
+        }
+
+        console.log(`📧 Newsletter sent: ${successCount} success, ${failCount} failed`)
+        res.json({
+            success: true,
+            message: `Newsletter sent to ${successCount} subscribers`,
+            stats: { success: successCount, failed: failCount, total: data.subscribers.length }
+        })
+    } catch (error) {
+        console.error('Send newsletter error:', error.message)
+        res.status(500).json({ success: false, error: error.message })
+    }
+})
+
 // 健康检查
 app.get('/api/health', (req, res) => {
     res.json({

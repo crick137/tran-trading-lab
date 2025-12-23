@@ -5,7 +5,8 @@ import {
     ChevronLeft, ChevronRight, Save, X, AlertCircle, CheckCircle,
     Zap, Settings, LogOut, Menu, Filter, Download, Lock, Key,
     Users, Activity, TrendingUp, BarChart2, Database, Shield,
-    Clock, CalendarDays, Sparkles, Crown, Globe, ImagePlus, Upload
+    Clock, CalendarDays, Sparkles, Crown, Globe, ImagePlus, Upload,
+    Mail, Send, Loader
 } from 'lucide-react'
 import { db, TABLES, storage, auth } from '../lib/supabase'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, CartesianGrid } from 'recharts'
@@ -243,6 +244,11 @@ function AdminPage() {
     const [showForm, setShowForm] = useState(false)
     const [formData, setFormData] = useState({})
     const [editItem, setEditItem] = useState(null)
+    // Newsletter state
+    const [subscribers, setSubscribers] = useState([])
+    const [newsletterTitle, setNewsletterTitle] = useState('')
+    const [newsletterContent, setNewsletterContent] = useState('')
+    const [sendingNewsletter, setSendingNewsletter] = useState(false)
 
 
     const modules = [
@@ -252,6 +258,7 @@ function AdminPage() {
         { id: 'news', label: '市场新闻', labelSub: '行业资讯', icon: Newspaper, table: TABLES.NEWS, color: '#fbbf24' },
         { id: 'lab', label: '研究课程', labelSub: '学习资料', icon: FlaskConical, table: TABLES.LAB_COURSES, color: '#a855f7' },
         { id: 'notes', label: '交易笔记', labelSub: '交易日志', icon: StickyNote, table: TABLES.TRADE_NOTES, color: '#f43f5e' },
+        { id: 'newsletter', label: '邮件通知', labelSub: '订阅管理', icon: Mail, color: '#f97316' },
     ]
 
     const currentModule = modules.find(m => m.id === activeModule) || modules[0]
@@ -617,6 +624,124 @@ function AdminPage() {
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : activeModule === 'newsletter' ? (
+                    /* Newsletter View */
+                    <div style={{ padding: 32, overflow: 'auto' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+                            {/* Subscribers List */}
+                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 24 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                                    <h3 style={{ margin: 0, color: '#fff', fontSize: 18 }}>📧 订阅者列表</h3>
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                const res = await fetch('/api/newsletter/subscribers')
+                                                const data = await res.json()
+                                                if (data.success) setSubscribers(data.subscribers || [])
+                                            } catch (e) { console.error(e) }
+                                        }}
+                                        style={{ ...styles.iconBtn, padding: '8px 12px' }}
+                                    >
+                                        <RefreshCw size={14} /> 刷新
+                                    </button>
+                                </div>
+                                <div style={{ background: 'rgba(249, 115, 22, 0.1)', padding: '12px 16px', borderRadius: 10, marginBottom: 16 }}>
+                                    <span style={{ color: '#f97316', fontWeight: 600, fontSize: 28 }}>{subscribers.length}</span>
+                                    <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: 8 }}>位订阅者</span>
+                                </div>
+                                <div style={{ maxHeight: 400, overflow: 'auto' }}>
+                                    {subscribers.length === 0 ? (
+                                        <p style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: 40 }}>暂无订阅者，点击刷新加载</p>
+                                    ) : subscribers.map((s, i) => (
+                                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'linear-gradient(135deg, #f97316, #fb923c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600 }}>
+                                                {s.name?.[0]?.toUpperCase() || s.email?.[0]?.toUpperCase()}
+                                            </div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}>{s.name || 'User'}</div>
+                                                <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>{s.email}</div>
+                                            </div>
+                                            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{new Date(s.subscribedAt).toLocaleDateString()}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Send Newsletter */}
+                            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 24 }}>
+                                <h3 style={{ margin: '0 0 20px', color: '#fff', fontSize: 18 }}>✉️ 发送更新通知</h3>
+                                <div style={{ marginBottom: 16 }}>
+                                    <label style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>标题</label>
+                                    <input
+                                        type="text"
+                                        value={newsletterTitle}
+                                        onChange={(e) => setNewsletterTitle(e.target.value)}
+                                        placeholder="输入邮件标题..."
+                                        style={styles.input}
+                                    />
+                                </div>
+                                <div style={{ marginBottom: 20 }}>
+                                    <label style={{ display: 'block', marginBottom: 8, color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>内容</label>
+                                    <textarea
+                                        value={newsletterContent}
+                                        onChange={(e) => setNewsletterContent(e.target.value)}
+                                        placeholder="输入邮件内容...\n\n支持换行，将保留格式发送给所有订阅者。"
+                                        style={{ ...styles.textarea, minHeight: 200 }}
+                                    />
+                                </div>
+                                <button
+                                    onClick={async () => {
+                                        if (!newsletterTitle || !newsletterContent) {
+                                            showNotification('请填写标题和内容', 'error')
+                                            return
+                                        }
+                                        if (subscribers.length === 0) {
+                                            showNotification('没有订阅者', 'error')
+                                            return
+                                        }
+                                        if (!confirm(`确定发送给 ${subscribers.length} 位订阅者吗？`)) return
+                                        setSendingNewsletter(true)
+                                        try {
+                                            const res = await fetch('/api/newsletter/send', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    title: newsletterTitle,
+                                                    content: newsletterContent,
+                                                    adminKey: 'tran-admin-2024'
+                                                })
+                                            })
+                                            const data = await res.json()
+                                            if (data.success) {
+                                                showNotification(`成功发送给 ${data.stats?.success || 0} 位订阅者`)
+                                                setNewsletterTitle('')
+                                                setNewsletterContent('')
+                                            } else {
+                                                showNotification(data.error || '发送失败', 'error')
+                                            }
+                                        } catch (e) {
+                                            showNotification('发送失败: ' + e.message, 'error')
+                                        }
+                                        setSendingNewsletter(false)
+                                    }}
+                                    disabled={sendingNewsletter || !newsletterTitle || !newsletterContent}
+                                    style={{
+                                        ...styles.primaryBtn,
+                                        width: '100%',
+                                        justifyContent: 'center',
+                                        background: 'linear-gradient(135deg, #f97316, #fb923c)',
+                                        opacity: sendingNewsletter ? 0.7 : 1
+                                    }}
+                                >
+                                    {sendingNewsletter ? (
+                                        <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> 发送中...</>
+                                    ) : (
+                                        <><Send size={16} /> 发送给 {subscribers.length} 位订阅者</>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>

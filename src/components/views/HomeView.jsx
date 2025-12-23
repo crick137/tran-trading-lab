@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
+import NewsletterSubscribe from '../NewsletterSubscribe'
 
 /**
  * HomeView - 震撼视觉效果版本
@@ -252,6 +253,11 @@ function HomeView({ onNavigate }) {
                     </div>
                 </section>
             )}
+
+            {/* Newsletter Subscription */}
+            <section style={{ marginBottom: 40 }}>
+                <NewsletterSubscribe />
+            </section>
 
             {/* Footer */}
             <footer style={styles.footer}>
