@@ -95,16 +95,28 @@ function AnalysisView() {
                                 </div>
                                 <button style={styles.readBtn} onClick={() => setSelectedAnalysis(featuredItem)}><span>{t('views.analysis.readMore')}</span><ArrowRight size={16} /></button>
                             </div>
-                            <div style={styles.featuredVisual}>
-                                <div style={styles.visualLines}>{[...Array(5)].map((_, i) => <div key={i} style={{ ...styles.visualLine, animationDelay: `${i * 0.2}s` }} />)}</div>
+                            <div style={{
+                                ...styles.featuredVisual,
+                                backgroundImage: featuredItem.image_url ? `url(${featuredItem.image_url})` : undefined,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center'
+                            }}>
+                                {!featuredItem.image_url && (
+                                    <div style={styles.visualLines}>{[...Array(5)].map((_, i) => <div key={i} style={{ ...styles.visualLine, animationDelay: `${i * 0.2}s` }} />)}</div>
+                                )}
                             </div>
                         </div>
                     )}
                     <div style={styles.grid}>
                         {filteredItems.filter(item => !item.is_featured).map((item, index) => (
                             <article key={item.id} style={{ ...styles.articleCard, animationDelay: `${index * 80}ms` }} onClick={() => setSelectedAnalysis(item)}>
-                                <div style={styles.thumbnail}>
-                                    <div style={styles.thumbnailGradient} />
+                                <div style={{
+                                    ...styles.thumbnail,
+                                    backgroundImage: item.image_url ? `url(${item.image_url})` : undefined,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center'
+                                }}>
+                                    {!item.image_url && <div style={styles.thumbnailGradient} />}
                                     <div style={styles.thumbnailOverlay}><div style={styles.readTime}><Clock size={10} /><span>{item.read_time || '10min'}</span></div></div>
                                 </div>
                                 <div style={styles.articleContent}>

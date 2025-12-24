@@ -94,6 +94,17 @@ function NewsView() {
                             return (
                                 <article key={news.id} style={{ ...styles.newsCard, animationDelay: `${index * 60}ms` }}>
                                     <div style={{ ...styles.sentimentBar, background: sentiment.color }} />
+                                    {news.image_url && (
+                                        <div style={{
+                                            width: 120,
+                                            height: 80,
+                                            borderRadius: 'var(--radius-md)',
+                                            backgroundImage: `url(${news.image_url})`,
+                                            backgroundSize: 'cover',
+                                            backgroundPosition: 'center',
+                                            flexShrink: 0
+                                        }} />
+                                    )}
                                     <div style={styles.newsContent}>
                                         <div style={styles.newsMeta}>
                                             <span style={styles.newsSource}>{news.source || t('views.news.source')}</span>

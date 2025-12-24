@@ -62,6 +62,17 @@ function LabView() {
                         const levelConfig = getLevelConfig(course.level)
                         return (
                             <article key={course.id} style={{ ...styles.courseCard, animationDelay: `${index * 100}ms` }}>
+                                {course.image_url && (
+                                    <div style={{
+                                        width: '100%',
+                                        height: 160,
+                                        borderRadius: 'var(--radius-lg)',
+                                        backgroundImage: `url(${course.image_url})`,
+                                        backgroundSize: 'cover',
+                                        backgroundPosition: 'center',
+                                        marginBottom: 'var(--space-2)'
+                                    }} />
+                                )}
                                 <div style={styles.courseHeader}>
                                     <div style={{ ...styles.levelBadge, background: levelConfig.bg, color: levelConfig.color }}>
                                         {levelConfig.label}
