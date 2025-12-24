@@ -165,7 +165,10 @@ export const TABLES = {
     NEWS: 'news',
     LAB_COURSES: 'lab_courses',
     TRADE_NOTES: 'trade_notes',
-    PROFILES: 'profiles'
+    PROFILES: 'profiles',
+    ARTICLE_LIKES: 'article_likes',
+    ARTICLE_COMMENTS: 'article_comments',
+    ARTICLE_BOOKMARKS: 'article_bookmarks',
 }
 
 // Authentication Helpers
@@ -274,3 +277,155 @@ export const auth = {
         return data
     }
 }
+
+// 文章互动功能
+export const interactions = {
+    // ========== 点赞功能 ==========
+
+    // 切换点赞状态（点赞/取消点赞）
+    async toggleLike(articleId, userId) {
+        const hasLiked = await this.hasLiked(articleId, userId)
+
+        if (hasLiked) {
+            // 取消点赞
+            const { error } = await supabase
+                .from(TABLES.ARTICLE_LIKES)
+                .delete()
+                .eq('article_id', articleId)
+                .eq('user_id', userId)
+            if (error) throw error
+            return { liked: false }
+        } else {
+            // 添加点赞
+            const { error } = await supabase
+                .from(TABLES.ARTICLE_LIKES)
+                .insert({ article_id: articleId, user_id: userId })
+            if (error) throw error
+            return { liked: true }
+        }
+    },
+
+    // 检查是否已点赞
+    async hasLiked(articleId, userId) {
+        if (!userId) return false
+        const { data, error } = await supabase
+            .from(TABLES.ARTICLE_LIKES)
+            .select('id')
+            .eq('article_id', articleId)
+            .eq('user_id', userId)
+            .single()
+        return !error && !!data
+    },
+
+    // 获取点赞数
+    async getLikeCount(articleId) {
+        const { count, error } = await supabase
+            .from(TABLES.ARTICLE_LIKES)
+            .select('*', { count: 'exact', head: true })
+            .eq('article_id', articleId)
+        if (error) return 0
+        return count || 0
+    },
+
+    // ========== 评论功能 ==========
+
+    // 添加评论
+    async addComment(articleId, userId, username, content) {
+        const { data, error } = await supabase
+            .from(TABLES.ARTICLE_COMMENTS)
+            .insert({
+                article_id: articleId,
+                user_id: userId,
+                username,
+                content
+            })
+            .select()
+            .single()
+        if (error) throw error
+        return data
+    },
+
+    // 获取评论列表
+    async getComments(articleId) {
+        const { data, error } = await supabase
+            .from(TABLES.ARTICLE_COMMENTS)
+            .select('*')
+            .eq('article_id', articleId)
+            .order('created_at', { ascending: false })
+        if (error) throw error
+        return data || []
+    },
+
+    // 删除评论（只能删除自己的）
+    async deleteComment(commentId, userId) {
+        const { error } = await supabase
+            .from(TABLES.ARTICLE_COMMENTS)
+            .delete()
+            .eq('id', commentId)
+            .eq('user_id', userId)
+        if (error) throw error
+        return true
+    },
+
+    // 获取评论数
+    async getCommentCount(articleId) {
+        const { count, error } = await supabase
+            .from(TABLES.ARTICLE_COMMENTS)
+            .select('*', { count: 'exact', head: true })
+            .eq('article_id', articleId)
+        if (error) return 0
+        return count || 0
+    },
+
+    // ========== 收藏功能 ==========
+
+    // 切换收藏状态
+    async toggleBookmark(articleId, userId) {
+        const hasBookmarked = await this.hasBookmarked(articleId, userId)
+
+        if (hasBookmarked) {
+            const { error } = await supabase
+                .from(TABLES.ARTICLE_BOOKMARKS)
+                .delete()
+                .eq('article_id', articleId)
+                .eq('user_id', userId)
+            if (error) throw error
+            return { bookmarked: false }
+        } else {
+            const { error } = await supabase
+                .from(TABLES.ARTICLE_BOOKMARKS)
+                .insert({ article_id: articleId, user_id: userId })
+            if (error) throw error
+            return { bookmarked: true }
+        }
+    },
+
+    // 检查是否已收藏
+    async hasBookmarked(articleId, userId) {
+        if (!userId) return false
+        const { data, error } = await supabase
+            .from(TABLES.ARTICLE_BOOKMARKS)
+            .select('id')
+            .eq('article_id', articleId)
+            .eq('user_id', userId)
+            .single()
+        return !error && !!data
+    },
+
+    // 获取用户的收藏列表
+    async getUserBookmarks(userId) {
+        const { data, error } = await supabase
+            .from(TABLES.ARTICLE_BOOKMARKS)
+            .select(`
+                id,
+                article_id,
+                created_at,
+                analysis:article_id (id, title, summary, image_url, created_at)
+            `)
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+        if (error) throw error
+        return data || []
+    }
+}
+

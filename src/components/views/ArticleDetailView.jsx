@@ -1,14 +1,30 @@
-import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Clock, Calendar, Share2, Tag, ThumbsUp, MessageSquare, Bookmark } from 'lucide-react'
-// Assuming no external markdown lib for now, will implement a simple renderer or just display text.
-// Actually, let's just make a nice layout first.
+import React, { useState, useEffect, useCallback } from 'react'
+import { ArrowLeft, Clock, Calendar, Share2, ThumbsUp, MessageSquare, Bookmark, Check } from 'lucide-react'
+import { interactions } from '../../lib/supabase'
+import { useAppState, useAppActions } from '../../context/AppContext'
+import CommentPanel from '../CommentPanel'
 
 function ArticleDetailView({ articleId, onBack, initialData }) {
+    const { user, isAuthenticated } = useAppState()
+    const { openAuthModal, notify } = useAppActions()
+
     const [article, setArticle] = useState(initialData || null)
     const [loading, setLoading] = useState(!initialData)
 
+    // 互动状态
+    const [liked, setLiked] = useState(false)
+    const [likeCount, setLikeCount] = useState(0)
+    const [bookmarked, setBookmarked] = useState(false)
+    const [commentCount, setCommentCount] = useState(0)
+    const [commentPanelOpen, setCommentPanelOpen] = useState(false)
+    const [copied, setCopied] = useState(false)
+
+    // 加载文章数据
     useEffect(() => {
-        if (initialData) return
+        if (initialData) {
+            setArticle(initialData)
+            return
+        }
 
         // Simulate fetch if no initial data provided
         setTimeout(() => {
@@ -27,39 +43,110 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                 content: `
 # 비트코인 반감기의 역사적 패턴
 
-비트코인 반감기는 암호화폐 시장에서 가장 중요한 이벤트 중 하나입니다. 약 4년마다 발생하는 이 현상은 채굴 보상을 절반으로 줄여 공급 충격을 야기합니다.
+비트코인 반감기는 암호화폐 시장에서 가장 중요한 이벤트 중 하나입니다.
 
 ## 과거 사이클 분석
 
-1. **2012년 반감기**: 
-   - 반감기 전: 횡보
-   - 반감기 후: 12개월간 급격한 상승
-
-2. **2016년 반감기**:
-   - 반감기 전: 소폭 상승
-   - 반감기 후: 18개월간의 불장
-
-3. **2020년 반감기**:
-   - 거시경제 변수와 맞물려 새로운 패턴 형성
+1. **2012년 반감기**: 반감기 후 12개월간 급격한 상승
+2. **2016년 반감기**: 반감기 후 18개월간의 불장
+3. **2020년 반감기**: 거시경제 변수와 맞물려 새로운 패턴 형성
 
 ## 2024년 전망
 
-현재 기관 투자자들의 유입(ETF)과 맞물려 과거와는 다른 양상을 보일 가능성이 높습니다. 공급 쇼크는 여전히 유효하지만, 수요 측면의 변화가 더 큰 변수입니다.
-
-### 주목해야 할 지표
-- 현물 ETF 유입량
-- 채굴자들의 보유량 변화
-- 거시경제 금리 정책
-
-### 결론
-단기적인 변동성은 있겠지만, 장기적으로는 공급 감소에 따른 가격 상승 압력이 우세할 것으로 보입니다.
+현재 기관 투자자들의 유입(ETF)과 맞물려 과거와는 다른 양상을 보일 가능성이 높습니다.
                 `,
-                likes: 124,
-                comments: 45
             })
             setLoading(false)
         }, 800)
-    }, [])
+    }, [articleId, initialData])
+
+    // 加载互动状态
+    useEffect(() => {
+        if (!article?.id) return
+
+        const loadInteractionState = async () => {
+            try {
+                // 加载点赞数
+                const likes = await interactions.getLikeCount(article.id)
+                setLikeCount(likes)
+
+                // 加载评论数
+                const comments = await interactions.getCommentCount(article.id)
+                setCommentCount(comments)
+
+                // 如果用户已登录，检查是否已点赞/收藏
+                if (user?.id) {
+                    const hasLiked = await interactions.hasLiked(article.id, user.id)
+                    setLiked(hasLiked)
+
+                    const hasBookmarked = await interactions.hasBookmarked(article.id, user.id)
+                    setBookmarked(hasBookmarked)
+                }
+            } catch (err) {
+                console.error('加载互动状态失败:', err)
+            }
+        }
+
+        loadInteractionState()
+    }, [article?.id, user?.id])
+
+    // 点赞
+    const handleLike = useCallback(async () => {
+        if (!isAuthenticated) {
+            openAuthModal()
+            return
+        }
+
+        try {
+            const result = await interactions.toggleLike(article.id, user.id)
+            setLiked(result.liked)
+            setLikeCount(prev => result.liked ? prev + 1 : prev - 1)
+            notify(result.liked ? '已点赞' : '已取消点赞', 'success')
+        } catch (err) {
+            console.error('点赞失败:', err)
+            notify('操作失败', 'error')
+        }
+    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify])
+
+    // 收藏
+    const handleBookmark = useCallback(async () => {
+        if (!isAuthenticated) {
+            openAuthModal()
+            return
+        }
+
+        try {
+            const result = await interactions.toggleBookmark(article.id, user.id)
+            setBookmarked(result.bookmarked)
+            notify(result.bookmarked ? '已收藏' : '已取消收藏', 'success')
+        } catch (err) {
+            console.error('收藏失败:', err)
+            notify('操作失败', 'error')
+        }
+    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify])
+
+    // 分享（复制链接）
+    const handleShare = useCallback(async () => {
+        try {
+            const url = `${window.location.origin}/analysis/${article.id}`
+            await navigator.clipboard.writeText(url)
+            setCopied(true)
+            notify('链接已复制到剪贴板', 'success')
+            setTimeout(() => setCopied(false), 2000)
+        } catch (err) {
+            console.error('复制失败:', err)
+            notify('复制失败', 'error')
+        }
+    }, [article?.id, notify])
+
+    // 评论面板关闭时刷新评论数
+    const handleCommentPanelClose = useCallback(async () => {
+        setCommentPanelOpen(false)
+        if (article?.id) {
+            const count = await interactions.getCommentCount(article.id)
+            setCommentCount(count)
+        }
+    }, [article?.id])
 
     if (loading) return (
         <div style={styles.loading}>
@@ -86,10 +173,10 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
                     <div style={styles.meta}>
                         <div style={styles.author}>
-                            <img src={article.author.avatar} alt={article.author.name} style={styles.avatar} />
+                            <img src={article.author?.avatar || 'https://i.pravatar.cc/150'} alt={article.author?.name} style={styles.avatar} />
                             <div style={styles.authorInfo}>
-                                <span style={styles.authorName}>{article.author.name}</span>
-                                <span style={styles.authorRole}>{article.author.role}</span>
+                                <span style={styles.authorName}>{article.author?.name || 'Anonymous'}</span>
+                                <span style={styles.authorRole}>{article.author?.role || 'Author'}</span>
                             </div>
                         </div>
                         <div style={styles.metaRight}>
@@ -118,23 +205,63 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
                 <footer style={styles.footer}>
                     <div style={styles.actions}>
-                        <button style={styles.actionBtn}>
-                            <ThumbsUp size={18} />
-                            <span>{article.likes}</span>
+                        {/* 点赞按钮 */}
+                        <button
+                            style={{
+                                ...styles.actionBtn,
+                                background: liked ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255,255,255,0.05)',
+                                borderColor: liked ? 'rgba(0, 255, 136, 0.3)' : 'rgba(255,255,255,0.1)',
+                                color: liked ? '#00ff88' : 'rgba(255,255,255,0.8)',
+                            }}
+                            onClick={handleLike}
+                        >
+                            <ThumbsUp size={18} fill={liked ? '#00ff88' : 'none'} />
+                            <span>{likeCount}</span>
                         </button>
-                        <button style={styles.actionBtn}>
+
+                        {/* 评论按钮 */}
+                        <button
+                            style={styles.actionBtn}
+                            onClick={() => setCommentPanelOpen(true)}
+                        >
                             <MessageSquare size={18} />
-                            <span>{article.comments}</span>
+                            <span>{commentCount}</span>
                         </button>
-                        <button style={styles.actionBtn}>
-                            <Bookmark size={18} />
+
+                        {/* 收藏按钮 */}
+                        <button
+                            style={{
+                                ...styles.actionBtn,
+                                background: bookmarked ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.05)',
+                                borderColor: bookmarked ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255,255,255,0.1)',
+                                color: bookmarked ? '#fbbf24' : 'rgba(255,255,255,0.8)',
+                            }}
+                            onClick={handleBookmark}
+                        >
+                            <Bookmark size={18} fill={bookmarked ? '#fbbf24' : 'none'} />
                         </button>
-                        <button style={styles.actionBtn}>
-                            <Share2 size={18} />
+
+                        {/* 分享按钮 */}
+                        <button
+                            style={{
+                                ...styles.actionBtn,
+                                background: copied ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255,255,255,0.05)',
+                                color: copied ? '#00ff88' : 'rgba(255,255,255,0.8)',
+                            }}
+                            onClick={handleShare}
+                        >
+                            {copied ? <Check size={18} /> : <Share2 size={18} />}
                         </button>
                     </div>
                 </footer>
             </article>
+
+            {/* 评论面板 */}
+            <CommentPanel
+                articleId={article?.id}
+                isOpen={commentPanelOpen}
+                onClose={handleCommentPanelClose}
+            />
         </div>
     )
 }
@@ -269,17 +396,17 @@ const styles = {
     },
     actions: {
         display: 'flex',
-        gap: 20,
+        gap: 16,
         justifyContent: 'center',
     },
     actionBtn: {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 20px',
+        padding: '12px 24px',
         background: 'rgba(255,255,255,0.05)',
         border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 8,
+        borderRadius: 12,
         color: 'rgba(255,255,255,0.8)',
         cursor: 'pointer',
         transition: 'all 0.2s',
