@@ -26,7 +26,7 @@ function ToolsView() {
     const [posSL, setPosSL] = useState('95000')
 
     // Price Alerts
-    const { priceAlerts } = useAppState()
+    const { priceAlerts = [] } = useAppState()
     const { addPriceAlert, removePriceAlert, notify } = useAppActions()
     const [alertSymbol, setAlertSymbol] = useState('BTC/USDT')
     const [alertPrice, setAlertPrice] = useState('')
