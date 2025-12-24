@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     User, Heart, Bookmark, ArrowLeft, Calendar, Clock,
-    ThumbsUp, MessageSquare, ChevronRight, Mail, LogOut
+    ThumbsUp, MessageSquare, ChevronRight, Mail, LogOut,
+    Edit3, X, Check, Camera
 } from 'lucide-react'
-import { db, TABLES, interactions } from '../../lib/supabase'
+import { db, TABLES, interactions, auth } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
 import { useI18n } from '../../hooks/useI18n'
 import ArticleDetailView from './ArticleDetailView'
 
 function ProfileView({ onNavigate }) {
     const { user, isAuthenticated } = useAppState()
-    const { logout, openAuthModal } = useAppActions()
+    const { logout, openAuthModal, setUser, notify } = useAppActions()
     const { t, language } = useI18n()
     const navigate = useNavigate()
 
@@ -20,6 +21,11 @@ function ProfileView({ onNavigate }) {
     const [bookmarkedArticles, setBookmarkedArticles] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedArticle, setSelectedArticle] = useState(null)
+
+    // 编辑状态
+    const [isEditing, setIsEditing] = useState(false)
+    const [editName, setEditName] = useState('')
+    const [saving, setSaving] = useState(false)
 
     // 加载用户点赞和收藏的文章
     useEffect(() => {
@@ -44,6 +50,58 @@ function ProfileView({ onNavigate }) {
             console.error('加载用户互动数据失败:', err)
         }
         setLoading(false)
+    }
+
+    // 打开编辑模态框
+    const handleOpenEdit = () => {
+        setEditName(user?.name || user?.user_metadata?.username || '')
+        setIsEditing(true)
+    }
+
+    // 保存用户信息
+    const handleSaveProfile = async () => {
+        if (!editName.trim()) return
+
+        setSaving(true)
+        try {
+            // 更新用户元数据
+            const updatedUser = await auth.updateProfile({
+                username: editName.trim(),
+                name: editName.trim()
+            })
+
+            // 更新本地状态
+            if (setUser && updatedUser) {
+                setUser({
+                    ...user,
+                    name: editName.trim(),
+                    user_metadata: {
+                        ...user?.user_metadata,
+                        username: editName.trim(),
+                        name: editName.trim()
+                    }
+                })
+            }
+
+            setIsEditing(false)
+            if (notify) {
+                notify(
+                    language === 'ko' ? '프로필이 업데이트되었습니다' :
+                        language === 'zh' ? '个人信息已更新' : 'Profile updated',
+                    'success'
+                )
+            }
+        } catch (err) {
+            console.error('更新个人信息失败:', err)
+            if (notify) {
+                notify(
+                    language === 'ko' ? '업데이트 실패' :
+                        language === 'zh' ? '更新失败' : 'Update failed',
+                    'error'
+                )
+            }
+        }
+        setSaving(false)
     }
 
     // 格式化日期
@@ -91,6 +149,7 @@ function ProfileView({ onNavigate }) {
     }
 
     const currentArticles = activeTab === 'likes' ? likedArticles : bookmarkedArticles
+    const displayName = user.name || user?.user_metadata?.username || user?.user_metadata?.name || 'User'
 
     return (
         <div style={styles.container}>
@@ -104,13 +163,19 @@ function ProfileView({ onNavigate }) {
             <div style={styles.profileCard}>
                 <div style={styles.avatarLarge}>
                     {user.avatar ? (
-                        <img src={user.avatar} alt={user.name} style={styles.avatarImg} />
+                        <img src={user.avatar} alt={displayName} style={styles.avatarImg} />
                     ) : (
-                        <span style={styles.avatarText}>{user.name?.charAt(0).toUpperCase() || 'U'}</span>
+                        <span style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</span>
                     )}
                 </div>
                 <div style={styles.userInfo}>
-                    <h1 style={styles.userName}>{user.name || 'User'}</h1>
+                    <div style={styles.userNameRow}>
+                        <h1 style={styles.userName}>{displayName}</h1>
+                        <button style={styles.editBtn} onClick={handleOpenEdit}>
+                            <Edit3 size={16} />
+                            <span>{language === 'ko' ? '편집' : language === 'zh' ? '编辑' : 'Edit'}</span>
+                        </button>
+                    </div>
                     <div style={styles.userEmail}>
                         <Mail size={14} />
                         <span>{user.email}</span>
@@ -221,6 +286,86 @@ function ProfileView({ onNavigate }) {
                     ))
                 )}
             </div>
+
+            {/* 编辑模态框 */}
+            {isEditing && (
+                <div style={styles.modalOverlay} onClick={() => setIsEditing(false)}>
+                    <div style={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div style={styles.modalHeader}>
+                            <h2 style={styles.modalTitle}>
+                                {language === 'ko' ? '프로필 편집' : language === 'zh' ? '编辑个人资料' : 'Edit Profile'}
+                            </h2>
+                            <button style={styles.modalCloseBtn} onClick={() => setIsEditing(false)}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div style={styles.modalBody}>
+                            {/* 头像 */}
+                            <div style={styles.editAvatarSection}>
+                                <div style={styles.editAvatar}>
+                                    {user.avatar ? (
+                                        <img src={user.avatar} alt={displayName} style={styles.avatarImg} />
+                                    ) : (
+                                        <span style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* 用户名 */}
+                            <div style={styles.formGroup}>
+                                <label style={styles.formLabel}>
+                                    {language === 'ko' ? '사용자 이름' : language === 'zh' ? '用户名' : 'Username'}
+                                </label>
+                                <input
+                                    type="text"
+                                    style={styles.formInput}
+                                    value={editName}
+                                    onChange={e => setEditName(e.target.value)}
+                                    placeholder={language === 'ko' ? '이름을 입력하세요' : language === 'zh' ? '请输入用户名' : 'Enter your name'}
+                                />
+                            </div>
+
+                            {/* 邮箱（只读） */}
+                            <div style={styles.formGroup}>
+                                <label style={styles.formLabel}>
+                                    {language === 'ko' ? '이메일' : language === 'zh' ? '邮箱' : 'Email'}
+                                </label>
+                                <input
+                                    type="email"
+                                    style={{ ...styles.formInput, opacity: 0.6, cursor: 'not-allowed' }}
+                                    value={user.email}
+                                    disabled
+                                />
+                                <span style={styles.formHint}>
+                                    {language === 'ko' ? '이메일은 변경할 수 없습니다' :
+                                        language === 'zh' ? '邮箱不可修改' : 'Email cannot be changed'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style={styles.modalFooter}>
+                            <button style={styles.cancelBtn} onClick={() => setIsEditing(false)}>
+                                {language === 'ko' ? '취소' : language === 'zh' ? '取消' : 'Cancel'}
+                            </button>
+                            <button
+                                style={{
+                                    ...styles.saveBtn,
+                                    opacity: saving || !editName.trim() ? 0.6 : 1
+                                }}
+                                onClick={handleSaveProfile}
+                                disabled={saving || !editName.trim()}
+                            >
+                                {saving ? (
+                                    <><div style={styles.btnSpinner} /> {language === 'ko' ? '저장 중...' : language === 'zh' ? '保存中...' : 'Saving...'}</>
+                                ) : (
+                                    <><Check size={16} /> {language === 'ko' ? '저장' : language === 'zh' ? '保存' : 'Save'}</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
@@ -312,13 +457,33 @@ const styles = {
     userInfo: {
         flex: 1,
     },
+    userNameRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        marginBottom: 8,
+    },
     userName: {
         fontSize: 28,
         fontWeight: 800,
-        margin: '0 0 8px 0',
+        margin: 0,
         background: 'linear-gradient(90deg, #fff, #a5b4fc)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
+    },
+    editBtn: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '6px 14px',
+        background: 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: 8,
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
     },
     userEmail: {
         display: 'flex',
@@ -504,6 +669,136 @@ const styles = {
     articleArrow: {
         color: 'rgba(255,255,255,0.3)',
         flexShrink: 0,
+    },
+    // 模态框样式
+    modalOverlay: {
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0, 0, 0, 0.8)',
+        backdropFilter: 'blur(8px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+    },
+    modal: {
+        width: 420,
+        maxWidth: '90%',
+        background: 'linear-gradient(180deg, #0d1117 0%, #080c12 100%)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 20,
+        overflow: 'hidden',
+        animation: 'fadeIn 0.2s ease',
+    },
+    modalHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '20px 24px',
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 700,
+        color: '#fff',
+        margin: 0,
+    },
+    modalCloseBtn: {
+        background: 'rgba(255,255,255,0.05)',
+        border: 'none',
+        borderRadius: 8,
+        padding: 8,
+        color: 'rgba(255,255,255,0.6)',
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    modalBody: {
+        padding: 24,
+    },
+    editAvatarSection: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: 24,
+    },
+    editAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: '50%',
+        background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 8px 32px rgba(99, 102, 241, 0.3)',
+        position: 'relative',
+    },
+    formGroup: {
+        marginBottom: 20,
+    },
+    formLabel: {
+        display: 'block',
+        fontSize: 13,
+        fontWeight: 600,
+        color: 'rgba(255,255,255,0.7)',
+        marginBottom: 8,
+    },
+    formInput: {
+        width: '100%',
+        padding: '14px 16px',
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 12,
+        color: '#fff',
+        fontSize: 15,
+        outline: 'none',
+        transition: 'border-color 0.2s',
+        boxSizing: 'border-box',
+    },
+    formHint: {
+        display: 'block',
+        fontSize: 11,
+        color: 'rgba(255,255,255,0.4)',
+        marginTop: 6,
+    },
+    modalFooter: {
+        display: 'flex',
+        gap: 12,
+        padding: '16px 24px 24px',
+    },
+    cancelBtn: {
+        flex: 1,
+        padding: '14px 20px',
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 12,
+        color: 'rgba(255,255,255,0.7)',
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    saveBtn: {
+        flex: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        padding: '14px 20px',
+        background: 'linear-gradient(135deg, #00d26a 0%, #00ff88 100%)',
+        border: 'none',
+        borderRadius: 12,
+        color: '#000',
+        fontSize: 14,
+        fontWeight: 700,
+        cursor: 'pointer',
+        transition: 'all 0.2s',
+    },
+    btnSpinner: {
+        width: 16,
+        height: 16,
+        border: '2px solid rgba(0,0,0,0.2)',
+        borderTopColor: '#000',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
     },
 }
 
