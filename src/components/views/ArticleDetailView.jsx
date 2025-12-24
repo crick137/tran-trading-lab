@@ -77,7 +77,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             <article style={styles.article}>
                 <header style={styles.header}>
                     <div style={styles.tags}>
-                        {article.tags.map(tag => (
+                        {(article.tags || []).map(tag => (
                             <span key={tag} style={styles.tag}>#{tag}</span>
                         ))}
                     </div>
@@ -106,7 +106,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                 </header>
 
                 <div style={styles.content}>
-                    {article.content.split('\n').map((line, i) => {
+                    {(article.content || '').split('\n').map((line, i) => {
                         if (line.startsWith('# ')) return <h1 key={i} style={styles.h1}>{line.replace('# ', '')}</h1>
                         if (line.startsWith('## ')) return <h2 key={i} style={styles.h2}>{line.replace('## ', '')}</h2>
                         if (line.startsWith('### ')) return <h3 key={i} style={styles.h3}>{line.replace('### ', '')}</h3>

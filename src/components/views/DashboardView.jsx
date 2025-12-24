@@ -120,7 +120,7 @@ function DashboardView() {
     const { trades, connected: tradesConnected } = useTrades(selectedSymbol)
 
     const positions = useMemo(() => {
-        return trading.positions.map(p => {
+        return (trading.positions || []).map(p => {
             const market = marketData.find(m => m.symbol === p.symbol)
             const currentPrice = market?.price || p.entryPrice
             const priceDiff = currentPrice - p.entryPrice
@@ -138,8 +138,8 @@ function DashboardView() {
         })
     }, [trading.positions, marketData])
 
-    const maxAskTotal = Math.max(...orderBook.asks.map(a => parseFloat(a.total))) || 1
-    const maxBidTotal = Math.max(...orderBook.bids.map(b => parseFloat(b.total))) || 1
+    const maxAskTotal = Math.max(...(orderBook.asks || []).map(a => parseFloat(a.total)), 0) || 1
+    const maxBidTotal = Math.max(...(orderBook.bids || []).map(b => parseFloat(b.total)), 0) || 1
     const selected = marketData.find(m => m.symbol === selectedSymbol) || marketData[0]
 
     // ORB Analysis
@@ -507,7 +507,7 @@ function DashboardView() {
                             <span style={{ textAlign: 'right' }}>{t('dashboard_ui.cols.total')}</span>
                         </div>
                         <div style={styles.asksWrap}>
-                            {orderBook.asks.map((ask, i) => (
+                            {(orderBook.asks || []).map((ask, i) => (
                                 <div key={i} style={styles.bookRow}>
                                     <div style={{ ...styles.bookDepth, width: `${(parseFloat(ask.total) / maxAskTotal) * 100}%`, background: 'linear-gradient(90deg, transparent, rgba(255, 68, 102, 0.15))' }} />
                                     <span style={{ ...styles.bookPrice, color: '#ff4466' }}>{parseFloat(ask.price).toFixed(2)}</span>
@@ -521,7 +521,7 @@ function DashboardView() {
                             <span style={styles.midUsd}>≈ {btcPrice.toFixed(2)} USD</span>
                         </div>
                         <div style={styles.bidsWrap}>
-                            {orderBook.bids.map((bid, i) => (
+                            {(orderBook.bids || []).map((bid, i) => (
                                 <div key={i} style={styles.bookRow}>
                                     <div style={{ ...styles.bookDepth, width: `${(parseFloat(bid.total) / maxBidTotal) * 100}%`, background: 'linear-gradient(270deg, transparent, rgba(0, 255, 136, 0.15))' }} />
                                     <span style={{ ...styles.bookPrice, color: '#00ff88' }}>{parseFloat(bid.price).toFixed(2)}</span>
@@ -567,7 +567,7 @@ function DashboardView() {
                             <span style={{ textAlign: 'right' }}>{t('dashboard_ui.cols.size')}</span>
                         </div>
                         <div style={styles.tradesList}>
-                            {trades.map((t, i) => (
+                            {(trades || []).map((t, i) => (
                                 <div key={i} style={{ ...styles.tradeRow, animation: i === 0 ? 'slideIn 0.3s ease' : 'none' }}>
                                     <span style={styles.tradeTime}>{t.time}</span>
                                     <span style={{ ...styles.tradePrice, color: t.side === 'buy' ? '#00ff88' : '#ff4466' }}>{t.price}</span>
