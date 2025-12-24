@@ -1,4 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard, Newspaper, BarChart3, Globe,
     GraduationCap, BookOpen, Wrench, Home, Info
@@ -22,10 +23,21 @@ import { useGlobalKeyboard } from '../hooks/useKeyboard.jsx'
 import { Bot } from 'lucide-react'
 import { useI18n } from '../hooks/useI18n.jsx'
 
-function TranTradingTerminal() {
-    const [activeView, setActiveView] = useState('home')
+function TranTradingTerminal({ initialView }) {
+    const { articleId } = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
+
+    const [activeView, setActiveView] = useState(() => {
+        // 如果 URL 中有 articleId，直接显示分析页面
+        if (articleId || initialView === 'article-detail') {
+            return 'analysis'
+        }
+        return 'home'
+    })
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT')
     const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
+    const [directArticleId, setDirectArticleId] = useState(articleId || null)
 
     // Global State
     const {
@@ -59,10 +71,15 @@ function TranTradingTerminal() {
         { id: 'about', label: t('nav.about'), icon: Info }, // Changed icon to Info
     ], [t])
 
-    // Handle Navigation
+    // Handle Navigation - 更新 URL
     const handleNavigate = useCallback((view) => {
         setActiveView(view)
-    }, [])
+        setDirectArticleId(null) // 清除直接打开的文章
+        // 更新 URL 但不重新加载页面
+        if (view === 'home') {
+            navigate('/', { replace: true })
+        }
+    }, [navigate])
 
     // Handle Trade Panel
     const handleTrade = useCallback((symbol) => {
@@ -93,7 +110,7 @@ function TranTradingTerminal() {
             case 'home': return <HomeView onNavigate={handleNavigate} />
             case 'dashboard': return <DashboardView />
             case 'brief': return <BriefView />
-            case 'analysis': return <AnalysisView />
+            case 'analysis': return <AnalysisView directArticleId={directArticleId} onClearDirectArticle={() => setDirectArticleId(null)} />
             case 'news': return <NewsView />
             case 'lab': return <LabView />
             case 'note': return <NoteView />

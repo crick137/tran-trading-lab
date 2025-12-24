@@ -20,7 +20,10 @@ function App() {
                         <Suspense fallback={<FullScreenLoader message="TRAN Terminal 로딩 중..." />}>
                             <Routes>
                                 <Route path="/" element={<TranTradingTerminal />} />
+                                <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
                                 <Route path="/admin" element={<AdminPage />} />
+                                {/* Catch-all route for SPA */}
+                                <Route path="*" element={<TranTradingTerminal />} />
                             </Routes>
                         </Suspense>
                         <NotificationCenter />
@@ -32,4 +35,5 @@ function App() {
 }
 
 export default App
+
 

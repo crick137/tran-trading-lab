@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Clock, User, ArrowRight, X, ChevronRight, Eye, BookOpen, TrendingUp, Calendar, Inbox } from 'lucide-react'
 import ArticleDetailView from './ArticleDetailView'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
 
-function AnalysisView() {
+function AnalysisView({ directArticleId, onClearDirectArticle }) {
     const { t, language } = useI18n()
+    const navigate = useNavigate()
     const [selectedAnalysis, setSelectedAnalysis] = useState(null)
     const [activeCategory, setActiveCategory] = useState('all')
     const [analysisItems, setAnalysisItems] = useState([])
@@ -23,6 +25,23 @@ function AnalysisView() {
         }
         loadAnalysis()
     }, [])
+
+    // 处理直接通过 URL 打开文章
+    useEffect(() => {
+        if (directArticleId && !selectedAnalysis) {
+            const loadDirectArticle = async () => {
+                try {
+                    const article = await db.getById(TABLES.ANALYSIS, directArticleId)
+                    if (article) {
+                        setSelectedAnalysis(article)
+                    }
+                } catch (err) {
+                    console.error('Failed to load article:', err)
+                }
+            }
+            loadDirectArticle()
+        }
+    }, [directArticleId, selectedAnalysis])
 
     const categories = [
         { id: 'all', label: t('views.brief.all') },
@@ -42,12 +61,19 @@ function AnalysisView() {
     const filteredItems = activeCategory === 'all' ? analysisItems : analysisItems.filter(item => item.category === activeCategory)
     const featuredItem = analysisItems.find(item => item.is_featured)
 
+    // 返回处理 - 清除 URL 和状态
+    const handleBack = () => {
+        setSelectedAnalysis(null)
+        if (onClearDirectArticle) onClearDirectArticle()
+        navigate('/', { replace: true })
+    }
+
     if (selectedAnalysis) {
         return (
             <ArticleDetailView
                 articleId={selectedAnalysis.id}
                 initialData={selectedAnalysis}
-                onBack={() => setSelectedAnalysis(null)}
+                onBack={handleBack}
             />
         )
     }
