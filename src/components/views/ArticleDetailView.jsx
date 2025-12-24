@@ -173,10 +173,10 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
                     <div style={styles.meta}>
                         <div style={styles.author}>
-                            <img src={article.author?.avatar || 'https://i.pravatar.cc/150'} alt={article.author?.name} style={styles.avatar} />
+                            <img src={article.author?.avatar || '/tran-logo.png'} alt={article.author?.name} style={styles.avatar} />
                             <div style={styles.authorInfo}>
-                                <span style={styles.authorName}>{article.author?.name || 'Anonymous'}</span>
-                                <span style={styles.authorRole}>{article.author?.role || 'Author'}</span>
+                                <span style={styles.authorName}>{article.author?.name || 'TranTradingLab'}</span>
+                                <span style={styles.authorRole}>{article.author?.role || 'Research Team'}</span>
                             </div>
                         </div>
                         <div style={styles.metaRight}>
@@ -191,6 +191,13 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                         </div>
                     </div>
                 </header>
+
+                {/* 文章封面图 */}
+                {article.image_url && (
+                    <div style={styles.coverImage}>
+                        <img src={article.image_url} alt={article.title} style={styles.coverImg} />
+                    </div>
+                )}
 
                 <div style={styles.content}>
                     {(article.content || '').split('\n').map((line, i) => {
@@ -378,6 +385,19 @@ const styles = {
         gap: 6,
         fontSize: 13,
         color: 'rgba(255,255,255,0.4)',
+    },
+    coverImage: {
+        marginBottom: 32,
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.1)',
+    },
+    coverImg: {
+        width: '100%',
+        height: 'auto',
+        maxHeight: 400,
+        objectFit: 'cover',
+        display: 'block',
     },
     content: {
         fontSize: 16,
