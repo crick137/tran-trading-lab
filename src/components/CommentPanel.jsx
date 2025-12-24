@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { X, Send, Trash2, MessageSquare, User } from 'lucide-react'
 import { interactions } from '../lib/supabase'
 import { useAppState, useAppActions } from '../context/AppContext'
+import { useI18n } from '../hooks/useI18n'
 
 function CommentPanel({ articleId, isOpen, onClose }) {
     const { user, isAuthenticated } = useAppState()
     const { openAuthModal, notify } = useAppActions()
+    const { t, language } = useI18n()
 
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState('')
@@ -46,25 +48,25 @@ function CommentPanel({ articleId, isOpen, onClose }) {
             const comment = await interactions.addComment(articleId, user.id, username, newComment.trim())
             setComments([comment, ...comments])
             setNewComment('')
-            notify('评论发布成功', 'success')
+            notify(t('views.interaction.commentPosted'), 'success')
         } catch (err) {
             console.error('发布评论失败:', err)
-            notify('评论发布失败', 'error')
+            notify(t('views.interaction.commentFailed'), 'error')
         }
         setSubmitting(false)
     }
 
     // 删除评论
     const handleDelete = async (commentId) => {
-        if (!confirm('确定要删除这条评论吗？')) return
+        if (!confirm(t('views.interaction.deleteConfirm'))) return
 
         try {
             await interactions.deleteComment(commentId, user.id)
             setComments(comments.filter(c => c.id !== commentId))
-            notify('评论已删除', 'success')
+            notify(t('views.interaction.commentDeleted'), 'success')
         } catch (err) {
             console.error('删除评论失败:', err)
-            notify('删除失败', 'error')
+            notify(t('views.interaction.deleteFailed'), 'error')
         }
     }
 
@@ -74,10 +76,12 @@ function CommentPanel({ articleId, isOpen, onClose }) {
         const now = new Date()
         const diff = Math.floor((now - date) / 1000 / 60)
 
-        if (diff < 1) return '刚刚'
-        if (diff < 60) return `${diff}分钟前`
-        if (diff < 1440) return `${Math.floor(diff / 60)}小时前`
-        return date.toLocaleDateString('zh-CN')
+        if (diff < 1) return t('views.interaction.justNow')
+        if (diff < 60) return t('views.interaction.minutesAgo').replace('{n}', diff)
+        if (diff < 1440) return t('views.interaction.hoursAgo').replace('{n}', Math.floor(diff / 60))
+
+        const locales = { ko: 'ko-KR', zh: 'zh-CN', en: 'en-US' }
+        return date.toLocaleDateString(locales[language] || 'en-US')
     }
 
     if (!isOpen) return null
@@ -89,7 +93,7 @@ function CommentPanel({ articleId, isOpen, onClose }) {
                 <div style={styles.header}>
                     <div style={styles.headerTitle}>
                         <MessageSquare size={20} />
-                        <span>评论 ({comments.length})</span>
+                        <span>{t('views.interaction.comments')} ({comments.length})</span>
                     </div>
                     <button style={styles.closeBtn} onClick={onClose}>
                         <X size={20} />
@@ -101,7 +105,7 @@ function CommentPanel({ articleId, isOpen, onClose }) {
                     <div style={styles.inputWrapper}>
                         <textarea
                             style={styles.textarea}
-                            placeholder={isAuthenticated ? "发表你的看法..." : "登录后发表评论"}
+                            placeholder={isAuthenticated ? t('views.interaction.writeComment') : t('views.interaction.loginToComment')}
                             value={newComment}
                             onChange={e => setNewComment(e.target.value)}
                             rows={3}
@@ -116,7 +120,7 @@ function CommentPanel({ articleId, isOpen, onClose }) {
                             disabled={submitting || !newComment.trim()}
                         >
                             <Send size={16} />
-                            <span>{submitting ? '发送中...' : '发送'}</span>
+                            <span>{submitting ? t('views.interaction.sending') : t('views.interaction.send')}</span>
                         </button>
                     </div>
                 </form>
@@ -126,12 +130,13 @@ function CommentPanel({ articleId, isOpen, onClose }) {
                     {loading ? (
                         <div style={styles.emptyState}>
                             <div style={styles.spinner} />
-                            <span>加载中...</span>
+                            <span>{t('common.loading')}</span>
                         </div>
                     ) : comments.length === 0 ? (
                         <div style={styles.emptyState}>
                             <MessageSquare size={40} style={{ opacity: 0.3 }} />
-                            <span>暂无评论，快来抢沙发！</span>
+                            <span>{t('views.interaction.noComments')}</span>
+                            <span style={{ fontSize: 12 }}>{t('views.interaction.beFirst')}</span>
                         </div>
                     ) : (
                         comments.map(comment => (
@@ -150,7 +155,6 @@ function CommentPanel({ articleId, isOpen, onClose }) {
                                     <button
                                         style={styles.deleteBtn}
                                         onClick={() => handleDelete(comment.id)}
-                                        title="删除评论"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -256,7 +260,7 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 12,
+        gap: 8,
         padding: 40,
         color: 'rgba(255, 255, 255, 0.4)',
         fontSize: 14,

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { ArrowLeft, Clock, Calendar, Share2, ThumbsUp, MessageSquare, Bookmark, Check } from 'lucide-react'
 import { interactions } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
+import { useI18n } from '../../hooks/useI18n'
 import CommentPanel from '../CommentPanel'
 
 function ArticleDetailView({ articleId, onBack, initialData }) {
     const { user, isAuthenticated } = useAppState()
     const { openAuthModal, notify } = useAppActions()
+    const { t } = useI18n()
 
     const [article, setArticle] = useState(initialData || null)
     const [loading, setLoading] = useState(!initialData)
@@ -101,12 +103,12 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             const result = await interactions.toggleLike(article.id, user.id)
             setLiked(result.liked)
             setLikeCount(prev => result.liked ? prev + 1 : prev - 1)
-            notify(result.liked ? '已点赞' : '已取消点赞', 'success')
+            notify(result.liked ? t('views.interaction.liked') : t('views.interaction.unliked'), 'success')
         } catch (err) {
             console.error('点赞失败:', err)
-            notify('操作失败', 'error')
+            notify(t('views.interaction.operationFailed'), 'error')
         }
-    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify])
+    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify, t])
 
     // 收藏
     const handleBookmark = useCallback(async () => {
@@ -118,12 +120,12 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
         try {
             const result = await interactions.toggleBookmark(article.id, user.id)
             setBookmarked(result.bookmarked)
-            notify(result.bookmarked ? '已收藏' : '已取消收藏', 'success')
+            notify(result.bookmarked ? t('views.interaction.bookmarked') : t('views.interaction.unbookmarked'), 'success')
         } catch (err) {
             console.error('收藏失败:', err)
-            notify('操作失败', 'error')
+            notify(t('views.interaction.operationFailed'), 'error')
         }
-    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify])
+    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify, t])
 
     // 分享（复制链接）
     const handleShare = useCallback(async () => {
@@ -131,13 +133,13 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             const url = `${window.location.origin}/analysis/${article.id}`
             await navigator.clipboard.writeText(url)
             setCopied(true)
-            notify('链接已复制到剪贴板', 'success')
+            notify(t('views.interaction.linkCopied'), 'success')
             setTimeout(() => setCopied(false), 2000)
         } catch (err) {
             console.error('复制失败:', err)
-            notify('复制失败', 'error')
+            notify(t('views.interaction.copyFailed'), 'error')
         }
-    }, [article?.id, notify])
+    }, [article?.id, notify, t])
 
     // 评论面板关闭时刷新评论数
     const handleCommentPanelClose = useCallback(async () => {
@@ -158,7 +160,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
         <div style={styles.container}>
             <button style={styles.backBtn} onClick={onBack}>
                 <ArrowLeft size={18} />
-                <span>Back to Analysis</span>
+                <span>{t('views.analysis.backTo')}</span>
             </button>
 
             <article style={styles.article}>
