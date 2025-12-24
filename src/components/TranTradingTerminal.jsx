@@ -16,6 +16,7 @@ import LabView from './views/LabView'
 import NoteView from './views/NoteView'
 import ToolsView from './views/ToolsView'
 import IntroductionView from './views/IntroductionView'
+import ProfileView from './views/ProfileView'
 import CommandPalette from './CommandPalette'
 import AIAssistant from './AIAssistant'
 import { useAppState, useAppActions } from '../context/AppContext'
@@ -116,6 +117,7 @@ function TranTradingTerminal({ initialView }) {
             case 'note': return <NoteView />
             case 'tools': return <ToolsView />
             case 'about': return <IntroductionView />
+            case 'profile': return <ProfileView onNavigate={handleNavigate} />
             default: return <HomeView onNavigate={handleNavigate} />
         }
     }
@@ -132,6 +134,7 @@ function TranTradingTerminal({ initialView }) {
                 onThemeToggle={handleThemeToggle}
                 language={language}
                 onLanguageChange={setLanguage}
+                onProfileClick={() => handleNavigate('profile')}
             />
 
             {/* Sidebar Navigation */}

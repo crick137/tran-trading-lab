@@ -18,7 +18,7 @@ const LANGUAGES = [
 ]
 
 // 最高等级 TopBar
-function TopBar() {
+function TopBar({ onProfileClick }) {
     const [time, setTime] = useState(new Date())
     const [flash, setFlash] = useState({})
     const [showLangMenu, setShowLangMenu] = useState(false)
@@ -311,7 +311,12 @@ function TopBar() {
                                     <span style={styles.userMenuEmail}>{user.email}</span>
                                 </div>
                                 <div style={styles.userMenuDivider} />
-                                <button style={styles.userMenuItem}>
+                                <button style={styles.userMenuItem} onClick={() => {
+                                    if (onProfileClick) {
+                                        onProfileClick()
+                                        setShowUserMenu(false)
+                                    }
+                                }}>
                                     <User size={14} /> {t('nav.profile')}
                                 </button>
                                 <button style={styles.userMenuItem}>

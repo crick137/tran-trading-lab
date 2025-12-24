@@ -412,20 +412,52 @@ export const interactions = {
         return !error && !!data
     },
 
-    // 获取用户的收藏列表
-    async getUserBookmarks(userId) {
-        const { data, error } = await supabase
-            .from(TABLES.ARTICLE_BOOKMARKS)
-            .select(`
-                id,
-                article_id,
-                created_at,
-                analysis:article_id (id, title, summary, image_url, created_at)
-            `)
+    // 获取用户的点赞文章列表
+    async getUserLikes(userId) {
+        if (!userId) return []
+
+        // 先获取用户点赞的文章ID
+        const { data: likes, error: likesError } = await supabase
+            .from(TABLES.ARTICLE_LIKES)
+            .select('article_id')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
-        if (error) throw error
-        return data || []
+
+        if (likesError || !likes?.length) return []
+
+        // 获取文章详情
+        const articleIds = likes.map(l => l.article_id)
+        const { data: articles, error: articlesError } = await supabase
+            .from(TABLES.ANALYSIS)
+            .select('*')
+            .in('id', articleIds)
+
+        if (articlesError) return []
+        return articles || []
+    },
+
+    // 获取用户的收藏文章列表
+    async getUserBookmarks(userId) {
+        if (!userId) return []
+
+        // 先获取用户收藏的文章ID
+        const { data: bookmarks, error: bookmarksError } = await supabase
+            .from(TABLES.ARTICLE_BOOKMARKS)
+            .select('article_id')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+
+        if (bookmarksError || !bookmarks?.length) return []
+
+        // 获取文章详情
+        const articleIds = bookmarks.map(b => b.article_id)
+        const { data: articles, error: articlesError } = await supabase
+            .from(TABLES.ANALYSIS)
+            .select('*')
+            .in('id', articleIds)
+
+        if (articlesError) return []
+        return articles || []
     }
 }
 
