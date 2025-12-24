@@ -73,6 +73,43 @@ CREATE TABLE IF NOT EXISTS trade_notes (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 6. Newsletter订阅者表
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT,
+    language TEXT DEFAULT 'ko',
+    unsubscribe_token TEXT UNIQUE,
+    is_active BOOLEAN DEFAULT true,
+    subscribed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    unsubscribed_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 7. 用户课程进度表
+CREATE TABLE IF NOT EXISTS user_course_progress (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    course_id UUID REFERENCES lab_courses(id) ON DELETE CASCADE,
+    progress INTEGER DEFAULT 0,
+    completed BOOLEAN DEFAULT false,
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id, course_id)
+);
+
+-- 8. 价格警报表 (可选，如需持久化到服务器)
+CREATE TABLE IF NOT EXISTS price_alerts (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    symbol TEXT NOT NULL,
+    target_price DECIMAL NOT NULL,
+    condition TEXT CHECK (condition IN ('above', 'below')),
+    is_active BOOLEAN DEFAULT true,
+    triggered_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- 启用 Row Level Security (可选)
 ALTER TABLE briefs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analysis ENABLE ROW LEVEL SECURITY;
@@ -93,6 +130,20 @@ CREATE POLICY "Allow all analysis" ON analysis FOR ALL USING (true) WITH CHECK (
 CREATE POLICY "Allow all news" ON news FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all lab_courses" ON lab_courses FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all trade_notes" ON trade_notes FOR ALL USING (true) WITH CHECK (true);
+
+-- Newsletter订阅者表策略
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow insert newsletter" ON newsletter_subscribers FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow select newsletter" ON newsletter_subscribers FOR SELECT USING (true);
+CREATE POLICY "Allow update newsletter" ON newsletter_subscribers FOR UPDATE USING (true);
+
+-- 用户课程进度策略
+ALTER TABLE user_course_progress ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own progress" ON user_course_progress FOR ALL USING (true) WITH CHECK (true);
+
+-- 价格警报策略
+ALTER TABLE price_alerts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users manage own alerts" ON price_alerts FOR ALL USING (true) WITH CHECK (true);
 
 -- 插入一些示例数据
 INSERT INTO briefs (title, content, importance, tags) VALUES

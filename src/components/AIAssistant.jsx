@@ -505,9 +505,21 @@ I can help with crypto market analysis, trading concepts, and investment strateg
 💡 **Get Started**: Try asking "BTC analysis", "market overview", "what is RSI?"`
     }[lang] || '')
 
-    const [messages, setMessages] = useState([
-        { id: 1, role: 'assistant', content: getInitialMessage(), timestamp: new Date() }
-    ])
+    // Load saved messages from localStorage
+    const loadSavedMessages = () => {
+        try {
+            const saved = localStorage.getItem('tran_ai_chat_history')
+            if (saved) {
+                const parsed = JSON.parse(saved)
+                return parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) }))
+            }
+        } catch (e) {
+            console.warn('Failed to load chat history:', e)
+        }
+        return [{ id: 1, role: 'assistant', content: getInitialMessage(), timestamp: new Date() }]
+    }
+
+    const [messages, setMessages] = useState(loadSavedMessages)
     const [inputValue, setInputValue] = useState('')
     const [isTyping, setIsTyping] = useState(false)
     const messagesEndRef = useRef(null)
@@ -520,11 +532,20 @@ I can help with crypto market analysis, trading concepts, and investment strateg
         scrollToBottom()
     }, [messages, isTyping])
 
+    // Save messages to localStorage whenever they change
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem('tran_ai_chat_history', JSON.stringify(messages))
+        }
+    }, [messages])
+
     // 清空对话
     const clearChat = useCallback(() => {
-        setMessages([
+        const newMessages = [
             { id: Date.now(), role: 'assistant', content: getInitialMessage(), timestamp: new Date() }
-        ])
+        ]
+        setMessages(newMessages)
+        localStorage.setItem('tran_ai_chat_history', JSON.stringify(newMessages))
     }, [lang])
 
     const handleSendMessage = async (e) => {

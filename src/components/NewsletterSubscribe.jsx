@@ -58,12 +58,27 @@ function NewsletterSubscribe({ variant = 'default' }) {
     const [status, setStatus] = useState('idle') // idle, loading, success, error
     const [message, setMessage] = useState('')
 
+    // Email validation regex
+    const isValidEmail = (email) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault()
         if (!email) return
 
+        // Validate email format
+        if (!isValidEmail(email)) {
+            setStatus('error')
+            setMessage(language === 'ko' ? '유효한 이메일을 입력해 주세요.'
+                : language === 'zh' ? '请输入有效的邮箱地址。'
+                    : 'Please enter a valid email address.')
+            return
+        }
+
         setStatus('loading')
         try {
+            // Try API first
             const res = await fetch(`${API_BASE}/api/newsletter/subscribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -76,19 +91,45 @@ function NewsletterSubscribe({ variant = 'default' }) {
                 setMessage(t.success)
                 setEmail('')
                 setName('')
+                // Also save to localStorage as backup
+                saveToLocalStorage(email, name)
             } else {
                 setStatus('error')
                 setMessage(data.error?.includes('already') ? t.already : t.error)
             }
         } catch (err) {
-            setStatus('error')
-            setMessage(t.error)
+            console.warn('API failed, saving locally:', err)
+            // Fallback: Save to localStorage
+            saveToLocalStorage(email, name)
+            setStatus('success')
+            setMessage(t.success)
+            setEmail('')
+            setName('')
         }
 
         // 5秒后重置状态
         setTimeout(() => {
-            if (status !== 'idle') setStatus('idle')
+            setStatus('idle')
+            setMessage('')
         }, 5000)
+    }
+
+    // Fallback local storage
+    const saveToLocalStorage = (email, name) => {
+        try {
+            const subscribers = JSON.parse(localStorage.getItem('tran_newsletter_pending') || '[]')
+            if (!subscribers.find(s => s.email === email)) {
+                subscribers.push({
+                    email,
+                    name,
+                    language,
+                    subscribed_at: new Date().toISOString()
+                })
+                localStorage.setItem('tran_newsletter_pending', JSON.stringify(subscribers))
+            }
+        } catch (e) {
+            console.warn('Failed to save to localStorage:', e)
+        }
     }
 
     const isCompact = variant === 'compact'

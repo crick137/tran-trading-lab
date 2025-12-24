@@ -12,6 +12,18 @@ try {
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Supabase客户端（用于订阅者同步）
+import { createClient } from '@supabase/supabase-js'
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gswikdqcptfdnzmigsnl.supabase.co'
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdzd2lrZHFjcHRmZG56bWlnc25sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk3NzcxMDAsImV4cCI6MjA0NTM1MzEwMH0.sBhAHPxvJQ47x9iZQ0hFCxjIAOCpyKLCpjjnaS3OK8Y'
+let supabase = null
+try {
+    supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+    console.log('✅ Supabase initialized for newsletter sync')
+} catch (e) {
+    console.warn('⚠️ Supabase not available, using file storage only')
+}
+
 // CORS 配置
 app.use(cors({
     origin: process.env.CORS_ORIGIN || '*',
@@ -244,7 +256,7 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
 
         const data = getSubscribers()
 
-        // 检查是否已订阅
+        // 检查是否已订阅（文件存储）
         if (data.subscribers.some(s => s.email.toLowerCase() === email.toLowerCase())) {
             return res.status(400).json({ success: false, error: 'Email already subscribed' })
         }
@@ -259,8 +271,26 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
             token
         }
 
+        // 保存到文件存储
         data.subscribers.push(subscriber)
         saveSubscribers(data)
+
+        // 同步到Supabase（如果可用）
+        if (supabase) {
+            try {
+                await supabase.from('newsletter_subscribers').upsert({
+                    email: subscriber.email,
+                    name: subscriber.name,
+                    language: subscriber.language,
+                    unsubscribe_token: token,
+                    is_active: true,
+                    subscribed_at: subscriber.subscribedAt
+                }, { onConflict: 'email' })
+                console.log('📦 Synced to Supabase:', email)
+            } catch (dbErr) {
+                console.warn('Supabase sync failed (continuing):', dbErr.message)
+            }
+        }
 
         // 发送确认邮件
         try {
@@ -269,6 +299,7 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
             const unsubscribeUrl = `${appUrl}/api/newsletter/unsubscribe?token=${token}`
             const template = emailTemplates.confirmSubscription(subscriber.name, unsubscribeUrl, subscriber.language)
             await sendEmail(email, template)
+            console.log('✉️ Confirmation email sent to:', email)
         } catch (emailErr) {
             console.error('Failed to send confirmation email:', emailErr.message)
         }
