@@ -51,45 +51,7 @@ function SystemsView() {
 
     // 交易系统列表 - 您可以在这里添加更多系统
     const tradingSystems = [
-        {
-            id: 'trend-following',
-            nameZh: '趋势跟踪系统',
-            nameEn: 'Trend Following System',
-            nameKo: '추세 추종 시스템',
-            descZh: '基于移动平均线和价格动量的经典趋势跟踪策略，适合中长期交易。',
-            descEn: 'Classic trend following strategy based on moving averages and price momentum, suitable for medium to long-term trading.',
-            descKo: '이동 평균과 가격 모멘텀을 기반으로 한 클래식 추세 추종 전략으로, 중장기 트레이딩에 적합합니다.',
-            icon: TrendingUp,
-            color: '#00ff88',
-            stats: { winRate: '40%', rr: '3:1', timeframe: 'D1/W1' },
-            tags: ['趋势', '中长期', '动量']
-        },
-        {
-            id: 'breakout',
-            nameZh: '突破交易系统',
-            nameEn: 'Breakout Trading System',
-            nameKo: '돌파 트레이딩 시스템',
-            descZh: '捕捉价格突破关键支撑阻力位的高动量行情，强调风险管理。',
-            descEn: 'Captures high momentum moves when price breaks key support/resistance levels, emphasizing risk management.',
-            descKo: '가격이 주요 지지/저항 수준을 돌파할 때 높은 모멘텀 움직임을 포착하며, 위험 관리를 강조합니다.',
-            icon: Zap,
-            color: '#00d4ff',
-            stats: { winRate: '35%', rr: '4:1', timeframe: 'H4/D1' },
-            tags: ['突破', '动量', '波动性']
-        },
-        {
-            id: 'mean-reversion',
-            nameZh: '均值回归系统',
-            nameEn: 'Mean Reversion System',
-            nameKo: '평균 회귀 시스템',
-            descZh: '利用价格偏离均值后的回归特性，在超买超卖区域寻找交易机会。',
-            descEn: 'Utilizes price reversion to mean after deviation, finding trading opportunities in overbought/oversold areas.',
-            descKo: '편차 후 평균으로의 가격 회귀를 활용하여 과매수/과매도 영역에서 거래 기회를 찾습니다.',
-            icon: BarChart3,
-            color: '#a855f7',
-            stats: { winRate: '55%', rr: '1.5:1', timeframe: 'H1/H4' },
-            tags: ['均值回归', '震荡', 'RSI']
-        }
+        // 以后添加您研究的交易系统
     ]
 
     const getName = (system) => language === 'zh' ? system.nameZh : language === 'ko' ? system.nameKo : system.nameEn
