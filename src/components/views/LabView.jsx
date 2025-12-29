@@ -7,31 +7,23 @@ import CourseDetailView from './CourseDetailView'
 import KellySimulator from '../experiments/KellySimulator'
 import KellyArticle from '../experiments/KellyArticle'
 
-// 互动实验工具列表 - 现在包含文章和模拟器两个模式
+// 互动实验工具列表 - 包含完整的凯利公式模块
 const INTERACTIVE_TOOLS = [
     {
-        id: 'kelly-article',
-        titleZh: '凯利公式：资金管理的秘密',
-        titleEn: 'Kelly Criterion: Secret of Money Management',
-        titleKo: '켈리 공식: 자금 관리의 비밀',
-        descZh: '为什么胜率60%账户还是会归零？深入理解凯利公式的数学原理和实战应用。',
-        descEn: 'Why does a 60% win rate still lead to zero? Deep dive into Kelly math and practical application.',
-        descKo: '왜 승률 60%인데 계좌는 0원이 될까? 켈리 공식의 수학적 원리와 실전 적용.',
-        icon: FileText,
-        color: '#818cf8',
-        type: 'article'
-    },
-    {
-        id: 'kelly-simulator',
-        titleZh: '凯利公式模拟器',
-        titleEn: 'Kelly Criterion Simulator',
-        titleKo: '켈리 기준 시뮬레이터',
-        descZh: '使用蒙特卡洛模拟可视化凯利公式的最优仓位管理策略。',
-        descEn: 'Visualize optimal position sizing using Kelly Criterion with Monte Carlo simulation.',
-        descKo: '몬테카를로 시뮬레이션을 통해 켈리 기준의 최적 포지션 사이징을 시각화합니다.',
+        id: 'kelly-complete',
+        titleZh: '凯利公式完整教程',
+        titleEn: 'Kelly Criterion Complete Guide',
+        titleKo: '켈리 공식 완전 가이드',
+        descZh: '包含深度文章解析和蒙特卡洛模拟器，完整掌握凯利公式的数学原理与实战应用。',
+        descEn: 'Complete package with in-depth article and Monte Carlo simulator. Master Kelly Criterion math and practical application.',
+        descKo: '심층 분석 문서와 몬테카를로 시뮬레이터를 포함. 켈리 공식의 수학적 원리와 실전 적용을 완벽하게 마스터하세요.',
         icon: Calculator,
         color: '#00ff88',
-        type: 'simulator'
+        type: 'bundle',
+        subTools: [
+            { id: 'article', labelZh: '📖 理论文章', labelEn: '📖 Theory Article', labelKo: '📖 이론 문서', type: 'article' },
+            { id: 'simulator', labelZh: '🧮 模拟器', labelEn: '🧮 Simulator', labelKo: '🧮 시뮬레이터', type: 'simulator' }
+        ]
     }
 ]
 
@@ -130,15 +122,53 @@ function LabView() {
 
     // 如果选中了互动工具，根据类型显示不同组件
     if (activeTool) {
-        if (activeTool.type === 'article') {
+        // 直接显示文章
+        if (activeTool.type === 'article' || activeTool.subType === 'article') {
             return (
                 <KellyArticle
                     onBack={() => setActiveTool(null)}
-                    onOpenSimulator={() => setActiveTool(INTERACTIVE_TOOLS.find(t => t.type === 'simulator'))}
+                    onOpenSimulator={() => setActiveTool({ ...activeTool, subType: 'simulator' })}
                 />
             )
-        } else if (activeTool.type === 'simulator') {
+        }
+        // 直接显示模拟器
+        if (activeTool.type === 'simulator' || activeTool.subType === 'simulator') {
             return <KellySimulator onBack={() => setActiveTool(null)} />
+        }
+        // bundle类型 - 显示选择界面
+        if (activeTool.type === 'bundle' && !activeTool.subType) {
+            return (
+                <div style={styles.container}>
+                    <button onClick={() => setActiveTool(null)} style={styles.backButton}>
+                        ← {language === 'zh' ? '返回' : language === 'ko' ? '돌아가기' : 'Back'}
+                    </button>
+                    <div style={styles.bundleSelector}>
+                        <div style={styles.bundleHeader}>
+                            <activeTool.icon size={48} style={{ color: activeTool.color }} />
+                            <h2 style={styles.bundleTitle}>
+                                {language === 'zh' ? activeTool.titleZh : language === 'ko' ? activeTool.titleKo : activeTool.titleEn}
+                            </h2>
+                            <p style={styles.bundleDesc}>
+                                {language === 'zh' ? activeTool.descZh : language === 'ko' ? activeTool.descKo : activeTool.descEn}
+                            </p>
+                        </div>
+                        <div style={styles.subToolsGrid}>
+                            {activeTool.subTools.map(sub => (
+                                <button
+                                    key={sub.id}
+                                    onClick={() => setActiveTool({ ...activeTool, subType: sub.type })}
+                                    style={styles.subToolCard}
+                                >
+                                    <span style={styles.subToolLabel}>
+                                        {language === 'zh' ? sub.labelZh : language === 'ko' ? sub.labelKo : sub.labelEn}
+                                    </span>
+                                    <ChevronRight size={20} style={{ color: '#64748b' }} />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )
         }
     }
 
@@ -296,6 +326,15 @@ const styles = {
     progressFill: { height: '100%', background: 'linear-gradient(90deg, #00d26a, #00ff88)', borderRadius: 2, transition: 'width 0.4s ease' },
     courseFooter: { paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-light)' },
     startBtn: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-5)', background: 'linear-gradient(135deg, #00d26a 0%, #00ff88 100%)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: '600', color: '#000', cursor: 'pointer', width: '100%', justifyContent: 'center', transition: 'all 0.3s ease', boxShadow: '0 4px 16px rgba(0, 210, 106, 0.3)' },
+    // Bundle selector styles
+    backButton: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', marginBottom: 24, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer' },
+    bundleSelector: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 40px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 24 },
+    bundleHeader: { textAlign: 'center', marginBottom: 40 },
+    bundleTitle: { margin: '20px 0 12px', fontSize: '2rem', fontWeight: 800, color: '#fff' },
+    bundleDesc: { margin: 0, fontSize: '1rem', color: '#94a3b8', lineHeight: 1.8, maxWidth: 500 },
+    subToolsGrid: { display: 'flex', gap: 20 },
+    subToolCard: { display: 'flex', alignItems: 'center', gap: 16, padding: '20px 32px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, cursor: 'pointer', transition: 'all 0.3s ease' },
+    subToolLabel: { fontSize: '1.1rem', fontWeight: 600, color: '#fff' }
 }
 
 export default LabView
