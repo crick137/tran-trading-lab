@@ -9,7 +9,7 @@ import { NotificationCenter } from './components/NotificationCenter'
 
 // 路由懒加载
 const TranTradingTerminal = lazy(() => import('./components/TranTradingTerminal'))
-const AdminPage = lazy(() => import('./pages/AdminPage'))
+const ContentLibrary = lazy(() => import('./pages/ContentLibrary'))
 
 // 独立可分享页面 - 使用命名导出
 const KellyArticlePage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellyArticlePage })))
@@ -25,7 +25,7 @@ function App() {
                             <Routes>
                                 <Route path="/" element={<TranTradingTerminal />} />
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
-                                <Route path="/admin" element={<AdminPage />} />
+                                <Route path="/library" element={<ContentLibrary />} />
 
                                 {/* 可独立分享的文章和工具页面 */}
                                 <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
