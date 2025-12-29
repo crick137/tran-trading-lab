@@ -12,6 +12,7 @@ const TranTradingTerminal = lazy(() => import('./components/TranTradingTerminal'
 const ContentLibrary = lazy(() => import('./pages/ContentLibrary'))
 
 // 独立可分享页面 - 使用命名导出
+const KellyCompletePage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellyCompletePage })))
 const KellyArticlePage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellyArticlePage })))
 const KellySimulatorPage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellySimulatorPage })))
 
@@ -27,7 +28,8 @@ function App() {
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
                                 <Route path="/library" element={<ContentLibrary />} />
 
-                                {/* 可独立分享的文章和工具页面 */}
+                                {/* 可独立分享的Kelly公式页面 */}
+                                <Route path="/kelly" element={<KellyCompletePage />} />
                                 <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
                                 <Route path="/tools/kelly-simulator" element={<KellySimulatorPage />} />
 
