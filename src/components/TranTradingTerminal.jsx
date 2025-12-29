@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard, BarChart3, Globe,
-    GraduationCap, Home, Info
+    GraduationCap, Home, Info, Cpu
 } from 'lucide-react'
 import Background3D from './3d/Background3D'
 import TopBar from './TopBar'
@@ -12,6 +12,7 @@ import DashboardView from './views/DashboardView'
 import AnalysisView from './views/AnalysisView'
 import NewsView from './views/NewsView'
 import LabView from './views/LabView'
+import SystemsView from './views/SystemsView'
 import IntroductionView from './views/IntroductionView'
 import ProfileView from './views/ProfileView'
 import CommandPalette from './CommandPalette'
@@ -56,14 +57,14 @@ function TranTradingTerminal({ initialView }) {
     // I18n
     const { language, setLanguage, t } = useI18n()
 
-    // Navigation Items with I18n
-    // Navigation - Streamlined to 6 core pages
+    // Navigation - 6 core pages + Systems
     const navItems = useMemo(() => [
         { id: 'home', label: t('nav.home'), icon: Home },
         { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
         { id: 'analysis', label: t('nav.analysis'), icon: BarChart3 },
         { id: 'news', label: t('nav.news'), icon: Globe },
         { id: 'lab', label: t('nav.lab'), icon: GraduationCap },
+        { id: 'systems', label: t('nav.systems') || 'Systems', icon: Cpu },
         { id: 'about', label: t('nav.about'), icon: Info },
     ], [t])
 
@@ -108,6 +109,7 @@ function TranTradingTerminal({ initialView }) {
             case 'analysis': return <AnalysisView directArticleId={directArticleId} onClearDirectArticle={() => setDirectArticleId(null)} />
             case 'news': return <NewsView />
             case 'lab': return <LabView />
+            case 'systems': return <SystemsView />
             case 'about': return <IntroductionView />
             case 'profile': return <ProfileView onNavigate={handleNavigate} />
             default: return <HomeView onNavigate={handleNavigate} />

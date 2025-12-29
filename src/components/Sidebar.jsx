@@ -3,7 +3,7 @@ import {
     LayoutDashboard, FileText, LineChart, Newspaper,
     FlaskConical, StickyNote, Wrench, ChevronLeft,
     ChevronRight, Terminal, Zap, Star, Crown,
-    Sparkles, TrendingUp, Globe
+    Sparkles, TrendingUp, Globe, Cpu
 } from 'lucide-react'
 
 // 最高等级侧边栏
@@ -15,7 +15,8 @@ function Sidebar({ navItems, activeView, onNavClick, collapsed, onToggle }) {
         { id: 'analysis', label: 'Analysis', labelKr: '분석', icon: LineChart, shortcut: '⌘2', isPro: true },
         { id: 'news', label: 'News', labelKr: '뉴스', icon: Newspaper, shortcut: '⌘3' },
         { id: 'lab', label: 'Research', labelKr: '연구', icon: FlaskConical, shortcut: '⌘4', isPro: true },
-        { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘5' },
+        { id: 'systems', label: 'Systems', labelKr: '시스템', icon: Cpu, shortcut: '⌘5', isHot: true },
+        { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘6' },
     ]
 
     return (
