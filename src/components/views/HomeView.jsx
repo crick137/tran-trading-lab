@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import {
-    Newspaper, BarChart3, Globe, GraduationCap, BookOpen, Wrench,
-    ArrowRight, Sparkles, TrendingUp, Zap, Star, ChevronRight,
-    Activity, Users, Clock, Award, Shield, Rocket
+    BarChart3, Globe, GraduationCap,
+    ArrowRight, Sparkles, TrendingUp, Star,
+    Activity, Award, Rocket
 } from 'lucide-react'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
@@ -19,12 +19,10 @@ function HomeView({ onNavigate }) {
     const [hoveredModule, setHoveredModule] = useState(null)
 
     const moduleConfig = [
-        { id: 'brief', icon: Newspaper, color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
-        { id: 'analysis', icon: BarChart3, color: '#00d4ff', bg: 'rgba(0,212,255,0.08)' },
+        { id: 'dashboard', icon: BarChart3, color: '#00d4ff', bg: 'rgba(0,212,255,0.08)' },
+        { id: 'analysis', icon: TrendingUp, color: '#00ff88', bg: 'rgba(0,255,136,0.08)' },
         { id: 'news', icon: Globe, color: '#fbbf24', bg: 'rgba(251,191,36,0.08)' },
         { id: 'lab', icon: GraduationCap, color: '#a855f7', bg: 'rgba(168,85,247,0.08)' },
-        { id: 'note', icon: BookOpen, color: '#f43f5e', bg: 'rgba(244,63,94,0.08)' },
-        { id: 'tools', icon: Wrench, color: '#6366f1', bg: 'rgba(99,102,241,0.08)' },
     ]
 
     useEffect(() => {
@@ -205,54 +203,6 @@ function HomeView({ onNavigate }) {
                     })}
                 </div>
             </section>
-
-            {/* Recent Briefs */}
-            {recentBriefs.length > 0 && (
-                <section style={styles.recentSection}>
-                    <div style={styles.sectionHeader}>
-                        <h2 style={styles.sectionTitle}>
-                            <Newspaper size={22} style={{ color: '#00ff88' }} />
-                            {t('home.recentBriefs')}
-                        </h2>
-                        <button style={styles.viewAllBtn} onClick={() => handleModuleClick('brief')}>
-                            {t('home.viewAll')}
-                            <ChevronRight size={18} />
-                        </button>
-                    </div>
-                    <div style={styles.briefsList}>
-                        {recentBriefs.map((brief, index) => (
-                            <article
-                                key={brief.id}
-                                style={{
-                                    ...styles.briefCard,
-                                    animationDelay: `${index * 0.1}s`,
-                                }}
-                                onClick={() => handleModuleClick('brief')}
-                            >
-                                <div style={{
-                                    ...styles.briefImportance,
-                                    background: brief.importance === 'high' ? 'rgba(255,56,96,0.12)'
-                                        : brief.importance === 'medium' ? 'rgba(251,191,36,0.12)'
-                                            : 'rgba(107,114,128,0.12)',
-                                    color: brief.importance === 'high' ? '#ff5274'
-                                        : brief.importance === 'medium' ? '#fbbf24'
-                                            : '#9ca3af',
-                                }}>
-                                    {getImportanceLabel(brief.importance)}
-                                </div>
-                                <h4 style={styles.briefTitle}>{brief.title}</h4>
-                                <p style={styles.briefContent}>
-                                    {brief.content?.substring(0, 100)}...
-                                </p>
-                                <div style={styles.briefMeta}>
-                                    <Clock size={13} />
-                                    <span>{new Date(brief.created_at).toLocaleDateString(getDateLocale())}</span>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
-                </section>
-            )}
 
             {/* Newsletter Subscription */}
             <section style={{ marginBottom: 40 }}>
