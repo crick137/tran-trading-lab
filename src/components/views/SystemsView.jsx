@@ -49,9 +49,32 @@ function SystemsView() {
 
     const t = texts[language] || texts.en
 
-    // 交易系统列表 - 您可以在这里添加更多系统
+    // 交易系统列表
     const tradingSystems = [
-        // 以后添加您研究的交易系统
+        {
+            id: 'orb-strategy',
+            nameZh: 'ORB 开盘区间突破战法',
+            nameEn: 'ORB - Opening Range Breakout',
+            nameKo: 'ORB 시가 범위 돌파 전략',
+            descZh: '基于开盘后5/15/30/60分钟建立的价格区间，捕捉突破行情。包含多时间框架ORB、成交量过滤、趋势确认、FVG检测、动态止损止盈系统。适用于美股、期货、加密货币等各类市场。',
+            descEn: 'Captures breakout moves from the opening range established in the first 5/15/30/60 minutes. Features multi-timeframe ORB, volume filter, trend confirmation, FVG detection, and dynamic TP/SL. Works on stocks, futures, crypto, and forex.',
+            descKo: '시장 개장 후 5/15/30/60분 동안 형성된 가격 범위의 돌파를 포착합니다. 다중 시간프레임 ORB, 거래량 필터, 추세 확인, FVG 감지, 동적 TP/SL 시스템을 포함합니다. 주식, 선물, 암호화폐, 외환 등 다양한 시장에 적용 가능합니다.',
+            icon: TrendingUp,
+            color: '#00ff88',
+            stats: { winRate: '45-55%', rr: '2:1 ~ 3:1', timeframe: '5m/15m' },
+            features: [
+                { zh: '多时间框架ORB (5/15/30/60分钟)', en: 'Multi-timeframe ORB (5/15/30/60min)', ko: '다중 시간프레임 ORB (5/15/30/60분)' },
+                { zh: '成交量确认过滤器', en: 'Volume confirmation filter', ko: '거래량 확인 필터' },
+                { zh: '趋势方向过滤 (VWAP/EMA/SuperTrend)', en: 'Trend filter (VWAP/EMA/SuperTrend)', ko: '추세 필터 (VWAP/EMA/슈퍼트렌드)' },
+                { zh: 'FVG (公允价值缺口) 检测', en: 'FVG (Fair Value Gap) detection', ko: 'FVG (공정 가치 갭) 감지' },
+                { zh: '智能自适应止损', en: 'Smart adaptive stop-loss', ko: '스마트 적응형 손절' },
+                { zh: '多目标止盈 (TP1/TP1.5/TP2/TP3)', en: 'Multi-target take profit (TP1/TP1.5/TP2/TP3)', ko: '다중 목표 익절 (TP1/TP1.5/TP2/TP3)' },
+                { zh: '仓位管理计算器', en: 'Position sizing calculator', ko: '포지션 사이징 계산기' },
+                { zh: '回测与再突破检测', en: 'Retest & re-breakout detection', ko: '재시도 및 재돌파 감지' }
+            ],
+            platform: 'TradingView',
+            hasIndicator: true
+        }
     ]
 
     const getName = (system) => language === 'zh' ? system.nameZh : language === 'ko' ? system.nameKo : system.nameEn
@@ -109,8 +132,36 @@ function SystemsView() {
 
                             {/* Content */}
                             <div style={styles.cardContent}>
+                                {/* Platform Badge */}
+                                {system.platform && (
+                                    <div style={styles.platformBadge}>
+                                        <Cpu size={12} />
+                                        <span>{system.platform}</span>
+                                    </div>
+                                )}
+
                                 <h3 style={styles.systemName}>{getName(system)}</h3>
                                 <p style={styles.systemDesc}>{getDesc(system)}</p>
+
+                                {/* Features */}
+                                {system.features && system.features.length > 0 && (
+                                    <div style={styles.featuresSection}>
+                                        <div style={styles.featuresTitle}>✨ {t.features}</div>
+                                        <div style={styles.featuresList}>
+                                            {system.features.slice(0, 4).map((feature, idx) => (
+                                                <div key={idx} style={styles.featureItem}>
+                                                    <span style={styles.featureDot}>•</span>
+                                                    <span>{language === 'zh' ? feature.zh : language === 'ko' ? feature.ko : feature.en}</span>
+                                                </div>
+                                            ))}
+                                            {system.features.length > 4 && (
+                                                <div style={styles.featureMore}>
+                                                    +{system.features.length - 4} more...
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Stats */}
                                 <div style={styles.statsRow}>
@@ -227,6 +278,19 @@ const styles = {
         position: 'relative',
         zIndex: 1
     },
+    platformBadge: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 10px',
+        marginBottom: 12,
+        background: 'rgba(99, 102, 241, 0.15)',
+        border: '1px solid rgba(99, 102, 241, 0.3)',
+        borderRadius: 8,
+        fontSize: '0.75rem',
+        fontWeight: 600,
+        color: '#818cf8'
+    },
     systemName: {
         margin: '0 0 12px',
         fontSize: '1.25rem',
@@ -238,6 +302,41 @@ const styles = {
         fontSize: '0.9rem',
         color: '#94a3b8',
         lineHeight: 1.7
+    },
+    featuresSection: {
+        marginBottom: 20,
+        padding: 16,
+        background: 'rgba(255,255,255,0.02)',
+        borderRadius: 12,
+        border: '1px solid rgba(255,255,255,0.05)'
+    },
+    featuresTitle: {
+        fontSize: '0.8rem',
+        fontWeight: 600,
+        color: '#cbd5e1',
+        marginBottom: 10
+    },
+    featuresList: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 6
+    },
+    featureItem: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 8,
+        fontSize: '0.8rem',
+        color: '#94a3b8'
+    },
+    featureDot: {
+        color: '#00ff88',
+        fontWeight: 700
+    },
+    featureMore: {
+        fontSize: '0.75rem',
+        color: '#64748b',
+        fontStyle: 'italic',
+        marginTop: 4
     },
     statsRow: {
         display: 'flex',
