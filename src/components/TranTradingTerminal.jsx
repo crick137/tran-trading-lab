@@ -1,22 +1,18 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
-    LayoutDashboard, Newspaper, BarChart3, Globe,
-    GraduationCap, BookOpen, Wrench, Home, Info, FlaskConical
+    LayoutDashboard, BarChart3, Globe,
+    GraduationCap, Home, Info
 } from 'lucide-react'
 import Background3D from './3d/Background3D'
 import TopBar from './TopBar'
 import Sidebar from './Sidebar'
 import HomeView from './views/HomeView'
 import DashboardView from './views/DashboardView'
-import BriefView from './views/BriefView'
 import AnalysisView from './views/AnalysisView'
 import NewsView from './views/NewsView'
 import LabView from './views/LabView'
-import NoteView from './views/NoteView'
-import ToolsView from './views/ToolsView'
 import IntroductionView from './views/IntroductionView'
-import ExperimentsView from './views/ExperimentsView'
 import ProfileView from './views/ProfileView'
 import CommandPalette from './CommandPalette'
 import AIAssistant from './AIAssistant'
@@ -61,17 +57,14 @@ function TranTradingTerminal({ initialView }) {
     const { language, setLanguage, t } = useI18n()
 
     // Navigation Items with I18n
+    // Navigation - Streamlined to 6 core pages
     const navItems = useMemo(() => [
         { id: 'home', label: t('nav.home'), icon: Home },
         { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-        { id: 'brief', label: t('nav.brief'), icon: Newspaper },
         { id: 'analysis', label: t('nav.analysis'), icon: BarChart3 },
         { id: 'news', label: t('nav.news'), icon: Globe },
         { id: 'lab', label: t('nav.lab'), icon: GraduationCap },
-        { id: 'experiments', label: t('nav.experiments') || '实验室', icon: FlaskConical },
-        { id: 'note', label: t('nav.note'), icon: BookOpen },
-        { id: 'tools', label: t('nav.tools'), icon: Wrench },
-        { id: 'about', label: t('nav.about'), icon: Info }, // Changed icon to Info
+        { id: 'about', label: t('nav.about'), icon: Info },
     ], [t])
 
     // Handle Navigation - 更新 URL
@@ -112,13 +105,9 @@ function TranTradingTerminal({ initialView }) {
         switch (activeView) {
             case 'home': return <HomeView onNavigate={handleNavigate} />
             case 'dashboard': return <DashboardView />
-            case 'brief': return <BriefView />
             case 'analysis': return <AnalysisView directArticleId={directArticleId} onClearDirectArticle={() => setDirectArticleId(null)} />
             case 'news': return <NewsView />
             case 'lab': return <LabView />
-            case 'experiments': return <ExperimentsView />
-            case 'note': return <NoteView />
-            case 'tools': return <ToolsView />
             case 'about': return <IntroductionView />
             case 'profile': return <ProfileView onNavigate={handleNavigate} />
             default: return <HomeView onNavigate={handleNavigate} />
