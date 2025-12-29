@@ -1,9 +1,39 @@
 import React, { useState, useEffect } from 'react'
-import { BookOpen, CheckCircle, Circle, Lock, Award, ChevronRight, Sparkles, Clock, Star, TrendingUp, Inbox } from 'lucide-react'
+import { BookOpen, ChevronRight, TrendingUp, Inbox, FlaskConical, ArrowRight, FileText, Calculator } from 'lucide-react'
 import { db, TABLES, supabase } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
 import { useAppState } from '../../context/AppContext'
 import CourseDetailView from './CourseDetailView'
+import KellySimulator from '../experiments/KellySimulator'
+import KellyArticle from '../experiments/KellyArticle'
+
+// 互动实验工具列表 - 现在包含文章和模拟器两个模式
+const INTERACTIVE_TOOLS = [
+    {
+        id: 'kelly-article',
+        titleZh: '凯利公式：资金管理的秘密',
+        titleEn: 'Kelly Criterion: Secret of Money Management',
+        titleKo: '켈리 공식: 자금 관리의 비밀',
+        descZh: '为什么胜率60%账户还是会归零？深入理解凯利公式的数学原理和实战应用。',
+        descEn: 'Why does a 60% win rate still lead to zero? Deep dive into Kelly math and practical application.',
+        descKo: '왜 승률 60%인데 계좌는 0원이 될까? 켈리 공식의 수학적 원리와 실전 적용.',
+        icon: FileText,
+        color: '#818cf8',
+        type: 'article'
+    },
+    {
+        id: 'kelly-simulator',
+        titleZh: '凯利公式模拟器',
+        titleEn: 'Kelly Criterion Simulator',
+        titleKo: '켈리 기준 시뮬레이터',
+        descZh: '使用蒙特卡洛模拟可视化凯利公式的最优仓位管理策略。',
+        descEn: 'Visualize optimal position sizing using Kelly Criterion with Monte Carlo simulation.',
+        descKo: '몬테카를로 시뮬레이션을 통해 켈리 기준의 최적 포지션 사이징을 시각화합니다.',
+        icon: Calculator,
+        color: '#00ff88',
+        type: 'simulator'
+    }
+]
 
 function LabView() {
     const { t, language } = useI18n()
@@ -11,7 +41,8 @@ function LabView() {
     const [labCourses, setLabCourses] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedCourseId, setSelectedCourseId] = useState(null)
-    const [userProgress, setUserProgress] = useState({}) // courseId -> progress
+    const [activeTool, setActiveTool] = useState(null)
+    const [userProgress, setUserProgress] = useState({})
 
     useEffect(() => {
         loadCourses()
@@ -72,6 +103,18 @@ function LabView() {
         return Math.round(((progress + 1) / (totalLessons || 1)) * 100)
     }
 
+    const getToolTitle = (tool) => {
+        if (language === 'zh') return tool.titleZh
+        if (language === 'ko') return tool.titleKo
+        return tool.titleEn
+    }
+
+    const getToolDesc = (tool) => {
+        if (language === 'zh') return tool.descZh
+        if (language === 'ko') return tool.descKo
+        return tool.descEn
+    }
+
     // 如果选中了课程，显示详情
     if (selectedCourseId) {
         return (
@@ -79,10 +122,24 @@ function LabView() {
                 courseId={selectedCourseId}
                 onBack={() => {
                     setSelectedCourseId(null)
-                    loadUserProgress() // 返回时刷新进度
+                    loadUserProgress()
                 }}
             />
         )
+    }
+
+    // 如果选中了互动工具，根据类型显示不同组件
+    if (activeTool) {
+        if (activeTool.type === 'article') {
+            return (
+                <KellyArticle
+                    onBack={() => setActiveTool(null)}
+                    onOpenSimulator={() => setActiveTool(INTERACTIVE_TOOLS.find(t => t.type === 'simulator'))}
+                />
+            )
+        } else if (activeTool.type === 'simulator') {
+            return <KellySimulator onBack={() => setActiveTool(null)} />
+        }
     }
 
     return (
@@ -96,76 +153,109 @@ function LabView() {
 
             {loading ? (
                 <div style={styles.emptyState}><div style={styles.spinner} /><span>{t('common.loading')}</span></div>
-            ) : labCourses.length === 0 ? (
-                <div style={styles.emptyState}>
-                    <Inbox size={48} style={{ color: 'rgba(255,255,255,0.2)' }} />
-                    <h3 style={styles.emptyTitle}>{t('views.lab.noData')}</h3>
-                    <p style={styles.emptyDesc}>{t('views.lab.noDataDesc')}</p>
-                </div>
             ) : (
-                <div style={styles.coursesGrid}>
-                    {labCourses.map((course, index) => {
-                        const levelConfig = getLevelConfig(course.level)
-                        const progress = userProgress[course.id] || 0
-                        const progressPercent = getProgressPercent(course.id, course.lessons)
-                        const hasStarted = progress > 0 || userProgress[course.id] !== undefined
-
-                        return (
-                            <article
-                                key={course.id}
-                                style={{ ...styles.courseCard, animationDelay: `${index * 100}ms` }}
-                                onClick={() => setSelectedCourseId(course.id)}
-                            >
-                                {course.image_url && (
-                                    <div style={{
-                                        width: '100%',
-                                        height: 160,
-                                        borderRadius: 'var(--radius-lg)',
-                                        backgroundImage: `url(${course.image_url})`,
-                                        backgroundSize: 'cover',
-                                        backgroundPosition: 'center',
-                                        marginBottom: 'var(--space-2)'
-                                    }} />
-                                )}
-                                <div style={styles.courseHeader}>
-                                    <div style={{ ...styles.levelBadge, background: levelConfig.bg, color: levelConfig.color }}>
-                                        {levelConfig.label}
-                                    </div>
-                                    <div style={styles.lessonCount}>
-                                        <BookOpen size={12} />
-                                        <span>{course.lessons || 0} {t('views.lab.lessons')}</span>
-                                    </div>
-                                </div>
-                                <h3 style={styles.courseTitle}>{course.title}</h3>
-                                <p style={styles.courseDesc}>{course.description}</p>
-
-                                {/* 进度条 (如果用户已登录且有进度) */}
-                                {user && hasStarted && (
-                                    <div style={styles.progressSection}>
-                                        <div style={styles.progressInfo}>
-                                            <span>{language === 'ko' ? '진행률' : language === 'zh' ? '进度' : 'Progress'}</span>
-                                            <span style={styles.progressPercent}>{progressPercent}%</span>
+                <div style={styles.contentWrapper}>
+                    {/* 互动实验工具区块 */}
+                    <section style={styles.toolsSection}>
+                        <h2 style={styles.sectionHeader}>
+                            <FlaskConical size={18} style={{ color: 'var(--accent-primary)' }} />
+                            {language === 'ko' ? '인터랙티브 도구' : language === 'zh' ? '互动实验工具' : 'Interactive Tools'}
+                        </h2>
+                        <div style={styles.toolsGrid}>
+                            {INTERACTIVE_TOOLS.map((tool) => {
+                                const IconComponent = tool.icon
+                                return (
+                                    <article
+                                        key={tool.id}
+                                        style={styles.toolCard}
+                                        onClick={() => setActiveTool(tool)}
+                                    >
+                                        <div style={{ ...styles.toolIcon, background: `${tool.color}20`, color: tool.color }}>
+                                            <IconComponent size={24} />
                                         </div>
-                                        <div style={styles.progressBar}>
-                                            <div style={{ ...styles.progressFill, width: `${progressPercent}%` }} />
+                                        <div style={styles.toolContent}>
+                                            <h3 style={styles.toolTitle}>{getToolTitle(tool)}</h3>
+                                            <p style={styles.toolDesc}>{getToolDesc(tool)}</p>
                                         </div>
-                                    </div>
-                                )}
+                                        <ArrowRight size={16} style={styles.toolArrow} />
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    </section>
 
-                                <div style={styles.courseFooter}>
-                                    <button style={styles.startBtn}>
-                                        <span>
-                                            {hasStarted
-                                                ? (language === 'ko' ? '계속하기' : language === 'zh' ? '继续学习' : 'Continue')
-                                                : t('views.lab.startCourse')
-                                            }
-                                        </span>
-                                        <ChevronRight size={14} />
-                                    </button>
-                                </div>
-                            </article>
-                        )
-                    })}
+                    {/* 课程区块 */}
+                    {labCourses.length > 0 && (
+                        <section style={styles.coursesSection}>
+                            <h2 style={styles.sectionHeader}>
+                                <BookOpen size={18} style={{ color: 'var(--accent-gold)' }} />
+                                {language === 'ko' ? '학습 과정' : language === 'zh' ? '学习课程' : 'Courses'}
+                            </h2>
+                            <div style={styles.coursesGrid}>
+                                {labCourses.map((course, index) => {
+                                    const levelConfig = getLevelConfig(course.level)
+                                    const progress = userProgress[course.id] || 0
+                                    const progressPercent = getProgressPercent(course.id, course.lessons)
+                                    const hasStarted = progress > 0 || userProgress[course.id] !== undefined
+
+                                    return (
+                                        <article
+                                            key={course.id}
+                                            style={{ ...styles.courseCard, animationDelay: `${index * 100}ms` }}
+                                            onClick={() => setSelectedCourseId(course.id)}
+                                        >
+                                            {course.image_url && (
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: 160,
+                                                    borderRadius: 'var(--radius-lg)',
+                                                    backgroundImage: `url(${course.image_url})`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    marginBottom: 'var(--space-2)'
+                                                }} />
+                                            )}
+                                            <div style={styles.courseHeader}>
+                                                <div style={{ ...styles.levelBadge, background: levelConfig.bg, color: levelConfig.color }}>
+                                                    {levelConfig.label}
+                                                </div>
+                                                <div style={styles.lessonCount}>
+                                                    <BookOpen size={12} />
+                                                    <span>{course.lessons || 0} {t('views.lab.lessons')}</span>
+                                                </div>
+                                            </div>
+                                            <h3 style={styles.courseTitle}>{course.title}</h3>
+                                            <p style={styles.courseDesc}>{course.description}</p>
+
+                                            {user && hasStarted && (
+                                                <div style={styles.progressSection}>
+                                                    <div style={styles.progressInfo}>
+                                                        <span>{language === 'ko' ? '진행률' : language === 'zh' ? '进度' : 'Progress'}</span>
+                                                        <span style={styles.progressPercent}>{progressPercent}%</span>
+                                                    </div>
+                                                    <div style={styles.progressBar}>
+                                                        <div style={{ ...styles.progressFill, width: `${progressPercent}%` }} />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div style={styles.courseFooter}>
+                                                <button style={styles.startBtn}>
+                                                    <span>
+                                                        {hasStarted
+                                                            ? (language === 'ko' ? '계속하기' : language === 'zh' ? '继续学习' : 'Continue')
+                                                            : t('views.lab.startCourse')
+                                                        }
+                                                    </span>
+                                                    <ChevronRight size={14} />
+                                                </button>
+                                            </div>
+                                        </article>
+                                    )
+                                })}
+                            </div>
+                        </section>
+                    )}
                 </div>
             )}
         </div>
@@ -180,10 +270,19 @@ const styles = {
     titleGradient: { background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
     subtitle: { fontSize: '0.875rem', color: 'var(--text-tertiary)' },
     emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-16)', gap: 'var(--space-4)', flex: 1, minHeight: 0 },
-    emptyTitle: { margin: 0, fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-secondary)' },
-    emptyDesc: { margin: 0, fontSize: '0.875rem', color: 'var(--text-muted)' },
     spinner: { width: 32, height: 32, border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' },
-    coursesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-5)', overflow: 'auto', flex: 1 },
+    contentWrapper: { display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', overflow: 'auto', flex: 1 },
+    toolsSection: { display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' },
+    sectionHeader: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' },
+    toolsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-4)' },
+    toolCard: { display: 'flex', alignItems: 'center', gap: 'var(--space-4)', padding: 'var(--space-4)', background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(8, 16, 24, 0.9) 100%)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-lg)', cursor: 'pointer', transition: 'all 0.3s ease' },
+    toolIcon: { width: 48, height: 48, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+    toolContent: { flex: 1, minWidth: 0 },
+    toolTitle: { margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' },
+    toolDesc: { margin: '4px 0 0', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 },
+    toolArrow: { color: 'var(--text-muted)', flexShrink: 0 },
+    coursesSection: { display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' },
+    coursesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 'var(--space-5)' },
     courseCard: { background: 'linear-gradient(135deg, var(--bg-card) 0%, rgba(8, 16, 24, 0.9) 100%)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-xl)', padding: 'var(--space-6)', display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', animation: 'slide-up 0.4s ease forwards', opacity: 0, transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', backdropFilter: 'blur(8px)', cursor: 'pointer' },
     courseHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
     levelBadge: { padding: '5px 14px', borderRadius: 'var(--radius-full)', fontSize: '0.75rem', fontWeight: '700', boxShadow: '0 0 12px currentColor' },
