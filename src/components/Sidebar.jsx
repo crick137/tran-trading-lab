@@ -12,13 +12,10 @@ function Sidebar({ navItems, activeView, onNavClick, collapsed, onToggle }) {
 
     const mainNavItems = [
         { id: 'dashboard', label: 'Overview', labelKr: '대시보드', icon: LayoutDashboard, shortcut: '⌘1' },
-        { id: 'brief', label: 'Brief', labelKr: '브리프', icon: Zap, shortcut: '⌘2', isHot: true },
-        { id: 'analysis', label: 'Analysis', labelKr: '분석', icon: LineChart, shortcut: '⌘3', isPro: true },
-        { id: 'news', label: 'News', labelKr: '뉴스', icon: Newspaper, shortcut: '⌘4' },
-        { id: 'lab', label: 'Research', labelKr: '연구', icon: FlaskConical, shortcut: '⌘5', isPro: true },
-        { id: 'note', label: 'Journal', labelKr: '노트', icon: StickyNote, shortcut: '⌘6' },
-        { id: 'tools', label: 'Tools', labelKr: '도구', icon: Wrench, shortcut: '⌘7' },
-        { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘8' },
+        { id: 'analysis', label: 'Analysis', labelKr: '분석', icon: LineChart, shortcut: '⌘2', isPro: true },
+        { id: 'news', label: 'News', labelKr: '뉴스', icon: Newspaper, shortcut: '⌘3' },
+        { id: 'lab', label: 'Research', labelKr: '연구', icon: FlaskConical, shortcut: '⌘4', isPro: true },
+        { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘5' },
     ]
 
     return (
