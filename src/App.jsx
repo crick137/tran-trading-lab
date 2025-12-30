@@ -24,7 +24,11 @@ function App() {
                             <Routes>
                                 <Route path="/" element={<TranTradingTerminal />} />
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
-                                <Route path="/library" element={<ContentLibrary />} />
+                                {/* Generic Article Route - verifying this works for howard-marks-bubble */}
+                                <Route path="/article/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
+
+                                <Route path="/column" element={<ContentLibrary />} /> {/* Renaming URL to /column */}
+                                <Route path="/library" element={<ContentLibrary />} /> {/* Keep for backward compat if needed */}
 
                                 {/* 可独立分享的Kelly公式页面 */}
                                 <Route path="/kelly" element={<KellyCompletePage />} />

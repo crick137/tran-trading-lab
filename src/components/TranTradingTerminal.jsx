@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard, BarChart3, Globe,
-    GraduationCap, Home, Info, Cpu
+    GraduationCap, Home, Info, Cpu, BookOpen
 } from 'lucide-react'
 import Background3D from './3d/Background3D'
 import TopBar from './TopBar'
@@ -68,12 +68,18 @@ function TranTradingTerminal({ initialView }) {
         { id: 'analysis', label: t('nav.analysis'), icon: BarChart3 },
         { id: 'news', label: t('nav.news'), icon: Globe },
         { id: 'lab', label: t('nav.lab'), icon: GraduationCap },
+        { id: 'library', label: t('nav.library') || 'Library', icon: BookOpen },
         { id: 'systems', label: t('nav.systems') || 'Systems', icon: Cpu },
         { id: 'about', label: t('nav.about'), icon: Info },
     ], [t])
 
     // Handle Navigation - 更新 URL
     const handleNavigate = useCallback((view) => {
+        if (view === 'column') {
+            navigate('/column')
+            return
+        }
+
         setActiveView(view)
         setDirectArticleId(null) // 清除直接打开的文章
         // 更新 URL 但不重新加载页面

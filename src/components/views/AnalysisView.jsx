@@ -26,9 +26,18 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
         loadAnalysis()
     }, [])
 
+    // 硬编码的文章ID列表（在ArticleDetailView中有完整内容）
+    const hardcodedArticles = ['howard-marks-bubble']
+
     // 处理直接通过 URL 打开文章
     useEffect(() => {
         if (directArticleId && !selectedAnalysis) {
+            // 检查是否是硬编码的文章
+            if (hardcodedArticles.includes(directArticleId)) {
+                setSelectedAnalysis({ id: directArticleId })
+                return
+            }
+
             const loadDirectArticle = async () => {
                 try {
                     const article = await db.getById(TABLES.ANALYSIS, directArticleId)
@@ -68,11 +77,14 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
         navigate('/', { replace: true })
     }
 
+    // 检查是否是硬编码文章（不需要从数据库加载）
+    const isHardcodedArticle = (id) => hardcodedArticles.includes(id)
+
     if (selectedAnalysis) {
         return (
             <ArticleDetailView
                 articleId={selectedAnalysis.id}
-                initialData={selectedAnalysis}
+                initialData={isHardcodedArticle(selectedAnalysis.id) ? null : selectedAnalysis}
                 onBack={handleBack}
             />
         )

@@ -6,10 +6,12 @@ import {
     FileText, Wrench, GraduationCap
 } from 'lucide-react'
 import { useI18n } from '../hooks/useI18n'
+import { useAppActions } from '../context/AppContext'
 
-// 内容库 - 展示所有文章、工具和教程
+// 专栏 - 展示深度文章
 function ContentLibrary() {
     const { language } = useI18n()
+    const { setLanguage } = useAppActions()
 
     // 文章列表
     const articles = [
@@ -25,22 +27,19 @@ function ContentLibrary() {
             icon: Target,
             color: '#818cf8',
             tag: { zh: '资金管理', en: 'Money Management', ko: '자금 관리' }
-        }
-    ]
-
-    // 互动工具列表
-    const tools = [
+        },
         {
-            id: 'kelly-simulator',
-            slug: '/tools/kelly-simulator',
-            titleZh: '凯利公式模拟器',
-            titleEn: 'Kelly Criterion Simulator',
-            titleKo: '켈리 기준 시뮬레이터',
-            descZh: '蒙特卡洛模拟可视化最优仓位管理策略',
-            descEn: 'Monte Carlo simulation for optimal position sizing',
-            descKo: '몬테카를로 시뮬레이션으로 최적의 포지션 사이징',
-            icon: Calculator,
-            color: '#00ff88'
+            id: 'howard-marks-bubble',
+            slug: '/article/howard-marks-bubble',
+            titleZh: '霍华德·马克斯：这是泡沫吗？',
+            titleEn: 'Howard Marks: Is This a Bubble?',
+            titleKo: '하워드 막스: 이것은 버블인가?',
+            descZh: '橡树资本创始人深入深度解析 AI 浪潮与历史资产泡沫的异同。',
+            descEn: 'Oaktree founder deep dives into the AI wave vs historical market bubbles.',
+            descKo: '오크트리 창업자가 분석하는 AI 열풍과 역사적 자산 버블의 공통점과 차이점.',
+            icon: TrendingUp,
+            color: '#fbbf24',
+            tag: { zh: '市场洞察', en: 'Market Insights', ko: '시장 인사이트' }
         }
     ]
 
@@ -50,32 +49,32 @@ function ContentLibrary() {
 
     const texts = {
         zh: {
-            title: '内容库',
-            subtitle: '所有教育文章、互动工具和教程',
-            articlesTitle: '教育文章',
+            title: '深度专栏',
+            subtitle: '顶级投资人的思考与洞见',
+            articlesTitle: '精选文章',
             toolsTitle: '互动工具',
-            comingSoon: '更多内容即将推出...',
-            readArticle: '阅读文章',
+            comingSoon: '更多深度内容即将上线...',
+            readArticle: '阅读全文',
             openTool: '打开工具',
             home: '首页'
         },
         en: {
-            title: 'Content Library',
-            subtitle: 'All educational articles, interactive tools, and tutorials',
-            articlesTitle: 'Educational Articles',
+            title: 'Deep Column',
+            subtitle: 'Insights from Top Investors',
+            articlesTitle: 'Featured Articles',
             toolsTitle: 'Interactive Tools',
-            comingSoon: 'More content coming soon...',
-            readArticle: 'Read Article',
+            comingSoon: 'More deep content coming soon...',
+            readArticle: 'Read Full Article',
             openTool: 'Open Tool',
             home: 'Home'
         },
         ko: {
-            title: '콘텐츠 라이브러리',
-            subtitle: '모든 교육 기사, 인터랙티브 도구 및 튜토리얼',
-            articlesTitle: '교육 기사',
+            title: '심층 칼럼',
+            subtitle: '최고 투자자들의 통찰과 인사이트',
+            articlesTitle: '추천 기사',
             toolsTitle: '인터랙티브 도구',
-            comingSoon: '더 많은 콘텐츠가 곧 출시됩니다...',
-            readArticle: '기사 읽기',
+            comingSoon: '더 많은 심층 콘텐츠가 곧 출시됩니다...',
+            readArticle: '전체 읽기',
             openTool: '도구 열기',
             home: '홈'
         }
@@ -91,14 +90,32 @@ function ContentLibrary() {
                     <Home size={20} />
                     <span>{t.home}</span>
                 </Link>
+
+                {/* Language Switcher */}
+                <div style={styles.langSwitcher}>
+                    <button
+                        style={{ ...styles.langBtn, color: language === 'ko' ? '#00ff88' : '#64748b' }}
+                        onClick={() => setLanguage('ko')}
+                    >KR</button>
+                    <span style={styles.divider}>|</span>
+                    <button
+                        style={{ ...styles.langBtn, color: language === 'zh' ? '#00ff88' : '#64748b' }}
+                        onClick={() => setLanguage('zh')}
+                    >CN</button>
+                    <span style={styles.divider}>|</span>
+                    <button
+                        style={{ ...styles.langBtn, color: language === 'en' ? '#00ff88' : '#64748b' }}
+                        onClick={() => setLanguage('en')}
+                    >EN</button>
+                </div>
             </header>
 
             {/* Hero Section */}
             <section style={styles.hero}>
                 <div style={styles.heroContent}>
                     <div style={styles.badge}>
-                        <GraduationCap size={16} />
-                        <span>TranTradingLab</span>
+                        <BookOpen size={16} />
+                        <span>TranTradingLab Column</span>
                     </div>
                     <h1 style={styles.title}>{t.title}</h1>
                     <p style={styles.subtitle}>{t.subtitle}</p>
@@ -136,33 +153,8 @@ function ContentLibrary() {
                 </div>
             </section>
 
-            {/* Tools Section */}
-            <section style={styles.section}>
-                <h2 style={styles.sectionTitle}>
-                    <Wrench size={22} style={{ color: '#00ff88' }} />
-                    {t.toolsTitle}
-                </h2>
-                <div style={styles.grid}>
-                    {tools.map((tool) => {
-                        const IconComponent = tool.icon
-                        return (
-                            <Link to={tool.slug} key={tool.id} style={styles.card}>
-                                <div style={{ ...styles.cardIcon, background: `${tool.color}15`, color: tool.color }}>
-                                    <IconComponent size={28} />
-                                </div>
-                                <div style={styles.cardContent}>
-                                    <h3 style={styles.cardTitle}>{getTitle(tool)}</h3>
-                                    <p style={styles.cardDesc}>{getDesc(tool)}</p>
-                                </div>
-                                <div style={{ ...styles.cardAction, color: '#00ff88' }}>
-                                    <span>{t.openTool}</span>
-                                    <ArrowRight size={16} />
-                                </div>
-                            </Link>
-                        )
-                    })}
-                </div>
-            </section>
+
+
 
             {/* Coming Soon */}
             <section style={styles.comingSoon}>
@@ -329,6 +321,24 @@ const styles = {
         borderTop: '1px solid #1e293b',
         fontSize: '0.85rem',
         color: '#475569'
+    },
+    langSwitcher: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+    },
+    langBtn: {
+        background: 'none',
+        border: 'none',
+        fontSize: 14,
+        fontWeight: 600,
+        cursor: 'pointer',
+        padding: 4,
+        transition: 'color 0.2s',
+    },
+    divider: {
+        color: '#334155',
+        fontSize: 12,
     }
 }
 

@@ -4,11 +4,12 @@ import { interactions } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
 import { useI18n } from '../../hooks/useI18n'
 import CommentPanel from '../CommentPanel'
+import { howardMarksBubbleArticle } from '../../data/articles/howardMarksBubble'
 
 function ArticleDetailView({ articleId, onBack, initialData }) {
     const { user, isAuthenticated } = useAppState()
     const { openAuthModal, notify } = useAppActions()
-    const { t } = useI18n()
+    const { t, language } = useI18n()
 
     const [article, setArticle] = useState(initialData || null)
     const [loading, setLoading] = useState(!initialData)
@@ -30,19 +31,49 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
         // Simulate fetch if no initial data provided
         setTimeout(() => {
-            setArticle({
-                id: articleId,
-                title: "비트코인 반감기 이후 시장 전망 분석",
-                subtitle: "과거 데이터를 통한 패턴 분석과 2024년 시장 예측",
-                author: {
-                    name: "Kim Chartist",
-                    avatar: "https://i.pravatar.cc/150?u=kim",
-                    role: "Chief Analyst"
-                },
-                date: "2024. 04. 15",
-                readTime: "5 min read",
-                tags: ["Bitcoin", "Market Analysis", "Halving"],
-                content: `
+            if (articleId === 'howard-marks-bubble') {
+                const currentLang = language || 'ko'
+                const localizedData = howardMarksBubbleArticle[currentLang] || howardMarksBubbleArticle.ko
+
+                // Get localized UI strings
+                const uiStrings = {
+                    ko: { role: '번역 | 리서치팀', originalLabel: '📄 원문:', readTime: '25분 읽기' },
+                    zh: { role: '翻译 | 研究团队', originalLabel: '📄 原文:', readTime: '25分钟阅读' },
+                    en: { role: 'Translation | Research Team', originalLabel: '📄 Original:', readTime: '25 min read' }
+                }
+                const ui = uiStrings[currentLang] || uiStrings.ko
+
+                setArticle({
+                    id: articleId,
+                    title: localizedData.title,
+                    subtitle: localizedData.description,
+                    author: {
+                        name: "TranTradingLab",
+                        avatar: "/tran-logo.png",
+                        role: ui.role
+                    },
+                    originalAuthor: "Howard Marks, Oaktree Capital",
+                    originalLabel: ui.originalLabel,
+                    date: "2025. 12. 30",
+                    readTime: ui.readTime,
+                    tags: ["Market Cycle", "AI Bubble", "Investing", "Oaktree Capital"],
+                    image_url: "/ai_bubble.png",
+                    content: localizedData.content
+                })
+            } else {
+                setArticle({
+                    id: articleId,
+                    title: "비트코인 반감기 이후 시장 전망 분석",
+                    subtitle: "과거 데이터를 통한 패턴 분석과 2024년 시장 예측",
+                    author: {
+                        name: "TranTradingLab",
+                        avatar: "/tran-logo.png",
+                        role: "리서치팀"
+                    },
+                    date: "2024. 04. 15",
+                    readTime: "5 min read",
+                    tags: ["Bitcoin", "Market Analysis", "Halving"],
+                    content: `
 # 비트코인 반감기의 역사적 패턴
 
 비트코인 반감기는 암호화폐 시장에서 가장 중요한 이벤트 중 하나입니다.
@@ -56,11 +87,12 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 ## 2024년 전망
 
 현재 기관 투자자들의 유입(ETF)과 맞물려 과거와는 다른 양상을 보일 가능성이 높습니다.
-                `,
-            })
+                    `,
+                })
+            }
             setLoading(false)
         }, 800)
-    }, [articleId, initialData])
+    }, [articleId, initialData, language])
 
     // 加载互动状态
     useEffect(() => {
@@ -100,15 +132,22 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
         }
 
         try {
-            const result = await interactions.toggleLike(article.id, user.id)
-            setLiked(result.liked)
-            setLikeCount(prev => result.liked ? prev + 1 : prev - 1)
-            notify(result.liked ? t('views.interaction.liked') : t('views.interaction.unliked'), 'success')
+            if (liked) {
+                await interactions.removeLike(article.id, user.id)
+                setLiked(false)
+                setLikeCount(prev => prev - 1)
+                notify(t('views.interaction.unliked'), 'success')
+            } else {
+                await interactions.addLike(article.id, user.id)
+                setLiked(true)
+                setLikeCount(prev => prev + 1)
+                notify(t('views.interaction.liked'), 'success')
+            }
         } catch (err) {
-            console.error('点赞失败:', err)
+            console.error('点赞操作失败:', err)
             notify(t('views.interaction.operationFailed'), 'error')
         }
-    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify, t])
+    }, [isAuthenticated, liked, article?.id, user?.id, openAuthModal, notify, t])
 
     // 收藏
     const handleBookmark = useCallback(async () => {
@@ -118,14 +157,20 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
         }
 
         try {
-            const result = await interactions.toggleBookmark(article.id, user.id)
-            setBookmarked(result.bookmarked)
-            notify(result.bookmarked ? t('views.interaction.bookmarked') : t('views.interaction.unbookmarked'), 'success')
+            if (bookmarked) {
+                await interactions.removeBookmark(article.id, user.id)
+                setBookmarked(false)
+                notify(t('views.interaction.unbookmarked'), 'success')
+            } else {
+                await interactions.addBookmark(article.id, user.id)
+                setBookmarked(true)
+                notify(t('views.interaction.bookmarked'), 'success')
+            }
         } catch (err) {
-            console.error('收藏失败:', err)
+            console.error('收藏操作失败:', err)
             notify(t('views.interaction.operationFailed'), 'error')
         }
-    }, [article?.id, user?.id, isAuthenticated, openAuthModal, notify, t])
+    }, [isAuthenticated, bookmarked, article?.id, user?.id, openAuthModal, notify, t])
 
     // 分享（复制链接）
     const handleShare = useCallback(async () => {
@@ -149,6 +194,107 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             setCommentCount(count)
         }
     }, [article?.id])
+
+    // 处理评论数更新
+    const handleCommentCountChange = useCallback((count) => {
+        setCommentCount(count)
+    }, [])
+
+    // Improved markdown renderer
+    const renderMarkdown = (content) => {
+        if (!content) return null
+
+        const lines = content.split('\n')
+        const elements = []
+        let inList = false
+        let listItems = []
+
+        const processInlineStyles = (text) => {
+            // Handle bold text
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            // Handle italic
+            text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>')
+            return text
+        }
+
+        const flushList = () => {
+            if (listItems.length > 0) {
+                elements.push(
+                    <ul key={`list-${elements.length}`} style={styles.ul}>
+                        {listItems.map((item, i) => (
+                            <li key={i} style={styles.li} dangerouslySetInnerHTML={{ __html: processInlineStyles(item) }} />
+                        ))}
+                    </ul>
+                )
+                listItems = []
+                inList = false
+            }
+        }
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i]
+            const trimmedLine = line.trim()
+
+            // Horizontal rule
+            if (trimmedLine === '---') {
+                flushList()
+                elements.push(<hr key={i} style={styles.hr} />)
+                continue
+            }
+
+            // Headers
+            if (trimmedLine.startsWith('### ')) {
+                flushList()
+                elements.push(<h3 key={i} style={styles.h3}>{trimmedLine.replace('### ', '')}</h3>)
+                continue
+            }
+            if (trimmedLine.startsWith('## ')) {
+                flushList()
+                elements.push(<h2 key={i} style={styles.h2}>{trimmedLine.replace('## ', '')}</h2>)
+                continue
+            }
+            if (trimmedLine.startsWith('# ')) {
+                flushList()
+                elements.push(<h1 key={i} style={styles.h1}>{trimmedLine.replace('# ', '')}</h1>)
+                continue
+            }
+
+            // Blockquote
+            if (trimmedLine.startsWith('> ')) {
+                flushList()
+                const quoteText = trimmedLine.replace('> ', '')
+                elements.push(
+                    <blockquote key={i} style={styles.blockquote}>
+                        <span dangerouslySetInnerHTML={{ __html: processInlineStyles(quoteText) }} />
+                    </blockquote>
+                )
+                continue
+            }
+
+            // List items
+            if (trimmedLine.startsWith('- ') || trimmedLine.match(/^\d+\.\s/)) {
+                inList = true
+                const itemText = trimmedLine.replace(/^-\s|^\d+\.\s/, '')
+                listItems.push(itemText)
+                continue
+            }
+
+            // Empty line
+            if (trimmedLine === '') {
+                flushList()
+                continue
+            }
+
+            // Regular paragraph
+            flushList()
+            elements.push(
+                <p key={i} style={styles.p} dangerouslySetInnerHTML={{ __html: processInlineStyles(trimmedLine) }} />
+            )
+        }
+
+        flushList()
+        return elements
+    }
 
     if (loading) return (
         <div style={styles.loading}>
@@ -192,6 +338,13 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                             </div>
                         </div>
                     </div>
+
+                    {/* Original author credit */}
+                    {article.originalAuthor && (
+                        <div style={styles.originalAuthor}>
+                            {article.originalLabel || '📄 원문:'} {article.originalAuthor}
+                        </div>
+                    )}
                 </header>
 
                 {/* 文章封面图 */}
@@ -202,14 +355,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                 )}
 
                 <div style={styles.content}>
-                    {(article.content || '').split('\n').map((line, i) => {
-                        if (line.startsWith('# ')) return <h1 key={i} style={styles.h1}>{line.replace('# ', '')}</h1>
-                        if (line.startsWith('## ')) return <h2 key={i} style={styles.h2}>{line.replace('## ', '')}</h2>
-                        if (line.startsWith('### ')) return <h3 key={i} style={styles.h3}>{line.replace('### ', '')}</h3>
-                        if (line.startsWith('- ')) return <li key={i} style={styles.li}>{line.replace('- ', '')}</li>
-                        if (line.trim() === '') return <br key={i} />
-                        return <p key={i} style={styles.p}>{line}</p>
-                    })}
+                    {renderMarkdown(article.content)}
                 </div>
 
                 <footer style={styles.footer}>
@@ -402,15 +548,75 @@ const styles = {
         display: 'block',
     },
     content: {
-        fontSize: 16,
-        lineHeight: 1.8,
+        fontSize: 17,
+        lineHeight: 1.9,
         color: 'rgba(255,255,255,0.9)',
+        letterSpacing: '0.01em',
     },
-    h1: { fontSize: 28, fontWeight: 700, marginTop: 40, marginBottom: 20, color: '#fff' },
-    h2: { fontSize: 24, fontWeight: 700, marginTop: 30, marginBottom: 16, color: '#e2e8f0' },
-    h3: { fontSize: 20, fontWeight: 600, marginTop: 24, marginBottom: 12, color: '#cbd5e1' },
-    p: { marginBottom: 16 },
-    li: { marginLeft: 20, marginBottom: 8, listStyleType: 'disc' },
+    h1: {
+        fontSize: 28,
+        fontWeight: 700,
+        marginTop: 48,
+        marginBottom: 24,
+        color: '#fff',
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        paddingBottom: 12,
+    },
+    h2: {
+        fontSize: 24,
+        fontWeight: 700,
+        marginTop: 40,
+        marginBottom: 20,
+        color: '#e2e8f0',
+        borderLeft: '3px solid #00ff88',
+        paddingLeft: 16,
+    },
+    h3: {
+        fontSize: 20,
+        fontWeight: 600,
+        marginTop: 32,
+        marginBottom: 16,
+        color: '#cbd5e1'
+    },
+    p: {
+        marginBottom: 20,
+        textAlign: 'justify',
+    },
+    ul: {
+        marginBottom: 24,
+        paddingLeft: 24,
+    },
+    li: {
+        marginBottom: 12,
+        listStyleType: 'disc',
+        paddingLeft: 8,
+    },
+    blockquote: {
+        margin: '28px 0',
+        padding: '20px 24px',
+        background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.08), rgba(99, 102, 241, 0.08))',
+        borderLeft: '4px solid #00ff88',
+        borderRadius: '0 12px 12px 0',
+        fontStyle: 'italic',
+        color: 'rgba(255,255,255,0.85)',
+        fontSize: 16,
+        lineHeight: 1.7,
+    },
+    hr: {
+        border: 'none',
+        height: 1,
+        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+        margin: '40px 0',
+    },
+    originalAuthor: {
+        marginTop: 20,
+        padding: '12px 16px',
+        background: 'rgba(255,255,255,0.05)',
+        borderRadius: 8,
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.6)',
+        border: '1px solid rgba(255,255,255,0.1)',
+    },
     footer: {
         marginTop: 60,
         paddingTop: 30,
