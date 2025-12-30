@@ -31,6 +31,9 @@ function App() {
                                 <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
                                 <Route path="/tools/kelly-simulator" element={<KellySimulatorPage />} />
 
+                                {/* Admin Pages */}
+                                <Route path="/admin/sentiment" element={<TranTradingTerminal initialView="admin-sentiment" />} />
+
                                 {/* Catch-all route for SPA */}
                                 <Route path="*" element={<TranTradingTerminal />} />
                             </Routes>

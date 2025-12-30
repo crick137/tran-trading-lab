@@ -29,7 +29,10 @@ function TranTradingTerminal({ initialView }) {
     const location = useLocation()
 
     const [activeView, setActiveView] = useState(() => {
-        // 如果 URL 中有 articleId，直接显示分析页面
+        // 处理初始视图
+        if (initialView === 'admin-sentiment') {
+            return 'admin-sentiment'
+        }
         if (articleId || initialView === 'article-detail') {
             return 'analysis'
         }
