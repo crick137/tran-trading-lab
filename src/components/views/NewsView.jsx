@@ -137,7 +137,13 @@ function NewsView() {
                         {filteredNews.map((news, index) => {
                             const sentiment = getSentimentConfig(news.sentiment)
                             return (
-                                <article key={news.id} style={{ ...styles.newsCard, animationDelay: `${index * 60}ms` }}>
+                                <a
+                                    key={news.id}
+                                    href={news.source_url || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ ...styles.newsCard, animationDelay: `${index * 60}ms`, textDecoration: 'none', color: 'inherit' }}
+                                >
                                     <div style={{ ...styles.sentimentBar, background: sentiment.color }} />
                                     {news.image_url && (
                                         <div style={{
@@ -154,18 +160,14 @@ function NewsView() {
                                         <div style={styles.newsMeta}>
                                             <span style={styles.newsSource}>{news.source || t('views.news.source')}</span>
                                             <span style={styles.newsTime}><Clock size={11} />{formatTimeAgo(news.created_at)}</span>
-                                            <div style={{ ...styles.newsSentiment, background: sentiment.bg, color: sentiment.color }}>
-                                                {sentiment.icon}<span>{sentiment.label}</span>
-                                            </div>
                                         </div>
                                         <h3 style={styles.newsTitle}>{news.title}</h3>
                                         <p style={styles.newsSummary}>{news.summary}</p>
                                     </div>
-                                    <div style={styles.newsActions}>
-                                        <button style={styles.newsActionBtn}><Bookmark size={14} /></button>
-                                        {news.source_url && <a href={news.source_url} target="_blank" rel="noopener noreferrer" style={styles.newsActionBtn}><ExternalLink size={14} /></a>}
+                                    <div style={styles.openIndicator}>
+                                        <ExternalLink size={16} />
                                     </div>
-                                </article>
+                                </a>
                             )
                         })}
                     </div>
@@ -205,6 +207,7 @@ const styles = {
     newsSummary: { margin: 0, fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' },
     newsActions: { display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' },
     newsActionBtn: { width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'var(--text-tertiary)', cursor: 'pointer', textDecoration: 'none' },
+    openIndicator: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'rgba(0,210,106,0.1)', color: '#00ff88', flexShrink: 0 },
 }
 
 export default NewsView
