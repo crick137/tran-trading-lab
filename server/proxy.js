@@ -242,62 +242,69 @@ function parseRssXml(xml, feedInfo) {
     return items
 }
 
+// 提取新闻抓取逻辑为独立函数
+async function fetchKoreanNews() {
+    const now = Date.now()
+
+    // 检查缓存
+    if (newsCache.data && (now - newsCache.timestamp) < NEWS_CACHE_TTL) {
+        console.log('📰 Returning cached Korean news')
+        return { data: newsCache.data, cached: true }
+    }
+
+    console.log('📰 Fetching fresh Korean news from RSS feeds...')
+    const allNews = []
+
+    const fetchPromises = KOREAN_NEWS_FEEDS.map(async (feed) => {
+        try {
+            const response = await fetch(feed.url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'application/rss+xml, application/xml, text/xml'
+                },
+                timeout: 10000
+            })
+
+            if (!response.ok) {
+                console.warn(`Failed to fetch ${feed.name}: ${response.status}`)
+                return []
+            }
+
+            const xml = await response.text()
+            const items = parseRssXml(xml, feed)
+            console.log(`  ✓ ${feed.name}: ${items.length} items`)
+            return items
+        } catch (err) {
+            console.warn(`Error fetching ${feed.name}:`, err.message)
+            return []
+        }
+    })
+
+    const results = await Promise.all(fetchPromises)
+    results.forEach(items => allNews.push(...items))
+
+    // 按日期排序
+    allNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+    // 更新缓存
+    newsCache = { data: allNews, timestamp: now }
+    console.log(`📰 Total Korean news fetched: ${allNews.length}`)
+
+    return { data: allNews, cached: false }
+}
+
 // 한국 금융 뉴스 API
 app.get('/api/news/korean', async (req, res) => {
     try {
-        const now = Date.now()
-
-        // 캐시 확인
-        if (newsCache.data && (now - newsCache.timestamp) < NEWS_CACHE_TTL) {
-            console.log('📰 Returning cached Korean news')
-            return res.json({ success: true, data: newsCache.data, cached: true })
-        }
-
-        console.log('📰 Fetching fresh Korean news from RSS feeds...')
-        const allNews = []
-
-        // 모든 피드에서 뉴스 가져오기
-        const fetchPromises = KOREAN_NEWS_FEEDS.map(async (feed) => {
-            try {
-                const response = await fetch(feed.url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                        'Accept': 'application/rss+xml, application/xml, text/xml'
-                    },
-                    timeout: 10000
-                })
-
-                if (!response.ok) {
-                    console.warn(`Failed to fetch ${feed.name}: ${response.status}`)
-                    return []
-                }
-
-                const xml = await response.text()
-                const items = parseRssXml(xml, feed)
-                console.log(`  ✓ ${feed.name}: ${items.length} items`)
-                return items
-            } catch (err) {
-                console.warn(`Error fetching ${feed.name}:`, err.message)
-                return []
-            }
-        })
-
-        const results = await Promise.all(fetchPromises)
-        results.forEach(items => allNews.push(...items))
-
-        // 날짜순 정렬 (최신순)
-        allNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-
-        // 캐시 업데이트
-        newsCache = { data: allNews, timestamp: now }
-
-        console.log(`📰 Total Korean news fetched: ${allNews.length}`)
-        res.json({ success: true, data: allNews, cached: false })
+        const result = await fetchKoreanNews()
+        res.json({ success: true, ...result })
     } catch (error) {
         console.error('Korean news API error:', error.message)
         res.status(500).json({ success: false, error: error.message })
     }
 })
+
+
 
 // ============================================
 // Admin Sentiment Analysis API (FinBERT)
@@ -340,44 +347,52 @@ app.post('/api/admin/sentiment/analyze-news', adminAuth, async (req, res) => {
         // 获取缓存的新闻
         if (!newsCache.data || newsCache.data.length === 0) {
             return res.status(400).json({
+                // 获取缓存的新闻，如果为空则自动抓取
+                if(!newsCache.data || newsCache.data.length === 0) {
+                console.log('📰 Cache empty, auto-fetching news for analysis...')
+                await fetchKoreanNews()
+
+                if (!newsCache.data || newsCache.data.length === 0) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'No news available to analyze.'
+                    })
+                }
+            }
+
+            // 提取新闻标题
+            const titles = newsCache.data.slice(0, 50).map(n => n.title)
+
+            // 调用情绪分析 API
+            const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment/batch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts: titles })
+            })
+
+            if (!response.ok) {
+                throw new Error(`Sentiment API error: ${response.status}`)
+            }
+
+            const analysis = await response.json()
+
+            res.json({
+                success: true,
+                data: {
+                    ...analysis,
+                    news_sample: newsCache.data.slice(0, 5).map(n => ({ title: n.title, source: n.source })),
+                    analyzed_at: new Date().toISOString()
+                }
+            })
+        } catch (error) {
+            console.error('News sentiment analysis error:', error.message)
+            res.status(500).json({
                 success: false,
-                error: 'No cached news. Please fetch Korean news first.'
+                error: error.message,
+                hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
             })
         }
-
-        // 提取新闻标题
-        const titles = newsCache.data.slice(0, 50).map(n => n.title)
-
-        // 调用情绪分析 API
-        const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment/batch`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texts: titles })
-        })
-
-        if (!response.ok) {
-            throw new Error(`Sentiment API error: ${response.status}`)
-        }
-
-        const analysis = await response.json()
-
-        res.json({
-            success: true,
-            data: {
-                ...analysis,
-                news_sample: newsCache.data.slice(0, 5).map(n => ({ title: n.title, source: n.source })),
-                analyzed_at: new Date().toISOString()
-            }
-        })
-    } catch (error) {
-        console.error('News sentiment analysis error:', error.message)
-        res.status(500).json({
-            success: false,
-            error: error.message,
-            hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
-        })
-    }
-})
+    })
 
 // 情绪 API 健康检查 (仅管理员)
 app.get('/api/admin/sentiment/health', adminAuth, async (req, res) => {
