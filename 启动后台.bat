@@ -12,6 +12,10 @@ echo ║  密钥: 147258369.q                                           ║
 echo ╚══════════════════════════════════════════════════════════════╝
 echo.
 
+:: 延迟2秒后打开浏览器
+timeout /t 2 /nobreak > nul
+start "" "http://localhost:5173/admin"
+
 cd /d "%~dp0server"
 
 echo 📦 正在启动 Node.js Proxy 服务...
