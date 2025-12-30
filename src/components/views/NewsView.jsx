@@ -1,40 +1,58 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     TrendingUp, TrendingDown, Minus, ExternalLink,
-    Clock, Newspaper, Filter, Bookmark, Share2, Zap, Inbox
+    Clock, Newspaper, Filter, Bookmark, Share2, Zap, Inbox, RefreshCw
 } from 'lucide-react'
-import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
+
+// Proxy API URL
+const PROXY_API_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3001'
 
 function NewsView() {
     const { t, language } = useI18n()
     const [activeCategory, setActiveCategory] = useState('all')
     const [newsItems, setNewsItems] = useState([])
     const [loading, setLoading] = useState(true)
+    const [lastUpdated, setLastUpdated] = useState(null)
+    const [isRefreshing, setIsRefreshing] = useState(false)
 
-    useEffect(() => {
-        const loadNews = async () => {
-            try {
-                const data = await db.getAll(TABLES.NEWS, {
-                    orderBy: 'created_at',
-                    filters: { is_published: true }
-                })
-                setNewsItems(data || [])
-            } catch (err) {
-                console.error('Failed to load news:', err)
+    // 한국 뉴스 가져오기
+    const fetchKoreanNews = useCallback(async (isManualRefresh = false) => {
+        if (isManualRefresh) setIsRefreshing(true)
+        else setLoading(true)
+
+        try {
+            const response = await fetch(`${PROXY_API_URL}/api/news/korean`)
+            const result = await response.json()
+
+            if (result.success && result.data) {
+                setNewsItems(result.data)
+                setLastUpdated(new Date())
+                console.log(`📰 Loaded ${result.data.length} Korean news items`)
+            } else {
+                console.error('Failed to load Korean news:', result.error)
                 setNewsItems([])
             }
-            setLoading(false)
+        } catch (err) {
+            console.error('Failed to fetch Korean news:', err)
+            setNewsItems([])
         }
-        loadNews()
+
+        setLoading(false)
+        setIsRefreshing(false)
     }, [])
 
+    // 초기 로드 및 자동 갱신 (5분)
+    useEffect(() => {
+        fetchKoreanNews()
+        const interval = setInterval(() => fetchKoreanNews(), 5 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [fetchKoreanNews])
+
     const categories = [
-        { id: 'all', label: t('views.brief.all'), icon: <Newspaper size={14} /> },
-        { id: 'bitcoin', label: 'BTC', icon: null },
-        { id: 'ethereum', label: 'ETH', icon: null },
-        { id: 'altcoin', label: language === 'ko' ? '알트코인' : language === 'zh' ? '山寨币' : 'Altcoin', icon: null },
-        { id: 'macro', label: language === 'ko' ? '매크로' : language === 'zh' ? '宏观' : 'Macro', icon: null },
+        { id: 'all', label: language === 'ko' ? '전체' : language === 'zh' ? '全部' : 'All', icon: <Newspaper size={14} /> },
+        { id: 'finance', label: language === 'ko' ? '증권' : language === 'zh' ? '证券' : 'Finance', icon: null },
+        { id: 'economy', label: language === 'ko' ? '경제' : language === 'zh' ? '经济' : 'Economy', icon: null },
     ]
 
     const getSentimentConfig = (sentiment) => {
@@ -56,6 +74,21 @@ function NewsView() {
         }
     }
 
+    const formatTimeAgo = (dateStr) => {
+        const date = new Date(dateStr)
+        const now = new Date()
+        const diffMs = now - date
+        const diffMins = Math.floor(diffMs / 60000)
+        const diffHours = Math.floor(diffMs / 3600000)
+
+        if (diffMins < 60) {
+            return language === 'ko' ? `${diffMins}분 전` : language === 'zh' ? `${diffMins}分钟前` : `${diffMins}m ago`
+        } else if (diffHours < 24) {
+            return language === 'ko' ? `${diffHours}시간 전` : language === 'zh' ? `${diffHours}小时前` : `${diffHours}h ago`
+        }
+        return date.toLocaleDateString(getDateLocale())
+    }
+
     const filteredNews = activeCategory === 'all' ? newsItems : newsItems.filter(n => n.category === activeCategory)
 
     return (
@@ -66,7 +99,19 @@ function NewsView() {
                     <span style={styles.subtitle}>{t('views.news.subtitle')}</span>
                 </div>
                 <div style={styles.headerRight}>
-                    <button style={styles.filterBtn}><Filter size={14} /><span>{t('common.search')}</span></button>
+                    {lastUpdated && (
+                        <span style={styles.lastUpdated}>
+                            {language === 'ko' ? '마지막 업데이트: ' : language === 'zh' ? '最后更新: ' : 'Updated: '}
+                            {lastUpdated.toLocaleTimeString(getDateLocale())}
+                        </span>
+                    )}
+                    <button
+                        style={{ ...styles.refreshBtn, animation: isRefreshing ? 'spin 1s linear infinite' : 'none' }}
+                        onClick={() => fetchKoreanNews(true)}
+                        disabled={isRefreshing}
+                    >
+                        <RefreshCw size={16} />
+                    </button>
                 </div>
             </header>
 
@@ -108,7 +153,7 @@ function NewsView() {
                                     <div style={styles.newsContent}>
                                         <div style={styles.newsMeta}>
                                             <span style={styles.newsSource}>{news.source || t('views.news.source')}</span>
-                                            <span style={styles.newsTime}><Clock size={11} />{new Date(news.created_at).toLocaleDateString(getDateLocale())}</span>
+                                            <span style={styles.newsTime}><Clock size={11} />{formatTimeAgo(news.created_at)}</span>
                                             <div style={{ ...styles.newsSentiment, background: sentiment.bg, color: sentiment.color }}>
                                                 {sentiment.icon}<span>{sentiment.label}</span>
                                             </div>
@@ -137,8 +182,9 @@ const styles = {
     title: { margin: 0, fontSize: '1.75rem', fontWeight: '700' },
     titleGradient: { background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
     subtitle: { fontSize: '0.875rem', color: 'var(--text-tertiary)' },
-    headerRight: {},
-    filterBtn: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', fontWeight: '500', color: 'var(--text-tertiary)', cursor: 'pointer' },
+    headerRight: { display: 'flex', alignItems: 'center', gap: 'var(--space-3)' },
+    lastUpdated: { fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' },
+    refreshBtn: { width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0, 210, 106, 0.1)', border: '1px solid rgba(0, 210, 106, 0.3)', borderRadius: 'var(--radius-md)', color: '#00ff88', cursor: 'pointer', transition: 'all 0.2s ease' },
     categoryBar: { display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap', flexShrink: 0 },
     categoryPill: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-2) var(--space-4)', background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-full)', fontSize: '0.8125rem', fontWeight: '500', color: 'var(--text-tertiary)', cursor: 'pointer', transition: 'all 0.25s ease', backdropFilter: 'blur(4px)' },
     categoryPillActive: { background: 'linear-gradient(135deg, rgba(0, 210, 106, 0.2) 0%, rgba(0, 210, 106, 0.08) 100%)', borderColor: 'rgba(0, 210, 106, 0.4)', color: '#00ff88', boxShadow: '0 0 16px rgba(0, 210, 106, 0.2)' },

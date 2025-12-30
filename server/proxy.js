@@ -28,7 +28,7 @@ try {
 app.use(cors({
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key']
 }))
 
 app.use(express.json())
@@ -39,6 +39,23 @@ app.use((req, res, next) => {
     console.log(`[${timestamp}] ${req.method} ${req.path}`)
     next()
 })
+
+// ============================================
+// Admin Authentication Middleware
+// ============================================
+const ADMIN_KEY = process.env.ADMIN_KEY || '147258369.q'
+const SENTIMENT_API_URL = process.env.SENTIMENT_API_URL || 'http://localhost:5000'
+
+const adminAuth = (req, res, next) => {
+    const adminKey = req.headers['x-admin-key']
+    if (adminKey !== ADMIN_KEY) {
+        return res.status(403).json({
+            success: false,
+            error: 'Admin access required. Please provide valid x-admin-key header.'
+        })
+    }
+    next()
+}
 
 // Yahoo Finance 符号映射
 const YAHOO_SYMBOLS = {
@@ -170,6 +187,211 @@ app.get('/api/market/all', async (req, res) => {
     } catch (error) {
         console.error('Market API error:', error.message)
         res.status(500).json({ success: false, error: error.message })
+    }
+})
+
+// ============================================
+// Korean Financial News RSS Crawler
+// ============================================
+
+// 한국 금융 뉴스 RSS 소스
+const KOREAN_NEWS_FEEDS = [
+    { id: 'hankyung-finance', url: 'https://www.hankyung.com/feed/finance', name: '한국경제 증권', category: 'finance' },
+    { id: 'hankyung-economy', url: 'https://www.hankyung.com/feed/economy', name: '한국경제 경제', category: 'economy' },
+    { id: 'etoday', url: 'https://rss.etoday.co.kr/eto/etoday_news_all.xml', name: '이투데이', category: 'all' },
+]
+
+// 뉴스 캐시 (5분 TTL)
+let newsCache = { data: null, timestamp: 0 }
+const NEWS_CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+// 간단한 XML 파싱 함수 (외부 의존성 없음)
+function parseRssXml(xml, feedInfo) {
+    const items = []
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g
+    let match
+
+    while ((match = itemRegex.exec(xml)) !== null) {
+        const itemXml = match[1]
+
+        const getTagContent = (tag) => {
+            const regex = new RegExp(`<${tag}[^>]*><!\\[CDATA\\[([\\s\\S]*?)\\]\\]></${tag}>|<${tag}[^>]*>([\\s\\S]*?)</${tag}>`)
+            const m = regex.exec(itemXml)
+            if (m) return (m[1] || m[2] || '').trim()
+            return ''
+        }
+
+        const title = getTagContent('title')
+        const link = getTagContent('link')
+        const description = getTagContent('description')
+        const pubDate = getTagContent('pubDate')
+
+        if (title && link) {
+            items.push({
+                id: `${feedInfo.id}-${Buffer.from(link).toString('base64').slice(0, 16)}`,
+                title,
+                summary: description.replace(/<[^>]*>/g, '').slice(0, 200),
+                source: feedInfo.name,
+                source_url: link,
+                category: feedInfo.category,
+                created_at: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+                sentiment: 'neutral'
+            })
+        }
+    }
+    return items
+}
+
+// 한국 금융 뉴스 API
+app.get('/api/news/korean', async (req, res) => {
+    try {
+        const now = Date.now()
+
+        // 캐시 확인
+        if (newsCache.data && (now - newsCache.timestamp) < NEWS_CACHE_TTL) {
+            console.log('📰 Returning cached Korean news')
+            return res.json({ success: true, data: newsCache.data, cached: true })
+        }
+
+        console.log('📰 Fetching fresh Korean news from RSS feeds...')
+        const allNews = []
+
+        // 모든 피드에서 뉴스 가져오기
+        const fetchPromises = KOREAN_NEWS_FEEDS.map(async (feed) => {
+            try {
+                const response = await fetch(feed.url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/rss+xml, application/xml, text/xml'
+                    },
+                    timeout: 10000
+                })
+
+                if (!response.ok) {
+                    console.warn(`Failed to fetch ${feed.name}: ${response.status}`)
+                    return []
+                }
+
+                const xml = await response.text()
+                const items = parseRssXml(xml, feed)
+                console.log(`  ✓ ${feed.name}: ${items.length} items`)
+                return items
+            } catch (err) {
+                console.warn(`Error fetching ${feed.name}:`, err.message)
+                return []
+            }
+        })
+
+        const results = await Promise.all(fetchPromises)
+        results.forEach(items => allNews.push(...items))
+
+        // 날짜순 정렬 (최신순)
+        allNews.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+
+        // 캐시 업데이트
+        newsCache = { data: allNews, timestamp: now }
+
+        console.log(`📰 Total Korean news fetched: ${allNews.length}`)
+        res.json({ success: true, data: allNews, cached: false })
+    } catch (error) {
+        console.error('Korean news API error:', error.message)
+        res.status(500).json({ success: false, error: error.message })
+    }
+})
+
+// ============================================
+// Admin Sentiment Analysis API (FinBERT)
+// ============================================
+
+// 情绪分析 - 分析单条或多条文本 (仅管理员)
+app.post('/api/admin/sentiment', adminAuth, async (req, res) => {
+    try {
+        const { texts } = req.body
+
+        if (!texts || !Array.isArray(texts) || texts.length === 0) {
+            return res.status(400).json({ success: false, error: 'texts array required' })
+        }
+
+        const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts })
+        })
+
+        if (!response.ok) {
+            throw new Error(`Sentiment API error: ${response.status}`)
+        }
+
+        const data = await response.json()
+        res.json({ success: true, data })
+    } catch (error) {
+        console.error('Sentiment API error:', error.message)
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
+        })
+    }
+})
+
+// 批量分析新闻情绪统计 (仅管理员)
+app.post('/api/admin/sentiment/analyze-news', adminAuth, async (req, res) => {
+    try {
+        // 获取缓存的新闻
+        if (!newsCache.data || newsCache.data.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'No cached news. Please fetch Korean news first.'
+            })
+        }
+
+        // 提取新闻标题
+        const titles = newsCache.data.slice(0, 50).map(n => n.title)
+
+        // 调用情绪分析 API
+        const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment/batch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts: titles })
+        })
+
+        if (!response.ok) {
+            throw new Error(`Sentiment API error: ${response.status}`)
+        }
+
+        const analysis = await response.json()
+
+        res.json({
+            success: true,
+            data: {
+                ...analysis,
+                news_sample: newsCache.data.slice(0, 5).map(n => ({ title: n.title, source: n.source })),
+                analyzed_at: new Date().toISOString()
+            }
+        })
+    } catch (error) {
+        console.error('News sentiment analysis error:', error.message)
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
+        })
+    }
+})
+
+// 情绪 API 健康检查 (仅管理员)
+app.get('/api/admin/sentiment/health', adminAuth, async (req, res) => {
+    try {
+        const response = await fetch(`${SENTIMENT_API_URL}/api/health`)
+        const data = await response.json()
+        res.json({ success: true, data })
+    } catch (error) {
+        res.json({
+            success: false,
+            status: 'offline',
+            error: 'Sentiment API not reachable',
+            hint: 'Start with: python sentiment_api.py'
+        })
     }
 })
 

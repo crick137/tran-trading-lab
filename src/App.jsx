@@ -11,10 +11,8 @@ import { NotificationCenter } from './components/NotificationCenter'
 const TranTradingTerminal = lazy(() => import('./components/TranTradingTerminal'))
 const ContentLibrary = lazy(() => import('./pages/ContentLibrary'))
 
-// 独立可分享页面 - 使用命名导出
-const KellyCompletePage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellyCompletePage })))
-const KellyArticlePage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellyArticlePage })))
-const KellySimulatorPage = lazy(() => import('./pages/KellyPages').then(m => ({ default: m.KellySimulatorPage })))
+// 独立可分享页面 - 直接导入（避免懒加载问题）
+import { KellyCompletePage, KellyArticlePage, KellySimulatorPage } from './pages/KellyPages'
 
 function App() {
     return (

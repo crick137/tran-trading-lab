@@ -15,6 +15,7 @@ import LabView from './views/LabView'
 import SystemsView from './views/SystemsView'
 import IntroductionView from './views/IntroductionView'
 import ProfileView from './views/ProfileView'
+import AdminSentimentView from './views/AdminSentimentView'
 import CommandPalette from './CommandPalette'
 import AIAssistant from './AIAssistant'
 import { useAppState, useAppActions } from '../context/AppContext'
@@ -112,6 +113,7 @@ function TranTradingTerminal({ initialView }) {
             case 'systems': return <SystemsView />
             case 'about': return <IntroductionView />
             case 'profile': return <ProfileView onNavigate={handleNavigate} />
+            case 'admin-sentiment': return <AdminSentimentView onBack={() => handleNavigate('home')} />
             default: return <HomeView onNavigate={handleNavigate} />
         }
     }
