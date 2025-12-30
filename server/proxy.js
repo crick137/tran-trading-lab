@@ -344,55 +344,52 @@ app.post('/api/admin/sentiment', adminAuth, async (req, res) => {
 // 批量分析新闻情绪统计 (仅管理员)
 app.post('/api/admin/sentiment/analyze-news', adminAuth, async (req, res) => {
     try {
-        // 获取缓存的新闻
+        // 获取缓存的新闻，如果为空则自动抓取
         if (!newsCache.data || newsCache.data.length === 0) {
-            return res.status(400).json({
-                // 获取缓存的新闻，如果为空则自动抓取
-                if(!newsCache.data || newsCache.data.length === 0) {
-                console.log('📰 Cache empty, auto-fetching news for analysis...')
-                await fetchKoreanNews()
+            console.log('📰 Cache empty, auto-fetching news for analysis...')
+            await fetchKoreanNews()
 
-                if (!newsCache.data || newsCache.data.length === 0) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'No news available to analyze.'
-                    })
-                }
+            if (!newsCache.data || newsCache.data.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No news available to analyze.'
+                })
             }
-
-            // 提取新闻标题
-            const titles = newsCache.data.slice(0, 50).map(n => n.title)
-
-            // 调用情绪分析 API
-            const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment/batch`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ texts: titles })
-            })
-
-            if (!response.ok) {
-                throw new Error(`Sentiment API error: ${response.status}`)
-            }
-
-            const analysis = await response.json()
-
-            res.json({
-                success: true,
-                data: {
-                    ...analysis,
-                    news_sample: newsCache.data.slice(0, 5).map(n => ({ title: n.title, source: n.source })),
-                    analyzed_at: new Date().toISOString()
-                }
-            })
-        } catch (error) {
-            console.error('News sentiment analysis error:', error.message)
-            res.status(500).json({
-                success: false,
-                error: error.message,
-                hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
-            })
         }
-    })
+
+        // 提取新闻标题
+        const titles = newsCache.data.slice(0, 50).map(n => n.title)
+
+        // 调用情绪分析 API
+        const response = await fetch(`${SENTIMENT_API_URL}/api/sentiment/batch`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texts: titles })
+        })
+
+        if (!response.ok) {
+            throw new Error(`Sentiment API error: ${response.status}`)
+        }
+
+        const analysis = await response.json()
+
+        res.json({
+            success: true,
+            data: {
+                ...analysis,
+                news_sample: newsCache.data.slice(0, 5).map(n => ({ title: n.title, source: n.source })),
+                analyzed_at: new Date().toISOString()
+            }
+        })
+    } catch (error) {
+        console.error('News sentiment analysis error:', error.message)
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            hint: 'Make sure sentiment_api.py is running: python sentiment_api.py'
+        })
+    }
+})
 
 // 情绪 API 健康检查 (仅管理员)
 app.get('/api/admin/sentiment/health', adminAuth, async (req, res) => {
