@@ -36,31 +36,31 @@ export default async function handler(req, res) {
 
         const html = await response.text()
 
-        // Simple content extraction
         let title = ''
         let content = ''
 
-        // Extract title
+        // Extract title from og:title or <title>
+        const ogTitleMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i)
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
-        if (titleMatch) {
-            title = titleMatch[1].trim()
-        }
+        title = ogTitleMatch ? ogTitleMatch[1] : (titleMatch ? titleMatch[1] : '')
+        title = title.trim()
 
-        // Extract main content (simplified extraction)
-        // Try common article selectors
-        const contentPatterns = [
-            /<article[^>]*>([\s\S]*?)<\/article>/i,
-            /<div[^>]*class="[^"]*article[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
-            /<div[^>]*id="article[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
-            /<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
-        ]
-
-        for (const pattern of contentPatterns) {
-            const match = html.match(pattern)
-            if (match && match[1] && match[1].length > 200) {
-                content = match[1]
-                break
-            }
+        // Site-specific extraction for Korean news sites
+        if (url.includes('etoday.co.kr')) {
+            // 이투데이
+            const articleMatch = html.match(/<div[^>]*class="[^"]*articleView[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*article_copy/i)
+                || html.match(/<div[^>]*class="[^"]*newsContent[^"]*"[^>]*>([\s\S]*?)<\/div>/i)
+                || html.match(/<div[^>]*id="articleBody"[^>]*>([\s\S]*?)<\/div>/i)
+            if (articleMatch) content = articleMatch[1]
+        } else if (url.includes('hankyung.com')) {
+            // 한국경제
+            const articleMatch = html.match(/<div[^>]*id="articletxt"[^>]*>([\s\S]*?)<\/div>/i)
+                || html.match(/<div[^>]*class="[^"]*article-body[^"]*"[^>]*>([\s\S]*?)<\/div>/i)
+            if (articleMatch) content = articleMatch[1]
+        } else {
+            // Generic extraction
+            const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i)
+            if (articleMatch) content = articleMatch[1]
         }
 
         // Fallback: extract all paragraphs
@@ -69,12 +69,23 @@ export default async function handler(req, res) {
             const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi
             let pMatch
             while ((pMatch = pRegex.exec(html)) !== null) {
-                const text = pMatch[1].replace(/<[^>]*>/g, '').trim()
-                if (text.length > 30) {
+                // Clean the paragraph text
+                let text = pMatch[1]
+                    .replace(/<[^>]*>/g, '') // Remove HTML tags
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/&[a-z]+;/gi, '')
+                    .trim()
+
+                // Skip short or junk paragraphs
+                if (text.length > 30 &&
+                    !text.includes('검색어') &&
+                    !text.includes('로그인') &&
+                    !text.includes('무단전재') &&
+                    !text.includes('저작권')) {
                     paragraphs.push(`<p>${text}</p>`)
                 }
             }
-            content = paragraphs.slice(0, 20).join('')
+            content = paragraphs.slice(0, 30).join('')
         }
 
         // Clean content
@@ -84,10 +95,16 @@ export default async function handler(req, res) {
             .replace(/<nav[\s\S]*?<\/nav>/gi, '')
             .replace(/<footer[\s\S]*?<\/footer>/gi, '')
             .replace(/<aside[\s\S]*?<\/aside>/gi, '')
+            .replace(/<form[\s\S]*?<\/form>/gi, '')
+            .replace(/<button[\s\S]*?<\/button>/gi, '')
+            .replace(/<input[^>]*>/gi, '')
             .replace(/<!--[\s\S]*?-->/g, '')
+            .replace(/<img[^>]*>/gi, '') // Remove images for cleaner reading
+            .trim()
 
+        // Final check
         if (!content || content.length < 50) {
-            content = '<p>无法自动提取文章内容，请点击右上角按钮查看原文。</p>'
+            content = '<p style="color: rgba(255,255,255,0.5);">无法自动提取文章内容。请点击右上角按钮查看原文。</p>'
         }
 
         res.status(200).json({
