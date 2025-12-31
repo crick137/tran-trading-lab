@@ -68,8 +68,11 @@ function NewsView() {
 
     const categories = [
         { id: 'all', label: language === 'ko' ? '전체' : language === 'zh' ? '全部' : 'All', icon: <Newspaper size={14} /> },
-        { id: 'finance', label: language === 'ko' ? '증권' : language === 'zh' ? '证券' : 'Finance', icon: null },
+        { id: 'finance', label: language === 'ko' ? '증권' : language === 'zh' ? '证券' : 'Stocks', icon: null },
         { id: 'economy', label: language === 'ko' ? '경제' : language === 'zh' ? '经济' : 'Economy', icon: null },
+        { id: 'crypto', label: language === 'ko' ? '암호화폐' : language === 'zh' ? '加密货币' : 'Crypto', icon: null },
+        { id: 'global', label: language === 'ko' ? '국제' : language === 'zh' ? '国际' : 'Global', icon: null },
+        { id: 'realestate', label: language === 'ko' ? '부동산' : language === 'zh' ? '房产' : 'Property', icon: null },
     ]
 
     const getSentimentConfig = (sentiment) => {

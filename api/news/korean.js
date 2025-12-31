@@ -5,9 +5,18 @@
 
 // 한국 금융 뉴스 RSS 소스
 const KOREAN_NEWS_FEEDS = [
+    // 증권 (Finance/Stocks)
     { id: 'hankyung-finance', url: 'https://www.hankyung.com/feed/finance', name: '한국경제 증권', category: 'finance' },
+    // 경제 (Economy)
     { id: 'hankyung-economy', url: 'https://www.hankyung.com/feed/economy', name: '한국경제 경제', category: 'economy' },
+    // 글로벌 (Global)
+    { id: 'hankyung-international', url: 'https://www.hankyung.com/feed/international', name: '한국경제 국제', category: 'global' },
+    // 부동산 (Real Estate)
+    { id: 'hankyung-realestate', url: 'https://www.hankyung.com/feed/realestate', name: '한국경제 부동산', category: 'realestate' },
+    // 종합 (General)
     { id: 'etoday', url: 'https://rss.etoday.co.kr/eto/etoday_news_all.xml', name: '이투데이', category: 'all' },
+    // 암호화폐 (Crypto) - Using Hankyung IT (often covers crypto)
+    { id: 'hankyung-it', url: 'https://www.hankyung.com/feed/it', name: '한국경제 IT', category: 'crypto' },
 ]
 
 // 简单的 XML 解析 (无外部依赖)
