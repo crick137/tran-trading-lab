@@ -3,20 +3,22 @@
  * Endpoint: /api/news/korean
  */
 
-// 한국 금융 뉴스 RSS 소스
+// 한국 금융 뉴스 RSS 소스 (verified working feeds)
 const KOREAN_NEWS_FEEDS = [
-    // 증권 (Finance/Stocks)
-    { id: 'hankyung-finance', url: 'https://www.hankyung.com/feed/finance', name: '한국경제 증권', category: 'finance' },
-    // 경제 (Economy)
-    { id: 'hankyung-economy', url: 'https://www.hankyung.com/feed/economy', name: '한국경제 경제', category: 'economy' },
-    // 글로벌 (Global)
-    { id: 'hankyung-international', url: 'https://www.hankyung.com/feed/international', name: '한국경제 국제', category: 'global' },
-    // 부동산 (Real Estate)
-    { id: 'hankyung-realestate', url: 'https://www.hankyung.com/feed/realestate', name: '한국경제 부동산', category: 'realestate' },
-    // 종합 (General)
-    { id: 'etoday', url: 'https://rss.etoday.co.kr/eto/etoday_news_all.xml', name: '이투데이', category: 'all' },
-    // 암호화폐 (Crypto) - Using Hankyung IT (often covers crypto)
-    { id: 'hankyung-it', url: 'https://www.hankyung.com/feed/it', name: '한국경제 IT', category: 'crypto' },
+    // 전체 (All) - 이투데이 종합
+    { id: 'etoday-all', url: 'https://rss.etoday.co.kr/eto/etoday_news_all.xml', name: '이투데이', category: 'all' },
+    // 증권 (Finance/Stocks) - 이투데이 증권·금융
+    { id: 'etoday-finance', url: 'https://rss.etoday.co.kr/eto/finance_news.xml', name: '이투데이 증권', category: 'finance' },
+    // 경제 (Economy) - 이투데이 경제
+    { id: 'etoday-economy', url: 'https://rss.etoday.co.kr/eto/economy_news.xml', name: '이투데이 경제', category: 'economy' },
+    // 국제 (Global) - 이투데이 글로벌
+    { id: 'etoday-global', url: 'https://rss.etoday.co.kr/eto/global_news.xml', name: '이투데이 국제', category: 'global' },
+    // 부동산 (Real Estate) - 이투데이 부동산
+    { id: 'etoday-land', url: 'https://rss.etoday.co.kr/eto/land_news.xml', name: '이투데이 부동산', category: 'realestate' },
+    // IT/암호화폐 (Crypto/Tech) - 이투데이 IT
+    { id: 'etoday-it', url: 'https://rss.etoday.co.kr/eto/it_news.xml', name: '이투데이 IT', category: 'crypto' },
+    // 매일경제 헤드라인 (backup)
+    { id: 'mk-headline', url: 'https://www.mk.co.kr/rss/30000001/', name: '매일경제', category: 'all' },
 ]
 
 // 简单的 XML 解析 (无外部依赖)
