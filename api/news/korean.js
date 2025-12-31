@@ -15,8 +15,10 @@ const KOREAN_NEWS_FEEDS = [
     { id: 'etoday-global', url: 'https://rss.etoday.co.kr/eto/global_news.xml', name: '이투데이 국제', category: 'global' },
     // 부동산 (Real Estate) - 이투데이 부동산
     { id: 'etoday-land', url: 'https://rss.etoday.co.kr/eto/land_news.xml', name: '이투데이 부동산', category: 'realestate' },
-    // IT/암호화폐 (Crypto/Tech) - 이투데이 IT
-    { id: 'etoday-it', url: 'https://rss.etoday.co.kr/eto/it_news.xml', name: '이투데이 IT', category: 'crypto' },
+    // 암호화폐 (Crypto) - 증권 피드에 포함 (etoday doesn't have separate crypto feed)
+    { id: 'etoday-crypto', url: 'https://rss.etoday.co.kr/eto/finance_news.xml', name: '이투데이 코인', category: 'crypto' },
+    // 뉴스발전소 (backup)
+    { id: 'etoday-newsplant', url: 'https://rss.etoday.co.kr/eto/newsplant_news.xml', name: '뉴스발전소', category: 'all' },
     // 매일경제 헤드라인 (backup)
     { id: 'mk-headline', url: 'https://www.mk.co.kr/rss/30000001/', name: '매일경제', category: 'all' },
 ]
