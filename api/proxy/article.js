@@ -99,8 +99,25 @@ export default async function handler(req, res) {
             .replace(/<button[\s\S]*?<\/button>/gi, '')
             .replace(/<input[^>]*>/gi, '')
             .replace(/<!--[\s\S]*?-->/g, '')
-            .replace(/<img[^>]*>/gi, '') // Remove images for cleaner reading
             .trim()
+
+        // Fix relative image URLs to absolute
+        try {
+            const urlObj = new URL(url)
+            const baseUrl = urlObj.origin
+
+            // Fix src="/..." to src="https://domain.com/..."
+            content = content.replace(/src="\/([^"]+)"/gi, `src="${baseUrl}/$1"`)
+
+            // Fix lazy-load images (data-src or data-original)
+            content = content.replace(/data-src="([^"]+)"/gi, 'src="$1"')
+            content = content.replace(/data-original="([^"]+)"/gi, 'src="$1"')
+
+            // Add styling to images for responsive display
+            content = content.replace(/<img([^>]*)>/gi, '<img$1 style="max-width:100%;height:auto;border-radius:8px;margin:16px 0;">')
+        } catch (e) {
+            console.warn('Image URL fix error:', e.message)
+        }
 
         // Final check
         if (!content || content.length < 50) {
