@@ -29,13 +29,16 @@ function TranTradingTerminal({ initialView }) {
     const location = useLocation()
 
     const [activeView, setActiveView] = useState(() => {
-        // 处理初始视图
-        if (initialView === 'admin-sentiment') {
-            return 'admin-sentiment'
-        }
-        if (articleId || initialView === 'article-detail') {
-            return 'analysis'
-        }
+        // 根据 URL 路径设置初始视图
+        const path = window.location.pathname
+        if (initialView === 'admin-sentiment') return 'admin-sentiment'
+        if (articleId || initialView === 'article-detail') return 'analysis'
+        if (path === '/dashboard') return 'dashboard'
+        if (path === '/news') return 'news'
+        if (path === '/lab') return 'lab'
+        if (path === '/about') return 'about'
+        if (path === '/systems') return 'systems'
+        if (path === '/analysis') return 'analysis'
         return 'home'
     })
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT')
@@ -75,17 +78,27 @@ function TranTradingTerminal({ initialView }) {
 
     // Handle Navigation - 更新 URL
     const handleNavigate = useCallback((view) => {
-        if (view === 'column') {
+        if (view === 'column' || view === 'library') {
             navigate('/column')
             return
         }
 
         setActiveView(view)
         setDirectArticleId(null) // 清除直接打开的文章
-        // 更新 URL 但不重新加载页面
-        if (view === 'home') {
-            navigate('/', { replace: true })
+
+        // 更新 URL 为对应页面路径
+        const pathMap = {
+            'home': '/',
+            'dashboard': '/dashboard',
+            'analysis': '/analysis',
+            'news': '/news',
+            'lab': '/lab',
+            'systems': '/systems',
+            'about': '/about',
+            'profile': '/profile',
         }
+        const newPath = pathMap[view] || '/'
+        navigate(newPath, { replace: false })
     }, [navigate])
 
     // Handle Trade Panel

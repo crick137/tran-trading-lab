@@ -23,14 +23,25 @@ function App() {
                         <Suspense fallback={<FullScreenLoader message="TRAN Terminal 로딩 중..." />}>
                             <Routes>
                                 <Route path="/" element={<TranTradingTerminal />} />
+
+                                {/* Main Pages with unique URLs */}
+                                <Route path="/dashboard" element={<TranTradingTerminal />} />
+                                <Route path="/news" element={<TranTradingTerminal />} />
+                                <Route path="/lab" element={<TranTradingTerminal />} />
+                                <Route path="/about" element={<TranTradingTerminal />} />
+                                <Route path="/systems" element={<TranTradingTerminal />} />
+                                <Route path="/profile" element={<TranTradingTerminal />} />
+                                <Route path="/analysis" element={<TranTradingTerminal />} />
+
+                                {/* Article Routes */}
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
-                                {/* Generic Article Route - verifying this works for howard-marks-bubble */}
                                 <Route path="/article/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
 
-                                <Route path="/column" element={<ContentLibrary />} /> {/* Renaming URL to /column */}
-                                <Route path="/library" element={<ContentLibrary />} /> {/* Keep for backward compat if needed */}
+                                {/* Content Library */}
+                                <Route path="/column" element={<ContentLibrary />} />
+                                <Route path="/library" element={<ContentLibrary />} />
 
-                                {/* 可独立分享的Kelly公式页面 */}
+                                {/* Kelly Pages */}
                                 <Route path="/kelly" element={<KellyCompletePage />} />
                                 <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
                                 <Route path="/tools/kelly-simulator" element={<KellySimulatorPage />} />
