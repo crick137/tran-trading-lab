@@ -20,6 +20,14 @@ const getArticleApiUrl = (sourceUrl) => {
     return `${base}?url=${encodeURIComponent(sourceUrl)}`
 }
 
+// Google Analytics event tracking helper
+const trackEvent = (eventName, params = {}) => {
+    if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', eventName, params)
+        console.log(`📊 GA Event: ${eventName}`, params)
+    }
+}
+
 function NewsView() {
     const { t, language } = useI18n()
     const [activeCategory, setActiveCategory] = useState('all')
@@ -115,6 +123,13 @@ function NewsView() {
         setArticleLoading(true)
         setArticleContent(null)
 
+        // Track article open event
+        trackEvent('news_article_open', {
+            article_title: news.title?.substring(0, 50),
+            article_source: news.source,
+            article_category: news.category
+        })
+
         try {
             const response = await fetch(getArticleApiUrl(news.source_url))
             const result = await response.json()
@@ -148,13 +163,6 @@ function NewsView() {
 
     const filteredNews = activeCategory === 'all' ? newsItems : newsItems.filter(n => n.category === activeCategory)
 
-    // Debug log
-    console.log(`🔍 Filter: activeCategory='${activeCategory}', total=${newsItems.length}, filtered=${filteredNews.length}`)
-    if (newsItems.length > 0) {
-        const categories = [...new Set(newsItems.map(n => n.category))]
-        console.log('📊 Available categories in data:', categories)
-    }
-
     return (
         <div style={styles.container}>
             <header style={styles.header}>
@@ -181,7 +189,10 @@ function NewsView() {
 
             <div style={styles.categoryBar}>
                 {categories.map(cat => (
-                    <button key={cat.id} onClick={() => setActiveCategory(cat.id)} style={{ ...styles.categoryPill, ...(activeCategory === cat.id ? styles.categoryPillActive : {}) }}>
+                    <button key={cat.id} onClick={() => {
+                        setActiveCategory(cat.id)
+                        trackEvent('news_category_change', { category: cat.id, category_label: cat.label })
+                    }} style={{ ...styles.categoryPill, ...(activeCategory === cat.id ? styles.categoryPillActive : {}) }}>
                         {cat.icon}<span>{cat.label}</span>
                     </button>
                 ))}
@@ -249,6 +260,10 @@ function NewsView() {
                                     rel="noopener noreferrer"
                                     style={styles.readerExternalBtn}
                                     title={language === 'ko' ? '원문 보기' : '查看原文'}
+                                    onClick={() => trackEvent('news_external_link', {
+                                        article_title: selectedArticle.title?.substring(0, 50),
+                                        article_source: selectedArticle.source
+                                    })}
                                 >
                                     <ExternalLink size={16} />
                                 </a>
