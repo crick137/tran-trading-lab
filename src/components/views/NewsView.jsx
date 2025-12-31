@@ -148,6 +148,13 @@ function NewsView() {
 
     const filteredNews = activeCategory === 'all' ? newsItems : newsItems.filter(n => n.category === activeCategory)
 
+    // Debug log
+    console.log(`🔍 Filter: activeCategory='${activeCategory}', total=${newsItems.length}, filtered=${filteredNews.length}`)
+    if (newsItems.length > 0) {
+        const categories = [...new Set(newsItems.map(n => n.category))]
+        console.log('📊 Available categories in data:', categories)
+    }
+
     return (
         <div style={styles.container}>
             <header style={styles.header}>
