@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     TrendingUp, TrendingDown, Minus, ExternalLink,
-    Clock, Newspaper, Filter, Bookmark, Share2, Zap, Inbox, RefreshCw
+    Clock, Newspaper, Filter, Bookmark, Share2, Zap, Inbox, RefreshCw, X
 } from 'lucide-react'
 import { useI18n } from '../../hooks/useI18n'
 
-// API URL: Use Vercel Serverless in production, local proxy in development
+// API URL helpers
 const getNewsApiUrl = () => {
-    // In production (Vercel), use relative path which routes to /api/news/korean.js
     if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
         return '/api/news/korean'
     }
-    // In development, use local proxy server
     return (import.meta.env.VITE_PROXY_URL || 'http://localhost:3001') + '/api/news/korean'
+}
+
+const getArticleApiUrl = (sourceUrl) => {
+    const base = import.meta.env.PROD || window.location.hostname !== 'localhost'
+        ? '/api/proxy/article'
+        : (import.meta.env.VITE_PROXY_URL || 'http://localhost:3001') + '/api/proxy/article'
+    return `${base}?url=${encodeURIComponent(sourceUrl)}`
 }
 
 function NewsView() {
@@ -22,6 +27,11 @@ function NewsView() {
     const [loading, setLoading] = useState(true)
     const [lastUpdated, setLastUpdated] = useState(null)
     const [isRefreshing, setIsRefreshing] = useState(false)
+
+    // Article Reader State
+    const [selectedArticle, setSelectedArticle] = useState(null)
+    const [articleContent, setArticleContent] = useState(null)
+    const [articleLoading, setArticleLoading] = useState(false)
 
     // 한국 뉴스 가져오기
     const fetchKoreanNews = useCallback(async (isManualRefresh = false) => {
@@ -96,6 +106,43 @@ function NewsView() {
         return date.toLocaleDateString(getDateLocale())
     }
 
+    // Open article in reader modal
+    const openArticle = async (news) => {
+        setSelectedArticle(news)
+        setArticleLoading(true)
+        setArticleContent(null)
+
+        try {
+            const response = await fetch(getArticleApiUrl(news.source_url))
+            const result = await response.json()
+
+            if (result.success && result.data) {
+                setArticleContent(result.data)
+            } else {
+                // Fallback to original summary
+                setArticleContent({
+                    title: news.title,
+                    content: `<p>${news.summary}</p><p style="color:#888;margin-top:20px;">完整内容无法加载，请查看原文。</p>`,
+                    source_url: news.source_url
+                })
+            }
+        } catch (err) {
+            console.error('Failed to load article:', err)
+            setArticleContent({
+                title: news.title,
+                content: `<p>${news.summary}</p><p style="color:#ff6b6b;margin-top:20px;">加载失败：${err.message}</p>`,
+                source_url: news.source_url
+            })
+        }
+
+        setArticleLoading(false)
+    }
+
+    const closeArticle = () => {
+        setSelectedArticle(null)
+        setArticleContent(null)
+    }
+
     const filteredNews = activeCategory === 'all' ? newsItems : newsItems.filter(n => n.category === activeCategory)
 
     return (
@@ -144,12 +191,10 @@ function NewsView() {
                         {filteredNews.map((news, index) => {
                             const sentiment = getSentimentConfig(news.sentiment)
                             return (
-                                <a
+                                <div
                                     key={news.id}
-                                    href={news.source_url || '#'}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    style={{ ...styles.newsCard, animationDelay: `${index * 60}ms`, textDecoration: 'none', color: 'inherit' }}
+                                    onClick={() => openArticle(news)}
+                                    style={{ ...styles.newsCard, animationDelay: `${index * 60}ms`, cursor: 'pointer' }}
                                 >
                                     <div style={{ ...styles.sentimentBar, background: sentiment.color }} />
                                     {news.image_url && (
@@ -172,11 +217,53 @@ function NewsView() {
                                         <p style={styles.newsSummary}>{news.summary}</p>
                                     </div>
                                     <div style={styles.openIndicator}>
-                                        <ExternalLink size={16} />
+                                        <Newspaper size={16} />
                                     </div>
-                                </a>
+                                </div>
                             )
                         })}
+                    </div>
+                </div>
+            )}
+
+            {/* Article Reader Modal */}
+            {selectedArticle && (
+                <div style={styles.readerOverlay} onClick={closeArticle}>
+                    <div style={styles.readerModal} onClick={e => e.stopPropagation()}>
+                        <div style={styles.readerHeader}>
+                            <div style={styles.readerSource}>{selectedArticle.source}</div>
+                            <div style={styles.readerActions}>
+                                <a
+                                    href={selectedArticle.source_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={styles.readerExternalBtn}
+                                    title={language === 'ko' ? '원문 보기' : '查看原文'}
+                                >
+                                    <ExternalLink size={16} />
+                                </a>
+                                <button style={styles.readerCloseBtn} onClick={closeArticle}>
+                                    <X size={20} />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style={styles.readerBody}>
+                            {articleLoading ? (
+                                <div style={styles.readerLoading}>
+                                    <div style={styles.spinner} />
+                                    <span>{language === 'ko' ? '기사 로딩 중...' : '加载文章中...'}</span>
+                                </div>
+                            ) : articleContent ? (
+                                <>
+                                    <h1 style={styles.readerTitle}>{articleContent.title}</h1>
+                                    <div
+                                        style={styles.readerContent}
+                                        dangerouslySetInnerHTML={{ __html: articleContent.content }}
+                                    />
+                                </>
+                            ) : null}
+                        </div>
                     </div>
                 </div>
             )}
@@ -215,6 +302,18 @@ const styles = {
     newsActions: { display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' },
     newsActionBtn: { width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', color: 'var(--text-tertiary)', cursor: 'pointer', textDecoration: 'none' },
     openIndicator: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 'var(--radius-md)', background: 'rgba(0,210,106,0.1)', color: '#00ff88', flexShrink: 0 },
+    // Article Reader Modal
+    readerOverlay: { position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', animation: 'fade-in 0.2s ease' },
+    readerModal: { width: '100%', maxWidth: 800, maxHeight: '90vh', background: 'linear-gradient(145deg, rgba(12, 16, 24, 0.98) 0%, rgba(8, 12, 20, 0.98) 100%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' },
+    readerHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.3)' },
+    readerSource: { fontSize: '0.75rem', fontWeight: 700, color: '#00d26a', textTransform: 'uppercase', letterSpacing: '0.08em' },
+    readerActions: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
+    readerExternalBtn: { width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', transition: 'all 0.2s ease' },
+    readerCloseBtn: { width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,68,102,0.1)', border: '1px solid rgba(255,68,102,0.2)', borderRadius: 8, color: '#ff4466', cursor: 'pointer', transition: 'all 0.2s ease' },
+    readerBody: { flex: 1, padding: '1.5rem 2rem', overflowY: 'auto' },
+    readerLoading: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', padding: '4rem', color: 'rgba(255,255,255,0.5)' },
+    readerTitle: { margin: '0 0 1.5rem 0', fontSize: '1.5rem', fontWeight: 700, color: '#fff', lineHeight: 1.4 },
+    readerContent: { fontSize: '1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.8)' },
 }
 
 export default NewsView
