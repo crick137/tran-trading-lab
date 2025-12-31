@@ -93,6 +93,14 @@ function NewsletterSubscribe({ variant = 'default' }) {
                 setName('')
                 // Also save to localStorage as backup
                 saveToLocalStorage(email, name)
+
+                // Track signup event
+                if (window.gtag) {
+                    window.gtag('event', 'sign_up', {
+                        method: 'newsletter',
+                        location: 'sidebar'
+                    })
+                }
             } else {
                 setStatus('error')
                 setMessage(data.error?.includes('already') ? t.already : t.error)
@@ -105,6 +113,14 @@ function NewsletterSubscribe({ variant = 'default' }) {
             setMessage(t.success)
             setEmail('')
             setName('')
+
+            // Track signup event (fallback)
+            if (window.gtag) {
+                window.gtag('event', 'sign_up', {
+                    method: 'newsletter_fallback',
+                    location: 'sidebar'
+                })
+            }
         }
 
         // 5秒后重置状态
