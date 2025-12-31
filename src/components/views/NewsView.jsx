@@ -197,7 +197,7 @@ function NewsView() {
                 </div>
             ) : (
                 <div style={styles.newsGrid}>
-                    <div style={styles.newsList}>
+                    <div style={styles.newsList} key={activeCategory}>
                         {filteredNews.map((news, index) => {
                             const sentiment = getSentimentConfig(news.sentiment)
                             return (
