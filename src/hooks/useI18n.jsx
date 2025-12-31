@@ -100,6 +100,10 @@ const translations = {
             normal: '일반',
             footerText: '전문 암호화폐 트레이딩 리서치 플랫폼 · 데이터 기반 의사결정',
             modules: {
+                dashboard: {
+                    title: '대시보드',
+                    desc: '시장 데이터 및 분석 도구 탐색'
+                },
                 brief: {
                     title: '실황 브리프',
                     desc: '암호화폐 시장 최신 동향, 중요한 정보를 가장 먼저 파악하세요'
@@ -442,6 +446,10 @@ const translations = {
             normal: '普通',
             footerText: '专业的加密货币交易研究平台 · 数据驱动决策',
             modules: {
+                dashboard: {
+                    title: '仪表盘',
+                    desc: '探索市场数据与分析工具'
+                },
                 brief: {
                     title: '实时快讯',
                     desc: '加密市场最新动态，第一时间掌握重要信息'
@@ -784,6 +792,10 @@ const translations = {
             normal: 'Normal',
             footerText: 'Professional Crypto Trading Research Platform · Data-Driven Decisions',
             modules: {
+                dashboard: {
+                    title: 'Dashboard',
+                    desc: 'Explore market data and tools'
+                },
                 brief: {
                     title: 'Live Brief',
                     desc: 'Latest crypto market updates, get important info first'

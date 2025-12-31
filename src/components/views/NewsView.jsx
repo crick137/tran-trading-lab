@@ -5,8 +5,15 @@ import {
 } from 'lucide-react'
 import { useI18n } from '../../hooks/useI18n'
 
-// Proxy API URL
-const PROXY_API_URL = import.meta.env.VITE_PROXY_URL || 'http://localhost:3001'
+// API URL: Use Vercel Serverless in production, local proxy in development
+const getNewsApiUrl = () => {
+    // In production (Vercel), use relative path which routes to /api/news/korean.js
+    if (import.meta.env.PROD || window.location.hostname !== 'localhost') {
+        return '/api/news/korean'
+    }
+    // In development, use local proxy server
+    return (import.meta.env.VITE_PROXY_URL || 'http://localhost:3001') + '/api/news/korean'
+}
 
 function NewsView() {
     const { t, language } = useI18n()
@@ -22,7 +29,7 @@ function NewsView() {
         else setLoading(true)
 
         try {
-            const response = await fetch(`${PROXY_API_URL}/api/news/korean`)
+            const response = await fetch(getNewsApiUrl())
             const result = await response.json()
 
             if (result.success && result.data) {

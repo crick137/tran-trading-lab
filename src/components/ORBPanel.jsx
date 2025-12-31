@@ -26,6 +26,16 @@ const ORBPanel = memo(function ORBPanel({
 }) {
     const [showSettings, setShowSettings] = useState(false)
     const [showSignals, setShowSignals] = useState(true)
+    const [showSystemSelector, setShowSystemSelector] = useState(false)
+    const [activeSystemId, setActiveSystemId] = useState('orb')
+
+    // 거래 시스템 설정 (확장 가능)
+    const tradingSystems = [
+        { id: 'orb', name: 'ORB', fullName: 'Opening Range Breakout', color: '#00d26a' },
+        { id: 'turtle', name: 'Turtle', fullName: 'Turtle Trading', color: '#00d4ff', disabled: true },
+        { id: 'grid', name: 'Grid', fullName: 'Grid Trading', color: '#bd00ff', disabled: true },
+    ]
+    const activeSystem = tradingSystems.find(s => s.id === activeSystemId) || tradingSystems[0]
 
     const formatPrice = (price) => {
         if (!price) return '-'
@@ -57,13 +67,74 @@ const ORBPanel = memo(function ORBPanel({
 
     return (
         <div style={styles.container}>
+            {/* 시스템 선택기 */}
+            <div style={styles.systemSelectorBar}>
+                <div style={styles.systemSelectorHeader}>
+                    <span style={styles.systemSelectorLabel}>거래 시스템</span>
+                    <div
+                        style={styles.systemDropdown}
+                        onClick={() => setShowSystemSelector(!showSystemSelector)}
+                    >
+                        <div style={{
+                            ...styles.systemDotIndicator,
+                            background: activeSystem.color,
+                            boxShadow: `0 0 6px ${activeSystem.color}`
+                        }} />
+                        <span style={{ color: activeSystem.color, fontWeight: 600 }}>{activeSystem.name}</span>
+                        <ChevronDown size={12} style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            transform: showSystemSelector ? 'rotate(180deg)' : 'none',
+                            transition: 'transform 0.2s ease'
+                        }} />
+                    </div>
+                </div>
+                {showSystemSelector && (
+                    <div style={styles.systemDropdownMenu}>
+                        {tradingSystems.map(sys => (
+                            <div
+                                key={sys.id}
+                                style={{
+                                    ...styles.systemMenuItem,
+                                    opacity: sys.disabled ? 0.4 : 1,
+                                    cursor: sys.disabled ? 'not-allowed' : 'pointer',
+                                    background: activeSystemId === sys.id ? 'rgba(255,255,255,0.05)' : 'transparent',
+                                }}
+                                onClick={() => {
+                                    if (!sys.disabled) {
+                                        setActiveSystemId(sys.id)
+                                        setShowSystemSelector(false)
+                                    }
+                                }}
+                            >
+                                <div style={{
+                                    ...styles.systemDotIndicator,
+                                    background: sys.color,
+                                    boxShadow: activeSystemId === sys.id ? `0 0 6px ${sys.color}` : 'none'
+                                }} />
+                                <div style={styles.systemMenuText}>
+                                    <span style={{ color: activeSystemId === sys.id ? sys.color : 'rgba(255,255,255,0.8)' }}>
+                                        {sys.name}
+                                    </span>
+                                    <span style={styles.systemMenuSub}>{sys.fullName}</span>
+                                </div>
+                                {sys.disabled && <span style={styles.comingSoon}>곧 출시</span>}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             {/* 헤더 */}
             <div style={styles.header}>
                 <div style={styles.headerLeft}>
-                    <div style={styles.headerIcon}>
+                    <div style={{
+                        ...styles.headerIcon,
+                        background: `${activeSystem.color}15`,
+                        color: activeSystem.color,
+                    }}>
                         <Activity size={14} />
                     </div>
-                    <span style={styles.headerTitle}>ORB 분석</span>
+                    <span style={styles.headerTitle}>{activeSystem.name} 분석</span>
                     <span style={{
                         ...styles.statusBadge,
                         background: hasBreakout
@@ -346,6 +417,82 @@ const styles = {
         overflow: 'hidden',
         backdropFilter: 'blur(20px)',
     },
+    // System Selector (NEW)
+    systemSelectorBar: {
+        padding: '10px 14px',
+        background: 'rgba(0, 0, 0, 0.4)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        position: 'relative',
+    },
+    systemSelectorHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    systemSelectorLabel: {
+        fontSize: 10,
+        color: 'rgba(255, 255, 255, 0.4)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+    },
+    systemDropdown: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '4px 10px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: 6,
+        cursor: 'pointer',
+        transition: 'all 0.2s ease',
+        fontSize: 11,
+    },
+    systemDotIndicator: {
+        width: 6,
+        height: 6,
+        borderRadius: '50%',
+        flexShrink: 0,
+    },
+    systemDropdownMenu: {
+        position: 'absolute',
+        top: '100%',
+        left: 14,
+        right: 14,
+        zIndex: 100,
+        background: 'rgba(10, 12, 20, 0.98)',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: 8,
+        marginTop: 4,
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+    },
+    systemMenuItem: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 10,
+        padding: '10px 12px',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+        transition: 'background 0.2s ease',
+    },
+    systemMenuText: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        flex: 1,
+    },
+    systemMenuSub: {
+        fontSize: 9,
+        color: 'rgba(255, 255, 255, 0.4)',
+    },
+    comingSoon: {
+        fontSize: 9,
+        padding: '2px 6px',
+        background: 'rgba(189, 0, 255, 0.15)',
+        color: '#bd00ff',
+        borderRadius: 4,
+        fontWeight: 600,
+    },
+    // End System Selector
     header: {
         display: 'flex',
         alignItems: 'center',
