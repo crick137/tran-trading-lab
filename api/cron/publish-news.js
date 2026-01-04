@@ -89,7 +89,7 @@ async function sendTelegramMessage(text) {
             chat_id: TELEGRAM_CHANNEL_ID,
             text: text,
             parse_mode: 'HTML',
-            disable_web_page_preview: true
+            disable_web_page_preview: false
         })
     })
     return response.json()
