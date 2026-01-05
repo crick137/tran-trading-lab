@@ -7,10 +7,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import FormData from 'form-data'
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
-const CHANNEL_ID = '-1002815876265' // @http4477 numeric ID
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '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'
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyBSeChx2bYTPMrcRLfbPoWpFtUq8wjgHDQ' // Hardcoded for convenience
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '-1002815876265'
+const GROQ_API_KEY = process.env.GROQ_API_KEY
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 const NEWS_FEEDS = [
     { id: 'hankyung-finance', url: 'https://www.hankyung.com/feed/finance', name: '한경 증권' },
