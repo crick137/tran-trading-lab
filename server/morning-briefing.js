@@ -1,69 +1,13 @@
-/**
- * 🌅 TRAN 얼티밋 마켓 브리핑 v5
- * Gemini AI 배너 이미지 생성 + 모든 프리미엄 기능
- */
+// 🌅 TRAN 얼티밋 마켓 브리핑 v5 (No AI)
+// 데이터 기반 자동 브리핑
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import fetch from 'node-fetch'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
-const GROQ_API_KEY = process.env.GROQ_API_KEY
 
 if (!TELEGRAM_BOT_TOKEN) {
     throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
-}
-
-// Gemini API Key (https://aistudio.google.com/apikey 에서 무료 발급)
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY'
-
-// ============================================
-// Gemini 이미지 생성 (Imagen)
-// ============================================
-
-async function generateMarketBanner(fearGreedValue, btcChange) {
-    // Gemini API Key가 없으면 스킵
-    if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
-        console.log('  ℹ️ Gemini API Key 없음 - 기본 차트 사용')
-        return null
-    }
-
-    try {
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-
-        // Gemini 2.0 Flash를 사용한 이미지 생성 (Imagen 3)
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash-exp-image-generation',
-        })
-
-        // 시장 상태에 따른 프롬프트 결정
-        const mood = fearGreedValue <= 25 ? 'dramatic dark stormy bearish' :
-            fearGreedValue >= 75 ? 'bright golden bullish celebration' : 'calm neutral balanced'
-        const trend = btcChange >= 0 ? 'upward trending green' : 'downward trending red'
-
-        const prompt = `A professional crypto market dashboard banner image. ${mood} mood with ${trend} visual elements. Abstract Bitcoin chart visualization with candlesticks. Futuristic digital art style with neon glow effects. Dark background with blue and gold accents. No text. 16:9 horizontal aspect ratio.`
-
-        console.log('  🎨 Gemini 이미지 생성 중...')
-
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: {
-                responseModalities: ['image', 'text'],
-            }
-        })
-
-        const response = result.response
-        const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
-
-        if (imagePart?.inlineData?.data) {
-            // base64 이미지를 Buffer로 변환 (파일 저장 없이)
-            const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
-            console.log('  ✓ AI 배너 이미지 생성 완료')
-            return imageBuffer
-        }
-    } catch (e) {
-        console.log('  ✗ Gemini 이미지 생성 실패:', e.message)
-    }
-    return null
 }
 
 // ============================================
@@ -241,79 +185,37 @@ async function getTopNews() {
 }
 
 // ============================================
-// 8. 고급 시장 분석 (Groq AI)
+// 8. 시장 분석 (Rule-based)
 // ============================================
 
-async function generateAnalysis(data) {
-    try {
-        const { crypto, stocks, fearGreed, globalData, futures, forex } = data
-        const btc = crypto.BTC
-        const vix = stocks.VIX?.price || 15
-        const fundingRate = parseFloat(futures.fundingRate)
+function generateAnalysis(data) {
+    const { crypto, stocks, fearGreed, futures } = data
+    const btc = crypto.BTC
+    const fundingRate = parseFloat(futures.fundingRate)
 
-        // 시장 상태 판단
-        const marketState = fearGreed.value <= 25 ? '극단적 공포' :
-            fearGreed.value >= 75 ? '극단적 탐욕' : '중립'
-        const fundingState = fundingRate > 0.05 ? '롱 과열' :
-            fundingRate < -0.01 ? '숏 과열' : '균형'
+    // 1. 시장 상태 판단
+    let marketState = '보합세'
+    if (btc.change > 2) marketState = '강세장'
+    else if (btc.change < -2) marketState = '약세장'
 
-        const prompt = `【시장 데이터】
-BTC: $${btc?.price?.toLocaleString()} (${btc?.change?.toFixed(1)}%), ATH 대비 ${globalData.btcAthChange}%
-펀딩비: ${futures.fundingRate}%, 미결제약정: ${futures.openInterest}K BTC
-S&P500: ${stocks['S&P500']?.change?.toFixed(1)}%, VIX: ${vix.toFixed(1)}
-공포/탐욕: ${fearGreed.value}/100, 원/달러: ₩${forex.KRW?.toLocaleString()}
+    // 2. 펀딩비 해석
+    let fundingAnalysis = '중립적'
+    if (fundingRate > 0.03) fundingAnalysis = '롱 포지션 우세 (과열 주의)'
+    else if (fundingRate < -0.01) fundingAnalysis = '숏 포지션 우세'
 
-【요청】
-위 데이터를 바탕으로 5문장의 시장 분석을 작성하세요.
+    // 3. 투자 심리
+    const sentiment = fearGreed.value
+    let sentimentAnalysis = '관망 심리가 우세하며,'
+    if (sentiment >= 70) sentimentAnalysis = '매수 심리가 매우 강하며,'
+    else if (sentiment <= 30) sentimentAnalysis = '공포 심리가 지배적이며,'
 
-1문장: 현재 시장 상황 요약 (예: "글로벌 증시 강세 속 비트코인은 조정 국면")
-2문장: 펀딩비 ${futures.fundingRate}%가 의미하는 것 (롱/숏 포지션 상황)
-3문장: 공포/탐욕 ${fearGreed.value}과 VIX ${vix.toFixed(1)} 조합 해석
-4문장: BTC 지지선($${btc?.low?.toLocaleString()})과 저항선($${btc?.high?.toLocaleString()})
-5문장: 투자자가 오늘 취해야 할 전략
+    // 4. BTC 레벨
+    const btcPrice = btc.price.toLocaleString()
 
-규칙: 숫자 필수 언급, 전문적이면서 이해하기 쉽게, "AI/분석결과" 단어 금지`
-
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${GROQ_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
-                messages: [
-                    {
-                        role: 'system',
-                        content: '당신은 삼성자산운용 출신 CIO입니다. 한국 투자자에게 프라이빗 뱅킹 수준의 시장 분석을 제공합니다. 항상 구체적인 숫자와 명확한 논리로 설명합니다.'
-                    },
-                    { role: 'user', content: prompt }
-                ],
-                temperature: 0.8,
-                max_tokens: 600
-            })
-        })
-
-        if (!response.ok) {
-            console.log('API 응답 오류:', response.status, response.statusText)
-            return getDefaultAnalysis()
-        }
-
-        const result = await response.json()
-        let analysis = result.choices?.[0]?.message?.content?.trim() || ''
-
-        // AI 관련 표현 제거
-        analysis = analysis.replace(/AI|인공지능|분석 결과|데이터에 따르면|알고리즘/g, '')
-
-        return analysis || getDefaultAnalysis()
-    } catch (e) {
-        console.log('분석 오류:', e.message)
-        return getDefaultAnalysis()
-    }
-}
-
-function getDefaultAnalysis() {
-    return '시장은 현재 균형점을 찾아가는 과정에 있습니다. 주요 지표들의 방향성을 확인한 후 포지션 조정을 고려하시기 바랍니다.'
+    return `현재 시장은 ${marketState}를 보이고 있습니다. 비트코인은 $${btcPrice} 선에서 거래되고 있습니다.
+펀딩비는 ${fundingRate}%로 ${fundingAnalysis} 상황입니다.
+투자 심리는 ${sentiment}점(${fearGreed.text})으로 ${sentimentAnalysis} 변동성에 유의가 필요합니다.
+주요 지지선과 저항선을 확인하며 신중한 접근이 권장됩니다.`
 }
 
 // ============================================
@@ -352,9 +254,7 @@ async function generateBriefing() {
     console.log('  ✓ 암호화폐, 증시, 환율, 심리지수, 선물, 뉴스 수집 완료')
 
     const allData = { crypto, stocks, forex, fearGreed, globalData, futures }
-
-    console.log('📝 분석 작성 중...')
-    const analysis = await generateAnalysis(allData)
+    const analysis = generateAnalysis(allData)
 
     const btc = crypto.BTC
     const vix = stocks.VIX
@@ -412,7 +312,7 @@ ${news.map((n, i) => `${i + 1}. ${n.slice(0, 40)}${n.length > 40 ? '...' : ''}`)
 
 ━━━━━━━━━━━━━━━━━━━━
 
-💡 <b>시장 분석</b>
+💡 <b>시장 코멘트</b>
 
 ${analysis}
 
