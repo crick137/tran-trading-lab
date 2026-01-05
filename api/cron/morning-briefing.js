@@ -100,14 +100,24 @@ async function getFuturesData() {
 }
 
 async function getStockData() {
+    console.log('Fetching Stock Data from Yahoo Finance...')
     const symbols = { 'S&P500': '^GSPC', 'NASDAQ': '^IXIC', 'KOSPI': '^KS11', 'VIX': '^VIX', 'DXY': 'DX-Y.NYB', '삼성전자': '005930.KS', 'SK하이닉스': '000660.KS' }
     const result = {}
     for (const [name, sym] of Object.entries(symbols)) {
         try {
-            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=2d`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
             const data = await res.json()
-            const meta = data.chart?.result?.[0]?.meta
-            if (meta) result[name] = { price: meta.regularMarketPrice, change: meta.previousClose ? ((meta.regularMarketPrice - meta.previousClose) / meta.previousClose * 100) : 0 }
+            const chartResult = data.chart?.result?.[0]
+            const meta = chartResult?.meta
+            const closes = chartResult?.indicators?.quote?.[0]?.close?.filter(c => c !== null)
+
+            if (meta && closes && closes.length >= 2) {
+                const currentPrice = meta.regularMarketPrice || closes[closes.length - 1]
+                const prevClose = closes[closes.length - 2]
+                result[name] = { price: currentPrice, change: prevClose ? ((currentPrice - prevClose) / prevClose * 100) : 0 }
+            } else if (meta) {
+                result[name] = { price: meta.regularMarketPrice, change: 0 }
+            }
         } catch { }
     }
     return result
@@ -202,15 +212,165 @@ async function getTopNews() {
 // AI 분석 (Groq)
 // ============================================
 
-async function generateAnalysis(data) {
-    const { crypto, stocks, fearGreed, globalData, futures, forex } = data
-    const prompt = `【시장 데이터】
-BTC: $${crypto.BTC?.price} (${crypto.BTC?.change}%), ATH대비 ${globalData.btcAthChange}%
-펀딩: ${futures.fundingRate}%, 미결제: ${futures.openInterest}K
-S&P500: ${stocks['S&P500']?.change}%, VIX: ${stocks.VIX?.price}
-공포/탐욕: ${fearGreed.value}
-【요청】
-5문장 시장 분석. 숫자 필수. 전문적. AI/분석결과 단어 금지.`
+async function generateFullBriefing(data, news) {
+    console.log('Generating Full AI Briefing via Groq...')
+    const { crypto, stocks, forex, fearGreed, globalData, futures } = data
+
+    const koreaTime = new Date().toLocaleString('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric', month: 'long', day: 'numeric',
+        weekday: 'long', hour: '2-digit', minute: '2-digit'
+    })
+
+    const marketDataContext = `
+【실시간 시장 데이터 - ${koreaTime}】
+
+📊 암호화폐:
+- BTC: $${crypto.BTC?.price?.toLocaleString()} (${crypto.BTC?.change >= 0 ? '+' : ''}${crypto.BTC?.change?.toFixed(2)}%)
+- ETH: $${crypto.ETH?.price?.toLocaleString()} (${crypto.ETH?.change >= 0 ? '+' : ''}${crypto.ETH?.change?.toFixed(2)}%)
+- SOL: $${crypto.SOL?.price?.toLocaleString()} (${crypto.SOL?.change >= 0 ? '+' : ''}${crypto.SOL?.change?.toFixed(2)}%)
+- BTC ATH 대비: ${globalData.btcAthChange}%
+- BTC 24h 거래량: $${crypto.BTC?.volume?.toFixed(1)}B
+- BTC 도미넌스: ${globalData.btcDominance}%
+
+📈 선물:
+- 펀딩비: ${futures.fundingRate}%
+- 미결제약정: ${futures.openInterest}K BTC
+
+📉 주식시장:
+- S&P500: ${stocks['S&P500']?.price?.toLocaleString()} (${stocks['S&P500']?.change >= 0 ? '+' : ''}${stocks['S&P500']?.change?.toFixed(2)}%)
+- NASDAQ: ${stocks.NASDAQ?.price?.toLocaleString()} (${stocks.NASDAQ?.change >= 0 ? '+' : ''}${stocks.NASDAQ?.change?.toFixed(2)}%)
+- KOSPI: ${stocks.KOSPI?.price?.toLocaleString()} (${stocks.KOSPI?.change >= 0 ? '+' : ''}${stocks.KOSPI?.change?.toFixed(2)}%)
+- VIX: ${stocks.VIX?.price?.toFixed(2)}
+- 달러인덱스: ${stocks.DXY?.price?.toFixed(2)}
+- 삼성전자: ₩${stocks['삼성전자']?.price?.toLocaleString()} (${stocks['삼성전자']?.change >= 0 ? '+' : ''}${stocks['삼성전자']?.change?.toFixed(2)}%)
+- SK하이닉스: ₩${stocks['SK하이닉스']?.price?.toLocaleString()} (${stocks['SK하이닉스']?.change >= 0 ? '+' : ''}${stocks['SK하이닉스']?.change?.toFixed(2)}%)
+
+🌡️ 센티먼트:
+- 공포/탐욕 지수: ${fearGreed.value} (전일 대비 ${fearGreed.change >= 0 ? '+' : ''}${fearGreed.change})
+
+💱 환율:
+- 원/달러: ₩${forex.KRW?.toLocaleString()}
+- 엔/달러: ¥${forex.JPY?.toFixed(1)}
+
+📰 최신 뉴스 헤드라인:
+${news.map((n, i) => `${i + 1}. ${n}`).join('\n')}
+`
+
+    const systemPrompt = `당신은 TRAN Trading Lab의 수석 시장 분석가이자 금융 스토리텔러입니다.
+
+【핵심 규칙 - 반드시 준수】
+1. 오직 한국어만 사용. 중국어, 일본어, 영어 단어 절대 금지.
+2. "[변동 없음]", "[데이터 없음]" 같은 플레이스홀더 절대 금지.
+3. "AI", "분석 결과", "예측" 같은 단어 사용 금지.
+
+【헤드라인 작성법】
+- 단순 숫자 나열 금지 (예: "비트코인 1.8% 상승" ← 안 됨)
+- 금융 전문 용어와 은유 활용 (예: "아일랜드 효과", "유동성 폭포수", "데드캣 바운스")
+- 블룸버그/한국경제신문 헤드라인 스타일
+
+【💡 시장 분석 스토리텔링 가이드】
+시장 분석 섹션은 마치 소설의 한 장면처럼 작성하세요:
+
+1. 창의적인 제목: 인용구 형식 ("황소들의 마지막 춤", "폭풍 전의 고요")
+2. 비유와 은유 적극 활용:
+   - "비트코인이 $90K 지지선에서 춤을 추고 있다"
+   - "기관 투자자들이 조용히 물량을 쌓아올리는 사이..."
+   - "VIX 14.5는 시장이 잠들었다는 신호가 아니라, 폭풍 전의 고요함일 수 있다"
+3. 긴장감과 드라마:
+   - 황소(상승) vs 곰(하락)의 대결 구도로 묘사
+   - "만약 ~한다면" 시나리오 제시
+4. 마무리는 행동 촉구:
+   - "지금은 관망할 때가 아니다. 리스크 관리와 함께 기회를 포착하라."
+
+【금지 표현】
+- "~입니다", "~있습니다" 반복 자제
+- "상승세/하락세를 보이고 있습니다" 같은 진부한 표현
+- 괄호 안 플레이스홀더
+- 🔴🔵 같은 색깔 원 이모지 금지. 대신 ▲ (상승, 녹색 의미), ▼ (하락, 적색 의미) 화살표 사용`
+
+    const userPrompt = `아래 실시간 시장 데이터를 바탕으로, 다음 형식에 맞춰 완전한 한국어 마켓 브리핑을 작성하세요.
+
+${marketDataContext}
+
+【출력 형식】
+☀️ TRAN 얼티밋 마켓 브리핑
+📅 ${koreaTime}
+
+━━━━━━━━━━━━━━━━━━━━
+
+📰 오늘의 헤드라인
+1️⃣ [창의적이고 전문적인 첫 번째 헤드라인 - 주식/경제 관련]
+2️⃣ [창의적이고 전문적인 두 번째 헤드라인 - 암호화폐 관련]
+3️⃣ [창의적이고 전문적인 세 번째 헤드라인 - 환율/거시경제 관련]
+
+━━━━━━━━━━━━━━━━━━━━
+
+🌡️ 시장 센티먼트
+• 공포/탐욕: [값] [이모지] [설명] ([변동])
+• VIX: [값] [변동]
+• 달러인덱스: [값] [변동]
+
+━━━━━━━━━━━━━━━━━━━━
+
+📊 글로벌 증시
+• S&P500: [가격] [변동]
+• NASDAQ: [가격] [변동]
+• KOSPI: [가격] [변동]
+
+🇰🇷 한국 대표주
+• 삼성전자: [가격] [변동]
+• SK하이닉스: [가격] [변동]
+
+━━━━━━━━━━━━━━━━━━━━
+
+₿ 비트코인 심층 분석
+• 현재가: [가격] [변동]
+• ATH 대비: [값]
+• 24h 거래량: [값]
+
+📈 선물 시장
+• 펀딩비: [값] ([해석])
+• 미결제약정: [값] ([추세])
+
+💰 크립토 시장
+• BTC 도미넌스: [값] [추세]
+• ETH: [가격] [변동]
+• SOL: [가격] [변동]
+
+━━━━━━━━━━━━━━━━━━━━
+
+💱 환율
+• 원/달러: [값] ([해석])
+• 엔/달러: [값]
+
+━━━━━━━━━━━━━━━━━━━━
+
+💡 시장 분석 (TranTradingLab Insight)
+
+"[창의적인 분석 제목]"
+
+1. [첫 번째 핵심 포인트 제목]:
+[2-3문장의 심층 분석]
+
+2. [두 번째 핵심 포인트 제목]:
+[2-3문장의 심층 분석]
+
+3. 전략적 대응:
+[투자자를 위한 액션 아이템]
+
+━━━━━━━━━━━━━━━━━━━━
+
+📰 뉴스: @TranTradingLabNews
+🌐 웹: trantradinglab.com
+
+#시장분석 #비트코인 #투자전략 #TranTradingLab
+
+【중요】
+- 위 형식을 정확히 따르세요
+- 모든 데이터는 제공된 실시간 값을 사용하세요
+- 헤드라인은 뉴스 데이터를 참고하되 더 창의적으로 재작성하세요
+- 분석은 전문적이고 인사이트 있게 작성하세요`
 
     try {
         const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -218,14 +378,25 @@ S&P500: ${stocks['S&P500']?.change}%, VIX: ${stocks.VIX?.price}
             headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model: 'llama-3.3-70b-versatile',
-                messages: [{ role: 'system', content: 'You are a professional crypto analyst.' }, { role: 'user', content: prompt }],
-                temperature: 0.7, max_tokens: 600
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                temperature: 0.8,
+                max_tokens: 2000
             })
         })
         const json = await res.json()
-        let text = json.choices?.[0]?.message?.content?.trim() || ''
-        return text.replace(/AI|인공지능|분석 결과/g, '') || '시장 분석 데이터 생성 중...'
-    } catch { return '시장 분석 데이터를 불러올 수 없습니다.' }
+        const content = json.choices?.[0]?.message?.content?.trim()
+        if (!content) {
+            console.error('Groq returned empty content:', json)
+            return null
+        }
+        return content
+    } catch (e) {
+        console.error('Groq API error:', e.message)
+        return null
+    }
 }
 
 // ============================================
@@ -265,69 +436,16 @@ export default async function handler(req, res) {
         ])
 
         const allData = { crypto, stocks, forex, fearGreed, globalData, futures }
-        const analysis = await generateAnalysis(allData)
 
-        // 메시지 생성 (Plain Text)
-        const message = `☀️ TRAN 얼티밋 마켓 브리핑
-📅 ${getKoreaDateTime()}
+        // Generate FULL briefing via Groq AI
+        const message = await generateFullBriefing(allData, news)
 
-━━━━━━━━━━━━━━━━━━━━
+        if (!message) {
+            console.error('Failed to generate AI briefing')
+            return res.status(500).json({ error: 'AI generation failed' })
+        }
 
-📰 오늘의 헤드라인
-${news.map((n, i) => `${i + 1}. ${n.slice(0, 40)}${n.length > 40 ? '...' : ''}`).join('\n')}
-
-━━━━━━━━━━━━━━━━━━━━
-
-🌡️ 시장 센티먼트
-• 공포/탐욕: ${fearGreed.value} ${fgEmoji(fearGreed.value)} (${fearGreed.change >= 0 ? '+' : ''}${fearGreed.change})
-• VIX: ${stocks.VIX?.price?.toFixed(2)}
-• 달러인덱스: ${stocks.DXY?.price?.toFixed(2)}
-
-━━━━━━━━━━━━━━━━━━━━
-
-📊 글로벌 증시
-• S&P500: ${fmt(stocks['S&P500']?.price)} ${chg(stocks['S&P500']?.change)}
-• NASDAQ: ${fmt(stocks.NASDAQ?.price)} ${chg(stocks.NASDAQ?.change)}
-• KOSPI: ${fmt(stocks.KOSPI?.price)} ${chg(stocks.KOSPI?.change)}
-
-🇰🇷 한국 대표주
-• 삼성전자: ₩${fmt(stocks['삼성전자']?.price, 0)} ${chg(stocks['삼성전자']?.change)}
-• SK하이닉스: ₩${fmt(stocks['SK하이닉스']?.price, 0)} ${chg(stocks['SK하이닉스']?.change)}
-
-━━━━━━━━━━━━━━━━━━━━
-
-₿ 비트코인 심층 분석
-• 현재가: $${fmt(crypto.BTC?.price)} ${chg(crypto.BTC?.change)}
-• ATH 대비: ${globalData.btcAthChange}%
-• 24h 거래량: $${crypto.BTC?.volume?.toFixed(1)}B
-
-📈 선물 시장
-• 펀딩비: ${futures.fundingRate}%
-• 미결제약정: ${futures.openInterest}K BTC
-
-💰 크립토 시장
-• BTC 도미넌스: ${globalData.btcDominance}%
-• ETH: $${fmt(crypto.ETH?.price)} ${chg(crypto.ETH?.change)}
-• SOL: $${fmt(crypto.SOL?.price)} ${chg(crypto.SOL?.change)}
-
-━━━━━━━━━━━━━━━━━━━━
-
-💱 환율
-• 원/달러: ₩${fmt(forex.KRW, 0)}
-• 엔/달러: ¥${fmt(forex.JPY, 1)}
-
-━━━━━━━━━━━━━━━━━━━━
-
-💡 시장 분석
-
-${analysis.slice(0, 1000)}
-
-━━━━━━━━━━━━━━━━━━━━
-
-📰 뉴스: ${CHANNEL_ID}
-🌐 웹: trantradinglab.com
-
-#시장분석 #비트코인 #투자전략`
+        console.log(`AI Briefing Generated (${message.length} chars)`)
 
         // 1. 배너 이미지 생성 및 전송
         console.log('Creating banner...')
