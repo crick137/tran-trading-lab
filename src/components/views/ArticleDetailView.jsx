@@ -4,6 +4,7 @@ import { interactions } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
 import { useI18n } from '../../hooks/useI18n'
 import CommentPanel from '../CommentPanel'
+import SEO from '../SEO'
 import { howardMarksBubbleArticle } from '../../data/articles/howardMarksBubble'
 
 function ArticleDetailView({ articleId, onBack, initialData }) {
@@ -337,6 +338,9 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
     return (
         <div style={styles.container}>
+            {/* Article-specific SEO */}
+            {article && <SEO article={article} />}
+
             <button style={styles.backBtn} onClick={onBack}>
                 <ArrowLeft size={18} />
                 <span>{t('views.analysis.backTo')}</span>

@@ -18,12 +18,15 @@ import ProfileView from './views/ProfileView'
 import AdminSentimentView from './views/AdminSentimentView'
 import CuratedArticlesView from './views/CuratedArticlesView'
 import NewsCommentaryView from './views/NewsCommentaryView'
+import PricingView from './views/PricingView'
 import CommandPalette from './CommandPalette'
 import AIAssistant from './AIAssistant'
+import { SubscribePopup } from './EmailSubscribe'
 import { useAppState, useAppActions } from '../context/AppContext'
 import { useGlobalKeyboard } from '../hooks/useKeyboard.jsx'
 import { Bot } from 'lucide-react'
 import { useI18n } from '../hooks/useI18n.jsx'
+import { initGA, useAnalytics } from '../lib/analytics'
 
 function TranTradingTerminal({ initialView }) {
     const { articleId } = useParams()
@@ -48,6 +51,12 @@ function TranTradingTerminal({ initialView }) {
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT')
     const [aiAssistantOpen, setAiAssistantOpen] = useState(false)
     const [directArticleId, setDirectArticleId] = useState(articleId || null)
+
+    // Google Analytics - 页面追踪
+    useAnalytics()
+    useEffect(() => {
+        initGA()
+    }, [])
 
     // Global State
     const {
@@ -142,6 +151,7 @@ function TranTradingTerminal({ initialView }) {
             case 'curated': return <CuratedArticlesView />
             case 'commentary': return <NewsCommentaryView />
             case 'lab': return <LabView />
+            case 'pricing': return <PricingView />
             case 'systems': return <SystemsView />
             case 'about': return <IntroductionView />
             case 'profile': return <ProfileView onNavigate={handleNavigate} />

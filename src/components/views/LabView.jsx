@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { BookOpen, ChevronRight, TrendingUp, Inbox, FlaskConical, ArrowRight, FileText, Calculator } from 'lucide-react'
+import { BookOpen, ChevronRight, TrendingUp, Inbox, FlaskConical, ArrowRight, FileText, Calculator, Target, Percent } from 'lucide-react'
 import { db, TABLES, supabase } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
 import { useAppState } from '../../context/AppContext'
 import CourseDetailView from './CourseDetailView'
 import KellySimulator from '../experiments/KellySimulator'
 import KellyArticle from '../experiments/KellyArticle'
+import { PositionSizeCalculator, RiskRewardCalculator, CompoundCalculator } from '../tools/TradingCalculators'
 
-// 互动实验工具列表 - 包含完整的凯利公式模块
+// 互动实验工具列表 - 包含完整的凯利公式模块和交易计算器
 const INTERACTIVE_TOOLS = [
     {
         id: 'kelly-complete',
@@ -24,6 +25,42 @@ const INTERACTIVE_TOOLS = [
             { id: 'article', labelZh: '📖 理论文章', labelEn: '📖 Theory Article', labelKo: '📖 이론 문서', type: 'article' },
             { id: 'simulator', labelZh: '🧮 模拟器', labelEn: '🧮 Simulator', labelKo: '🧮 시뮬레이터', type: 'simulator' }
         ]
+    },
+    {
+        id: 'position-size',
+        titleZh: '仓位大小计算器',
+        titleEn: 'Position Size Calculator',
+        titleKo: '포지션 사이즈 계산기',
+        descZh: '根据风险比例和止损点快速计算最优仓位大小',
+        descEn: 'Calculate optimal position size based on risk percentage and stop loss',
+        descKo: '리스크 비율과 스탑로스를 기반으로 최적의 포지션 사이즈 계산',
+        icon: Calculator,
+        color: '#00ff88',
+        type: 'position-calc'
+    },
+    {
+        id: 'risk-reward',
+        titleZh: '风险回报计算器',
+        titleEn: 'Risk/Reward Calculator',
+        titleKo: '리스크/리워드 계산기',
+        descZh: '计算交易的盈亏比和盈亏平衡胜率',
+        descEn: 'Calculate R:R ratio and break-even win rate for your trades',
+        descKo: 'R:R 비율과 손익분기 승률을 계산하세요',
+        icon: Target,
+        color: '#fbbf24',
+        type: 'rr-calc'
+    },
+    {
+        id: 'compound',
+        titleZh: '复利计算器',
+        titleEn: 'Compound Growth Calculator',
+        titleKo: '복리 계산기',
+        descZh: '模拟复利增长，看看长期稳定收益的威力',
+        descEn: 'Simulate compound growth and see the power of consistent returns',
+        descKo: '복리 성장을 시뮬레이션하고 꾸준한 수익의 힘을 확인하세요',
+        icon: Percent,
+        color: '#a855f7',
+        type: 'compound-calc'
     }
 ]
 
@@ -134,6 +171,39 @@ function LabView() {
         // 直接显示模拟器
         if (activeTool.type === 'simulator' || activeTool.subType === 'simulator') {
             return <KellySimulator onBack={() => setActiveTool(null)} />
+        }
+        // 仓位计算器
+        if (activeTool.type === 'position-calc') {
+            return (
+                <div style={styles.container}>
+                    <button onClick={() => setActiveTool(null)} style={styles.backButton}>
+                        ← {language === 'zh' ? '返回' : language === 'ko' ? '돌아가기' : 'Back'}
+                    </button>
+                    <PositionSizeCalculator />
+                </div>
+            )
+        }
+        // 风险收益计算器
+        if (activeTool.type === 'rr-calc') {
+            return (
+                <div style={styles.container}>
+                    <button onClick={() => setActiveTool(null)} style={styles.backButton}>
+                        ← {language === 'zh' ? '返回' : language === 'ko' ? '돌아가기' : 'Back'}
+                    </button>
+                    <RiskRewardCalculator />
+                </div>
+            )
+        }
+        // 复利计算器
+        if (activeTool.type === 'compound-calc') {
+            return (
+                <div style={styles.container}>
+                    <button onClick={() => setActiveTool(null)} style={styles.backButton}>
+                        ← {language === 'zh' ? '返回' : language === 'ko' ? '돌아가기' : 'Back'}
+                    </button>
+                    <CompoundCalculator />
+                </div>
+            )
         }
         // bundle类型 - 显示选择界面
         if (activeTool.type === 'bundle' && !activeTool.subType) {
