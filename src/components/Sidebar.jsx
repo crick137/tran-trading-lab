@@ -17,7 +17,6 @@ function Sidebar({ navItems, activeView, onNavClick, collapsed, onToggle }) {
         { id: 'lab', label: 'Research', labelKr: '연구', icon: FlaskConical, shortcut: '⌘4', isPro: true },
         { id: 'column', label: 'Column', labelKr: '칼럼', icon: BookOpen, shortcut: '⌘L' },
         { id: 'systems', label: 'Systems', labelKr: '시스템', icon: Cpu, shortcut: '⌘5', isHot: true },
-        { id: 'pricing', label: 'Membership', labelKr: '멤버십', icon: Crown, shortcut: '⌘M', isPro: true },
         { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘6' },
     ]
 

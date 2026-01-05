@@ -88,7 +88,6 @@ function TranTradingTerminal({ initialView }) {
         { id: 'lab', label: t('nav.lab'), icon: GraduationCap },
         { id: 'library', label: t('nav.library') || 'Library', icon: BookOpen },
         { id: 'systems', label: t('nav.systems') || 'Systems', icon: Cpu },
-        { id: 'pricing', label: t('nav.pricing') || 'Membership', icon: Sparkles },
         { id: 'about', label: t('nav.about'), icon: Info },
     ], [t])
 
