@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { MessageSquare, TrendingUp, TrendingDown, Minus, Star, ExternalLink, RefreshCw } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
-
-// Supabase client for read-only access
-const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-)
 
 function NewsCommentaryView() {
     const { language } = useI18n()

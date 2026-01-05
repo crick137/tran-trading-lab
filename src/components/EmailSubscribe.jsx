@@ -1,11 +1,6 @@
 import React, { useState } from 'react'
 import { Mail, X, Check, Loader, Gift } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-)
+import { supabase } from '../lib/supabase'
 
 /**
  * 邮件订阅组件
