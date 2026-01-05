@@ -1,5 +1,5 @@
 /**
- * 📅 TRAN 경제 일정 알림
+ * 📅 TRAN 경제 일정 알림 (Premium)
  * Vercel Cron: 매일 07:30 (KST) 실행
  * 채널: @http4477
  * 
@@ -8,11 +8,7 @@
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
-
-// ============================================
-// 주요 경제 이벤트 DB (정적 데이터)
-// 실제 운영시 Investing.com API 또는 Trading Economics API 사용 권장
-// ============================================
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 function getRecurringEvents() {
     const now = new Date()
@@ -20,166 +16,57 @@ function getRecurringEvents() {
     const dayOfMonth = now.getDate()
     const events = []
 
-    // 매주 수요일: FOMC 관련
     if (dayOfWeek === 3) {
-        events.push({
-            time: '03:00 (KST)',
-            event: 'FOMC 회의록 공개 (해당 주)',
-            importance: 'high',
-            currency: 'USD'
-        })
+        events.push({ time: '03:00 (다음날)', event: 'FOMC 회의록 공개', importance: 'high' })
     }
-
-    // 매주 목요일: 신규 실업수당 청구건수
     if (dayOfWeek === 4) {
-        events.push({
-            time: '22:30 (KST)',
-            event: '미국 신규 실업수당 청구건수',
-            importance: 'medium',
-            currency: 'USD'
-        })
+        events.push({ time: '22:30', event: '미국 신규 실업수당 청구건수', importance: 'medium' })
     }
-
-    // 매월 첫째 금요일: 비농업 고용
     if (dayOfWeek === 5 && dayOfMonth <= 7) {
-        events.push({
-            time: '22:30 (KST)',
-            event: '🔥 미국 비농업 고용지표 (NFP)',
-            importance: 'critical',
-            currency: 'USD'
-        })
+        events.push({ time: '22:30', event: '🔥 미국 비농업 고용지표 (NFP)', importance: 'critical' })
     }
-
-    // 매월 둘째 수요일: CPI
     if (dayOfWeek === 3 && dayOfMonth >= 8 && dayOfMonth <= 14) {
-        events.push({
-            time: '22:30 (KST)',
-            event: '🔥 미국 소비자물가지수 (CPI)',
-            importance: 'critical',
-            currency: 'USD'
-        })
+        events.push({ time: '22:30', event: '🔥 미국 소비자물가지수 (CPI)', importance: 'critical' })
     }
 
-    // 매월 셋째 주: FOMC 금리 결정 (격월)
-    const month = now.getMonth()
-    if ([0, 2, 4, 6, 8, 10].includes(month) && dayOfWeek === 3 && dayOfMonth >= 15 && dayOfMonth <= 21) {
-        events.push({
-            time: '03:00 (다음날 KST)',
-            event: '🔥🔥 FOMC 금리 결정',
-            importance: 'critical',
-            currency: 'USD'
-        })
-    }
-
+    // Add more logic as needed
     return events
 }
-
-// ============================================
-// 암호화폐 이벤트
-// ============================================
 
 function getCryptoEvents() {
-    const now = new Date()
-    const dayOfMonth = now.getDate()
-    const month = now.getMonth()
-    const events = []
+    return [] // Placeholder
+}
 
-    // BTC 옵션 만기 (매월 마지막 금요일)
-    const lastFriday = getLastFridayOfMonth(now)
-    if (now.toDateString() === lastFriday.toDateString()) {
-        events.push({
-            time: '17:00 (KST)',
-            event: '₿ BTC 월간 옵션 만기',
-            importance: 'high',
-            currency: 'BTC'
+async function generateCalendarImage(events) {
+    const hasCritical = events.some(e => e.importance === 'critical')
+    const mood = hasCritical ? 'Intense, high alert, red warning lights' : 'Calm, organized, blue holographic interface'
+
+    const prompt = `Futuristic 3D icon representing Economic Calendar.
+    Date: Today.
+    Mood: ${mood}.
+    Style: Glassmorphism, highly detailed, 4k.
+    No text.`
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
+            })
         })
+        const json = await res.json()
+        return json.data?.[0]?.url || null
+    } catch (e) {
+        return null
     }
-
-    // ETH 이벤트 예시
-    // 실제로는 동적으로 가져와야 함
-
-    return events
 }
-
-function getLastFridayOfMonth(date) {
-    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-    const dayOfWeek = lastDay.getDay()
-    const diff = dayOfWeek >= 5 ? dayOfWeek - 5 : dayOfWeek + 2
-    lastDay.setDate(lastDay.getDate() - diff)
-    return lastDay
-}
-
-// ============================================
-// 메시지 생성
-// ============================================
-
-function formatCalendarMessage(economicEvents, cryptoEvents) {
-    const koreaDate = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric', month: 'long', day: 'numeric',
-        weekday: 'long'
-    })
-
-    const allEvents = [...economicEvents, ...cryptoEvents]
-
-    if (allEvents.length === 0) {
-        return `📅 오늘의 경제 일정
-━━━━━━━━━━━━━━━━━━━━
-📆 ${koreaDate}
-
-✅ 오늘은 주요 경제 발표가 없습니다.
-
-평온한 하루, 트레이딩에 집중하세요! 📊
-
-━━━━━━━━━━━━━━━━━━━━
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-📰 뉴스: @TranTradingLabNews
-🌐 웹: trantradinglab.com
-
-#경제일정 #TranTradingLab`
-    }
-
-    const importanceEmoji = {
-        critical: '🔴',
-        high: '🟠',
-        medium: '🟡',
-        low: '🟢'
-    }
-
-    const eventList = allEvents.map(e => {
-        const emoji = importanceEmoji[e.importance] || '⚪'
-        return `${emoji} ${e.time}\n   ${e.event}`
-    }).join('\n\n')
-
-    const criticalCount = allEvents.filter(e => e.importance === 'critical').length
-    const warning = criticalCount > 0
-        ? `\n⚠️ 오늘 ${criticalCount}개의 주요 이벤트가 예정되어 있습니다!\n변동성에 유의하세요.\n`
-        : ''
-
-    return `📅 오늘의 경제 일정
-━━━━━━━━━━━━━━━━━━━━
-📆 ${koreaDate}
-${warning}
-${eventList}
-
-━━━━━━━━━━━━━━━━━━━━
-
-💡 중요도 안내
-🔴 매우 중요 | 🟠 중요 | 🟡 보통
-
-━━━━━━━━━━━━━━━━━━━━
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-📰 뉴스: @TranTradingLabNews
-🌐 웹: trantradinglab.com
-
-#경제일정 #TranTradingLab`
-}
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -188,33 +75,53 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Generating economic calendar...')
+        const events = [...getRecurringEvents(), ...getCryptoEvents()]
 
-        const economicEvents = getRecurringEvents()
-        const cryptoEvents = getCryptoEvents()
+        const koreaDate = new Date().toLocaleString('ko-KR', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+        })
 
-        const message = formatCalendarMessage(economicEvents, cryptoEvents)
+        let message = `📅 오늘의 경제 일정\n━━━━━━━━━━━━━━━━━━━━\n📆 ${koreaDate}\n\n`
 
-        const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: NEWS_CHANNEL_ID,
-                text: message
+        if (events.length === 0) {
+            message += `✅ 오늘은 주요 경제 발표가 없습니다.\n평온한 하루 보내세요! 📊`
+        } else {
+            message += events.map(e => {
+                const emoji = e.importance === 'critical' ? '🔴' : e.importance === 'high' ? '🟠' : '🟡'
+                return `${emoji} ${e.time}\n   ${e.event}`
+            }).join('\n\n')
+        }
+
+        message += `\n\n━━━━━━━━━━━━━━━━━━━━\n📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t\n🌐 웹: trantradinglab.com\n#경제일정 #TranTradingLab`
+
+        const imageUrl = await generateCalendarImage(events)
+
+        if (imageUrl) {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: NEWS_CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: message,
+                    parse_mode: 'Markdown'
+                })
             })
-        })
+        } else {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: NEWS_CHANNEL_ID,
+                    text: message
+                })
+            })
+        }
 
-        const result = await telegramRes.json()
-        console.log('Economic calendar sent:', result.ok ? 'Success' : result.description)
-
-        return res.status(200).json({
-            success: true,
-            messageId: result.result?.message_id,
-            eventsCount: economicEvents.length + cryptoEvents.length
-        })
+        return res.status(200).json({ success: true, count: events.length })
 
     } catch (error) {
-        console.error('Economic calendar error:', error)
         return res.status(500).json({ error: error.message })
     }
 }

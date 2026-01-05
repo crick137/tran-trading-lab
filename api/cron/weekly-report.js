@@ -1,6 +1,6 @@
 /**
- * 📊 TRAN 주간 마켓 리포트
- * Vercel Cron: 매주 일요일 10:00 (KST) 실행
+ * 📅 TRAN 위클리 리포트 (Premium)
+ * Vercel Cron: 매주 월요일 09:00 (KST) 실행
  * 채널: @http4477
  */
 
@@ -8,205 +8,129 @@ const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
-// ============================================
-// 주간 데이터 수집
-// ============================================
-
-async function getWeeklyPerformance() {
-    const coins = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT', 'DOGEUSDT', 'ADAUSDT', 'AVAXUSDT']
-    const performance = []
-
-    for (const symbol of coins) {
-        try {
-            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=7`)
-            const data = await res.json()
-
-            if (data.length >= 7) {
-                const weekStart = parseFloat(data[0][1])
-                const weekEnd = parseFloat(data[data.length - 1][4])
-                const change = ((weekEnd - weekStart) / weekStart) * 100
-                const volume = data.reduce((sum, d) => sum + parseFloat(d[7]), 0)
-
-                performance.push({
-                    symbol: symbol.replace('USDT', ''),
-                    price: weekEnd,
-                    weeklyChange: change,
-                    volume: volume / 1e9
-                })
-            }
-        } catch (e) {
-            console.error(`Error fetching ${symbol}:`, e.message)
-        }
-    }
-
-    return performance.sort((a, b) => b.weeklyChange - a.weeklyChange)
+if (!TELEGRAM_BOT_TOKEN || !OPENAI_API_KEY) {
+    throw new Error('Missing environment variables')
 }
 
-async function getWeeklyStockPerformance() {
-    const indices = { 'S&P500': '^GSPC', 'NASDAQ': '^IXIC', 'KOSPI': '^KS11' }
-    const result = {}
+// ============================================
+// 데이터 수집
+// ============================================
 
-    for (const [name, symbol] of Object.entries(indices)) {
-        try {
-            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=5d`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-            const data = await res.json()
-            const closes = data.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(c => c !== null) || []
-
-            if (closes.length >= 2) {
-                const weekStart = closes[0]
-                const weekEnd = closes[closes.length - 1]
-                result[name] = {
-                    price: weekEnd,
-                    weeklyChange: ((weekEnd - weekStart) / weekStart) * 100
-                }
-            }
-        } catch { }
-    }
-
-    return result
-}
-
-async function getWeeklyFearGreed() {
+async function getWeeklyData() {
     try {
-        const res = await fetch('https://api.alternative.me/fng/?limit=7')
-        const data = await res.json()
-        const values = data.data.map(d => parseInt(d.value))
+        const [btc, eth, sol] = await Promise.all([
+            fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT').then(r => r.json()),
+            fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=ETHUSDT').then(r => r.json()),
+            fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=SOLUSDT').then(r => r.json())
+        ])
         return {
-            current: values[0],
-            weekStart: values[values.length - 1],
-            average: Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+            BTC: { p: parseFloat(btc.lastPrice), c: parseFloat(btc.priceChangePercent) },
+            ETH: { p: parseFloat(eth.lastPrice), c: parseFloat(eth.priceChangePercent) },
+            SOL: { p: parseFloat(sol.lastPrice), c: parseFloat(sol.priceChangePercent) }
         }
-    } catch {
-        return { current: 50, weekStart: 50, average: 50 }
-    }
+    } catch { return {} }
 }
 
 // ============================================
-// AI 주간 분석 생성
+// DALL-E 3 이미지
 // ============================================
 
-async function generateWeeklyAnalysis(data) {
-    const { cryptoPerf, stockPerf, fearGreed } = data
+async function generateWeeklyBanner(marketState) {
+    const mood = marketState === 'bull' ? 'Grand golden bull statue in a futuristic museum, spotlight, crowd admiring'
+        : 'A sturdy lighthouse standing against a massive dark tsunami, resilience, hope'
 
-    const koreaDate = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric', month: 'long', day: 'numeric'
-    })
+    const prompt = `Premium financial magazine cover. 
+    Subject: ${mood}.
+    Style: Time Magazine or The Economist cover style, artistic, thought-provoking.
+    No text.`
 
-    const topGainers = cryptoPerf.slice(0, 3)
-    const topLosers = cryptoPerf.slice(-3).reverse()
+    try {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
+            })
+        })
+        const json = await res.json()
+        return json.data?.[0]?.url || null
+    } catch { return null }
+}
 
-    const marketContext = `
-【이번 주 시장 데이터】
+// ============================================
+// AI 위클리 분석 (GPT-5.2)
+// ============================================
 
-🏆 주간 상승 TOP 3:
-${topGainers.map((c, i) => `${i + 1}. ${c.symbol}: ${c.weeklyChange >= 0 ? '+' : ''}${c.weeklyChange.toFixed(2)}%`).join('\n')}
+async function generateWeeklyReport(data) {
+    const marketState = data.BTC.c > 0 ? 'bull' : 'bear'
+    const koreaTime = new Date().toLocaleDateString('ko-KR')
 
-📉 주간 하락 TOP 3:
-${topLosers.map((c, i) => `${i + 1}. ${c.symbol}: ${c.weeklyChange.toFixed(2)}%`).join('\n')}
+    const systemPrompt = `당신은 글로벌 매크로 전략가입니다.
+지난 한 주간의 시장 흐름을 큰 그림에서 조망하고, 이번 주의 핵심 테마를 선정합니다.
 
-₿ 비트코인 주간:
-- 현재가: $${cryptoPerf.find(c => c.symbol === 'BTC')?.price?.toLocaleString()}
-- 주간 변동: ${cryptoPerf.find(c => c.symbol === 'BTC')?.weeklyChange?.toFixed(2)}%
+【집필 가이드】
+- '이코노미스트(The Economist)' 잡지의 칼럼 스타일.
+- 지엽적인 등락보다는 거시적인 흐름(내러티브)에 집중.
+- 독자에게 "아, 지금 세상이 이렇게 돌아가는구나"라는 통찰을 줄 것.
+- 문체: 지적이고, 세련되며, 통찰력 있는.
+- "한 주간 정리입니다" 같은 서두 삭제.`
 
-📈 주식시장 주간:
-- S&P500: ${stockPerf['S&P500']?.weeklyChange?.toFixed(2)}%
-- NASDAQ: ${stockPerf['NASDAQ']?.weeklyChange?.toFixed(2)}%
-- KOSPI: ${stockPerf['KOSPI']?.weeklyChange?.toFixed(2)}%
+    const userPrompt = `지난주 데이터: BTC ${data.BTC.c}%, ETH ${data.ETH.c}%, SOL ${data.SOL.c}%
 
-🌡️ 공포/탐욕:
-- 주초: ${fearGreed.weekStart}
-- 현재: ${fearGreed.current}
-- 주간 평균: ${fearGreed.average}
-`
-
-    const systemPrompt = `당신은 TRAN Trading Lab의 수석 시장 분석가입니다.
-주간 시장 리뷰를 작성합니다. 오직 한국어만 사용하세요.
-🔴🔵 금지, ▲▼ 사용. 스토리텔링 스타일로 작성.`
-
-    const userPrompt = `아래 주간 데이터로 주간 리포트를 작성하세요.
-
-${marketContext}
+위클리 리포트를 작성해.
 
 【출력 형식】
-📊 TRAN 주간 마켓 리포트
-📅 ${koreaDate} (일요일)
+📅 TRAN 위클리 인사이트
+${koreaTime}
 
 ━━━━━━━━━━━━━━━━━━━━
 
-📌 이번 주 시장 한 줄 요약
-[이번 주 시장을 한 문장으로 요약]
+[이번 주를 관통하는 철학적인/통찰력 있는 제목]
+
+🌍 The Big Picture
+[지난주 시장을 움직인 거대한 흐름 설명. 2문단.]
+
+🔍 Key Narratives
+• [핵심 내러티브 1]: [해설]
+• [핵심 내러티브 2]: [해설]
+
+🗓️ This Week's Radar
+- [이번 주 주목할 이벤트/지표 1]
+- [이번 주 주목할 이벤트/지표 2]
+
+🧭 Strategist's Note
+"[독자들에게 던지는 질문이나 메시지]"
 
 ━━━━━━━━━━━━━━━━━━━━
-
-🏆 이번 주의 승자
-${topGainers.map((c, i) => `${i + 1}. ${c.symbol}: ▲ +${c.weeklyChange.toFixed(2)}%`).join('\n')}
-
-📉 이번 주의 패자
-${topLosers.map((c, i) => `${i + 1}. ${c.symbol}: ▼ ${c.weeklyChange.toFixed(2)}%`).join('\n')}
-
-━━━━━━━━━━━━━━━━━━━━
-
-₿ 비트코인 주간 분석
-• 주간 변동: [값]
-• 주요 이벤트: [이번 주 BTC 관련 주요 이슈]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📈 글로벌 증시 주간
-• S&P500: [변동]
-• NASDAQ: [변동]
-• KOSPI: [변동]
-
-━━━━━━━━━━━━━━━━━━━━
-
-💡 주간 인사이트
-
-"[창의적인 주간 분석 제목]"
-
-[3-4문장의 주간 시장 분석 및 다음 주 전망]
-
-━━━━━━━━━━━━━━━━━━━━
-
-🔮 다음 주 주목 포인트
-• [다음 주 주목할 첫 번째 이벤트]
-• [다음 주 주목할 두 번째 이벤트]
-• [다음 주 주목할 세 번째 이벤트]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-📰 뉴스: @TranTradingLabNews
-🌐 웹: trantradinglab.com
-
-#주간리포트 #비트코인 #TranTradingLab`
+#위클리 #매크로 #TranTradingLab`
 
     try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gpt-5.1',
+                model: 'gpt-5.2',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.8,
-                max_completion_tokens: 2000
+                temperature: 0.7,
+                max_completion_tokens: 1500
             })
         })
         const json = await res.json()
-        return json.choices?.[0]?.message?.content?.trim() || null
-    } catch (e) {
-        console.error('OpenAI API error:', e.message)
-        return null
-    }
+        return {
+            content: json.choices?.[0]?.message?.content?.trim(),
+            state: marketState
+        }
+    } catch { return null }
 }
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -215,36 +139,35 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Generating weekly report...')
+        const data = await getWeeklyData()
+        const report = await generateWeeklyReport(data)
 
-        const [cryptoPerf, stockPerf, fearGreed] = await Promise.all([
-            getWeeklyPerformance(),
-            getWeeklyStockPerformance(),
-            getWeeklyFearGreed()
-        ])
+        if (!report || !report.content) return res.status(500).json({ error: 'AI failed' })
 
-        const message = await generateWeeklyAnalysis({ cryptoPerf, stockPerf, fearGreed })
+        const imageUrl = await generateWeeklyBanner(report.state)
 
-        if (!message) {
-            return res.status(500).json({ error: 'AI generation failed' })
-        }
-
-        const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHANNEL_ID,
-                text: message
+        if (imageUrl) {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: report.content,
+                })
             })
-        })
-
-        const result = await telegramRes.json()
-        console.log('Weekly report sent:', result.ok ? 'Success' : result.description)
-
-        return res.status(200).json({ success: true, messageId: result.result?.message_id })
-
-    } catch (error) {
-        console.error('Weekly report error:', error)
-        return res.status(500).json({ error: error.message })
+        } else {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: report.content
+                })
+            })
+        }
+        return res.status(200).json({ success: true })
+    } catch (e) {
+        return res.status(500).json({ error: e.message })
     }
 }

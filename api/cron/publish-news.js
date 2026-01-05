@@ -1,7 +1,9 @@
 /**
- * Vercel Cron: 每小时自动发布 Top 5 新闻到 Telegram
+ * Vercel Cron: 每小时自动发布 Top 5 新闻到 Telegram (带配图)
  * 配置在 vercel.json 中设置 cron 表达式
  */
+
+import { generateNewsBanner } from '../utils/imageHelper.js'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
@@ -85,6 +87,20 @@ function formatNewsForTelegram(newsArray) {
     return message
 }
 
+async function sendTelegramPhoto(imageUrl, caption) {
+    const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHANNEL_ID,
+            photo: imageUrl,
+            caption: caption,
+            parse_mode: 'HTML'
+        })
+    })
+    return response.json()
+}
+
 async function sendTelegramMessage(text) {
     const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: 'POST',
@@ -122,11 +138,26 @@ export default async function handler(req, res) {
         // 随机选择 5 条新闻
         const toPublish = allNews.slice(0, 5)
         const message = formatNewsForTelegram(toPublish)
-        const result = await sendTelegramMessage(message)
+
+        // 生成配图
+        console.log('🎨 Generating news banner image...')
+        const imageUrl = await generateNewsBanner()
+
+        let result
+        if (imageUrl) {
+            // 有图片：使用 sendPhoto
+            console.log('📤 Sending with image...')
+            result = await sendTelegramPhoto(imageUrl, message)
+        } else {
+            // 无图片：使用 sendMessage
+            console.log('📤 Sending text only (image generation failed)...')
+            result = await sendTelegramMessage(message)
+        }
 
         return res.status(200).json({
             success: result.ok,
             published: toPublish.length,
+            hasImage: !!imageUrl,
             time: new Date().toISOString()
         })
     } catch (error) {
@@ -134,3 +165,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: error.message })
     }
 }
+

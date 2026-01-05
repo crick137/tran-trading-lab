@@ -1,218 +1,140 @@
 /**
- * 📈 TRAN AI 기술 분석
+ * 📈 TRAN 기술적 분석 (Premium)
  * Vercel Cron: 매일 12:00 (KST) 실행
  * 채널: @http4477
- * 
- * 주요 자산의 기술적 지지/저항선 분석
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
+if (!TELEGRAM_BOT_TOKEN || !OPENAI_API_KEY) {
+    throw new Error('Missing environment variables')
+}
+
 // ============================================
-// 기술적 지표 계산
+// 데이터 수집
 // ============================================
 
-async function getTechnicalData(symbol) {
+async function getTechnicalData() {
     try {
-        // 최근 50일 캔들 데이터
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=1d&limit=50`)
+        const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=30')
         const data = await res.json()
+        // Simple data packet: Open, High, Low, Close, Volume
+        return data.map(candle => ({
+            o: parseFloat(candle[1]),
+            h: parseFloat(candle[2]),
+            l: parseFloat(candle[3]),
+            c: parseFloat(candle[4]),
+            v: parseFloat(candle[5])
+        }))
+    } catch { return [] }
+}
 
-        const closes = data.map(d => parseFloat(d[4]))
-        const highs = data.map(d => parseFloat(d[2]))
-        const lows = data.map(d => parseFloat(d[3]))
-        const volumes = data.map(d => parseFloat(d[5]))
+// ============================================
+// DALL-E 3 차트 이미지
+// ============================================
 
-        // 현재가
-        const currentPrice = closes[closes.length - 1]
+async function generateTechnicalBanner(trend) {
+    const mood = trend === 'bullish' ? 'green neon charts, upward momentum, futuristic hud'
+        : trend === 'bearish' ? 'red warning signals, downward breakdown, glitch effect'
+            : 'blue symmetrical patterns, balance, calm interface'
 
-        // 이동평균선
-        const ma7 = closes.slice(-7).reduce((a, b) => a + b, 0) / 7
-        const ma25 = closes.slice(-25).reduce((a, b) => a + b, 0) / 25
-        const ma50 = closes.reduce((a, b) => a + b, 0) / 50
+    const prompt = `Advanced technical analysis dashboard background. 
+	Theme: ${mood}.
+	Style: Cybersecurity interface, glowing wireframe, 8k resolution.
+	No text.`
 
-        // RSI (14일)
-        const rsi = calculateRSI(closes, 14)
-
-        // 볼린저 밴드 (20일, 2 표준편차)
-        const bb = calculateBollingerBands(closes.slice(-20))
-
-        // 지지/저항선 (최근 50일 고저점)
-        const recentHighs = highs.slice(-14)
-        const recentLows = lows.slice(-14)
-        const resistance = Math.max(...recentHighs)
-        const support = Math.min(...recentLows)
-
-        // 거래량 트렌드
-        const avgVolume = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20
-        const recentVolume = volumes.slice(-3).reduce((a, b) => a + b, 0) / 3
-        const volumeTrend = recentVolume > avgVolume * 1.2 ? '증가' : recentVolume < avgVolume * 0.8 ? '감소' : '보통'
-
-        return {
-            currentPrice,
-            ma7, ma25, ma50,
-            rsi,
-            bb,
-            support, resistance,
-            volumeTrend,
-            trend: currentPrice > ma25 ? 'bullish' : 'bearish'
-        }
+    try {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
+            })
+        })
+        const json = await res.json()
+        return json.data?.[0]?.url || null
     } catch (e) {
-        console.error(`Technical data error for ${symbol}:`, e.message)
         return null
     }
 }
 
-function calculateRSI(closes, period = 14) {
-    if (closes.length < period + 1) return 50
-
-    let gains = 0, losses = 0
-    for (let i = closes.length - period; i < closes.length; i++) {
-        const diff = closes[i] - closes[i - 1]
-        if (diff > 0) gains += diff
-        else losses -= diff
-    }
-
-    const avgGain = gains / period
-    const avgLoss = losses / period
-
-    if (avgLoss === 0) return 100
-    const rs = avgGain / avgLoss
-    return 100 - (100 / (1 + rs))
-}
-
-function calculateBollingerBands(closes) {
-    const avg = closes.reduce((a, b) => a + b, 0) / closes.length
-    const variance = closes.reduce((sum, c) => sum + Math.pow(c - avg, 2), 0) / closes.length
-    const stdDev = Math.sqrt(variance)
-
-    return {
-        upper: avg + (2 * stdDev),
-        middle: avg,
-        lower: avg - (2 * stdDev)
-    }
-}
-
 // ============================================
-// AI 분석 생성
+// AI 분석 (GPT-5.2)
 // ============================================
 
-async function generateTechnicalAnalysis() {
-    const btcData = await getTechnicalData('BTCUSDT')
-    const ethData = await getTechnicalData('ETHUSDT')
+async function generateAnalysis(candles) {
+    const currentPrice = candles[candles.length - 1].c
+    const openPrice = candles[0].o
+    const trend = currentPrice > openPrice ? 'bullish' : 'bearish'
 
-    if (!btcData || !ethData) return null
+    const systemPrompt = `당신은 30년 경력의 월스트리트 수석 차티스트(CMT)입니다.
+캔들 패턴, 보조지표, 거래량 분석을 통해 시장의 방향성을 진단합니다.
 
-    const koreaTime = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric', month: 'long', day: 'numeric',
-        hour: '2-digit', minute: '2-digit'
-    })
+【분석 스타일】
+- 감정을 배제한 냉철한 어조.
+- "제 생각에는", "같습니다" 같은 추측성 발언 금지. 데이터에 근거해 "관측된다", "시사한다"로 표현.
+- 전문 용어 적절히 사용 (다이버전스, 오더블럭, 리테스트, 손익비 등).
+- 그러나 결론은 명확하게 (매수 우위/매도 우위).`
 
-    const technicalContext = `
-【기술적 분석 데이터】
+    const userPrompt = `비트코인 4시간봉 30개 데이터가 주어졌다.
+시가: ${openPrice}, 현재가: ${currentPrice}
+전체 데이터(요약): ${JSON.stringify(candles.slice(-5))}
 
-₿ 비트코인 (BTC):
-- 현재가: $${btcData.currentPrice.toLocaleString()}
-- MA7: $${btcData.ma7.toFixed(0)} | MA25: $${btcData.ma25.toFixed(0)} | MA50: $${btcData.ma50.toFixed(0)}
-- RSI(14): ${btcData.rsi.toFixed(1)} (${btcData.rsi > 70 ? '과매수' : btcData.rsi < 30 ? '과매도' : '중립'})
-- 볼린저: 상단 $${btcData.bb.upper.toFixed(0)} | 하단 $${btcData.bb.lower.toFixed(0)}
-- 단기 지지: $${btcData.support.toFixed(0)} | 저항: $${btcData.resistance.toFixed(0)}
-- 거래량: ${btcData.volumeTrend}
-- 추세: ${btcData.trend === 'bullish' ? '상승' : '하락'}
-
-Ξ 이더리움 (ETH):
-- 현재가: $${ethData.currentPrice.toLocaleString()}
-- MA7: $${ethData.ma7.toFixed(0)} | MA25: $${ethData.ma25.toFixed(0)}
-- RSI(14): ${ethData.rsi.toFixed(1)}
-- 단기 지지: $${ethData.support.toFixed(0)} | 저항: $${ethData.resistance.toFixed(0)}
-- 추세: ${ethData.trend === 'bullish' ? '상승' : '하락'}
-`
-
-    const systemPrompt = `당신은 TRAN Trading Lab의 테크니컬 애널리스트입니다.
-기술적 분석을 기반으로 트레이딩 인사이트를 제공합니다.
-오직 한국어만 사용. 🔴🔵 금지, ▲▼ 사용.`
-
-    const userPrompt = `아래 기술적 데이터로 분석 리포트를 작성하세요.
-
-${technicalContext}
+기술적 분석 리포트를 작성해.
 
 【출력 형식】
-📈 TRAN 기술적 분석 리포트
-📅 ${koreaTime}
-
+📈 TRAN 기술적 분석 (BTC/USDT 4H)
 ━━━━━━━━━━━━━━━━━━━━
 
-₿ 비트코인 기술 분석
+🔍 패턴 분석
+[현재 발견되는 주요 패턴 (예: 수렴, 이탈, 다이버전스) 설명]
 
-📊 주요 지표
-• RSI(14): [값] ([해석])
-• 이동평균: [MA 분석]
-• 볼린저: [위치 분석]
+📊 주요 지지/저항 레벨
+• 1차 저항: $[가격] (설명)
+• 1차 지지: $[가격] (설명)
 
-🎯 핵심 레벨
-• 저항선: $[값] | $[값]
-• 지지선: $[값] | $[값]
+🎯 트레이딩 셋업
+• 진입 타점: [가격대/조건]
+• 손절 라인: [가격]
+• 방향성: [상승/하락/횡보] 우위
 
-📝 분석
-[2-3문장 기술적 분석]
-
-━━━━━━━━━━━━━━━━━━━━
-
-Ξ 이더리움 기술 분석
-
-📊 주요 지표
-• RSI(14): [값] ([해석])
-• 추세: [상승/하락/횡보]
-
-🎯 핵심 레벨
-• 저항선: $[값]
-• 지지선: $[값]
+💬 분석가 코멘트
+"[한 줄 요약]"
 
 ━━━━━━━━━━━━━━━━━━━━
-
-🎯 트레이딩 아이디어
-
-[구체적인 진입/손절/목표가 제시]
-
-⚠️ 리스크 관리
-[리스크 관리 팁]
-
-━━━━━━━━━━━━━━━━━━━━
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-📰 뉴스: @TranTradingLabNews
-🌐 웹: trantradinglab.com
-
-#기술분석 #비트코인 #TranTradingLab`
+#차트분석 #비트코인 #TranTradingLab`
 
     try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gpt-5.1',
+                model: 'gpt-5.2',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
-                temperature: 0.7,
+                temperature: 0.5, // Lower temperature for precision
                 max_completion_tokens: 1500
             })
         })
         const json = await res.json()
-        return json.choices?.[0]?.message?.content?.trim() || null
+        return {
+            content: json.choices?.[0]?.message?.content?.trim(),
+            trend
+        }
     } catch (e) {
-        console.error('OpenAI API error:', e.message)
         return null
     }
 }
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -221,30 +143,36 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Generating technical analysis...')
+        const candles = await getTechnicalData()
+        if (candles.length === 0) return res.status(500).json({ error: 'No data' })
 
-        const message = await generateTechnicalAnalysis()
+        const analysis = await generateAnalysis(candles)
+        if (!analysis || !analysis.content) return res.status(500).json({ error: 'AI failed' })
 
-        if (!message) {
-            return res.status(500).json({ error: 'AI generation failed' })
-        }
+        const imageUrl = await generateTechnicalBanner(analysis.trend)
 
-        const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHANNEL_ID,
-                text: message
+        if (imageUrl) {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: analysis.content,
+                })
             })
-        })
-
-        const result = await telegramRes.json()
-        console.log('Technical analysis sent:', result.ok ? 'Success' : result.description)
-
-        return res.status(200).json({ success: true, messageId: result.result?.message_id })
-
-    } catch (error) {
-        console.error('Technical analysis error:', error)
-        return res.status(500).json({ error: error.message })
+        } else {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: analysis.content
+                })
+            })
+        }
+        return res.status(200).json({ success: true })
+    } catch (e) {
+        return res.status(500).json({ error: e.message })
     }
 }

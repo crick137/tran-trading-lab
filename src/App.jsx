@@ -32,6 +32,8 @@ function App() {
                                 <Route path="/systems" element={<TranTradingTerminal />} />
                                 <Route path="/profile" element={<TranTradingTerminal />} />
                                 <Route path="/analysis" element={<TranTradingTerminal />} />
+                                <Route path="/curated" element={<TranTradingTerminal />} />
+                                <Route path="/commentary" element={<TranTradingTerminal />} />
 
                                 {/* Article Routes */}
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />

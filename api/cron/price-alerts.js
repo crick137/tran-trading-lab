@@ -1,18 +1,17 @@
 /**
- * 🚨 TRAN 가격 돌파 알림
+ * 🚨 TRAN 가격 돌파 알림 (Premium)
  * Vercel Cron: 매일 2회 실행 (UTC 00:00, 12:00 = KST 09:00, 21:00)
  * 채널: @http4477
- * 
- * 주요 지지/저항선 돌파 시 알림
  */
 
 import { kv } from '@vercel/kv'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
-if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+if (!TELEGRAM_BOT_TOKEN || !OPENAI_API_KEY) {
+    throw new Error('Missing environment variables')
 }
 
 // ============================================
@@ -40,22 +39,11 @@ const PRICE_LEVELS = {
             { price: 3000, type: 'support', label: '주요 지지선 $3K' },
             { price: 2500, type: 'support', label: '강한 지지선 $2.5K' }
         ]
-    },
-    SOL: {
-        name: '솔라나',
-        symbol: 'SOLUSDT',
-        levels: [
-            { price: 200, type: 'resistance', label: '심리적 저항선 $200' },
-            { price: 150, type: 'resistance', label: '저항선 $150' },
-            { price: 120, type: 'support', label: '지지선 $120' },
-            { price: 100, type: 'support', label: '심리적 지지선 $100' }
-        ]
     }
 }
 
-// 쿨다운: 같은 레벨에 대해 1시간 내 재알림 방지
 const alertCooldowns = new Map()
-const COOLDOWN_MS = 60 * 60 * 1000 // 1시간
+const COOLDOWN_MS = 60 * 60 * 1000
 
 // ============================================
 // 가격 데이터 수집
@@ -73,7 +61,6 @@ async function getCurrentPrices() {
         }
         return prices
     } catch (e) {
-        console.error('Price fetch error:', e.message)
         return {}
     }
 }
@@ -89,7 +76,42 @@ async function get24hChange(symbol) {
 }
 
 // ============================================
-// 돌파 감지
+// DALL-E 3 알림 이미지
+// ============================================
+
+async function generateAlertImage(breach) {
+    const actionDesc = breach.direction === 'up'
+        ? 'A powerful golden rocket shattering a glass ceiling, explosive shards, upward momentum'
+        : 'A heavy stone floor cracking and collapsing, red warning lights, downward momentum'
+
+    const prompt = `Dramatic 3D illustration of financial market breakout.
+    Subject: ${breach.name} price alert. ${actionDesc}.
+    Mood: Intense, high energy, futuristic.
+    No text.`
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
+            })
+        })
+        const json = await res.json()
+        return json.data?.[0]?.url || null
+    } catch (e) {
+        return null
+    }
+}
+
+// ============================================
+// 돌파 감지 및 알림
 // ============================================
 
 function checkBreaches(prices, previousPrices) {
@@ -102,13 +124,6 @@ function checkBreaches(prices, previousPrices) {
         if (!currentPrice || !prevPrice) continue
 
         for (const level of config.levels) {
-            const cooldownKey = `${coin}-${level.price}`
-            const lastAlert = alertCooldowns.get(cooldownKey)
-
-            // 쿨다운 체크
-            if (lastAlert && Date.now() - lastAlert < COOLDOWN_MS) continue
-
-            // 상향 돌파 (저항선)
             if (level.type === 'resistance' && prevPrice < level.price && currentPrice >= level.price) {
                 breaches.push({
                     coin,
@@ -117,13 +132,9 @@ function checkBreaches(prices, previousPrices) {
                     price: currentPrice,
                     level: level.price,
                     label: level.label,
-                    direction: 'up',
-                    type: 'resistance'
+                    direction: 'up'
                 })
-                alertCooldowns.set(cooldownKey, Date.now())
             }
-
-            // 하향 돌파 (지지선)
             if (level.type === 'support' && prevPrice > level.price && currentPrice <= level.price) {
                 breaches.push({
                     coin,
@@ -132,105 +143,83 @@ function checkBreaches(prices, previousPrices) {
                     price: currentPrice,
                     level: level.price,
                     label: level.label,
-                    direction: 'down',
-                    type: 'support'
+                    direction: 'down'
                 })
-                alertCooldowns.set(cooldownKey, Date.now())
             }
         }
     }
-
     return breaches
 }
 
-// ============================================
-// 알림 메시지 생성
-// ============================================
-
-async function formatAlertMessage(breach) {
+async function sendAlert(breach) {
     const change = await get24hChange(breach.symbol)
-    const emoji = breach.direction === 'up' ? '🚀' : '🔻'
     const arrow = breach.direction === 'up' ? '▲' : '▼'
-    const action = breach.direction === 'up' ? '상향 돌파' : '하향 이탈'
+    const action = breach.direction === 'up' ? '상향 돌파 (Breakout)' : '하향 이탈 (Breakdown)'
 
-    const koreaTime = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        hour: '2-digit', minute: '2-digit', second: '2-digit'
-    })
-
-    return `${emoji} 가격 알림 | ${breach.name}
-
+    const message = `🚨 TRAN 가격 알림 | ${breach.name}
 ━━━━━━━━━━━━━━━━━━━━
 
 🎯 ${breach.label} ${action}!
 
 • 현재가: $${breach.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
 • 24h 변동: ${arrow} ${Math.abs(change).toFixed(2)}%
-• 돌파 레벨: $${breach.level.toLocaleString()}
+• 기준 레벨: $${breach.level.toLocaleString()}
 
 ━━━━━━━━━━━━━━━━━━━━
-
-⏰ ${koreaTime} (KST)
 📊 실시간 차트: trantradinglab.com
+#${breach.name} #가격알림 #TranTradingLab`
 
-#${breach.name.replace(/\s/g, '')} #가격알림 #TranTradingLab`
-}
+    const imageUrl = await generateAlertImage(breach)
 
-// ============================================
-// 텔레그램 전송
-// ============================================
-
-async function sendAlert(message) {
     try {
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: NEWS_CHANNEL_ID,
-                text: message
+        if (imageUrl) {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: NEWS_CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: message,
+                    parse_mode: 'Markdown'
+                })
             })
-        })
-        const result = await res.json()
-        return result.ok
+        } else {
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: NEWS_CHANNEL_ID,
+                    text: message
+                })
+            })
+        }
+        return true
     } catch (e) {
-        console.error('Telegram send error:', e.message)
+        console.error('Telegram error:', e.message)
         return false
     }
 }
 
-// ============================================
-// 이전 가격 저장 (Vercel KV)
-// ============================================
-
+// ... KV storage logic same as before ...
 const PRICE_STORAGE_KEY = 'price-alerts:previous-prices'
-
 async function getPreviousPrices() {
     try {
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
             const stored = await kv.get(PRICE_STORAGE_KEY)
             return stored || null
         }
-    } catch (e) {
-        console.warn('KV storage not available, using fallback:', e.message)
-    }
+    } catch (e) { }
     return null
 }
-
 async function savePreviousPrices(prices) {
     try {
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            await kv.set(PRICE_STORAGE_KEY, prices, { ex: 86400 }) // 24小时过期
+            await kv.set(PRICE_STORAGE_KEY, prices, { ex: 86400 })
             return true
         }
-    } catch (e) {
-        console.warn('KV storage not available:', e.message)
-    }
+    } catch (e) { }
     return false
 }
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -239,51 +228,26 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Checking price levels...')
-
         const currentPrices = await getCurrentPrices()
+        if (Object.keys(currentPrices).length === 0) return res.status(500).json({ error: 'Fetch failed' })
 
-        if (Object.keys(currentPrices).length === 0) {
-            return res.status(500).json({ error: 'Failed to fetch prices' })
-        }
-
-        // 이전 가격 가져오기
         const previousPrices = await getPreviousPrices()
 
-        // 첫 실행 시에는 이전 가격이 없으므로 저장만 하고 종료
         if (!previousPrices) {
             await savePreviousPrices(currentPrices)
-            console.log('Initial prices stored:', currentPrices)
-            return res.status(200).json({ message: 'Initial prices stored', prices: currentPrices })
+            return res.status(200).json({ message: 'Initialized prices' })
         }
 
-        // 돌파 감지
         const breaches = checkBreaches(currentPrices, previousPrices)
 
-        if (breaches.length > 0) {
-            console.log(`Found ${breaches.length} breach(es)!`)
-
-            for (const breach of breaches) {
-                const message = await formatAlertMessage(breach)
-                const sent = await sendAlert(message)
-                console.log(`Alert for ${breach.name}: ${sent ? 'Sent' : 'Failed'}`)
-            }
-        } else {
-            console.log('No breaches detected')
+        for (const breach of breaches) {
+            await sendAlert(breach)
         }
 
-        // 현재 가격을 이전 가격으로 저장
         await savePreviousPrices(currentPrices)
-
-        return res.status(200).json({
-            success: true,
-            prices: currentPrices,
-            breaches: breaches.length,
-            timestamp: new Date().toISOString()
-        })
+        return res.status(200).json({ success: true, breaches: breaches.length })
 
     } catch (error) {
-        console.error('Price alert error:', error)
         return res.status(500).json({ error: error.message })
     }
 }

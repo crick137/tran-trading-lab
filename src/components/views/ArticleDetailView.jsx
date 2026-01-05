@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { ArrowLeft, Clock, Calendar, Share2, ThumbsUp, MessageSquare, Bookmark, Check } from 'lucide-react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { ArrowLeft, Clock, Calendar, Share2, ThumbsUp, MessageSquare, Bookmark, Check, Play, Pause } from 'lucide-react'
 import { interactions } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
 import { useI18n } from '../../hooks/useI18n'
@@ -13,6 +13,39 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
     const [article, setArticle] = useState(initialData || null)
     const [loading, setLoading] = useState(!initialData)
+
+    // Audio State
+    const [isPlaying, setIsPlaying] = useState(false)
+    const [currentTime, setCurrentTime] = useState(0)
+    const [duration, setDuration] = useState(0)
+    const audioRef = useRef(null)
+
+    const toggleAudio = () => {
+        if (!audioRef.current) return
+        if (isPlaying) {
+            audioRef.current.pause()
+        } else {
+            audioRef.current.play()
+        }
+        setIsPlaying(!isPlaying)
+    }
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime)
+            setDuration(audioRef.current.duration || 0)
+        }
+    }
+
+    const formatTime = (time) => {
+        if (!time) return '0:00'
+        const mins = Math.floor(time / 60)
+        const secs = Math.floor(time % 60)
+        return `${mins}:${secs.toString().padStart(2, '0')}`
+    }
+
+    const audioProgress = duration ? (currentTime / duration) * 100 : 0
+
 
     // 互动状态
     const [liked, setLiked] = useState(false)
@@ -354,6 +387,48 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                     </div>
                 )}
 
+                {/* Custom Podcast Player */}
+                {article.audio_url && (
+                    <div style={styles.audioPlayer}>
+                        <div style={styles.audioHeader}>
+                            <div style={styles.audioBadge}>
+                                <div style={styles.audioWave}>
+                                    {[...Array(3)].map((_, i) => (
+                                        <div key={i} style={{
+                                            ...styles.waveBar,
+                                            animationDuration: isPlaying ? '0.8s' : '0s',
+                                            height: isPlaying ? '100%' : '20%'
+                                        }} />
+                                    ))}
+                                </div>
+                                <span style={{ fontWeight: 700, fontSize: 12, letterSpacing: '0.05em' }}>AI PODCAST</span>
+                            </div>
+                            <span style={styles.audioTitle}>Morning Briefing Radio</span>
+                        </div>
+
+                        <div style={styles.customPlayerControls}>
+                            <button onClick={toggleAudio} style={styles.playButton}>
+                                {isPlaying ? <Pause size={24} fill="#000" /> : <Play size={24} fill="#000" style={{ marginLeft: 4 }} />}
+                            </button>
+                            <div style={styles.playerInfo}>
+                                <span style={styles.playerStatus}>{isPlaying ? 'Now Playing...' : 'Click to Listen'}</span>
+                                <div style={styles.progressBar}>
+                                    <div style={{ ...styles.progressFill, width: `${audioProgress}%` }} />
+                                </div>
+                            </div>
+                            <span style={styles.audioDuration}>{formatTime(currentTime)}</span>
+                        </div>
+
+                        <audio
+                            ref={audioRef}
+                            src={article.audio_url}
+                            onTimeUpdate={handleTimeUpdate}
+                            onEnded={() => setIsPlaying(false)}
+                            style={{ display: 'none' }}
+                        />
+                    </div>
+                )}
+
                 <div style={styles.content}>
                     {renderMarkdown(article.content)}
                 </div>
@@ -408,6 +483,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                             {copied ? <Check size={18} /> : <Share2 size={18} />}
                         </button>
                     </div>
+
                 </footer>
             </article>
 
@@ -640,6 +716,108 @@ const styles = {
         transition: 'all 0.2s',
         fontSize: 14,
         fontWeight: 600,
+    },
+    audioPlayer: {
+        background: 'linear-gradient(135deg, rgba(8, 12, 20, 0.6) 0%, rgba(30, 41, 59, 0.6) 100%)',
+        border: '1px solid rgba(0, 255, 136, 0.2)',
+        borderRadius: 16,
+        padding: 20,
+        marginBottom: 40,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        backdropFilter: 'blur(10px)',
+    },
+    audioHeader: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+    },
+    audioBadge: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        background: 'rgba(0, 255, 136, 0.15)',
+        padding: '4px 10px',
+        borderRadius: 100,
+        color: '#00ff88',
+    },
+    audioTitle: {
+        fontSize: 14,
+        color: 'rgba(255,255,255,0.7)',
+        fontWeight: 500,
+    },
+    audioWave: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        height: 12,
+    },
+    waveBar: {
+        width: 2,
+        height: '100%',
+        background: '#00ff88',
+        borderRadius: 2,
+        animation: 'equalizer 0.8s ease-in-out infinite',
+    },
+    audioElement: {
+        width: '100%',
+        height: 40,
+        borderRadius: 8,
+        marginTop: 8,
+        background: '#f1f5f9',
+    },
+    customPlayerControls: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        marginTop: 8,
+        background: 'rgba(255,255,255,0.03)',
+        padding: 12,
+        borderRadius: 12,
+        border: '1px solid rgba(255,255,255,0.05)',
+    },
+    playButton: {
+        width: 48,
+        height: 48,
+        borderRadius: '50%',
+        background: '#00ff88',
+        border: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        boxShadow: '0 4px 12px rgba(0, 255, 136, 0.3)',
+        transition: 'transform 0.2s',
+    },
+    playerInfo: {
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 4,
+    },
+    playerStatus: {
+        fontSize: 13,
+        color: 'rgba(255,255,255,0.9)',
+        fontWeight: 600,
+    },
+    progressBar: {
+        width: '100%',
+        height: 4,
+        background: 'rgba(255,255,255,0.1)',
+        borderRadius: 2,
+        overflow: 'hidden',
+    },
+    progressFill: {
+        height: '100%',
+        background: '#00ff88',
+        borderRadius: 2,
+        transition: 'width 0.1s linear',
+    },
+    audioDuration: {
+        fontSize: 12,
+        color: 'rgba(255,255,255,0.5)',
+        fontVariantNumeric: 'tabular-nums',
     },
 }
 

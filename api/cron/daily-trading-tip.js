@@ -1,211 +1,97 @@
 /**
- * 💡 TRAN 每日交易小贴士
- * Vercel Cron: 每天 12:00 (KST) 执行 = UTC 03:00
- * 频道: @http4477
+ * 💡 TRAN 데일리 트레이딩 팁 (Premium)
+ * Vercel Cron: 매일 09:00 (KST) 실행
+ * 채널: @http4477
  * 
- * AI生成每日交易智慧、心理学建议、风险管理技巧
+ * 성공적인 트레이딩을 위한 한 마디 조언과 시각 자료
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
-if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
-}
-
-if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY environment variable is required')
+if (!TELEGRAM_BOT_TOKEN || !OPENAI_API_KEY) {
+    throw new Error('Missing environment variables')
 }
 
 // ============================================
-// 获取市场数据上下文
+// DALL-E 3 이미지 생성 (Zen Style)
 // ============================================
 
-async function getMarketContext() {
-    try {
-        // 获取BTC价格和24h变化
-        const btcRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT')
-        const btcData = await btcRes.json()
-        
-        // 获取恐惧贪婪指数
-        const fngRes = await fetch('https://api.alternative.me/fng/?limit=1')
-        const fngData = await fngRes.json()
-        
-        // 获取VIX
-        const vixRes = await fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d', {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        })
-        const vixData = await vixRes.json()
-        const vix = vixData.chart?.result?.[0]?.meta?.regularMarketPrice || 15
+async function generateTipImage(topic) {
+    // topic은 영어로 번역해서 쓰는게 좋겠지만, 간단히 키워드 조합으로
+    // DALL-E 3는 영어를 잘 알아들음. GPT가 주제를 영어로도 줬으면 좋겠는데, 번거로우니 무난한 프롬프트 사용
 
-        return {
-            btcPrice: parseFloat(btcData.lastPrice),
-            btcChange: parseFloat(btcData.priceChangePercent),
-            fearGreed: parseInt(fngData.data[0]?.value || 50),
-            vix: vix
-        }
-    } catch (e) {
-        console.warn('Failed to fetch market context:', e.message)
-        return {
-            btcPrice: 95000,
-            btcChange: 0,
-            fearGreed: 50,
-            vix: 15
-        }
-    }
-}
-
-// ============================================
-// AI生成交易小贴士
-// ============================================
-
-async function generateTradingTip(marketContext) {
-    const koreaTime = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long'
-    })
-
-    const marketInfo = `
-【当前市场状况 - ${koreaTime}】
-- BTC价格: $${marketContext.btcPrice.toLocaleString()} (${marketContext.btcChange >= 0 ? '+' : ''}${marketContext.btcChange.toFixed(2)}%)
-- 恐惧/贪婪指数: ${marketContext.fearGreed}/100
-- VIX恐慌指数: ${marketContext.vix.toFixed(2)}
-`
-
-    const systemPrompt = `당신은 TRAN Trading Lab의 수석 트레이딩 멘토입니다. 
-매일 투자자들에게 실용적이고 영감을 주는 트레이딩 지혜를 제공합니다.
-
-【핵심 규칙】
-1. 오직 한국어만 사용
-2. 실용적이고 실행 가능한 조언
-3. 심리학, 리스크 관리, 시장 이해에 초점
-4. 짧고 명확하게 (Telegram 메시지에 적합)
-5. "AI", "분석 결과" 같은 단어 사용 금지
-6. 구체적인 예시나 비유 활용
-
-【스타일】
-- 전문적이지만 친근한 톤
-- 실제 트레이더의 경험에서 나온 것처럼
-- 때로는 경고, 때로는 격려
-- 숫자나 구체적인 예시 포함`
-
-    const tipCategories = [
-        '리스크 관리',
-        '심리학',
-        '시장 타이밍',
-        '포지션 관리',
-        '감정 컨트롤',
-        '패턴 인식',
-        '손절 전략',
-        '수익 실현'
-    ]
-
-    // 根据市场状况选择主题
-    let selectedCategory = tipCategories[Math.floor(Math.random() * tipCategories.length)]
-    
-    if (marketContext.fearGreed <= 25) {
-        selectedCategory = '심리학' // 极度恐惧时，强调心理学
-    } else if (marketContext.fearGreed >= 75) {
-        selectedCategory = '리스크 관리' // 极度贪婪时，强调风险管理
-    } else if (marketContext.vix > 25) {
-        selectedCategory = '감정 컨트롤' // 高波动时，强调情绪控制
-    }
-
-    const userPrompt = `아래 현재 시장 상황을 바탕으로, "${selectedCategory}" 주제의 트레이딩 팁을 작성하세요.
-
-${marketInfo}
-
-【출력 형식】
-💡 TRAN 트레이딩 팁
-
-━━━━━━━━━━━━━━━━━━━━
-
-[핵심 메시지 - 1-2문장으로 강력하고 기억에 남는 조언]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📌 왜 중요한가?
-[1-2문장으로 이유 설명]
-
-🎯 실전 적용
-[구체적인 실행 방법이나 예시]
-
-💭 오늘의 시장
-[현재 시장 상황(${marketContext.fearGreed}점의 공포/탐욕, VIX ${marketContext.vix.toFixed(1)})에 맞는 조언]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-🌐 웹: trantradinglab.com
-
-#트레이딩팁 #투자지혜 #TranTradingLab
-
-【중요】
-- 위 형식을 정확히 따르세요
-- 총 길이는 300-400자 정도로 제한
-- 실용적이고 실행 가능한 조언만 제공
-- 현재 시장 상황을 반영하되, 너무 구체적인 예측은 피하세요`
+    const prompt = `A minimalist, zen-style artistic illustration. 
+	Subject: Abstract concept of '${topic}' in the context of wisdom and patience.
+	Style: Japanese ink wash painting or modern minimalist vector art. 
+	Mood: Calm, focused, disciplined.
+	No text.`
 
     try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${OPENAI_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-5.1',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.8,
-                max_completion_tokens: 600
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
             })
         })
-
         const json = await res.json()
-        const content = json.choices?.[0]?.message?.content?.trim()
-
-        if (!content) {
-            console.error('OpenAI returned empty content:', json)
-            return null
-        }
-
-        return content
+        return json.data?.[0]?.url || null
     } catch (e) {
-        console.error('OpenAI API error:', e.message)
+        console.error('DALL-E 3 error:', e.message)
         return null
     }
 }
 
 // ============================================
-// 发送到Telegram
+// Tip 생성 (GPT-5.2)
 // ============================================
 
-async function sendToTelegram(message) {
+async function generateTradingTip() {
+    const systemPrompt = `당신은 전설적인 트레이딩 멘토입니다.
+투자의 대가(워렌 버핏, 제시 리버모어 등)의 지혜를 빌려 짧고 강력한 조언을 해줍니다.
+규칙:
+1. 한국어 사용.
+2. 명언 하나와 그에 대한 간결한 해설.
+3. 어조는 부드럽지만 단호하게.`
+
+    // 주제를 매일 다르게 선정하기 위해 날짜 기반 해시나 랜덤 사용 가능하지만,
+    // GPT에게 "오늘의 주제를 랜덤하게 선정해달라"고 요청하는게 가장 자연스러움.
+    const userPrompt = `오늘 트레이더들에게 필요한 '트레이딩 심리' 또는 '리스크 관리' 관련 명언 하나와 해설을 작성해 주세요.
+주제(영어)도 함께 JSON 형식으로 출력해 주세요.
+
+형식:
+{
+	"topic": "patience",
+	"content": "..."
+}`
+
     try {
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: TELEGRAM_CHANNEL_ID,
-                text: message,
-                parse_mode: 'HTML',
-                disable_web_page_preview: false
+                model: 'gpt-5.2',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                response_format: { type: "json_object" },
+                mod: 0.8
             })
         })
-
-        const result = await res.json()
-        return result
+        const json = await res.json()
+        return JSON.parse(json.choices?.[0]?.message?.content || '{}')
     } catch (e) {
-        console.error('Telegram send error:', e.message)
-        return { ok: false, error: e.message }
+        console.error('GPT error:', e.message)
+        return null
     }
 }
 
@@ -214,46 +100,66 @@ async function sendToTelegram(message) {
 // ============================================
 
 export default async function handler(req, res) {
-    // Vercel Cron 认证
     const authHeader = req.headers.authorization
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
         return res.status(401).json({ error: 'Unauthorized' })
     }
 
     try {
-        console.log('Generating daily trading tip...')
+        console.log('Generating trading tip...')
 
-        // 获取市场上下文
-        const marketContext = await getMarketContext()
-        console.log('Market context:', marketContext)
-
-        // 生成交易小贴士
-        const tip = await generateTradingTip(marketContext)
-
-        if (!tip) {
-            console.error('Failed to generate tip')
-            return res.status(500).json({ error: 'Failed to generate trading tip' })
+        const tipData = await generateTradingTip()
+        if (!tipData || !tipData.content) {
+            return res.status(500).json({ error: 'Failed to generate tip' })
         }
 
-        console.log('Tip generated:', tip.substring(0, 100) + '...')
+        console.log('Topic:', tipData.topic)
+        const imageUrl = await generateTipImage(tipData.topic || 'trading wisdom')
 
-        // 发送到Telegram
-        const telegramResult = await sendToTelegram(tip)
+        const message = `💡 TRAN 데일리 트레이딩 팁
+━━━━━━━━━━━━━━━━━━━━
 
-        if (telegramResult.ok) {
-            console.log('✅ Trading tip sent successfully')
-            return res.status(200).json({
-                success: true,
-                messageId: telegramResult.result?.message_id,
-                timestamp: new Date().toISOString()
+${tipData.content}
+
+━━━━━━━━━━━━━━━━━━━━
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
+🌐 웹: trantradinglab.com
+
+#트레이딩명언 #투자심리 #TranTradingLab`
+
+        let result
+        if (imageUrl) {
+            const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: message,
+                    parse_mode: 'Markdown'
+                })
             })
+            result = await telegramRes.json()
         } else {
-            console.error('❌ Telegram send failed:', telegramResult.description)
-            return res.status(500).json({
-                error: 'Failed to send to Telegram',
-                details: telegramResult.description
+            // Fallback text only
+            const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: message
+                })
             })
+            result = await telegramRes.json()
         }
+
+        if (!result.ok) {
+            console.error('Telegram error:', result)
+            return res.status(500).json({ error: result.description })
+        }
+
+        return res.status(200).json({ success: true, messageId: result.result?.message_id })
 
     } catch (error) {
         console.error('Error:', error)

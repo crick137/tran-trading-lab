@@ -1,281 +1,98 @@
 /**
- * 📊 TRAN 市场情绪可视化卡片
- * Vercel Cron: 每天 14:00 (KST) 执行 = UTC 05:00
- * 频道: @http4477
+ * 🌡️ TRAN 시장 심리 카드 (Premium)
+ * Vercel Cron: 매일 08:00 (KST) 실행
+ * 채널: @http4477
  * 
- * 生成市场情绪总结卡片，包含可视化数据
+ * 공포/탐욕 지수를 시각화한 카드와 분석 제공
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import FormData from 'form-data'
-
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
-if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
-}
-
-if (!OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY environment variable is required')
-}
-
-// ============================================
-// 获取市场数据
-// ============================================
-
-async function getMarketData() {
+async function getFearAndGreed() {
     try {
-        const [cryptoRes, fngRes, vixRes, stocksRes] = await Promise.all([
-            fetch('https://api.binance.com/api/v3/ticker/24hr?symbols=' + JSON.stringify(['BTCUSDT', 'ETHUSDT', 'SOLUSDT'])),
-            fetch('https://api.alternative.me/fng/?limit=1'),
-            fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?interval=1d&range=1d', {
-                headers: { 'User-Agent': 'Mozilla/5.0' }
-            }),
-            fetch('https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=2d', {
-                headers: { 'User-Agent': 'Mozilla/5.0' }
-            })
-        ])
-
-        const cryptoData = await cryptoRes.json()
-        const fngData = await fngRes.json()
-        const vixData = await vixRes.json()
-        const stocksData = await stocksRes.json()
-
-        const btc = cryptoData.find(c => c.symbol === 'BTCUSDT')
-        const eth = cryptoData.find(c => c.symbol === 'ETHUSDT')
-        const sol = cryptoData.find(c => c.symbol === 'SOLUSDT')
-
-        const sp500Closes = stocksData.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(c => c !== null) || []
-        const sp500Change = sp500Closes.length >= 2 
-            ? ((sp500Closes[sp500Closes.length - 1] - sp500Closes[sp500Closes.length - 2]) / sp500Closes[sp500Closes.length - 2] * 100)
-            : 0
-
+        const res = await fetch('https://api.alternative.me/fng/?limit=1')
+        const data = await res.json()
+        const item = data.data[0]
         return {
-            btc: {
-                price: parseFloat(btc?.lastPrice || 95000),
-                change: parseFloat(btc?.priceChangePercent || 0)
-            },
-            eth: {
-                price: parseFloat(eth?.lastPrice || 3000),
-                change: parseFloat(eth?.priceChangePercent || 0)
-            },
-            sol: {
-                price: parseFloat(sol?.lastPrice || 150),
-                change: parseFloat(sol?.priceChangePercent || 0)
-            },
-            fearGreed: {
-                value: parseInt(fngData.data?.[0]?.value || 50),
-                classification: fngData.data?.[0]?.value_classification || 'Neutral'
-            },
-            vix: vixData.chart?.result?.[0]?.meta?.regularMarketPrice || 15,
-            sp500Change: sp500Change
+            value: parseInt(item.value),
+            classification: item.value_classification
         }
     } catch (e) {
-        console.warn('Failed to fetch market data:', e.message)
-        return {
-            btc: { price: 95000, change: 0 },
-            eth: { price: 3000, change: 0 },
-            sol: { price: 150, change: 0 },
-            fearGreed: { value: 50, classification: 'Neutral' },
-            vix: 15,
-            sp500Change: 0
-        }
+        return { value: 50, classification: 'Neutral' }
     }
 }
 
-// ============================================
-// 生成市场情绪图片（使用Gemini）
-// ============================================
+async function generateSentimentImage(value) {
+    let visualDesc = ''
+    if (value <= 25) visualDesc = 'A frozen, icy wasteland, blue cold lighting, abandoned technological ruins, depicting Extreme Fear'
+    else if (value <= 45) visualDesc = 'A foggy, grey day, cautious atmosphere, dim lighting, depicting Fear'
+    else if (value <= 55) visualDesc = 'A perfectly balanced golden scale, calm water reflecting the sky, harmonic lighting, depicting Neutrality'
+    else if (value <= 75) visualDesc = 'A lush green digital forest, growth, rising sun, energetic atmosphere, depicting Greed'
+    else visualDesc = 'A blazing rocket launch, intense red and orange fire, overheating machinery, explosive energy, depicting Extreme Greed'
 
-async function generateSentimentImage(marketData) {
-    if (!GEMINI_API_KEY) {
-        console.log('Gemini API Key missing, skipping image generation')
-        return null
-    }
-
-    try {
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-2.0-flash-exp-image-generation',
-        })
-
-        const fgValue = marketData.fearGreed.value
-        const mood = fgValue <= 25 ? 'dramatic dark bearish red tones' :
-            fgValue >= 75 ? 'bright golden bullish celebration' : 
-            'calm neutral balanced blue tones'
-
-        const prompt = `A professional financial market sentiment dashboard card. 
-${mood} mood. 
-Features: Fear & Greed Index gauge at ${fgValue}/100, Bitcoin price chart visualization, 
-market sentiment indicators. 
-Style: modern minimalist dashboard, clean typography, data visualization elements. 
-Dark background with accent colors. 
-Horizontal 16:9 aspect ratio. 
-No text labels, just visual elements.`
-
-        console.log('Generating sentiment image...')
-
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { responseModalities: ['image', 'text'] }
-        })
-
-        const imagePart = result.response.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
-
-        if (imagePart?.inlineData?.data) {
-            return Buffer.from(imagePart.inlineData.data, 'base64')
-        }
-    } catch (e) {
-        console.error('Gemini image generation error:', e.message)
-    }
-    return null
-}
-
-// ============================================
-// 生成市场情绪分析文本
-// ============================================
-
-async function generateSentimentAnalysis(marketData) {
-    const koreaTime = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
-
-    const systemPrompt = `당신은 TRAN Trading Lab의 시장 센티먼트 분석가입니다.
-시장 데이터를 분석하여 투자자에게 명확하고 실용적인 인사이트를 제공합니다.
-
-【핵심 규칙】
-1. 오직 한국어만 사용
-2. 구체적인 숫자와 데이터 언급
-3. 객관적이고 균형잡힌 분석
-4. "AI", "분석 결과" 같은 단어 사용 금지
-5. 짧고 명확하게 (Telegram 메시지에 적합)`
-
-    const userPrompt = `아래 시장 데이터를 분석하여 시장 센티먼트 카드를 작성하세요.
-
-【시장 데이터 - ${koreaTime}】
-
-📊 암호화폐:
-- BTC: $${marketData.btc.price.toLocaleString()} (${marketData.btc.change >= 0 ? '+' : ''}${marketData.btc.change.toFixed(2)}%)
-- ETH: $${marketData.eth.price.toLocaleString()} (${marketData.eth.change >= 0 ? '+' : ''}${marketData.eth.change.toFixed(2)}%)
-- SOL: $${marketData.sol.price.toLocaleString()} (${marketData.sol.change >= 0 ? '+' : ''}${marketData.sol.change.toFixed(2)}%)
-
-🌡️ 시장 센티먼트:
-- 공포/탐욕 지수: ${marketData.fearGreed.value}/100 (${marketData.fearGreed.classification})
-- VIX: ${marketData.vix.toFixed(2)}
-- S&P500: ${marketData.sp500Change >= 0 ? '+' : ''}${marketData.sp500Change.toFixed(2)}%
-
-【출력 형식】
-📊 TRAN 시장 센티먼트 카드
-
-━━━━━━━━━━━━━━━━━━━━
-
-🌡️ 현재 시장 심리
-[공포/탐욕 지수 ${marketData.fearGreed.value}점의 의미를 1-2문장으로 설명]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📈 주요 자산 현황
-• BTC: $${marketData.btc.price.toLocaleString()} (${marketData.btc.change >= 0 ? '▲' : '▼'} ${Math.abs(marketData.btc.change).toFixed(2)}%)
-• ETH: $${marketData.eth.price.toLocaleString()} (${marketData.eth.change >= 0 ? '▲' : '▼'} ${Math.abs(marketData.eth.change).toFixed(2)}%)
-• SOL: $${marketData.sol.price.toLocaleString()} (${marketData.sol.change >= 0 ? '▲' : '▼'} ${Math.abs(marketData.sol.change).toFixed(2)}%)
-
-━━━━━━━━━━━━━━━━━━━━
-
-💡 시장 해석
-[VIX ${marketData.vix.toFixed(1)}와 공포/탐욕 지수 ${marketData.fearGreed.value}점의 조합이 의미하는 바를 설명]
-
-🎯 투자자 관점
-[현재 시장 상황에서 투자자가 주목해야 할 포인트]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-🌐 웹: trantradinglab.com
-
-#시장센티먼트 #투자인사이트 #TranTradingLab
-
-【중요】
-- 총 길이는 400-500자 정도
-- 구체적인 숫자 반드시 언급
-- 실용적이고 실행 가능한 조언`
+    const prompt = `3D Abstract Art representing Crypto Market Sentiment.
+    Value: ${value}/100.
+    Scene: ${visualDesc}. 
+    Style: High-end 3D render, glassmorphism, cinematic lighting.
+    Centerpiece: A glowing holographic number "${value}" integrated into the environment. 
+    (If text generation fails, just the environment is fine).`
 
     try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${OPENAI_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'gpt-5.1',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.7,
-                max_completion_tokens: 700
+                model: 'dall-e-3', // DALL-E 3 
+                prompt: prompt,
+                n: 1,
+                size: '1024x1024'
             })
         })
-
         const json = await res.json()
-        return json.choices?.[0]?.message?.content?.trim() || null
+        return json.data?.[0]?.url || null
     } catch (e) {
-        console.error('OpenAI API error:', e.message)
+        console.error('DALL-E 3 error:', e.message)
         return null
     }
 }
 
-// ============================================
-// 发送到Telegram
-// ============================================
+async function generateSentimentAnalysis(fng) {
+    const systemPrompt = `당신은 행동경제학자이자 시장 심리 전문가입니다.
+공포/탐욕 지수를 해석하고 투자자들의 심리 상태를 분석합니다.
+규칙:
+1. 한국어 사용.
+2. 현재 심리 상태가 매수 기회인지, 관망세인지, 과열 구간인지 냉철하게 분석.`
 
-async function sendToTelegram(text, imageBuffer = null) {
+    const userPrompt = `현재 암호화폐 공포/탐욕 지수는 ${fng.value} (${fng.classification})입니다.
+이 수치가 의미하는 바와 투자자 행동 가이드를 짧게(3-4문장) 작성해 주세요.
+
+출력 형식:
+"현재 시장은 [심리상태]에 있습니다. [해석]. [조언]"`
+
     try {
-        // 如果有图片，先发送图片
-        if (imageBuffer) {
-            const form = new FormData()
-            form.append('chat_id', TELEGRAM_CHANNEL_ID)
-            form.append('photo', imageBuffer, { filename: 'sentiment.png' })
-            form.append('caption', '📊 TRAN 시장 센티먼트 카드')
-
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                headers: form.getHeaders(),
-                body: form
-            })
-        }
-
-        // 发送文本
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: TELEGRAM_CHANNEL_ID,
-                text: text,
-                parse_mode: 'HTML',
-                disable_web_page_preview: false
+                model: 'gpt-5.2',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                max_completion_tokens: 500
             })
         })
-
-        return await res.json()
+        const json = await res.json()
+        return json.choices?.[0]?.message?.content?.trim() || `시장 심리는 현재 ${fng.classification} 상태입니다.`
     } catch (e) {
-        console.error('Telegram send error:', e.message)
-        return { ok: false, error: e.message }
+        return `시장 심리는 현재 ${fng.classification} 상태입니다.`
     }
 }
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -284,40 +101,59 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('Generating market sentiment card...')
+        console.log('Generating sentiment card...')
+        const fng = await getFearAndGreed()
 
-        // 获取市场数据
-        const marketData = await getMarketData()
-        console.log('Market data:', marketData)
+        const [analysis, imageUrl] = await Promise.all([
+            generateSentimentAnalysis(fng),
+            generateSentimentImage(fng.value)
+        ])
 
-        // 生成图片（可选）
-        const imageBuffer = await generateSentimentImage(marketData)
+        const message = `🌡️ TRAN 시장 심리 알림
+━━━━━━━━━━━━━━━━━━━━
 
-        // 生成分析文本
-        const analysis = await generateSentimentAnalysis(marketData)
+심리지수: ${fng.value} (${fng.classification})
 
-        if (!analysis) {
-            return res.status(500).json({ error: 'Failed to generate sentiment analysis' })
-        }
+${analysis}
 
-        // 发送到Telegram
-        const result = await sendToTelegram(analysis, imageBuffer)
+━━━━━━━━━━━━━━━━━━━━
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
+🌐 웹: trantradinglab.com
 
-        if (result.ok) {
-            console.log('✅ Sentiment card sent successfully')
-            return res.status(200).json({
-                success: true,
-                messageId: result.result?.message_id,
-                imageGenerated: !!imageBuffer,
-                timestamp: new Date().toISOString()
+#시장심리 #공포탐욕지수 #TranTradingLab`
+
+        let result
+        if (imageUrl) {
+            const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: imageUrl,
+                    caption: message,
+                    parse_mode: 'Markdown'
+                })
             })
+            result = await telegramRes.json()
         } else {
-            console.error('❌ Telegram send failed:', result.description)
-            return res.status(500).json({
-                error: 'Failed to send to Telegram',
-                details: result.description
+            const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: message
+                })
             })
+            result = await telegramRes.json()
         }
+
+        if (!result.ok) {
+            console.error('Telegram error:', result)
+            return res.status(500).json({ error: result.description })
+        }
+
+        return res.status(200).json({ success: true, messageId: result.result?.message_id })
 
     } catch (error) {
         console.error('Error:', error)

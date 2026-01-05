@@ -1,21 +1,17 @@
 /**
- * 🌙 TRAN 마켓 클로징 서머리
+ * 🌙 TRAN 마켓 클로징 서머리 (Premium)
  * Vercel Cron: 매일 저녁 8시 (KST) 자동 실행
- * 채널: @http4477
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai'
-import FormData from 'form-data'
+import { uploadImageFromUrl, createAnalysisPost } from '../utils/supabaseClient.js'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
-// ============================================
-// 데이터 수집 함수들
-// ============================================
+if (!TELEGRAM_BOT_TOKEN || !OPENAI_API_KEY) throw new Error('Missing environment variables')
 
+// ... (Data Fetching Helpers: Same as before)
 async function getCryptoData() {
     try {
         const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'XRPUSDT', 'BNBUSDT']
@@ -23,8 +19,7 @@ async function getCryptoData() {
         const data = await res.json()
         const result = {}
         for (const item of data) {
-            const name = item.symbol.replace('USDT', '')
-            result[name] = {
+            result[item.symbol.replace('USDT', '')] = {
                 price: parseFloat(item.lastPrice),
                 change: parseFloat(item.priceChangePercent),
                 volume: parseFloat(item.quoteVolume) / 1e9,
@@ -35,7 +30,6 @@ async function getCryptoData() {
         return result
     } catch { return {} }
 }
-
 async function getStockData() {
     const symbols = { 'S&P500': '^GSPC', 'NASDAQ': '^IXIC', 'KOSPI': '^KS11', 'VIX': '^VIX', 'DXY': 'DX-Y.NYB' }
     const result = {}
@@ -43,19 +37,17 @@ async function getStockData() {
         try {
             const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=5d`, { headers: { 'User-Agent': 'Mozilla/5.0' } })
             const data = await res.json()
-            const chartResult = data.chart?.result?.[0]
-            const meta = chartResult?.meta
-            const closes = chartResult?.indicators?.quote?.[0]?.close?.filter(c => c !== null)
-            if (meta && closes && closes.length >= 2) {
+            const closes = data.chart?.result?.[0]?.indicators?.quote?.[0]?.close?.filter(c => c !== null)
+            const meta = data.chart?.result?.[0]?.meta
+            if (closes && closes.length >= 2) {
                 const currentPrice = meta.regularMarketPrice || closes[closes.length - 1]
                 const prevClose = closes[closes.length - 2]
-                result[name] = { price: currentPrice, change: prevClose ? ((currentPrice - prevClose) / prevClose * 100) : 0 }
+                result[name] = { price: currentPrice, change: ((currentPrice - prevClose) / prevClose * 100) }
             }
         } catch { }
     }
     return result
 }
-
 async function getFearGreedIndex() {
     try {
         const res = await fetch('https://api.alternative.me/fng/?limit=2')
@@ -63,192 +55,82 @@ async function getFearGreedIndex() {
         return { value: parseInt(data.data[0].value), change: parseInt(data.data[0].value) - parseInt(data.data[1].value) }
     } catch { return { value: 50, change: 0 } }
 }
-
 async function getTopMovers(crypto) {
-    const sorted = Object.entries(crypto)
-        .map(([name, data]) => ({ name, ...data }))
-        .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-    return {
-        gainers: sorted.filter(c => c.change > 0).slice(0, 3),
-        losers: sorted.filter(c => c.change < 0).slice(0, 3)
-    }
+    const sorted = Object.entries(crypto).map(([name, data]) => ({ name, ...data })).sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
+    return { gainers: sorted.filter(c => c.change > 0).slice(0, 3), losers: sorted.filter(c => c.change < 0).slice(0, 3) }
 }
 
-// ============================================
-// AI 분석 생성
-// ============================================
+import { generateEveningBanner } from '../utils/imageHelper.js'
 
-async function generateEveningSummary(data) {
+// generateEveningBanner is now imported from imageHelper.js
+
+// 1. Telegram: Short, Emotional, "Closing Bell"
+async function generateTelegramSummary(data) {
+    const { crypto, stocks, movers } = data
+    const context = `BTC: $${crypto.BTC?.price} (${crypto.BTC?.change}%)`
+    const systemPrompt = `당신은 하루의 전투를 끝내고 퇴근길 맥주 한잔을 기울이는 '여의도 차트쟁이'입니다. 짧게(800자 이내) 오늘 하루를 회고합니다.`
+    const userPrompt = `오늘 장 마감 브리핑을 작성해. 데이터: ${context}`
+
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: 'gpt-5.2', messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.8, max_completion_tokens: 1000 })
+        })
+        const json = await res.json()
+        return json.choices?.[0]?.message?.content?.trim()
+    } catch { return null }
+}
+
+// 2. Website: Detailed Market Wrap Article
+async function generateMarketWrapArticle(data) {
     const { crypto, stocks, fearGreed, movers } = data
+    const context = `
+    Closing Prices: BTC $${crypto.BTC?.price}, ETH $${crypto.ETH?.price}, SOL $${crypto.SOL?.price}
+    Top Gainers: ${movers.gainers.map(g => g.name).join(', ')}
+    Top Losers: ${movers.losers.map(l => l.name).join(', ')}
+    Sentiment: ${fearGreed.value}
+    `
+    // Institutional Grade Wrap
+    const systemPrompt = `당신은 TRAN Trading Lab의 시니어 마켓 에디터입니다.
+웹사이트용 **'Daily Market Wrap (Institutional)'** 리포트를 작성합니다.
 
-    const koreaTime = new Date().toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        year: 'numeric', month: 'long', day: 'numeric',
-        weekday: 'long', hour: '2-digit', minute: '2-digit'
-    })
+【핵심 원칙】
+1. **De-AI Style**: "시장은 변동성을 보였습니다" 같은 뻔한 문장 금지. 대신 "S&P500이 4300선을 위협하며 VIX가 3% 급등했습니다"처럼 구체적 팩트로 서술.
+2. **Causality**: '가격이 올랐다'가 아니라 '왜 올랐고(Why), 이것이 무엇을 의미하는지(So What)'에 집중.
+3. **Sector Rotation**: 자금이 어디에서 어디로 이동했는지(예: AI 테마 -> Layer 2) 자금 흐름(Flow) 중심 분석.
 
-    const marketDataContext = `
-【오늘의 마감 데이터 - ${koreaTime}】
+【필수 섹션】
+1. **Daily Snapshot**: 오늘의 시장 승자/패자 요약 및 투심(Sentiment) 변화.
+2. **Key Narrative**: 오늘 시장을 지배한 단 하나의 내러티브 분석 (예: ETF 승인 루머, 금리 동결 기대 등).
+3. **On-Chain Signals**: (가상의 데이터를 논리적으로 구성하여) 고래들의 지갑 이동, 펀딩비 추이 등 온체인 관점의 해석.
+4. **Tomorrow's Alpha**: 내일 주목해야 할 코인이나 섹터, 주요 경제 일정.
 
-📊 암호화폐 마감:
-- BTC: $${crypto.BTC?.price?.toLocaleString()} (${crypto.BTC?.change >= 0 ? '+' : ''}${crypto.BTC?.change?.toFixed(2)}%) | 고가: $${crypto.BTC?.high?.toLocaleString()} | 저가: $${crypto.BTC?.low?.toLocaleString()}
-- ETH: $${crypto.ETH?.price?.toLocaleString()} (${crypto.ETH?.change >= 0 ? '+' : ''}${crypto.ETH?.change?.toFixed(2)}%)
-- SOL: $${crypto.SOL?.price?.toLocaleString()} (${crypto.SOL?.change >= 0 ? '+' : ''}${crypto.SOL?.change?.toFixed(2)}%)
-
-🏆 오늘의 상승 TOP:
-${movers.gainers.map((c, i) => `${i + 1}. ${c.name}: +${c.change.toFixed(2)}%`).join('\n')}
-
-📉 오늘의 하락 TOP:
-${movers.losers.map((c, i) => `${i + 1}. ${c.name}: ${c.change.toFixed(2)}%`).join('\n')}
-
-📈 주식시장:
-- S&P500: ${stocks['S&P500']?.price?.toLocaleString()} (${stocks['S&P500']?.change >= 0 ? '+' : ''}${stocks['S&P500']?.change?.toFixed(2)}%)
-- NASDAQ: ${stocks.NASDAQ?.price?.toLocaleString()} (${stocks.NASDAQ?.change >= 0 ? '+' : ''}${stocks.NASDAQ?.change?.toFixed(2)}%)
-- KOSPI: ${stocks.KOSPI?.price?.toLocaleString()} (${stocks.KOSPI?.change >= 0 ? '+' : ''}${stocks.KOSPI?.change?.toFixed(2)}%)
-- VIX: ${stocks.VIX?.price?.toFixed(2)}
-
-🌡️ 공포/탐욕: ${fearGreed.value} (${fearGreed.change >= 0 ? '+' : ''}${fearGreed.change})
-`
-
-    const systemPrompt = `당신은 TRAN Trading Lab의 수석 시장 분석가이자 금융 스토리텔러입니다.
-
-【핵심 규칙】
-1. 오직 한국어만 사용. 중국어, 일본어, 영어 단어 절대 금지.
-2. "[변동 없음]", "[데이터 없음]" 같은 플레이스홀더 절대 금지.
-3. 🔴🔵 같은 색깔 원 이모지 금지. 대신 ▲▼ 화살표 사용.
-
-【저녁 리포트 스타일】
-- 하루를 정리하는 느낌으로 작성
-- 오늘 무슨 일이 있었는지 스토리텔링
-- 내일 주목할 포인트 제시
-- 비유와 은유 활용 ("황소의 하루", "곰의 반격")`
-
-    const userPrompt = `아래 오늘의 마감 데이터를 바탕으로 저녁 마켓 서머리를 작성하세요.
-
-${marketDataContext}
-
-【출력 형식】
-🌙 TRAN 마켓 클로징 서머리
-📅 ${koreaTime}
-
-━━━━━━━━━━━━━━━━━━━━
-
-📊 오늘의 시장 한 줄 요약
-[오늘 시장을 한 문장으로 요약]
-
-━━━━━━━━━━━━━━━━━━━━
-
-🏆 오늘의 승자 & 패자
-▲ 상승 TOP: [코인명] (+X.XX%)
-▼ 하락 TOP: [코인명] (-X.XX%)
-
-━━━━━━━━━━━━━━━━━━━━
-
-₿ 비트코인 하루 정리
-• 종가: $[가격] ([변동])
-• 일중 범위: $[저가] ~ $[고가]
-• 거래량: [수준 평가]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📈 글로벌 증시 마감
-• S&P500: [가격] ([변동])
-• NASDAQ: [가격] ([변동])
-• KOSPI: [가격] ([변동])
-
-━━━━━━━━━━━━━━━━━━━━
-
-💡 오늘의 인사이트
-
-"[창의적인 제목]"
-
-[2-3문장의 오늘 시장 분석]
-
-━━━━━━━━━━━━━━━━━━━━
-
-🔮 내일 주목 포인트
-• [내일 주목할 첫 번째 포인트]
-• [내일 주목할 두 번째 포인트]
-
-━━━━━━━━━━━━━━━━━━━━
-
-📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
-🐦 X: x.com/TranTradingLab
-📰 뉴스: @TranTradingLabNews
-🌐 웹: trantradinglab.com
-
-#마감정리 #비트코인 #TranTradingLab`
+분량: **공백 포함 2000자 이상**. Markdown 사용.`
 
     try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'gpt-5.1',
-                messages: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user', content: userPrompt }
-                ],
-                temperature: 0.8,
-                max_completion_tokens: 1500
+                model: 'gpt-5.2',
+                messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: `Write the Daily Market Wrap based on: ${context}` }],
+                temperature: 0.6,
+                max_completion_tokens: 2500
             })
         })
         const json = await res.json()
-        return json.choices?.[0]?.message?.content?.trim() || null
-    } catch (e) {
-        console.error('OpenAI API error:', e.message)
-        return null
-    }
+        return json.choices?.[0]?.message?.content?.trim()
+    } catch { return null }
 }
 
-// ============================================
-// DALL-E 3 이미지 생성
-// ============================================
-
-async function generateEveningBanner(fearGreedValue, btcChange) {
-    if (!OPENAI_API_KEY) return null
-    try {
-        const mood = btcChange >= 0
-            ? 'bullish golden sunset, warm orange and gold tones, upward trending chart'
-            : 'bearish cool twilight, deep purple and blue tones, calming atmosphere'
-
-        const prompt = `Professional crypto market evening banner. ${mood}. Features: crescent moon, modern city skyline at dusk, abstract Bitcoin chart overlay with glowing lines. Style: futuristic digital art, neon accents, dark background. Clean minimalist design. Horizontal 16:9 aspect ratio. No text.`
-
-        console.log('Generating DALL-E 3 banner image...')
-
-        const res = await fetch('https://api.openai.com/v1/images/generations', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${OPENAI_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'dall-e-3',
-                prompt: prompt,
-                n: 1,
-                size: '1792x1024',
-                quality: 'standard'
-            })
-        })
-
-        const data = await res.json()
-        const imageUrl = data.data?.[0]?.url
-
-        if (imageUrl) {
-            // Download image and convert to buffer
-            const imageRes = await fetch(imageUrl)
-            const arrayBuffer = await imageRes.arrayBuffer()
-            return Buffer.from(arrayBuffer)
-        }
-    } catch (e) {
-        console.error('DALL-E 3 image error:', e.message)
-    }
-    return null
+function parseTitle(text) {
+    if (!text) return `마켓 마감 리포트 (${new Date().toLocaleDateString()})`
+    const lines = text.split('\n')
+    const header = lines.find(l => l.startsWith('# '))
+    if (header) return header.replace('# ', '').trim()
+    return `TRAN Daily Wrap: ${new Date().toLocaleDateString()}`
 }
-
-// ============================================
-// Handler
-// ============================================
 
 export default async function handler(req, res) {
     const authHeader = req.headers.authorization
@@ -256,65 +138,49 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    // 环境变量验证
-    if (!TELEGRAM_BOT_TOKEN) {
-        return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN environment variable is required' })
-    }
-    if (!OPENAI_API_KEY) {
-        return res.status(500).json({ error: 'OPENAI_API_KEY environment variable is required' })
-    }
-
     try {
-        console.log('Fetching market data for evening summary...')
-        const [crypto, stocks, fearGreed] = await Promise.all([
-            getCryptoData(), getStockData(), getFearGreedIndex()
-        ])
-
+        const [crypto, stocks, fearGreed] = await Promise.all([getCryptoData(), getStockData(), getFearGreedIndex()])
         const movers = await getTopMovers(crypto)
         const allData = { crypto, stocks, fearGreed, movers }
 
-        const message = await generateEveningSummary(allData)
+        const [tgMessage, webArticle, imageUrl] = await Promise.all([
+            generateTelegramSummary(allData),
+            generateMarketWrapArticle(allData),
+            generateEveningBanner(crypto.BTC?.change || 0)
+        ])
 
-        if (!message) {
-            console.error('Failed to generate evening summary')
-            return res.status(500).json({ error: 'AI generation failed' })
-        }
-
-        console.log(`Evening Summary Generated (${message.length} chars)`)
-
-        // 1. 배너 이미지 생성 및 전송
-        const imageBuffer = await generateEveningBanner(fearGreed.value, crypto.BTC?.change || 0)
-
-        if (imageBuffer) {
-            const form = new FormData()
-            form.append('chat_id', CHANNEL_ID)
-            form.append('photo', imageBuffer, { filename: 'evening_banner.png' })
-            form.append('caption', '🌙 마켓 클로징 - TRAN Trading Lab')
-
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
-                method: 'POST',
-                headers: form.getHeaders(),
-                body: form
+        // 1. Telegram
+        if (tgMessage) {
+            const tgParam = imageUrl ? {
+                chat_id: CHANNEL_ID, photo: imageUrl, caption: tgMessage
+            } : { chat_id: CHANNEL_ID, text: tgMessage }
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${imageUrl ? 'sendPhoto' : 'sendMessage'}`, {
+                method: 'POST', body: JSON.stringify(tgParam), headers: { 'Content-Type': 'application/json' }
             })
         }
 
-        // 2. 텍스트 서머리 전송
-        const resText = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHANNEL_ID,
-                text: message
+        // 2. Website
+        if (webArticle) {
+            let savedImageUrl = imageUrl
+            if (imageUrl) {
+                const permUrl = await uploadImageFromUrl(imageUrl, 'evening-summary')
+                if (permUrl) savedImageUrl = permUrl
+            }
+            const title = parseTitle(webArticle)
+
+            await createAnalysisPost({
+                title: title,
+                summary: webArticle.slice(0, 200) + '...',
+                content: webArticle,
+                category: '市场分析',
+                author: 'TRAN Research',
+                imageUrl: savedImageUrl,
+                readTime: '6 min'
             })
-        })
+        }
 
-        const result = await resText.json()
-        console.log('Evening summary sent:', result.ok ? 'Success' : result.description)
-
-        return res.status(200).json({ success: true, messageId: result.result?.message_id })
-
-    } catch (error) {
-        console.error('Evening summary error:', error)
-        return res.status(500).json({ error: error.message })
+        return res.status(200).json({ success: true })
+    } catch (e) {
+        return res.status(500).json({ error: e.message })
     }
 }

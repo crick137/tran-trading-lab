@@ -51,6 +51,14 @@
     {
       "path": "/api/cron/trading-psychology-quiz",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/curated-article",
+      "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/news-commentary",
+      "schedule": "0 */4 * * *"
     }
   ],
   "rewrites": [

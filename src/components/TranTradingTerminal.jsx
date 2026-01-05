@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
     LayoutDashboard, BarChart3, Globe,
-    GraduationCap, Home, Info, Cpu, BookOpen
+    GraduationCap, Home, Info, Cpu, BookOpen, MessageSquare, Sparkles
 } from 'lucide-react'
 import Background3D from './3d/Background3D'
 import TopBar from './TopBar'
@@ -16,6 +16,8 @@ import SystemsView from './views/SystemsView'
 import IntroductionView from './views/IntroductionView'
 import ProfileView from './views/ProfileView'
 import AdminSentimentView from './views/AdminSentimentView'
+import CuratedArticlesView from './views/CuratedArticlesView'
+import NewsCommentaryView from './views/NewsCommentaryView'
 import CommandPalette from './CommandPalette'
 import AIAssistant from './AIAssistant'
 import { useAppState, useAppActions } from '../context/AppContext'
@@ -39,6 +41,8 @@ function TranTradingTerminal({ initialView }) {
         if (path === '/about') return 'about'
         if (path === '/systems') return 'systems'
         if (path === '/analysis') return 'analysis'
+        if (path === '/curated') return 'curated'
+        if (path === '/commentary') return 'commentary'
         return 'home'
     })
     const [tradeSymbol, setTradeSymbol] = useState('BTC/USDT')
@@ -70,6 +74,8 @@ function TranTradingTerminal({ initialView }) {
         { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
         { id: 'analysis', label: t('nav.analysis'), icon: BarChart3 },
         { id: 'news', label: t('nav.news'), icon: Globe },
+        { id: 'curated', label: '정선 아티클', icon: Sparkles },
+        { id: 'commentary', label: 'AI 코멘터리', icon: MessageSquare },
         { id: 'lab', label: t('nav.lab'), icon: GraduationCap },
         { id: 'library', label: t('nav.library') || 'Library', icon: BookOpen },
         { id: 'systems', label: t('nav.systems') || 'Systems', icon: Cpu },
@@ -92,6 +98,8 @@ function TranTradingTerminal({ initialView }) {
             'dashboard': '/dashboard',
             'analysis': '/analysis',
             'news': '/news',
+            'curated': '/curated',
+            'commentary': '/commentary',
             'lab': '/lab',
             'systems': '/systems',
             'about': '/about',
@@ -131,6 +139,8 @@ function TranTradingTerminal({ initialView }) {
             case 'dashboard': return <DashboardView />
             case 'analysis': return <AnalysisView directArticleId={directArticleId} onClearDirectArticle={() => setDirectArticleId(null)} />
             case 'news': return <NewsView />
+            case 'curated': return <CuratedArticlesView />
+            case 'commentary': return <NewsCommentaryView />
             case 'lab': return <LabView />
             case 'systems': return <SystemsView />
             case 'about': return <IntroductionView />
