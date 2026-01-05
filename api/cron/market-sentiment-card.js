@@ -6,6 +6,8 @@
  * 공포/탐욕 지수를 시각화한 카드와 분석 제공
  */
 
+import { generateFearGreedGauge } from '../utils/chartHelper.js'
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY
@@ -147,6 +149,18 @@ ${analysis}
             })
             result = await telegramRes.json()
         }
+
+        // Send Fear/Greed Gauge Chart as second message
+        const gaugeChartUrl = generateFearGreedGauge(fng.value)
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: CHANNEL_ID,
+                photo: gaugeChartUrl,
+                caption: '📊 공포/탐욕 게이지'
+            })
+        })
 
         if (!result.ok) {
             console.error('Telegram error:', result)

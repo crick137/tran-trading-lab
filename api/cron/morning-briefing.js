@@ -5,6 +5,7 @@
 
 import FormData from 'form-data'
 import { uploadImageFromUrl, createAnalysisPost } from '../utils/supabaseClient.js'
+import { generateMarketDashboardChart, generateAssetComparisonChart } from '../utils/chartHelper.js'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
@@ -260,7 +261,7 @@ export default async function handler(req, res) {
 
         if (!tgMessage && !webArticle) return res.status(500).json({ error: 'AI generation failed' })
 
-        // 1. Telegram
+        // 1. Telegram - Main Briefing
         if (tgMessage) {
             const tgParam = imageUrl ? {
                 chat_id: CHANNEL_ID, photo: imageUrl, caption: tgMessage
@@ -269,6 +270,23 @@ export default async function handler(req, res) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(tgParam)
+            })
+
+            // 1b. Telegram - Market Dashboard Chart
+            const chartUrl = generateMarketDashboardChart({
+                btc: crypto.BTC,
+                eth: crypto.ETH,
+                sp500: stocks['S&P500'],
+                vix: stocks['VIX']
+            })
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: chartUrl,
+                    caption: '📊 오늘의 시장 대시보드'
+                })
             })
         }
 

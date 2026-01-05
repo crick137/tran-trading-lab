@@ -4,6 +4,7 @@
  */
 
 import { uploadImageFromUrl, createAnalysisPost } from '../utils/supabaseClient.js'
+import { generateAssetComparisonChart } from '../utils/chartHelper.js'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
@@ -156,6 +157,25 @@ export default async function handler(req, res) {
             } : { chat_id: CHANNEL_ID, text: tgMessage }
             await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/${imageUrl ? 'sendPhoto' : 'sendMessage'}`, {
                 method: 'POST', body: JSON.stringify(tgParam), headers: { 'Content-Type': 'application/json' }
+            })
+
+            // 1b. Asset Comparison Chart
+            const assetChanges = {
+                'BTC': crypto.BTC?.change || 0,
+                'ETH': crypto.ETH?.change || 0,
+                'SOL': crypto.SOL?.change || 0,
+                'XRP': crypto.XRP?.change || 0,
+                'BNB': crypto.BNB?.change || 0
+            }
+            const chartUrl = generateAssetComparisonChart(assetChanges)
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    photo: chartUrl,
+                    caption: '📊 오늘의 암호화폐 성적표'
+                })
             })
         }
 
