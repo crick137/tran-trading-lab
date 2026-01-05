@@ -9,11 +9,11 @@ import { ToastContainer } from './components/Toast'
 import { NotificationCenter } from './components/NotificationCenter'
 import SEO from './components/SEO'
 
-// 路由懒加载
-const TranTradingTerminal = lazy(() => import('./components/TranTradingTerminal'))
-const ContentLibrary = lazy(() => import('./pages/ContentLibrary'))
+// 核心组件 - 静态导入以避免 Lazy Load 错误
+import TranTradingTerminal from './components/TranTradingTerminal'
+import ContentLibrary from './pages/ContentLibrary'
 
-// 独立可分享页面 - 直接导入（避免懒加载问题）
+// 独立可分享页面
 import { KellyCompletePage, KellyArticlePage, KellySimulatorPage } from './pages/KellyPages'
 
 function App() {
@@ -24,43 +24,43 @@ function App() {
                     <SEO /> {/* Default SEO */}
                     <ToastContainer>
                         <BrowserRouter>
-                            <Suspense fallback={<FullScreenLoader message="TRAN Terminal 로딩 중..." />}>
-                                <Routes>
-                                    <Route path="/" element={<TranTradingTerminal />} />
+                            {/* Suspense removed for static imports */}
+                            <Routes>
+                                <Route path="/" element={<TranTradingTerminal />} />
 
-                                    {/* Main Pages with unique URLs */}
-                                    <Route path="/dashboard" element={<TranTradingTerminal />} />
-                                    <Route path="/news" element={<TranTradingTerminal />} />
-                                    <Route path="/lab" element={<TranTradingTerminal />} />
-                                    <Route path="/about" element={<TranTradingTerminal />} />
-                                    <Route path="/systems" element={<TranTradingTerminal />} />
-                                    <Route path="/profile" element={<TranTradingTerminal />} />
-                                    <Route path="/analysis" element={<TranTradingTerminal />} />
-                                    <Route path="/curated" element={<TranTradingTerminal />} />
-                                    <Route path="/commentary" element={<TranTradingTerminal />} />
+                                {/* Main Pages with unique URLs */}
+                                <Route path="/dashboard" element={<TranTradingTerminal />} />
+                                <Route path="/news" element={<TranTradingTerminal />} />
+                                <Route path="/lab" element={<TranTradingTerminal />} />
+                                <Route path="/about" element={<TranTradingTerminal />} />
+                                <Route path="/systems" element={<TranTradingTerminal />} />
+                                <Route path="/profile" element={<TranTradingTerminal />} />
+                                <Route path="/analysis" element={<TranTradingTerminal />} />
+                                <Route path="/curated" element={<TranTradingTerminal />} />
+                                <Route path="/commentary" element={<TranTradingTerminal />} />
+                                <Route path="/pricing" element={<TranTradingTerminal initialView="pricing" />} />
 
-                                    {/* Article Routes */}
-                                    <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
-                                    <Route path="/article/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
+                                {/* Article Routes */}
+                                <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
+                                <Route path="/article/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
 
-                                    {/* Content Library */}
-                                    <Route path="/column" element={<ContentLibrary />} />
-                                    <Route path="/library" element={<ContentLibrary />} />
+                                {/* Content Library */}
+                                <Route path="/column" element={<ContentLibrary />} />
+                                <Route path="/library" element={<ContentLibrary />} />
 
-                                    {/* Kelly Pages */}
-                                    <Route path="/kelly" element={<KellyCompletePage />} />
-                                    <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
-                                    <Route path="/tools/kelly-simulator" element={<KellySimulatorPage />} />
+                                {/* Kelly Pages */}
+                                <Route path="/kelly" element={<KellyCompletePage />} />
+                                <Route path="/article/kelly-criterion" element={<KellyArticlePage />} />
+                                <Route path="/tools/kelly-simulator" element={<KellySimulatorPage />} />
 
-                                    {/* Admin Pages */}
-                                    <Route path="/admin" element={<TranTradingTerminal initialView="admin-sentiment" />} />
+                                {/* Admin Pages */}
+                                <Route path="/admin" element={<TranTradingTerminal initialView="admin-sentiment" />} />
 
-                                    {/* Catch-all route for SPA */}
-                                    <Route path="*" element={<TranTradingTerminal />} />
-                                </Routes>
-                            </Suspense>
-                            <NotificationCenter />
+                                {/* Catch-all route for SPA */}
+                                <Route path="*" element={<TranTradingTerminal />} />
+                            </Routes>
                         </BrowserRouter>
+                        <NotificationCenter />
                     </ToastContainer>
                 </AppProvider>
             </HelmetProvider>
