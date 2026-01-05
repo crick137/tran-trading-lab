@@ -1,20 +1,59 @@
 /**
  * 🐋 TRAN 고래 알림
- * Vercel Cron: 매 10분마다 실행
- * 채널: @TranTradingLabNews
+ * Vercel Cron: 매일 1회 실행 (UTC 03:00 = KST 12:00)
+ * 채널: @http4477
  * 
  * 대형 거래 감지 및 알림
  */
 
+import { kv } from '@vercel/kv'
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const NEWS_CHANNEL_ID = process.env.NEWS_CHANNEL_ID || '@TranTradingLabNews'
+const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+}
 
 // 최소 알림 금액 (USD)
 const MIN_ALERT_AMOUNT = 10000000 // $10M
 
-// 중복 방지를 위한 최근 알림 해시
-const recentAlerts = new Set()
+// 중복 방지를 위한 최근 알림 해시 (Vercel KV)
+const ALERTS_STORAGE_KEY = 'whale-alerts:recent-alerts'
 const MAX_RECENT = 100
+
+async function getRecentAlerts() {
+    try {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            const stored = await kv.get(ALERTS_STORAGE_KEY)
+            return new Set(stored || [])
+        }
+    } catch (e) {
+        console.warn('KV storage not available, using fallback:', e.message)
+    }
+    return new Set()
+}
+
+async function addRecentAlert(alertId) {
+    try {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            const recentAlerts = await getRecentAlerts()
+            recentAlerts.add(alertId)
+            
+            // 限制大小
+            if (recentAlerts.size > MAX_RECENT) {
+                const first = recentAlerts.values().next().value
+                recentAlerts.delete(first)
+            }
+            
+            await kv.set(ALERTS_STORAGE_KEY, Array.from(recentAlerts), { ex: 86400 }) // 24小时过期
+            return true
+        }
+    } catch (e) {
+        console.warn('KV storage not available:', e.message)
+    }
+    return false
+}
 
 // ============================================
 // Whale Alert API (무료 대안: Blockchain.com API)
@@ -167,6 +206,7 @@ export default async function handler(req, res) {
         console.log('Checking for whale transactions...')
 
         const transactions = await getRecentLargeTransactions()
+        const recentAlerts = await getRecentAlerts()
 
         let alertsSent = 0
 
@@ -179,13 +219,7 @@ export default async function handler(req, res) {
 
             if (sent) {
                 alertsSent++
-                recentAlerts.add(tx.id)
-
-                // 메모리 관리: 오래된 항목 제거
-                if (recentAlerts.size > MAX_RECENT) {
-                    const first = recentAlerts.values().next().value
-                    recentAlerts.delete(first)
-                }
+                await addRecentAlert(tx.id)
             }
 
             console.log(`Whale alert for ${tx.coinName}: ${sent ? 'Sent' : 'Failed'}`)

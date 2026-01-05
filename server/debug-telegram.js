@@ -2,8 +2,13 @@
  * 调试 Telegram Bot 发送问题
  */
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
-const CHANNEL_ID = '@TranTradingLabNews'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    console.error('❌ TELEGRAM_BOT_TOKEN environment variable is required')
+    process.exit(1)
+}
 
 async function debug() {
     console.log('🔍 调试 Telegram Bot...\n')

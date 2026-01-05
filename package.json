@@ -8,7 +8,8 @@
     "dev:frontend": "vite",
     "dev:proxy": "node server/proxy.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:telegram": "node test-single-feature.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

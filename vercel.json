@@ -14,11 +14,11 @@
     },
     {
       "path": "/api/cron/price-alerts",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0,12 * * *"
     },
     {
       "path": "/api/cron/whale-alerts",
-      "schedule": "*/10 * * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/weekly-report",
@@ -31,6 +31,26 @@
     {
       "path": "/api/cron/technical-analysis",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/daily-trading-tip",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/news-analysis",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/market-sentiment-card",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/daily-market-story",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/trading-psychology-quiz",
+      "schedule": "0 6 * * *"
     }
   ],
   "rewrites": [

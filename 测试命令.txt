@@ -1,0 +1,43 @@
+# 快速测试命令
+
+## 方法一：使用 curl（最简单，Windows PowerShell）
+
+# 替换 YOUR_PROJECT_URL 为你的 Vercel 项目 URL
+# 例如: tran-trading-lab.vercel.app
+
+$PROJECT_URL = "YOUR_PROJECT_URL"
+$CRON_SECRET = "gwreeeee98234r7guvh23nori88v43999999tnio3o5iii9v"
+
+# 测试交易小贴士
+curl -X GET "https://$PROJECT_URL/api/cron/daily-trading-tip" `
+  -H "Authorization: Bearer $CRON_SECRET" `
+  -H "Content-Type: application/json"
+
+# 测试新闻解读
+curl -X GET "https://$PROJECT_URL/api/cron/news-analysis" `
+  -H "Authorization: Bearer $CRON_SECRET" `
+  -H "Content-Type: application/json"
+
+# 测试市场情绪卡片
+curl -X GET "https://$PROJECT_URL/api/cron/market-sentiment-card" `
+  -H "Authorization: Bearer $CRON_SECRET" `
+  -H "Content-Type: application/json"
+
+## 方法二：使用 Node.js 脚本
+
+node test-single-feature.js YOUR_PROJECT_URL gwreeeee98234r7guvh23nori88v43999999tnio3o5iii9v
+
+## 需要的信息
+
+1. 你的 Vercel 项目 URL（在 Vercel Dashboard 中可以找到）
+   例如: tran-trading-lab.vercel.app 或 your-custom-domain.com
+
+2. CRON_SECRET 已经提供: gwreeeee98234r7guvh23nori88v43999999tnio3o5iii9v
+
+## 测试检查
+
+运行测试后：
+1. 查看终端输出（应该显示 success: true）
+2. 打开 Telegram，查看 @http4477 频道
+3. 检查是否收到消息
+4. 评估内容质量

@@ -9,8 +9,13 @@ import cron from 'node-cron'
 // Configuration
 // ============================================
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    console.error('⚠️ TELEGRAM_BOT_TOKEN environment variable is required')
+    process.exit(1)
+}
 
 // 扩展的韩国金融新闻源
 const EXPANDED_NEWS_FEEDS = [

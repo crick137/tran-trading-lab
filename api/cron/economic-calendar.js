@@ -1,13 +1,13 @@
 /**
  * 📅 TRAN 경제 일정 알림
  * Vercel Cron: 매일 07:30 (KST) 실행
- * 채널: @TranTradingLabNews
+ * 채널: @http4477
  * 
  * 오늘의 주요 경제 이벤트 안내
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const NEWS_CHANNEL_ID = process.env.NEWS_CHANNEL_ID || '@TranTradingLabNews'
+const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
 
 // ============================================
 // 주요 경제 이벤트 DB (정적 데이터)
@@ -132,6 +132,8 @@ function formatCalendarMessage(economicEvents, cryptoEvents) {
 평온한 하루, 트레이딩에 집중하세요! 📊
 
 ━━━━━━━━━━━━━━━━━━━━
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
 📰 뉴스: @TranTradingLabNews
 🌐 웹: trantradinglab.com
 
@@ -167,6 +169,8 @@ ${eventList}
 🔴 매우 중요 | 🟠 중요 | 🟡 보통
 
 ━━━━━━━━━━━━━━━━━━━━
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
 📰 뉴스: @TranTradingLabNews
 🌐 웹: trantradinglab.com
 

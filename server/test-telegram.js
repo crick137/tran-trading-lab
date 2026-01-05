@@ -2,7 +2,12 @@
  * 测试 Telegram Bot 连接
  */
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+
+if (!TELEGRAM_BOT_TOKEN) {
+    console.error('❌ TELEGRAM_BOT_TOKEN environment variable is required')
+    process.exit(1)
+}
 
 async function testBot() {
     console.log('🔍 Testing Telegram Bot connection...\n')

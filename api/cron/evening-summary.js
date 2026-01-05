@@ -8,8 +8,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import FormData from 'form-data'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '-1002815876265'
-const GROQ_API_KEY = process.env.GROQ_API_KEY
+const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 // ============================================
@@ -172,59 +172,76 @@ ${marketDataContext}
 
 ━━━━━━━━━━━━━━━━━━━━
 
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
 📰 뉴스: @TranTradingLabNews
 🌐 웹: trantradinglab.com
 
 #마감정리 #비트코인 #TranTradingLab`
 
     try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: 'gpt-5.1',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.8,
-                max_tokens: 1500
+                max_completion_tokens: 1500
             })
         })
         const json = await res.json()
         return json.choices?.[0]?.message?.content?.trim() || null
     } catch (e) {
-        console.error('Groq API error:', e.message)
+        console.error('OpenAI API error:', e.message)
         return null
     }
 }
 
 // ============================================
-// Gemini 이미지 생성
+// DALL-E 3 이미지 생성
 // ============================================
 
 async function generateEveningBanner(fearGreedValue, btcChange) {
-    if (!GEMINI_API_KEY) return null
+    if (!OPENAI_API_KEY) return null
     try {
-        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+        const mood = btcChange >= 0
+            ? 'bullish golden sunset, warm orange and gold tones, upward trending chart'
+            : 'bearish cool twilight, deep purple and blue tones, calming atmosphere'
 
-        const mood = btcChange >= 0 ? 'bullish sunset with golden tones' : 'bearish twilight with cool purple tones'
-        const prompt = `Create a professional financial market closing banner image. Style: ${mood}. Include: moon, city skyline at dusk, stock chart overlay, "MARKET CLOSE" text. Modern, sleek, 16:9 aspect ratio. No text except "MARKET CLOSE".`
+        const prompt = `Professional crypto market evening banner. ${mood}. Features: crescent moon, modern city skyline at dusk, abstract Bitcoin chart overlay with glowing lines. Style: futuristic digital art, neon accents, dark background. Clean minimalist design. Horizontal 16:9 aspect ratio. No text.`
 
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { responseModalities: ['image', 'text'] }
+        console.log('Generating DALL-E 3 banner image...')
+
+        const res = await fetch('https://api.openai.com/v1/images/generations', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${OPENAI_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'dall-e-3',
+                prompt: prompt,
+                n: 1,
+                size: '1792x1024',
+                quality: 'standard'
+            })
         })
 
-        const parts = result.response.candidates?.[0]?.content?.parts || []
-        for (const part of parts) {
-            if (part.inlineData?.mimeType?.startsWith('image/')) {
-                return Buffer.from(part.inlineData.data, 'base64')
-            }
+        const data = await res.json()
+        const imageUrl = data.data?.[0]?.url
+
+        if (imageUrl) {
+            // Download image and convert to buffer
+            const imageRes = await fetch(imageUrl)
+            const arrayBuffer = await imageRes.arrayBuffer()
+            return Buffer.from(arrayBuffer)
         }
     } catch (e) {
-        console.error('Gemini image error:', e.message)
+        console.error('DALL-E 3 image error:', e.message)
     }
     return null
 }
@@ -237,6 +254,14 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
         return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    // 环境变量验证
+    if (!TELEGRAM_BOT_TOKEN) {
+        return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN environment variable is required' })
+    }
+    if (!OPENAI_API_KEY) {
+        return res.status(500).json({ error: 'OPENAI_API_KEY environment variable is required' })
     }
 
     try {

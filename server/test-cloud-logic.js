@@ -12,7 +12,7 @@ dotenv.config()
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '-1002815876265'
-const GROQ_API_KEY = process.env.GROQ_API_KEY
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 const NEWS_FEEDS = [
@@ -348,6 +348,8 @@ ${marketDataContext}
 
 ━━━━━━━━━━━━━━━━━━━━
 
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
 📰 뉴스: @TranTradingLabNews
 🌐 웹: trantradinglab.com
 
@@ -360,28 +362,28 @@ ${marketDataContext}
 - 분석은 전문적이고 인사이트 있게 작성하세요`
 
     try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: 'gpt-5.1',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.8,
-                max_tokens: 2000
+                max_completion_tokens: 2000
             })
         })
         const json = await res.json()
         const content = json.choices?.[0]?.message?.content?.trim()
         if (!content) {
-            console.error('Groq returned empty content:', json)
+            console.error('OpenAI returned empty content:', json)
             return null
         }
         return content
     } catch (e) {
-        console.error('Groq API error:', e.message)
+        console.error('OpenAI API error:', e.message)
         return null
     }
 }

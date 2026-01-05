@@ -3,23 +3,18 @@
  * Gemini AI 배너 이미지 생성 + 모든 프리미엄 기능
  */
 
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+const GROQ_API_KEY = process.env.GROQ_API_KEY
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
-const CHANNEL_ID = '@TranTradingLabNews'
-const GROQ_API_KEY = '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'
+if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+}
 
 // Gemini API Key (https://aistudio.google.com/apikey 에서 무료 발급)
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY'
-
-// AI 생성 배너 이미지 (로컬 파일)
-const BANNER_IMAGE_PATH = path.join(__dirname, 'banner.png')
 
 // ============================================
 // Gemini 이미지 생성 (Imagen)
@@ -60,11 +55,10 @@ async function generateMarketBanner(fearGreedValue, btcChange) {
         const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData)
 
         if (imagePart?.inlineData?.data) {
-            // base64 이미지를 파일로 저장
+            // base64 이미지를 Buffer로 변환 (파일 저장 없이)
             const imageBuffer = Buffer.from(imagePart.inlineData.data, 'base64')
-            fs.writeFileSync(BANNER_IMAGE_PATH, imageBuffer)
             console.log('  ✓ AI 배너 이미지 생성 완료')
-            return BANNER_IMAGE_PATH
+            return imageBuffer
         }
     } catch (e) {
         console.log('  ✗ Gemini 이미지 생성 실패:', e.message)

@@ -3,8 +3,12 @@
  * 配置在 vercel.json 中设置 cron 表达式
  */
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
-const TELEGRAM_CHANNEL_ID = '@TranTradingLabNews'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+}
 
 // 扩展的韩国金融新闻源
 const NEWS_FEEDS = [
@@ -100,6 +104,11 @@ export default async function handler(req, res) {
     const authHeader = req.headers.authorization
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
         return res.status(401).json({ error: 'Unauthorized' })
+    }
+
+    // 环境变量验证
+    if (!TELEGRAM_BOT_TOKEN) {
+        return res.status(500).json({ error: 'TELEGRAM_BOT_TOKEN environment variable is required' })
     }
 
     try {

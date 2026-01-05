@@ -5,8 +5,8 @@
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '-1002815876265'
-const GROQ_API_KEY = process.env.GROQ_API_KEY
+const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY
 
 // ============================================
 // 주간 데이터 수집
@@ -175,29 +175,31 @@ ${topLosers.map((c, i) => `${i + 1}. ${c.symbol}: ▼ ${c.weeklyChange.toFixed(2
 
 ━━━━━━━━━━━━━━━━━━━━
 
+📱 WhatsApp: whatsapp.com/channel/0029Vb6DoUnHltY5bgndxT1t
+🐦 X: x.com/TranTradingLab
 📰 뉴스: @TranTradingLabNews
 🌐 웹: trantradinglab.com
 
 #주간리포트 #비트코인 #TranTradingLab`
 
     try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: 'gpt-5.1',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: userPrompt }
                 ],
                 temperature: 0.8,
-                max_tokens: 2000
+                max_completion_tokens: 2000
             })
         })
         const json = await res.json()
         return json.choices?.[0]?.message?.content?.trim() || null
     } catch (e) {
-        console.error('Groq API error:', e.message)
+        console.error('OpenAI API error:', e.message)
         return null
     }
 }

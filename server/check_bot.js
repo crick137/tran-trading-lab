@@ -1,5 +1,10 @@
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8';
-const CHANNELS = ['@http4477', '@TranTradingLab', '@TranTradingLabNews'];
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const CHANNELS = ['@http4477', '@TranTradingLab', '@TranTradingLabNews']
+
+if (!TELEGRAM_BOT_TOKEN) {
+    console.error('❌ TELEGRAM_BOT_TOKEN environment variable is required')
+    process.exit(1)
+}
 
 async function diagnose() {
     console.log('🔍 正在诊断频道信息...');

@@ -1,0 +1,21 @@
+# 直接复制粘贴运行（PowerShell）
+
+# 使用你的项目URL和CRON_SECRET
+$PROJECT_URL = "tran-trading-ep4c7daw5-crick137s-projects.vercel.app"
+$CRON_SECRET = "gwreeeee98234r7guvh23nori88v43999999tnio3o5iii9v"
+
+# 测试交易小贴士
+Write-Host "测试: 每日交易小贴士" -ForegroundColor Yellow
+try {
+    $response = Invoke-RestMethod -Uri "https://$PROJECT_URL/api/cron/daily-trading-tip" `
+        -Method Get `
+        -Headers @{
+            "Authorization" = "Bearer $CRONSecret"
+            "Content-Type" = "application/json"
+        }
+    Write-Host "成功! 消息ID: $($response.messageId)" -ForegroundColor Green
+    Write-Host "请检查 Telegram @http4477 频道" -ForegroundColor Cyan
+} catch {
+    Write-Host "错误: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "可能原因: 项目需要重新部署" -ForegroundColor Yellow
+}

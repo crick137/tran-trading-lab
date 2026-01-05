@@ -3,8 +3,12 @@
  * 格式参考用户示例：列表 + 原文链接 + 自动预览
  */
 
-const TELEGRAM_BOT_TOKEN = '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8'
-const CHANNEL_ID = '@TranTradingLabNews'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+const CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+}
 
 // 新闻源 - 包含国际财经
 const NEWS_FEEDS = [

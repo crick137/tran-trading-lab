@@ -1,13 +1,19 @@
 /**
  * 🚨 TRAN 가격 돌파 알림
- * Vercel Cron: 매 5분마다 실행
- * 채널: @TranTradingLabNews
+ * Vercel Cron: 매일 2회 실행 (UTC 00:00, 12:00 = KST 09:00, 21:00)
+ * 채널: @http4477
  * 
- * 주요 지지/저항선 돌파 시 즉시 알림
+ * 주요 지지/저항선 돌파 시 알림
  */
 
+import { kv } from '@vercel/kv'
+
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const NEWS_CHANNEL_ID = process.env.NEWS_CHANNEL_ID || '@TranTradingLabNews'
+const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+
+if (!TELEGRAM_BOT_TOKEN) {
+    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
+}
 
 // ============================================
 // 주요 가격 레벨 정의
@@ -193,11 +199,34 @@ async function sendAlert(message) {
 }
 
 // ============================================
-// 이전 가격 저장 (간단한 메모리 저장소)
-// 실제 운영에서는 KV 스토어 권장
+// 이전 가격 저장 (Vercel KV)
 // ============================================
 
-let previousPrices = null
+const PRICE_STORAGE_KEY = 'price-alerts:previous-prices'
+
+async function getPreviousPrices() {
+    try {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            const stored = await kv.get(PRICE_STORAGE_KEY)
+            return stored || null
+        }
+    } catch (e) {
+        console.warn('KV storage not available, using fallback:', e.message)
+    }
+    return null
+}
+
+async function savePreviousPrices(prices) {
+    try {
+        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+            await kv.set(PRICE_STORAGE_KEY, prices, { ex: 86400 }) // 24小时过期
+            return true
+        }
+    } catch (e) {
+        console.warn('KV storage not available:', e.message)
+    }
+    return false
+}
 
 // ============================================
 // Handler
@@ -218,9 +247,12 @@ export default async function handler(req, res) {
             return res.status(500).json({ error: 'Failed to fetch prices' })
         }
 
+        // 이전 가격 가져오기
+        const previousPrices = await getPreviousPrices()
+
         // 첫 실행 시에는 이전 가격이 없으므로 저장만 하고 종료
         if (!previousPrices) {
-            previousPrices = currentPrices
+            await savePreviousPrices(currentPrices)
             console.log('Initial prices stored:', currentPrices)
             return res.status(200).json({ message: 'Initial prices stored', prices: currentPrices })
         }
@@ -241,7 +273,7 @@ export default async function handler(req, res) {
         }
 
         // 현재 가격을 이전 가격으로 저장
-        previousPrices = currentPrices
+        await savePreviousPrices(currentPrices)
 
         return res.status(200).json({
             success: true,
