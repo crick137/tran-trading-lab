@@ -7,6 +7,30 @@
     {
       "path": "/api/cron/morning-briefing",
       "schedule": "0 23 * * *"
+    },
+    {
+      "path": "/api/cron/evening-summary",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/price-alerts",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/whale-alerts",
+      "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/weekly-report",
+      "schedule": "0 1 * * 0"
+    },
+    {
+      "path": "/api/cron/economic-calendar",
+      "schedule": "30 22 * * *"
+    },
+    {
+      "path": "/api/cron/technical-analysis",
+      "schedule": "0 3 * * *"
     }
   ],
   "rewrites": [
