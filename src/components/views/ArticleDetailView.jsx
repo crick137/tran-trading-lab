@@ -4,6 +4,8 @@ import { interactions } from '../../lib/supabase'
 import { useAppState, useAppActions } from '../../context/AppContext'
 import { useI18n } from '../../hooks/useI18n'
 import CommentPanel from '../CommentPanel'
+import ShareButtons from '../ShareButtons'
+import RelatedArticles from '../RelatedArticles'
 import SEO from '../SEO'
 import { howardMarksBubbleArticle } from '../../data/articles/howardMarksBubble'
 
@@ -490,6 +492,14 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
                 </footer>
             </article>
+
+            {/* Related Articles */}
+            <RelatedArticles
+                currentId={article?.id}
+                category={article?.category || 'analysis'}
+                type="analysis"
+                onArticleClick={(a) => console.log('Navigate to:', a.id)}
+            />
 
             {/* 评论面板 */}
             <CommentPanel

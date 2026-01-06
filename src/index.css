@@ -1208,3 +1208,136 @@ input::placeholder {
 .bounce-in {
   animation: bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Tablet - max 1024px */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 64px;
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+}
+
+/* Mobile - max 768px */
+@media (max-width: 768px) {
+  :root {
+    --topbar-height: 48px;
+    --sidebar-width: 0px;
+  }
+
+  /* Hide sidebar on mobile */
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed !important;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Adjust main content */
+  .main-content {
+    margin-left: 0 !important;
+    padding: 12px;
+    width: 100% !important;
+  }
+
+  /* TopBar mobile adjustments */
+  .topbar {
+    padding: 0 12px;
+  }
+
+  .topbar .brand-section {
+    gap: 8px;
+  }
+
+  .topbar .ticker-section {
+    display: none;
+  }
+
+  /* Hide non-essential elements */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Full width cards */
+  .card-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Article adjustments */
+  .article-container {
+    padding: 16px !important;
+  }
+
+  .article-title {
+    font-size: 24px !important;
+  }
+
+  /* Footer actions */
+  .article-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .article-actions button {
+    flex: 1;
+    min-width: 80px;
+  }
+}
+
+/* Small mobile - max 480px */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 8px;
+  }
+
+  .article-container {
+    padding: 12px !important;
+  }
+
+  .article-title {
+    font-size: 20px !important;
+  }
+
+  /* Stack action buttons vertically */
+  .article-actions {
+    flex-direction: column;
+  }
+
+  .article-actions button {
+    width: 100%;
+  }
+
+  /* Smaller padding for cards */
+  .premium-card,
+  .stat-card-premium {
+    padding: 12px !important;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) {
+
+  .btn:active,
+  .card:active,
+  button:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+/* Landscape phone adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --topbar-height: 40px;
+  }
+}

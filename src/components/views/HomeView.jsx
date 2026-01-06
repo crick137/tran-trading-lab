@@ -48,13 +48,7 @@ function HomeView({ onNavigate }) {
         { id: 'lab', icon: GraduationCap, title: '트레이딩 학습', desc: '체계적인 교육 과정', color: '#8b5cf6' },
     ]
 
-    // 인기 콘텐츠 (더미 데이터)
-    const popularContent = [
-        { title: '비트코인 기술적 분석: 2024년 전망', views: '1.2K', category: '분석', hot: true },
-        { title: '리스크 관리의 기본 원칙', views: '856', category: '학습', hot: false },
-        { title: '이더리움 업그레이드 영향 분석', views: '723', category: '분석', hot: true },
-        { title: '초보자를 위한 차트 읽기', views: '645', category: '학습', hot: false },
-    ]
+    const [popularContent, setPopularContent] = useState([])
 
     useEffect(() => {
         const loadData = async () => {
@@ -72,6 +66,29 @@ function HomeView({ onNavigate }) {
                     lab: courses?.length || 0,
                 })
                 setRecentArticles(analysis?.slice(0, 3) || [])
+
+                // 인기 콘텐츠: 분석과 강의를 합쳐서 view_count 기준 정렬
+                const allContent = [
+                    ...(analysis || []).map(a => ({
+                        title: a.title,
+                        views: a.view_count || 0,
+                        category: '분석',
+                        hot: (a.view_count || 0) > 500,
+                        id: a.id,
+                        type: 'analysis'
+                    })),
+                    ...(courses || []).map(c => ({
+                        title: c.title,
+                        views: c.view_count || 0,
+                        category: '학습',
+                        hot: (c.view_count || 0) > 500,
+                        id: c.id,
+                        type: 'course'
+                    }))
+                ]
+                // 조회수 기준 내림차순 정렬, 상위 4개
+                const sorted = allContent.sort((a, b) => b.views - a.views).slice(0, 4)
+                setPopularContent(sorted)
             } catch (err) {
                 console.error('Failed to load data:', err)
             }
@@ -184,18 +201,22 @@ function HomeView({ onNavigate }) {
                         </button>
                     </div>
                     <div style={styles.contentList}>
-                        {popularContent.map((item, i) => (
-                            <div key={i} style={{ ...styles.contentItem, borderColor: c.cardBorder }}>
+                        {popularContent.length > 0 ? popularContent.map((item, i) => (
+                            <div key={item.id || i} style={{ ...styles.contentItem, borderColor: c.cardBorder }}>
                                 <div style={styles.contentInfo}>
                                     {item.hot && <span style={styles.hotBadge}>HOT</span>}
                                     <span style={{ ...styles.categoryBadge, color: c.textSec }}>{item.category}</span>
                                 </div>
                                 <div style={{ ...styles.contentTitle, color: c.text }}>{item.title}</div>
                                 <div style={{ ...styles.contentMeta, color: c.textSec }}>
-                                    <Eye size={14} /> {item.views} views
+                                    <Eye size={14} /> {item.views >= 1000 ? `${(item.views / 1000).toFixed(1)}K` : item.views} views
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div style={{ color: c.textSec, textAlign: 'center', padding: 20 }}>
+                                콘텐츠가 없습니다
+                            </div>
+                        )}
                     </div>
                 </section>
 
