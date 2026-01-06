@@ -75,7 +75,7 @@ function IntroductionView() {
                     </div>
                     <div style={styles.terminalBody}>
                         {bootLines.map((line, i) => (
-                            <div key={i} style={{ color: i === bootLines.length - 1 ? '#00d26a' : 'rgba(0, 210, 106, 0.6)' }}>
+                            <div key={i} style={{ color: i === bootLines.length - 1 ? '#3b82f6' : 'rgba(59, 130, 246, 0.6)' }}>
                                 {line}
                             </div>
                         ))}
@@ -97,7 +97,7 @@ function IntroductionView() {
             {/* Holographic Stats */}
             <div style={styles.statsBar}>
                 <div style={styles.statItem}>
-                    <Activity size={20} color="#00d26a" />
+                    <Activity size={20} color="#10b981" />
                     <div>
                         <span style={styles.statValue}>DAILY</span>
                         <span style={styles.statLabel}>UPDATES</span>
@@ -125,7 +125,7 @@ function IntroductionView() {
             <h2 style={styles.sectionTitle}>LAB RESOURCES</h2>
             <div style={styles.grid}>
                 <FeatureCard
-                    icon={<Brain size={32} color="#00ff88" />}
+                    icon={<Brain size={32} color="#60a5fa" />}
                     title="Deep Analysis"
                     desc="Comprehensive market breakdowns combining technical and fundamental data."
                 />
@@ -212,7 +212,7 @@ const styles = {
     logoRing: {
         position: 'absolute',
         inset: -20,
-        border: '1px dashed rgba(0, 210, 106, 0.3)',
+        border: '1px dashed rgba(59, 130, 246, 0.3)',
         borderRadius: '50%',
         animation: 'spin 10s linear infinite',
     },
@@ -231,7 +231,7 @@ const styles = {
         transform: 'translate(-50%, -50%)',
         width: 200,
         height: 200,
-        background: 'radial-gradient(circle, rgba(0,210,106,0.3) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
         zIndex: 1,
         animation: 'pulse 3s ease-in-out infinite',
     },
@@ -259,39 +259,39 @@ const styles = {
         minHeight: 76,
     },
     cursor: {
-        color: '#00d26a',
+        color: '#3b82f6',
         animation: 'pulse 0.8s infinite',
     },
     heroSubtitle: {
         fontSize: 20,
-        color: '#00d26a',
+        color: '#3b82f6',
         fontWeight: 500,
         marginBottom: 40,
         maxWidth: 600,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        textShadow: '0 0 10px rgba(0, 210, 106, 0.4)',
+        textShadow: '0 0 10px rgba(59, 130, 246, 0.4)',
     },
     terminalWindow: {
         width: '100%',
         maxWidth: 500,
         background: 'rgba(0, 0, 0, 0.8)',
-        border: '1px solid rgba(0, 210, 106, 0.2)',
+        border: '1px solid rgba(59, 130, 246, 0.2)',
         borderRadius: 8,
         marginBottom: 48,
         overflow: 'hidden',
-        boxShadow: '0 0 20px rgba(0, 210, 106, 0.1)',
+        boxShadow: '0 0 20px rgba(59, 130, 246, 0.1)',
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: 12,
         textAlign: 'left',
     },
     terminalHeader: {
-        background: 'rgba(0, 210, 106, 0.1)',
+        background: 'rgba(59, 130, 246, 0.1)',
         padding: '8px 12px',
         display: 'flex',
         alignItems: 'center',
         gap: 6,
-        borderBottom: '1px solid rgba(0, 210, 106, 0.1)',
+        borderBottom: '1px solid rgba(59, 130, 246, 0.1)',
     },
     terminalDot: { width: 8, height: 8, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' },
     terminalTitle: { marginLeft: 8, color: 'rgba(255,255,255,0.4)' },
@@ -308,15 +308,15 @@ const styles = {
     },
     primaryBtn: {
         padding: '18px 48px',
-        background: 'linear-gradient(135deg, #00d26a 0%, #00ff88 100%)',
+        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
         border: 'none',
         borderRadius: 0,
         clipPath: 'polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%)',
-        color: '#000',
+        color: '#fff',
         fontSize: 16,
         fontWeight: 800,
         cursor: 'pointer',
-        boxShadow: '0 0 30px rgba(0, 210, 106, 0.4)',
+        boxShadow: '0 0 30px rgba(59, 130, 246, 0.4)',
         display: 'flex',
         alignItems: 'center',
         gap: 12,
@@ -418,7 +418,7 @@ const styles = {
         left: 0,
         width: '100%',
         height: '2px',
-        background: 'linear-gradient(90deg, transparent, rgba(0,210,106,0.5), transparent)',
+        background: 'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent)',
     },
     cardHeader: {
         display: 'flex',

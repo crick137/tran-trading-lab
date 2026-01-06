@@ -99,3 +99,4 @@ export async function generateStoryImage(btcChange) {
     const prompt = `Fantasy book cover illustration. Subject: ${theme}. Style: Oil painting. No text.`
     return generateImage(prompt, 'market-story')
 }
+

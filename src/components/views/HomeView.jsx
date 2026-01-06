@@ -1,43 +1,59 @@
 import React, { useState, useEffect } from 'react'
 import {
     BarChart3, Globe, GraduationCap,
-    ArrowRight, Sparkles, TrendingUp, Star,
-    Activity, Award, Rocket, Zap
+    ArrowRight, TrendingUp, Star,
+    FileText, BookOpen, Newspaper, ChevronRight,
+    Play, Clock, Eye, Flame, Zap, Award, Target
 } from 'lucide-react'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
 import { useAppState } from '../../context/AppContext'
 import NewsletterSubscribe from '../NewsletterSubscribe'
-import HeroChart from '../visuals/HeroChart'
 
 /**
- * HomeView - Luminous Dark Version (Now with Light Mode!)
+ * HomeView - Premium Korean Style v3
+ * 깔끔하고 고급스러운 한국 스타일
  */
+
+function AnimatedCounter({ value, duration = 1500 }) {
+    const [displayValue, setDisplayValue] = useState(0)
+    useEffect(() => {
+        if (value === 0) { setDisplayValue(0); return }
+        let startTime
+        const animate = (timestamp) => {
+            if (!startTime) startTime = timestamp
+            const progress = Math.min((timestamp - startTime) / duration, 1)
+            setDisplayValue(Math.floor((1 - Math.pow(1 - progress, 3)) * value))
+            if (progress < 1) requestAnimationFrame(animate)
+        }
+        requestAnimationFrame(animate)
+    }, [value, duration])
+    return <span>{displayValue}</span>
+}
+
 function HomeView({ onNavigate }) {
-    const { t, language } = useI18n()
+    const { t } = useI18n()
     const { theme } = useAppState()
     const isDark = theme === 'dark'
 
-    const [stats, setStats] = useState({})
-    const [recentBriefs, setRecentBriefs] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [hoveredModule, setHoveredModule] = useState(null)
+    const [stats, setStats] = useState({ brief: 0, analysis: 0, lab: 0, news: 0 })
+    const [recentArticles, setRecentArticles] = useState([])
+    const [hoveredCard, setHoveredCard] = useState(null)
 
-    // System Selector Config
-    const tradingSystems = [
-        { id: 'orb', name: 'ORB System', color: '#00ffa3' }, // Intense Green (User's screenshot)
-        { id: 'alpha', name: 'Alpha Trend', color: '#00f2ff' }, // Electric Cyan
-        { id: 'gamma', name: 'Gamma Scalp', color: '#bd00ff' }, // Deep Violet
+    // 메인 모듈
+    const modules = [
+        { id: 'dashboard', icon: BarChart3, title: '대시보드', desc: '실시간 시장 데이터', color: '#3b82f6' },
+        { id: 'analysis', icon: TrendingUp, title: '분석 리포트', desc: '전문가 시장 분석', color: '#10b981' },
+        { id: 'news', icon: Newspaper, title: '마켓 뉴스', desc: '글로벌 시장 소식', color: '#f59e0b' },
+        { id: 'lab', icon: GraduationCap, title: '트레이딩 학습', desc: '체계적인 교육 과정', color: '#8b5cf6' },
     ]
-    const [activeSystemId, setActiveSystemId] = useState('orb')
-    const activeSystem = tradingSystems.find(s => s.id === activeSystemId) || tradingSystems[0]
 
-    // Palette: Electric Cyan(#00f2ff), Deep Violet(#bd00ff)
-    const moduleConfig = [
-        { id: 'dashboard', icon: BarChart3, color: '#00f2ff', bg: 'rgba(0,242,255,0.08)' }, // Cyan
-        { id: 'analysis', icon: TrendingUp, color: '#bd00ff', bg: 'rgba(189,0,255,0.08)' }, // Violet
-        { id: 'news', icon: Globe, color: '#fbbf24', bg: 'rgba(251,191,36,0.08)' }, // Gold/Amber (Keep as accent)
-        { id: 'lab', icon: GraduationCap, color: isDark ? '#ffffff' : '#333333', bg: 'rgba(255,255,255,0.08)' }, // White/Platinum
+    // 인기 콘텐츠 (더미 데이터)
+    const popularContent = [
+        { title: '비트코인 기술적 분석: 2024년 전망', views: '1.2K', category: '분석', hot: true },
+        { title: '리스크 관리의 기본 원칙', views: '856', category: '학습', hot: false },
+        { title: '이더리움 업그레이드 영향 분석', views: '723', category: '분석', hot: true },
+        { title: '초보자를 위한 차트 읽기', views: '645', category: '학습', hot: false },
     ]
 
     useEffect(() => {
@@ -55,233 +71,205 @@ function HomeView({ onNavigate }) {
                     news: news?.length || 0,
                     lab: courses?.length || 0,
                 })
-                setRecentBriefs(briefs?.slice(0, 3) || [])
+                setRecentArticles(analysis?.slice(0, 3) || [])
             } catch (err) {
-                console.error('Failed to load home data:', err)
+                console.error('Failed to load data:', err)
             }
-            setLoading(false)
         }
         loadData()
     }, [])
 
-    const handleModuleClick = (moduleId) => {
-        if (onNavigate) onNavigate(moduleId)
-    }
-
-    // Dynamic Styles based on theme
-    const currentStyles = {
-        ...styles,
-        hero: {
-            ...styles.hero,
-            background: isDark ? '#050505' : '#ffffff',
-            border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
-            boxShadow: isDark ? 'none' : '0 20px 40px -10px rgba(0,0,0,0.05)',
-        },
-        heroTitleMain: {
-            ...styles.heroTitleMain,
-            color: isDark ? '#fff' : '#1a1a1a',
-        },
-        heroDesc: {
-            ...styles.heroDesc,
-            color: isDark ? '#888' : '#666',
-        },
-        sectionTitle: {
-            ...styles.sectionTitle,
-            color: isDark ? '#fff' : '#1a1a1a',
-        },
-        moduleCard: {
-            ...styles.moduleCard,
-            background: isDark ? '#0a0a0a' : '#ffffff',
-            border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.06)',
-        },
-        chartContainer: {
-            ...styles.chartContainer,
-            // Temporarily remove mask to ensure visibility
-            // maskImage: isDark
-            //    ? 'linear-gradient(to bottom, black 80%, transparent 100%)'
-            //    : 'linear-gradient(to bottom, black 90%, transparent 100%)',
-            height: 400, // Explicit height
-        },
-        chartOverlay: {
-            ...styles.chartOverlay,
-            // Simplify overlay to ensure it's not blocking
-            background: 'transparent',
-        }
+    const c = {
+        bg: isDark ? '#0a0a0f' : '#ffffff',
+        cardBg: isDark ? '#12121a' : '#f8fafc',
+        cardBorder: isDark ? '#1e1e2d' : '#e2e8f0',
+        text: isDark ? '#ffffff' : '#0f172a',
+        textSec: isDark ? '#94a3b8' : '#64748b',
+        accent: '#3b82f6',
     }
 
     return (
-        <div style={styles.container}>
-            {/* Hero Section - 2 Column Layout */}
-            <section style={currentStyles.hero}>
-                <div style={styles.heroBg}>
-                    <div style={styles.heroGlow1} />
-                    <div style={styles.heroGlow2} />
-                </div>
-
-                <div style={styles.heroGrid}>
-                    {/* Left Column: Text & Stats */}
-                    <div style={styles.heroLeft}>
-                        <div style={styles.badgeRow}>
-                            <div style={styles.liveBadge}>
-                                <div style={styles.liveIndicator} />
-                                <span>SYSTEM ONLINE</span>
-                            </div>
-                            <div style={styles.badge}>
-                                <Zap size={14} fill="currentColor" />
-                                <span>{t('home.badge')}</span>
-                            </div>
+        <div style={{ ...styles.container, background: c.bg }}>
+            {/* 히어로 섹션 */}
+            <section style={styles.hero}>
+                <div style={styles.heroInner}>
+                    {/* 왼쪽: 텍스트 */}
+                    <div style={styles.heroText}>
+                        <div style={styles.badge}>
+                            <Zap size={14} style={{ color: '#f59e0b' }} />
+                            <span>실시간 업데이트</span>
                         </div>
 
-                        <h1 style={styles.heroTitle}>
-                            <span style={currentStyles.heroTitleMain}>TRAN</span>
-                            <span style={styles.heroTitleGradient}>Trading Lab</span>
+                        <h1 style={{ ...styles.heroTitle, color: c.text }}>
+                            스마트한 투자의 시작,<br />
+                            <span style={styles.heroGradient}>TRAN Trading Lab</span>
                         </h1>
 
-                        <p style={currentStyles.heroDesc}>{t('home.heroDesc')}</p>
+                        <p style={{ ...styles.heroDesc, color: c.textSec }}>
+                            전문가의 시장 분석, 체계적인 학습 콘텐츠,<br />
+                            실시간 뉴스까지 한 곳에서 만나보세요.
+                        </p>
 
-                        <div style={styles.statsRow}>
-                            <div style={styles.statItem}>
-                                <span style={styles.statValue}>{stats?.brief || 0}</span>
-                                <span style={styles.statLabel}>BRIEFS</span>
+                        {/* 통계 */}
+                        <div style={styles.statsInline}>
+                            <div style={styles.statInline}>
+                                <span style={{ ...styles.statNum, color: c.text }}>
+                                    <AnimatedCounter value={stats.analysis + stats.brief} />+
+                                </span>
+                                <span style={{ color: c.textSec }}>분석 리포트</span>
                             </div>
                             <div style={styles.statDivider} />
-                            <div style={styles.statItem}>
-                                <span style={styles.statValue}>{stats?.analysis || 0}</span>
-                                <span style={styles.statLabel}>REPORTS</span>
+                            <div style={styles.statInline}>
+                                <span style={{ ...styles.statNum, color: c.text }}>
+                                    <AnimatedCounter value={stats.lab} />+
+                                </span>
+                                <span style={{ color: c.textSec }}>강의 콘텐츠</span>
                             </div>
                             <div style={styles.statDivider} />
-                            <div style={styles.statItem}>
-                                <span style={styles.statValue}>{stats?.lab || 0}</span>
-                                <span style={styles.statLabel}>COURSES</span>
+                            <div style={styles.statInline}>
+                                <span style={{ ...styles.statNum, color: c.text }}>24/7</span>
+                                <span style={{ color: c.textSec }}>실시간 업데이트</span>
                             </div>
+                        </div>
+
+                        <div style={styles.heroButtons}>
+                            <button style={styles.btnPrimary} onClick={() => onNavigate?.('dashboard')}>
+                                시작하기 <ArrowRight size={18} />
+                            </button>
+                            <button style={{ ...styles.btnSecondary, color: c.text, borderColor: c.cardBorder }}>
+                                <Play size={16} /> 소개 영상
+                            </button>
                         </div>
                     </div>
 
-                    {/* Right Column: Dynamic K-Line Chart */}
-                    <div style={styles.heroRight}>
-                        <div style={currentStyles.chartContainer}>
-                            <div style={styles.chartHeader}>
-                                <div style={styles.chartTag}>BTC/USD</div>
-                                <div style={{ color: activeSystem.color, fontSize: 13, fontWeight: 700 }}>+2.45%</div>
-                            </div>
-
-                            {/* System Selector - Floating Glass UI */}
-                            <div style={styles.systemSelector}>
-                                {tradingSystems.map(sys => (
-                                    <div
-                                        key={sys.id}
-                                        onClick={() => setActiveSystemId(sys.id)}
-                                        style={{
-                                            ...styles.systemTab,
-                                            background: activeSystemId === sys.id ? `${sys.color}20` : 'transparent',
-                                            color: activeSystemId === sys.id ? sys.color : 'rgba(255,255,255,0.4)',
-                                            border: activeSystemId === sys.id ? `1px solid ${sys.color}40` : '1px solid transparent',
-                                        }}
-                                    >
-                                        <div style={{
-                                            ...styles.systemDot,
-                                            background: sys.color,
-                                            boxShadow: activeSystemId === sys.id ? `0 0 8px ${sys.color}` : 'none',
-                                            opacity: activeSystemId === sys.id ? 1 : 0.3
-                                        }} />
-                                        {sys.name}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Insert HeroChart with dynamic system color */}
-                            <HeroChart theme={theme} accentColor={activeSystem.color} />
-
-                            {/* Decorative Overlay - Tinted by system color */}
-                            <div style={{
-                                ...currentStyles.chartOverlay,
-                                background: `linear-gradient(180deg, transparent 0%, transparent 80%, ${activeSystem.color}05 100%)`
-                            }} />
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Modules Grid */}
-            <section style={styles.modulesSection}>
-                <div style={styles.sectionHeader}>
-                    <h2 style={currentStyles.sectionTitle}>
-                        <Rocket size={22} style={{ color: '#00f2ff' }} />
-                        {t('home.exploreModules')}
-                    </h2>
-                </div>
-
-                <div style={styles.modulesGrid}>
-                    {moduleConfig.map((mod, index) => {
-                        const moduleText = t(`home.modules.${mod.id}`)
-                        const isHovered = hoveredModule === mod.id
-
-                        return (
-                            <article
+                    {/* 오른쪽: 카드 그리드 */}
+                    <div style={styles.heroCards}>
+                        {modules.map((mod, i) => (
+                            <div
                                 key={mod.id}
                                 style={{
-                                    ...currentStyles.moduleCard,
-                                    animationDelay: `${index * 0.08}s`,
-                                    transform: isHovered ? 'translateY(-8px) scale(1.01)' : 'translateY(0) scale(1)',
-                                    boxShadow: isHovered
-                                        ? `0 20px 40px -10px ${mod.color}20, 0 0 0 1px ${mod.color}40`
-                                        : (isDark ? '0 4px 20px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0,0,0,0.05)'),
-                                    borderColor: isHovered ? `${mod.color}50` : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
+                                    ...styles.miniCard,
+                                    background: c.cardBg,
+                                    borderColor: hoveredCard === mod.id ? mod.color : c.cardBorder,
+                                    transform: hoveredCard === mod.id ? 'translateY(-4px)' : 'none',
                                 }}
-                                onClick={() => handleModuleClick(mod.id)}
-                                onMouseEnter={() => setHoveredModule(mod.id)}
-                                onMouseLeave={() => setHoveredModule(null)}
+                                onClick={() => onNavigate?.(mod.id)}
+                                onMouseEnter={() => setHoveredCard(mod.id)}
+                                onMouseLeave={() => setHoveredCard(null)}
                             >
-                                <div style={{
-                                    ...styles.cardGlow,
-                                    background: `radial-gradient(circle at top right, ${mod.color}15 0%, transparent 60%)`,
-                                    opacity: isHovered ? 1 : 0.5,
-                                }} />
-
-                                <div style={{
-                                    ...styles.moduleIcon,
-                                    color: mod.color,
-                                    background: `linear-gradient(135deg, ${mod.color}10 0%, transparent 100%)`,
-                                    borderColor: `${mod.color}20`
-                                }}>
-                                    <mod.icon size={28} strokeWidth={1.5} />
+                                <div style={{ ...styles.miniIcon, background: `${mod.color}15`, color: mod.color }}>
+                                    <mod.icon size={22} />
                                 </div>
-
-                                <div style={styles.moduleContent}>
-                                    <h3 style={{ ...styles.moduleTitle, color: isDark ? '#fff' : '#1a1a1a' }}>
-                                        {(moduleText && typeof moduleText === 'object' && moduleText.title) ? moduleText.title : mod.id.toUpperCase()}
-                                    </h3>
-                                    <p style={{ ...styles.moduleDesc, color: isDark ? '#888' : '#666' }}>
-                                        {(moduleText && typeof moduleText === 'object' && moduleText.desc) ? moduleText.desc : 'Explore market data and tools'}
-                                    </p>
+                                <div>
+                                    <div style={{ ...styles.miniTitle, color: c.text }}>{mod.title}</div>
+                                    <div style={{ ...styles.miniDesc, color: c.textSec }}>{mod.desc}</div>
                                 </div>
-
-                                <div style={{
-                                    ...styles.moduleArrow,
-                                    color: isHovered ? '#fff' : 'rgba(255,255,255,0.3)',
-                                    transform: isHovered ? 'translateX(4px)' : 'translateX(0)',
-                                }}>
-                                    <ArrowRight size={18} />
-                                </div>
-                            </article>
-                        )
-                    })}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
 
-            {/* Newsletter Subscription */}
-            <section style={{ marginBottom: 40 }}>
+            {/* 콘텐츠 그리드 */}
+            <div style={styles.contentGrid}>
+                {/* 인기 콘텐츠 */}
+                <section style={{ ...styles.section, background: c.cardBg, borderColor: c.cardBorder }}>
+                    <div style={styles.sectionHeader}>
+                        <h2 style={{ ...styles.sectionTitle, color: c.text }}>
+                            <Flame size={20} style={{ color: '#ef4444' }} />
+                            인기 콘텐츠
+                        </h2>
+                        <button style={{ ...styles.viewAll, color: c.accent }}>
+                            전체보기 <ChevronRight size={16} />
+                        </button>
+                    </div>
+                    <div style={styles.contentList}>
+                        {popularContent.map((item, i) => (
+                            <div key={i} style={{ ...styles.contentItem, borderColor: c.cardBorder }}>
+                                <div style={styles.contentInfo}>
+                                    {item.hot && <span style={styles.hotBadge}>HOT</span>}
+                                    <span style={{ ...styles.categoryBadge, color: c.textSec }}>{item.category}</span>
+                                </div>
+                                <div style={{ ...styles.contentTitle, color: c.text }}>{item.title}</div>
+                                <div style={{ ...styles.contentMeta, color: c.textSec }}>
+                                    <Eye size={14} /> {item.views} views
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 빠른 시작 */}
+                <section style={{ ...styles.section, background: c.cardBg, borderColor: c.cardBorder }}>
+                    <div style={styles.sectionHeader}>
+                        <h2 style={{ ...styles.sectionTitle, color: c.text }}>
+                            <Target size={20} style={{ color: '#10b981' }} />
+                            빠른 시작
+                        </h2>
+                    </div>
+                    <div style={styles.quickLinks}>
+                        {[
+                            { icon: BarChart3, label: '시장 현황 보기', route: 'dashboard', color: '#3b82f6' },
+                            { icon: TrendingUp, label: '최신 분석 읽기', route: 'analysis', color: '#10b981' },
+                            { icon: BookOpen, label: '학습 시작하기', route: 'lab', color: '#8b5cf6' },
+                            { icon: Newspaper, label: '오늘의 뉴스', route: 'news', color: '#f59e0b' },
+                        ].map((link, i) => (
+                            <button
+                                key={i}
+                                style={{ ...styles.quickLink, borderColor: c.cardBorder }}
+                                onClick={() => onNavigate?.(link.route)}
+                            >
+                                <div style={{ ...styles.quickIcon, background: `${link.color}15`, color: link.color }}>
+                                    <link.icon size={18} />
+                                </div>
+                                <span style={{ color: c.text }}>{link.label}</span>
+                                <ChevronRight size={16} style={{ color: c.textSec }} />
+                            </button>
+                        ))}
+                    </div>
+                </section>
+
+                {/* 통계 카드 */}
+                <section style={{ ...styles.section, background: c.cardBg, borderColor: c.cardBorder }}>
+                    <div style={styles.sectionHeader}>
+                        <h2 style={{ ...styles.sectionTitle, color: c.text }}>
+                            <Award size={20} style={{ color: '#f59e0b' }} />
+                            플랫폼 현황
+                        </h2>
+                    </div>
+                    <div style={styles.statsGrid}>
+                        {[
+                            { label: '분석 리포트', value: stats.analysis, color: '#10b981' },
+                            { label: '마켓 브리핑', value: stats.brief, color: '#3b82f6' },
+                            { label: '뉴스 기사', value: stats.news, color: '#f59e0b' },
+                            { label: '학습 강의', value: stats.lab, color: '#8b5cf6' },
+                        ].map((stat, i) => (
+                            <div key={i} style={{ ...styles.statBox, borderColor: c.cardBorder }}>
+                                <div style={{ ...styles.statBoxValue, color: stat.color }}>
+                                    <AnimatedCounter value={stat.value} />
+                                </div>
+                                <div style={{ ...styles.statBoxLabel, color: c.textSec }}>{stat.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            </div>
+
+            {/* 뉴스레터 */}
+            <section style={{ marginTop: 40, marginBottom: 40 }}>
                 <NewsletterSubscribe />
             </section>
 
-            {/* Footer */}
-            <footer style={styles.footer}>
-                <div style={styles.footerContent}>
+            {/* 푸터 */}
+            <footer style={{ ...styles.footer, borderColor: c.cardBorder }}>
+                <div style={styles.footerInner}>
                     <div style={styles.footerBrand}>
-                        <Star size={18} style={{ color: '#00f2ff' }} />
-                        <span>TRAN Trading Lab</span>
+                        <Star size={18} style={{ color: '#f59e0b' }} />
+                        <span style={{ color: c.text }}>TRAN Trading Lab</span>
                     </div>
-                    <p style={styles.footerText}>{t('home.footerText')}</p>
+                    <p style={{ color: c.textSec, margin: 0, fontSize: 13 }}>
+                        © 2024 TRAN Trading Lab. 당신의 성공적인 투자를 응원합니다.
+                    </p>
                 </div>
             </footer>
         </div>
@@ -289,368 +277,96 @@ function HomeView({ onNavigate }) {
 }
 
 const styles = {
-    container: {
-        padding: '32px 40px',
-        height: '100%',
-        overflow: 'auto',
-        maxWidth: 1600,
-        margin: '0 auto',
-    },
-    // Hero
-    hero: {
-        position: 'relative',
-        marginBottom: 56,
-        borderRadius: 32,
-        overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.08)',
-        // Deep glass effect
-        background: 'rgba(5, 5, 5, 0.7)',
-        backdropFilter: 'blur(40px)',
-        boxShadow: '0 0 0 1px rgba(255,255,255,0.05) inset', // Inner rim
-    },
-    heroBg: {
-        position: 'absolute',
-        inset: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none',
-        zIndex: 0,
-    },
-    heroGlow1: {
-        position: 'absolute',
-        top: -150,
-        left: '10%',
-        width: 600,
-        height: 600,
-        background: 'radial-gradient(circle, rgba(0,242,255,0.12) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        opacity: 0.8,
-    },
-    heroGlow2: {
-        position: 'absolute',
-        bottom: -150,
-        right: '5%',
-        width: 500,
-        height: 500,
-        background: 'radial-gradient(circle, rgba(189,0,255,0.1) 0%, transparent 70%)',
-        filter: 'blur(80px)',
-        opacity: 0.8,
-    },
-    heroGrid: {
-        position: 'relative',
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: 60, // More breathing room
-        padding: '56px',
-        zIndex: 1,
-    },
-    heroLeft: {
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-    },
-    heroRight: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: 420,
-    },
-    // Right Chart Styles
-    chartContainer: {
-        width: '100%',
-        height: '100%',
-        position: 'relative',
-        overflow: 'hidden',
-    },
-    chartTag: {
-        fontSize: 12,
-        fontWeight: 700,
-        color: 'rgba(255,255,255,0.8)',
-        background: 'rgba(255,255,255,0.08)',
-        padding: '4px 10px',
-        borderRadius: 8,
-        backdropFilter: 'blur(4px)',
-        letterSpacing: '0.05em',
-    },
-    systemSelector: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 20,
-        display: 'flex',
-        gap: 6,
-        background: 'rgba(0,0,0,0.3)',
-        padding: 4,
-        borderRadius: 12,
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.05)',
-    },
-    systemTab: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '6px 12px',
-        borderRadius: 8,
-        fontSize: 11,
-        fontWeight: 600,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-    },
-    systemDot: {
-        width: 6,
-        height: 6,
-        borderRadius: '50%',
-        transition: 'all 0.3s ease',
-    },
-    chartOverlay: {
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-        // Smoother fade out at bottom
-        background: 'linear-gradient(180deg, transparent 0%, transparent 85%, rgba(0,0,0,0.6) 100%)',
-    },
-    // Left Content Styles
-    badgeRow: {
-        display: 'flex',
-        gap: 12,
-        marginBottom: 28,
-    },
-    liveBadge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '6px 12px',
-        background: 'rgba(0,242,255,0.08)',
-        border: '1px solid rgba(0,242,255,0.2)',
-        borderRadius: 100,
-        color: '#00f2ff',
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: '0.08em',
-        boxShadow: '0 0 20px rgba(0,242,255,0.1)',
-        backdropFilter: 'blur(4px)',
-    },
-    liveIndicator: {
-        width: 6,
-        height: 6,
-        borderRadius: '50%',
-        background: '#00f2ff',
-        boxShadow: '0 0 8px #00f2ff',
-        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-    },
+    container: { padding: '24px 32px', height: '100%', overflow: 'auto', maxWidth: 1400, margin: '0 auto' },
+
+    // 히어로
+    hero: { marginBottom: 32 },
+    heroInner: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' },
+    heroText: { maxWidth: 560 },
     badge: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '6px 14px',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 100,
-        color: '#fff',
-        fontSize: 12,
-        fontWeight: 500,
-        backdropFilter: 'blur(4px)',
+        display: 'inline-flex', alignItems: 'center', gap: 6,
+        padding: '6px 12px', background: 'rgba(245, 158, 11, 0.1)',
+        borderRadius: 20, fontSize: 13, fontWeight: 500, color: '#f59e0b', marginBottom: 20
     },
-    heroTitle: {
-        margin: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 4,
+    heroTitle: { fontSize: 40, fontWeight: 700, lineHeight: 1.3, margin: '0 0 20px', letterSpacing: '-1px' },
+    heroGradient: {
+        background: 'linear-gradient(135deg, #3b82f6 0%, #10b981 100%)',
+        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
     },
-    heroTitleMain: {
-        fontSize: 72, // Larger
-        fontWeight: 800,
-        color: '#fff',
-        letterSpacing: '-3px', // Tighter
-        lineHeight: 0.95,
+    heroDesc: { fontSize: 16, lineHeight: 1.7, margin: '0 0 28px' },
+    statsInline: { display: 'flex', alignItems: 'center', gap: 24, marginBottom: 28 },
+    statInline: { display: 'flex', flexDirection: 'column', gap: 2 },
+    statNum: { fontSize: 24, fontWeight: 700, fontFamily: "'Space Grotesk', sans-serif" },
+    statDivider: { width: 1, height: 36, background: 'rgba(148, 163, 184, 0.2)' },
+    heroButtons: { display: 'flex', gap: 12 },
+    btnPrimary: {
+        display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px',
+        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 600,
+        cursor: 'pointer', boxShadow: '0 4px 14px rgba(59, 130, 246, 0.35)'
     },
-    heroTitleGradient: {
-        fontSize: 60,
-        fontWeight: 800,
-        // Premium Tricolor Gradient
-        background: 'linear-gradient(135deg, #fff 10%, #00f2ff 50%, #bd00ff 90%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        letterSpacing: '-1.5px',
-        paddingBottom: 10, // Prevent clip
+    btnSecondary: {
+        display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px',
+        background: 'transparent', border: '1.5px solid', borderRadius: 10,
+        fontSize: 15, fontWeight: 500, cursor: 'pointer'
     },
-    heroDesc: {
-        margin: '28px 0 40px',
-        fontSize: 19,
-        color: 'rgba(255,255,255,0.65)',
-        lineHeight: 1.6,
-        maxWidth: 540,
-        letterSpacing: '-0.01em',
+
+    // 히어로 카드
+    heroCards: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+    miniCard: {
+        display: 'flex', alignItems: 'center', gap: 14, padding: 18,
+        borderRadius: 14, border: '1px solid', cursor: 'pointer',
+        transition: 'all 0.2s ease'
     },
-    statsRow: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 32,
-        padding: '24px 32px',
-        background: 'rgba(255,255,255,0.02)', // lighter glass
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 20,
-        width: 'fit-content',
-        backdropFilter: 'blur(12px)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+    miniIcon: { width: 48, height: 48, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    miniTitle: { fontSize: 15, fontWeight: 600, marginBottom: 2 },
+    miniDesc: { fontSize: 13 },
+
+    // 콘텐츠 그리드
+    contentGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 },
+    section: { padding: 24, borderRadius: 16, border: '1px solid' },
+    sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+    sectionTitle: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 17, fontWeight: 600, margin: 0 },
+    viewAll: { display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer' },
+
+    // 인기 콘텐츠
+    contentList: { display: 'flex', flexDirection: 'column', gap: 12 },
+    contentItem: { padding: 14, borderRadius: 10, border: '1px solid' },
+    contentInfo: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 },
+    hotBadge: { padding: '2px 8px', background: '#ef4444', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 4 },
+    categoryBadge: { fontSize: 12 },
+    contentTitle: { fontSize: 14, fontWeight: 500, marginBottom: 8, lineHeight: 1.4 },
+    contentMeta: { display: 'flex', alignItems: 'center', gap: 4, fontSize: 12 },
+
+    // 빠른 시작
+    quickLinks: { display: 'flex', flexDirection: 'column', gap: 10 },
+    quickLink: {
+        display: 'flex', alignItems: 'center', gap: 12, padding: 14,
+        borderRadius: 10, border: '1px solid', background: 'transparent',
+        cursor: 'pointer', width: '100%', textAlign: 'left', fontSize: 14, fontWeight: 500,
+        transition: 'all 0.2s ease'
     },
-    statItem: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 6,
-    },
-    statValue: {
-        fontSize: 24,
-        fontWeight: 700,
-        color: '#fff',
-        fontFamily: "'JetBrains Mono', 'SF Mono', monospace", // Technical font
-        letterSpacing: '-0.03em',
-    },
-    statLabel: {
-        fontSize: 11,
-        color: 'rgba(255,255,255,0.4)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        fontWeight: 600,
-    },
-    statDivider: {
-        width: 1,
-        height: 36,
-        background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.1), transparent)',
-    },
-    // Modules
-    modulesSection: {
-        marginBottom: 60,
-    },
-    sectionHeader: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 32,
-    },
-    sectionTitle: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        margin: 0,
-        fontSize: 24,
-        fontWeight: 700,
-        color: '#fff',
-        letterSpacing: '-0.02em',
-    },
-    modulesGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: 28,
-    },
-    moduleCard: {
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 24,
-        padding: '28px',
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 24,
-        cursor: 'pointer',
-        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        animation: 'fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        opacity: 0,
-        backdropFilter: 'blur(10px)',
-    },
-    cardGlow: {
-        position: 'absolute',
-        inset: 0,
-        transition: 'opacity 0.4s ease',
-        pointerEvents: 'none',
-        borderRadius: 24,
-    },
-    moduleIcon: {
-        width: 60,
-        height: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 18,
-        border: '1px solid',
-        flexShrink: 0,
-        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-    },
-    moduleContent: {
-        flex: 1,
-        minWidth: 0,
-    },
-    moduleTitle: {
-        margin: '0 0 6px',
-        fontSize: 18,
-        fontWeight: 700,
-        color: '#fff',
-        letterSpacing: '-0.01em',
-    },
-    moduleDesc: {
-        margin: 0,
-        fontSize: 14,
-        color: 'rgba(255,255,255,0.5)',
-        lineHeight: 1.5,
-    },
-    moduleArrow: {
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-    },
-    // Footer
-    footer: {
-        padding: '48px 0',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
-        marginTop: 80,
-    },
-    footerContent: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        gap: 16,
-    },
-    footerBrand: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 10,
-        fontSize: 16,
-        fontWeight: 700,
-        color: 'rgba(255,255,255,0.8)',
-    },
-    footerText: {
-        margin: 0,
-        fontSize: 13,
-        color: 'rgba(255,255,255,0.3)',
-    },
+    quickIcon: { width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+
+    // 통계 그리드
+    statsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 },
+    statBox: { padding: 16, borderRadius: 10, border: '1px solid', textAlign: 'center' },
+    statBoxValue: { fontSize: 28, fontWeight: 700, marginBottom: 4, fontFamily: "'Space Grotesk', sans-serif" },
+    statBoxLabel: { fontSize: 12 },
+
+    // 푸터
+    footer: { padding: '32px 0', borderTop: '1px solid', marginTop: 20 },
+    footerInner: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 },
+    footerBrand: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 16, fontWeight: 600 },
 }
 
-// Global Anims
-const styleSheet = document.createElement('style')
-styleSheet.textContent = `
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.95); }
-}
-@media (max-width: 900px) {
-    .hero-grid-responsive {
-        grid-template-columns: 1fr !important;
-    }
-}
+// 애니메이션
+const sheet = document.createElement('style')
+sheet.textContent = `
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1100px) { .hero-inner { grid-template-columns: 1fr !important; } }
+@media (max-width: 900px) { .content-grid { grid-template-columns: 1fr !important; } }
 `
-if (!document.head.querySelector('#home-view-styles-v3')) {
-    styleSheet.id = 'home-view-styles-v3'
-    document.head.appendChild(styleSheet)
-}
-
-// Inject responsive class manually since we are using inline styles
-styles.heroGrid = {
-    ...styles.heroGrid,
-    '@media (max-width: 900px)': {
-        gridTemplateColumns: '1fr',
-    }
-}
+if (!document.head.querySelector('#home-v3')) { sheet.id = 'home-v3'; document.head.appendChild(sheet) }
 
 export default HomeView
-

@@ -19,7 +19,7 @@ const INTERACTIVE_TOOLS = [
         descEn: 'Complete package with in-depth article and Monte Carlo simulator. Master Kelly Criterion math and practical application.',
         descKo: '심층 분석 문서와 몬테카를로 시뮬레이터를 포함. 켈리 공식의 수학적 원리와 실전 적용을 완벽하게 마스터하세요.',
         icon: Calculator,
-        color: '#00ff88',
+        color: '#3b82f6',
         type: 'bundle',
         subTools: [
             { id: 'article', labelZh: '📖 理论文章', labelEn: '📖 Theory Article', labelKo: '📖 이론 문서', type: 'article' },
@@ -35,7 +35,7 @@ const INTERACTIVE_TOOLS = [
         descEn: 'Calculate optimal position size based on risk percentage and stop loss',
         descKo: '리스크 비율과 스탑로스를 기반으로 최적의 포지션 사이즈 계산',
         icon: Calculator,
-        color: '#00ff88',
+        color: '#3b82f6',
         type: 'position-calc'
     },
     {
@@ -258,7 +258,7 @@ function LabView() {
                     {/* 互动实验工具区块 */}
                     <section style={styles.toolsSection}>
                         <h2 style={styles.sectionHeader}>
-                            <FlaskConical size={18} style={{ color: 'var(--accent-primary)' }} />
+                            <FlaskConical size={18} style={{ color: '#3b82f6' }} />
                             {language === 'ko' ? '인터랙티브 도구' : language === 'zh' ? '互动实验工具' : 'Interactive Tools'}
                         </h2>
                         <div style={styles.toolsGrid}>
@@ -370,7 +370,7 @@ const styles = {
     titleGradient: { background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.7) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
     subtitle: { fontSize: '0.875rem', color: 'var(--text-tertiary)' },
     emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'var(--space-16)', gap: 'var(--space-4)', flex: 1, minHeight: 0 },
-    spinner: { width: 32, height: 32, border: '3px solid rgba(255,255,255,0.1)', borderTopColor: 'var(--accent-primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' },
+    spinner: { width: 32, height: 32, border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' },
     contentWrapper: { display: 'flex', flexDirection: 'column', gap: 'var(--space-8)', overflow: 'auto', flex: 1 },
     toolsSection: { display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' },
     sectionHeader: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-secondary)' },
@@ -395,7 +395,7 @@ const styles = {
     progressBar: { height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' },
     progressFill: { height: '100%', background: 'linear-gradient(90deg, #00d26a, #00ff88)', borderRadius: 2, transition: 'width 0.4s ease' },
     courseFooter: { paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-light)' },
-    startBtn: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-5)', background: 'linear-gradient(135deg, #00d26a 0%, #00ff88 100%)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: '600', color: '#000', cursor: 'pointer', width: '100%', justifyContent: 'center', transition: 'all 0.3s ease', boxShadow: '0 4px 16px rgba(0, 210, 106, 0.3)' },
+    startBtn: { display: 'flex', alignItems: 'center', gap: 'var(--space-2)', padding: 'var(--space-3) var(--space-5)', background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', border: 'none', borderRadius: 'var(--radius-md)', fontSize: '0.875rem', fontWeight: '600', color: '#fff', cursor: 'pointer', width: '100%', justifyContent: 'center', transition: 'all 0.3s ease', boxShadow: '0 4px 16px rgba(59, 130, 246, 0.3)' },
     // Bundle selector styles
     backButton: { display: 'inline-flex', alignItems: 'center', gap: 8, padding: '10px 16px', marginBottom: 24, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#94a3b8', fontSize: '0.9rem', cursor: 'pointer' },
     bundleSelector: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 40px', background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 24 },
