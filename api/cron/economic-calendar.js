@@ -33,91 +33,75 @@ const COUNTRY_FLAGS = {
 
 async function fetchEconomicCalendar() {
     try {
-        // 使用免费的经济日历数据源
+        const FMP_API_KEY = process.env.FMP_API_KEY
+
+        if (!FMP_API_KEY) {
+            console.log('FMP API key not set, using fallback')
+            return getFallbackEvents()
+        }
+
+        // 获取今天和明天的日期
         const today = new Date()
-        const dayOfWeek = today.getDay()
-        const dateOfMonth = today.getDate()
+        const tomorrow = new Date(today)
+        tomorrow.setDate(tomorrow.getDate() + 1)
 
-        // 获取已知的重要经济事件
-        const events = []
+        const fromDate = today.toISOString().split('T')[0]
+        const toDate = tomorrow.toISOString().split('T')[0]
 
-        // 检查是否有重大事件（根据日期规律）
-        // NFP: 每月第一个周五
-        if (dayOfWeek === 5 && dateOfMonth <= 7) {
-            events.push({
-                time: '21:30 (KST)',
-                country: 'US',
-                event: '비농업 고용지수 (NFP)',
-                impact: 'high',
-                description: '美 비농업 부문 신규 고용'
-            })
-            events.push({
-                time: '21:30 (KST)',
-                country: 'US',
-                event: '실업률',
-                impact: 'high'
-            })
+        // FMP Economic Calendar API
+        const res = await fetch(
+            `https://financialmodelingprep.com/api/v3/economic_calendar?from=${fromDate}&to=${toDate}&apikey=${FMP_API_KEY}`
+        )
+        const data = await res.json()
+
+        if (Array.isArray(data) && data.length > 0) {
+            // 过滤重要事件
+            return data
+                .filter(e => e.impact === 'High' || e.impact === 'Medium')
+                .slice(0, 10) // 限制最多10个事件
+                .map(e => ({
+                    time: e.date ? new Date(e.date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : 'TBD',
+                    country: e.country || 'US',
+                    event: e.event,
+                    impact: e.impact?.toLowerCase() || 'medium',
+                    actual: e.actual,
+                    estimate: e.estimate,
+                    previous: e.previous
+                }))
         }
 
-        // CPI: 通常每月10-15日
-        if (dateOfMonth >= 10 && dateOfMonth <= 15) {
-            // 简化：假设每月中旬有CPI
-            if (dayOfWeek >= 2 && dayOfWeek <= 4) { // 周二到周四
-                events.push({
-                    time: '21:30 (KST)',
-                    country: 'US',
-                    event: '소비자물가지수 (CPI)',
-                    impact: 'high'
-                })
-            }
-        }
-
-        // FOMC: 每6周，通常周三
-        // 简化处理 - 实际应该查日历
-
-        // 每周固定事件
-        if (dayOfWeek === 4) { // 周四
-            events.push({
-                time: '21:30 (KST)',
-                country: 'US',
-                event: '신규 실업수당 청구건수',
-                impact: 'medium'
-            })
-        }
-
-        // 亚洲市场开盘提醒 (周一)
-        if (dayOfWeek === 1) {
-            events.push({
-                time: '09:00 (KST)',
-                country: 'KR',
-                event: 'KOSPI 주간 개장',
-                impact: 'low'
-            })
-            events.push({
-                time: '09:00 (KST)',
-                country: 'JP',
-                event: '닛케이 주간 개장',
-                impact: 'low'
-            })
-        }
-
-        // 美股财报季提醒 (1月, 4月, 7月, 10月)
-        const month = today.getMonth() + 1
-        if ([1, 4, 7, 10].includes(month) && dateOfMonth >= 15 && dateOfMonth <= 31) {
-            events.push({
-                time: '장 마감 후',
-                country: 'US',
-                event: '📊 어닝 시즌 진행 중',
-                impact: 'medium',
-                description: '주요 기업 실적 발표 기간'
-            })
-        }
-
-        return events
+        return getFallbackEvents()
     } catch (e) {
-        console.error('Error in calendar:', e.message)
-        return []
+        console.error('Error fetching FMP calendar:', e.message)
+        return getFallbackEvents()
     }
+}
+
+// 备用：基于规则的事件 (API失败时使用)
+function getFallbackEvents() {
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const dateOfMonth = today.getDate()
+    const events = []
+
+    // NFP: 每月第一个周五
+    if (dayOfWeek === 5 && dateOfMonth <= 7) {
+        events.push({ time: '21:30 (KST)', country: 'US', event: '비농업 고용지수 (NFP)', impact: 'high' })
+        events.push({ time: '21:30 (KST)', country: 'US', event: '실업률', impact: 'high' })
+    }
+
+    // 每周四: 初请失业金
+    if (dayOfWeek === 4) {
+        events.push({ time: '21:30 (KST)', country: 'US', event: '신규 실업수당 청구건수', impact: 'medium' })
+    }
+
+    // 周一: 亚洲市场开盘
+    if (dayOfWeek === 1) {
+        events.push({ time: '09:00 (KST)', country: 'KR', event: 'KOSPI 주간 개장', impact: 'low' })
+        events.push({ time: '09:00 (KST)', country: 'JP', event: '닛케이 주간 개장', impact: 'low' })
+    }
+
+    return events
 }
 
 
