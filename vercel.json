@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/economic-calendar",
       "schedule": "30 22 * * *"
+    },
+    {
+      "path": "/api/cron/fear-greed-index",
+      "schedule": "0 23 * * *"
     }
   ],
   "rewrites": [
