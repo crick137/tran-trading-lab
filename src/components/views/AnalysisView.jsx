@@ -4,6 +4,7 @@ import { Clock, User, ArrowRight, X, ChevronRight, Eye, BookOpen, TrendingUp, Ca
 import ArticleDetailView from './ArticleDetailView'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
+import { xauusdGoldAnalysisArticle } from '../../data/articles/xauusdGoldAnalysis'
 
 function AnalysisView({ directArticleId, onClearDirectArticle }) {
     const { t, language } = useI18n()
@@ -13,21 +14,49 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
     const [analysisItems, setAnalysisItems] = useState([])
     const [loading, setLoading] = useState(true)
 
+    // 硬编码的文章ID列表（在ArticleDetailView中有完整内容）
+    const hardcodedArticles = ['howard-marks-bubble', 'xauusd-gold-analysis']
+
+    // Generate static articles from hardcoded data
+    const getStaticArticles = () => {
+        const staticArticles = []
+        const currentLang = language || 'ko'
+
+        // Add XAUUSD Gold Analysis article
+        const xauusdData = xauusdGoldAnalysisArticle[currentLang] || xauusdGoldAnalysisArticle.ko
+        staticArticles.push({
+            id: 'xauusd-gold-analysis',
+            title: xauusdData.title,
+            summary: xauusdData.subtitle,
+            category: xauusdData.category,
+            author: xauusdData.author,
+            read_time: xauusdData.readTime,
+            image_url: xauusdGoldAnalysisArticle.chartImage,
+            is_featured: true,
+            created_at: new Date().toISOString(),
+            is_published: true
+        })
+
+        return staticArticles
+    }
+
     useEffect(() => {
         const loadAnalysis = async () => {
             try {
                 const data = await db.getAll(TABLES.ANALYSIS, { orderBy: 'created_at', filters: { is_published: true } })
-                setAnalysisItems(data || [])
+                // Combine database articles with static hardcoded articles
+                const staticArticles = getStaticArticles()
+                const combinedItems = [...staticArticles, ...(data || [])]
+                setAnalysisItems(combinedItems)
             } catch (err) {
                 console.error('Failed to load analysis:', err)
+                // Even if DB fails, still show static articles
+                setAnalysisItems(getStaticArticles())
             }
             setLoading(false)
         }
         loadAnalysis()
-    }, [])
-
-    // 硬编码的文章ID列表（在ArticleDetailView中有完整内容）
-    const hardcodedArticles = ['howard-marks-bubble']
+    }, [language])
 
     // 处理直接通过 URL 打开文章
     useEffect(() => {

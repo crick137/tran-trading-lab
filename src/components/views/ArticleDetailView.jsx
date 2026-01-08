@@ -7,7 +7,9 @@ import CommentPanel from '../CommentPanel'
 import ShareButtons from '../ShareButtons'
 import RelatedArticles from '../RelatedArticles'
 import SEO from '../SEO'
+import VotingPoll from '../VotingPoll'
 import { howardMarksBubbleArticle } from '../../data/articles/howardMarksBubble'
+import { xauusdGoldAnalysisArticle } from '../../data/articles/xauusdGoldAnalysis'
 
 function ArticleDetailView({ articleId, onBack, initialData }) {
     const { user, isAuthenticated } = useAppState()
@@ -95,6 +97,26 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                     tags: ["Market Cycle", "AI Bubble", "Investing", "Oaktree Capital"],
                     image_url: "/ai_bubble.png",
                     content: localizedData.content
+                })
+            } else if (articleId === 'xauusd-gold-analysis') {
+                const currentLang = language || 'ko'
+                const localizedData = xauusdGoldAnalysisArticle[currentLang] || xauusdGoldAnalysisArticle.ko
+
+                setArticle({
+                    id: articleId,
+                    title: localizedData.title,
+                    subtitle: localizedData.subtitle,
+                    author: {
+                        name: "TranTradingLab",
+                        avatar: "/tran-logo.png",
+                        role: localizedData.author
+                    },
+                    date: new Date().toLocaleDateString(currentLang === 'ko' ? 'ko-KR' : currentLang === 'zh' ? 'zh-CN' : 'en-US'),
+                    readTime: localizedData.readTime,
+                    tags: ["XAUUSD", "Gold", "Technical Analysis", "Trading Strategy"],
+                    image_url: xauusdGoldAnalysisArticle.chartImage,
+                    content: localizedData.content,
+                    poll: xauusdGoldAnalysisArticle.poll
                 })
             } else {
                 setArticle({
@@ -244,6 +266,9 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
         const elements = []
         let inList = false
         let listItems = []
+        let inTable = false
+        let tableRows = []
+        let tableHeaders = []
 
         const processInlineStyles = (text) => {
             // Handle bold text
@@ -267,13 +292,70 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             }
         }
 
+        const flushTable = () => {
+            if (tableRows.length > 0 || tableHeaders.length > 0) {
+                elements.push(
+                    <div key={`table-${elements.length}`} style={styles.tableWrapper}>
+                        <table style={styles.table}>
+                            {tableHeaders.length > 0 && (
+                                <thead>
+                                    <tr style={styles.tableHeaderRow}>
+                                        {tableHeaders.map((cell, i) => (
+                                            <th key={i} style={styles.th} dangerouslySetInnerHTML={{ __html: processInlineStyles(cell) }} />
+                                        ))}
+                                    </tr>
+                                </thead>
+                            )}
+                            <tbody>
+                                {tableRows.map((row, rowIndex) => (
+                                    <tr key={rowIndex} style={rowIndex % 2 === 0 ? styles.tableRowEven : styles.tableRow}>
+                                        {row.map((cell, cellIndex) => (
+                                            <td key={cellIndex} style={styles.td} dangerouslySetInnerHTML={{ __html: processInlineStyles(cell) }} />
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+                tableRows = []
+                tableHeaders = []
+                inTable = false
+            }
+        }
+
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i]
             const trimmedLine = line.trim()
 
+            // Detect table rows (starts and ends with |)
+            if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+                flushList()
+                const cells = trimmedLine.slice(1, -1).split('|').map(c => c.trim())
+
+                // Check if this is a separator row (|---|---|)
+                if (cells.every(cell => cell.match(/^[-:]+$/))) {
+                    // This is a separator, skip it
+                    continue
+                }
+
+                if (!inTable) {
+                    // First table row is header
+                    inTable = true
+                    tableHeaders = cells
+                } else {
+                    tableRows.push(cells)
+                }
+                continue
+            } else if (inTable) {
+                // End of table
+                flushTable()
+            }
+
             // Horizontal rule
             if (trimmedLine === '---') {
                 flushList()
+                flushTable()
                 elements.push(<hr key={i} style={styles.hr} />)
                 continue
             }
@@ -281,16 +363,19 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             // Headers
             if (trimmedLine.startsWith('### ')) {
                 flushList()
+                flushTable()
                 elements.push(<h3 key={i} style={styles.h3}>{trimmedLine.replace('### ', '')}</h3>)
                 continue
             }
             if (trimmedLine.startsWith('## ')) {
                 flushList()
+                flushTable()
                 elements.push(<h2 key={i} style={styles.h2}>{trimmedLine.replace('## ', '')}</h2>)
                 continue
             }
             if (trimmedLine.startsWith('# ')) {
                 flushList()
+                flushTable()
                 elements.push(<h1 key={i} style={styles.h1}>{trimmedLine.replace('# ', '')}</h1>)
                 continue
             }
@@ -298,6 +383,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             // Blockquote
             if (trimmedLine.startsWith('> ')) {
                 flushList()
+                flushTable()
                 const quoteText = trimmedLine.replace('> ', '')
                 elements.push(
                     <blockquote key={i} style={styles.blockquote}>
@@ -309,6 +395,7 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
 
             // List items
             if (trimmedLine.startsWith('- ') || trimmedLine.match(/^\d+\.\s/)) {
+                flushTable()
                 inList = true
                 const itemText = trimmedLine.replace(/^-\s|^\d+\.\s/, '')
                 listItems.push(itemText)
@@ -318,17 +405,20 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
             // Empty line
             if (trimmedLine === '') {
                 flushList()
+                flushTable()
                 continue
             }
 
             // Regular paragraph
             flushList()
+            flushTable()
             elements.push(
                 <p key={i} style={styles.p} dangerouslySetInnerHTML={{ __html: processInlineStyles(trimmedLine) }} />
             )
         }
 
         flushList()
+        flushTable()
         return elements
     }
 
@@ -438,6 +528,14 @@ function ArticleDetailView({ articleId, onBack, initialData }) {
                 <div style={styles.content}>
                     {renderMarkdown(article.content)}
                 </div>
+
+                {/* Voting Poll for articles that have it */}
+                {article.poll && (
+                    <VotingPoll
+                        pollConfig={article.poll}
+                        articleId={article.id}
+                    />
+                )}
 
                 <footer style={styles.footer}>
                     <div style={styles.actions}>
@@ -697,6 +795,39 @@ const styles = {
         height: 1,
         background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
         margin: '40px 0',
+    },
+    tableWrapper: {
+        margin: '24px 0',
+        overflowX: 'auto',
+        borderRadius: 12,
+        border: '1px solid rgba(255,255,255,0.1)',
+    },
+    table: {
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: 14,
+    },
+    tableHeaderRow: {
+        background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%)',
+    },
+    th: {
+        padding: '14px 16px',
+        textAlign: 'left',
+        fontWeight: 600,
+        color: '#60a5fa',
+        borderBottom: '1px solid rgba(255,255,255,0.15)',
+        whiteSpace: 'nowrap',
+    },
+    tableRow: {
+        background: 'rgba(255,255,255,0.02)',
+    },
+    tableRowEven: {
+        background: 'rgba(255,255,255,0.04)',
+    },
+    td: {
+        padding: '12px 16px',
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        color: 'rgba(255,255,255,0.85)',
     },
     originalAuthor: {
         marginTop: 20,
