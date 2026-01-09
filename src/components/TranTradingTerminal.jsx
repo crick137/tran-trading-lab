@@ -37,6 +37,7 @@ function TranTradingTerminal({ initialView }) {
         // 根据 URL 路径设置初始视图
         const path = window.location.pathname
         if (initialView === 'admin-sentiment') return 'admin-sentiment'
+        if (initialView === 'curated-article') return 'curated-article'
         if (articleId || initialView === 'article-detail') return 'analysis'
         if (path === '/dashboard') return 'dashboard'
         if (path === '/news') return 'news'
@@ -45,6 +46,7 @@ function TranTradingTerminal({ initialView }) {
         if (path === '/systems') return 'systems'
         if (path === '/analysis') return 'analysis'
         if (path === '/curated') return 'curated'
+        if (path.startsWith('/curated/')) return 'curated-article'
         if (path === '/commentary') return 'commentary'
         return 'home'
     })
@@ -150,6 +152,7 @@ function TranTradingTerminal({ initialView }) {
             case 'analysis': return <AnalysisView directArticleId={directArticleId} onClearDirectArticle={() => setDirectArticleId(null)} />
             case 'news': return <NewsView />
             case 'curated': return <CuratedArticlesView />
+            case 'curated-article': return <CuratedArticlesView directArticleId={articleId} onBack={() => navigate('/curated')} />
             case 'commentary': return <NewsCommentaryView />
             case 'lab': return <LabView />
             case 'pricing': return <PricingView />

@@ -43,6 +43,7 @@ function App() {
                                 {/* Article Routes */}
                                 <Route path="/analysis/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
                                 <Route path="/article/:articleId" element={<TranTradingTerminal initialView="article-detail" />} />
+                                <Route path="/curated/:articleId" element={<TranTradingTerminal initialView="curated-article" />} />
 
                                 {/* Content Library */}
                                 <Route path="/column" element={<ContentLibrary />} />

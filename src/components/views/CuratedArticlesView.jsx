@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Clock, User, ExternalLink, BookOpen, Globe } from 'lucide-react'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
 import { spaceEconomyArticle } from '../../data/articles/spaceEconomy'
 import SpaceEconomyArticle from '../experiments/SpaceEconomyArticle'
 
-function CuratedArticlesView({ onBack }) {
+function CuratedArticlesView({ directArticleId, onBack }) {
+    const navigate = useNavigate()
     const { t, language } = useI18n()
     const [articles, setArticles] = useState([])
     const [loading, setLoading] = useState(true)
-    const [selectedArticle, setSelectedArticle] = useState(null)
 
     // 硬编码的精选文章
     const getStaticArticles = () => {
@@ -57,47 +58,65 @@ function CuratedArticlesView({ onBack }) {
         })
     }
 
+    // 处理返回按钮
+    const handleBack = () => {
+        if (onBack) {
+            onBack()
+        } else {
+            navigate('/curated')
+        }
+    }
+
+    // 处理文章点击 - 导航到独立 URL
+    const handleArticleClick = (article) => {
+        navigate(`/curated/${article.id}`)
+    }
+
     if (loading) return (
         <div style={styles.loading}>
             <div style={styles.spinner} />
         </div>
     )
 
-    if (selectedArticle) {
+    // 直接通过 URL 打开特定文章
+    if (directArticleId) {
         // Space Economy 文章使用专门的组件
-        if (selectedArticle.id === 'space-economy-2026') {
-            return <SpaceEconomyArticle onBack={() => setSelectedArticle(null)} />
+        if (directArticleId === 'space-economy-2026') {
+            return <SpaceEconomyArticle onBack={handleBack} />
         }
-
-        return (
-            <div style={styles.container}>
-                <button style={styles.backBtn} onClick={() => setSelectedArticle(null)}>
-                    <ArrowLeft size={18} />
-                    <span>목록으로</span>
-                </button>
-
-                <article style={styles.article}>
-                    {selectedArticle.image_url && (
-                        <img src={selectedArticle.image_url} alt="" style={styles.heroImage} />
-                    )}
-                    <header style={styles.articleHeader}>
-                        <div style={styles.badge}>📚 번역 아티클</div>
-                        <h1 style={styles.articleTitle}>{selectedArticle.title}</h1>
-                        <div style={styles.meta}>
-                            <span><User size={14} /> {selectedArticle.author}</span>
-                            <span><Clock size={14} /> {selectedArticle.read_time}</span>
-                            <span>{formatDate(selectedArticle.created_at)}</span>
-                        </div>
-                    </header>
-                    <div
-                        style={styles.content}
-                        dangerouslySetInnerHTML={{ __html: selectedArticle.content?.replace(/\n/g, '<br/>') }}
-                    />
-                </article>
-            </div>
-        )
+        // 其他文章...查找并显示
+        const article = articles.find(a => a.id === directArticleId)
+        if (article) {
+            return (
+                <div style={styles.container}>
+                    <button style={styles.backBtn} onClick={handleBack}>
+                        <ArrowLeft size={18} />
+                        <span>목록으로</span>
+                    </button>
+                    <article style={styles.article}>
+                        {article.image_url && (
+                            <img src={article.image_url} alt="" style={styles.heroImage} />
+                        )}
+                        <header style={styles.articleHeader}>
+                            <div style={styles.badge}>📚 精选文章</div>
+                            <h1 style={styles.articleTitle}>{article.title}</h1>
+                            <div style={styles.meta}>
+                                <span><User size={14} /> {article.author}</span>
+                                <span><Clock size={14} /> {article.read_time}</span>
+                                <span>{formatDate(article.created_at)}</span>
+                            </div>
+                        </header>
+                        <div
+                            style={styles.content}
+                            dangerouslySetInnerHTML={{ __html: article.content?.replace(/\n/g, '<br/>') }}
+                        />
+                    </article>
+                </div>
+            )
+        }
     }
 
+    // 文章列表视图
     return (
         <div style={styles.container}>
             <header style={styles.header}>
@@ -119,13 +138,13 @@ function CuratedArticlesView({ onBack }) {
                         <div
                             key={article.id}
                             style={styles.card}
-                            onClick={() => setSelectedArticle(article)}
+                            onClick={() => handleArticleClick(article)}
                         >
                             {article.image_url && (
                                 <img src={article.image_url} alt="" style={styles.cardImage} />
                             )}
                             <div style={styles.cardContent}>
-                                <div style={styles.cardBadge}>📚 번역</div>
+                                <div style={styles.cardBadge}>✨ 精选</div>
                                 <h3 style={styles.cardTitle}>{article.title}</h3>
                                 <p style={styles.cardSummary}>{article.summary}</p>
                                 <div style={styles.cardMeta}>
