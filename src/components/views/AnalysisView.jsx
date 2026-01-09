@@ -22,7 +22,7 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
         const staticArticles = []
         const currentLang = language || 'ko'
 
-        // Add XAUUSD Gold Analysis article
+        // Add XAUUSD Gold Analysis article (Featured for analysis section)
         const xauusdData = xauusdGoldAnalysisArticle[currentLang] || xauusdGoldAnalysisArticle.ko
         staticArticles.push({
             id: 'xauusd-gold-analysis',
@@ -81,11 +81,21 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
         }
     }, [directArticleId, selectedAnalysis])
 
+    // Category IDs must match the article's category field which varies by language
+    const getCategoryId = (type) => {
+        const categoryMap = {
+            technical: { ko: '기술적 분석', zh: '技术分析', en: 'Technical Analysis' },
+            onchain: { ko: '온체인 분석', zh: '链上分析', en: 'On-chain Analysis' },
+            market: { ko: '시장 분석', zh: '市场分析', en: 'Market Analysis' },
+        }
+        return categoryMap[type]?.[language] || categoryMap[type]?.en
+    }
+
     const categories = [
         { id: 'all', label: t('views.brief.all') },
-        { id: '技术分析', label: language === 'ko' ? '기술적 분석' : language === 'zh' ? '技术分析' : 'Technical' },
-        { id: '链上分析', label: language === 'ko' ? '온체인 분석' : language === 'zh' ? '链上分析' : 'On-chain' },
-        { id: '市场分析', label: language === 'ko' ? '시장 분석' : language === 'zh' ? '市场分析' : 'Market' },
+        { id: getCategoryId('technical'), label: getCategoryId('technical') },
+        { id: getCategoryId('onchain'), label: getCategoryId('onchain') },
+        { id: getCategoryId('market'), label: getCategoryId('market') },
     ]
 
     const getDateLocale = () => {
@@ -110,6 +120,7 @@ function AnalysisView({ directArticleId, onClearDirectArticle }) {
     const isHardcodedArticle = (id) => hardcodedArticles.includes(id)
 
     if (selectedAnalysis) {
+
         return (
             <ArticleDetailView
                 articleId={selectedAnalysis.id}

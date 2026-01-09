@@ -14,9 +14,10 @@ function Sidebar({ navItems, activeView, onNavClick, collapsed, onToggle }) {
         { id: 'dashboard', label: 'Overview', labelKr: '대시보드', icon: LayoutDashboard, shortcut: '⌘1' },
         { id: 'analysis', label: 'Analysis', labelKr: '분석', icon: LineChart, shortcut: '⌘2', isPro: true },
         { id: 'news', label: 'News', labelKr: '뉴스', icon: Newspaper, shortcut: '⌘3' },
+        { id: 'curated', label: 'Curated', labelKr: '정선 아티클', icon: Sparkles, shortcut: '⌘C', isHot: true },
         { id: 'lab', label: 'Research', labelKr: '연구', icon: FlaskConical, shortcut: '⌘4', isPro: true },
         { id: 'column', label: 'Column', labelKr: '칼럼', icon: BookOpen, shortcut: '⌘L' },
-        { id: 'systems', label: 'Systems', labelKr: '시스템', icon: Cpu, shortcut: '⌘5', isHot: true },
+        { id: 'systems', label: 'Systems', labelKr: '시스템', icon: Cpu, shortcut: '⌘5' },
         { id: 'about', label: 'About', labelKr: '소개', icon: Globe, shortcut: '⌘6' },
     ]
 

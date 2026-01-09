@@ -2,12 +2,32 @@ import React, { useState, useEffect } from 'react'
 import { ArrowLeft, Clock, User, ExternalLink, BookOpen, Globe } from 'lucide-react'
 import { db, TABLES } from '../../lib/supabase'
 import { useI18n } from '../../hooks/useI18n'
+import { spaceEconomyArticle } from '../../data/articles/spaceEconomy'
+import SpaceEconomyArticle from '../experiments/SpaceEconomyArticle'
 
 function CuratedArticlesView({ onBack }) {
     const { t, language } = useI18n()
     const [articles, setArticles] = useState([])
     const [loading, setLoading] = useState(true)
     const [selectedArticle, setSelectedArticle] = useState(null)
+
+    // 硬编码的精选文章
+    const getStaticArticles = () => {
+        const currentLang = language || 'ko'
+        const spaceData = spaceEconomyArticle[currentLang] || spaceEconomyArticle.ko
+        return [{
+            id: 'space-economy-2026',
+            title: spaceData.title,
+            summary: spaceData.subtitle,
+            category: '精选文章',
+            author: spaceData.author,
+            read_time: spaceData.readTime,
+            image_url: spaceEconomyArticle.heroImage,
+            is_featured: true,
+            created_at: new Date().toISOString(),
+            is_published: true
+        }]
+    }
 
     useEffect(() => {
         const loadArticles = async () => {
@@ -17,14 +37,18 @@ function CuratedArticlesView({ onBack }) {
                     orderBy: 'created_at',
                     filter: { category: '精选翻译', is_published: true }
                 })
-                setArticles(data || [])
+                // 合并硬编码文章和数据库文章
+                const staticArticles = getStaticArticles()
+                setArticles([...staticArticles, ...(data || [])])
             } catch (err) {
                 console.error('Failed to load curated articles:', err)
+                // 即使数据库失败，也显示硬编码文章
+                setArticles(getStaticArticles())
             }
             setLoading(false)
         }
         loadArticles()
-    }, [])
+    }, [language])
 
     const formatDate = (dateStr) => {
         const date = new Date(dateStr)
@@ -40,6 +64,11 @@ function CuratedArticlesView({ onBack }) {
     )
 
     if (selectedArticle) {
+        // Space Economy 文章使用专门的组件
+        if (selectedArticle.id === 'space-economy-2026') {
+            return <SpaceEconomyArticle onBack={() => setSelectedArticle(null)} />
+        }
+
         return (
             <div style={styles.container}>
                 <button style={styles.backBtn} onClick={() => setSelectedArticle(null)}>
