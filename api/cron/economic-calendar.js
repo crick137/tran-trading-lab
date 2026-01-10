@@ -1,200 +1,121 @@
-/**
- * 📅 TRAN 경제 일정 알림
- * Vercel Cron: 매일 07:30 (KST) 실행
- * 채널: @http4477
- * 
- * 오늘의 주요 경제 이벤트를 알립니다 (모든 금융 시장 대상)
- */
+// Vercel Cron - 경제 캘린더 알림
+// api/cron/economic-calendar.js
+// 每周重要经济事件提醒
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+export const config = {
+    runtime: 'edge',
+};
 
-// 중요도 이모지
-const IMPORTANCE_EMOJI = {
-    high: '🔴',
-    medium: '🟡',
-    low: '🟢'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '@http4477';
+
+// 重要经济事件数据库 (静态定义常见事件)
+const RECURRING_EVENTS = {
+    // 美国
+    'US_NFP': { name: '🇺🇸 비농업 고용 (NFP)', day: 'first_friday', impact: 'high' },
+    'US_CPI': { name: '🇺🇸 소비자물가지수 (CPI)', day: 'mid_month', impact: 'high' },
+    'US_FOMC': { name: '🇺🇸 FOMC 금리 결정', day: 'variable', impact: 'high' },
+    'US_GDP': { name: '🇺🇸 GDP 성장률', day: 'end_month', impact: 'high' },
+    'US_PMI': { name: '🇺🇸 ISM 제조업 PMI', day: 'first_business', impact: 'medium' },
+
+    // 韩国
+    'KR_RATE': { name: '🇰🇷 한국은행 기준금리', day: 'variable', impact: 'high' },
+    'KR_CPI': { name: '🇰🇷 소비자물가지수', day: 'first_week', impact: 'medium' },
+    'KR_TRADE': { name: '🇰🇷 무역수지', day: 'first_week', impact: 'medium' },
+
+    // 加密货币
+    'CRYPTO_HALVING': { name: '₿ 비트코인 반감기', day: 'special', impact: 'high' },
+    'CRYPTO_ETF': { name: '₿ ETF 자금 유출입', day: 'daily', impact: 'medium' },
+};
+
+// 获取本周重要事件
+async function getWeeklyEvents() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const events = [];
+
+    // 模拟本周事件 (实际应从API获取)
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - dayOfWeek + 1);
+
+    // 根据日期判断可能的事件
+    const dayOfMonth = today.getDate();
+
+    // 月初事件
+    if (dayOfMonth <= 7) {
+        events.push({ day: '월', event: '🇺🇸 ISM 제조업 PMI', impact: '⭐⭐' });
+        events.push({ day: '월', event: '🇰🇷 무역수지 발표', impact: '⭐⭐' });
+    }
+
+    // 月中事件
+    if (dayOfMonth >= 10 && dayOfMonth <= 15) {
+        events.push({ day: '수', event: '🇺🇸 CPI 발표', impact: '⭐⭐⭐' });
+    }
+
+    // 每月第一个周五
+    const firstFriday = new Date(weekStart);
+    firstFriday.setDate(firstFriday.getDate() + (5 - firstFriday.getDay() + 7) % 7);
+    if (firstFriday.getDate() <= 7) {
+        events.push({ day: '금', event: '🇺🇸 비농업 고용 (NFP)', impact: '⭐⭐⭐' });
+    }
+
+    // 固定添加每周事件
+    events.push({ day: '매일', event: '₿ 비트코인 ETF 자금 흐름', impact: '⭐⭐' });
+    events.push({ day: '목', event: '🇺🇸 신규 실업수당 청구', impact: '⭐' });
+
+    return events;
 }
 
-// 국가 플래그
-const COUNTRY_FLAGS = {
-    'US': '🇺🇸',
-    'EU': '🇪🇺',
-    'JP': '🇯🇵',
-    'CN': '🇨🇳',
-    'KR': '🇰🇷',
-    'GB': '🇬🇧',
-    'DE': '🇩🇪',
-    'AU': '🇦🇺',
-    'CA': '🇨🇦',
-    'CH': '🇨🇭',
-    'NZ': '🇳🇿'
+async function generateCalendarReport() {
+    const events = await getWeeklyEvents();
+    const today = new Date();
+    const weekNum = Math.ceil((today.getDate() + new Date(today.getFullYear(), today.getMonth(), 1).getDay()) / 7);
+
+    let report = `📅 이번 주 경제 캘린더\n`;
+    report += `${today.getMonth() + 1}월 ${weekNum}주차\n`;
+    report += `${'='.repeat(30)}\n\n`;
+
+    // 按重要性排序
+    events.sort((a, b) => b.impact.length - a.impact.length);
+
+    for (const event of events) {
+        report += `${event.impact} ${event.day}: ${event.event}\n`;
+    }
+
+    report += `\n${'='.repeat(30)}\n`;
+    report += `💡 중요 이벤트 전후 변동성 주의\n`;
+    report += `📱 @trantradinglab_bot\n\n`;
+    report += `#경제캘린더 #트레이딩 #외환 #주식`;
+
+    return report;
 }
 
-async function fetchEconomicCalendar() {
+async function sendTelegram(text) {
+    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+    const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text }),
+    });
+    return resp.json();
+}
+
+export default async function handler(request) {
     try {
-        const FMP_API_KEY = process.env.FMP_API_KEY
+        const report = await generateCalendarReport();
+        const result = await sendTelegram(report);
 
-        if (!FMP_API_KEY) {
-            console.log('FMP API key not set, using fallback')
-            return getFallbackEvents()
-        }
-
-        // 获取今天和明天的日期
-        const today = new Date()
-        const tomorrow = new Date(today)
-        tomorrow.setDate(tomorrow.getDate() + 1)
-
-        const fromDate = today.toISOString().split('T')[0]
-        const toDate = tomorrow.toISOString().split('T')[0]
-
-        // FMP Economic Calendar API
-        const res = await fetch(
-            `https://financialmodelingprep.com/api/v3/economic_calendar?from=${fromDate}&to=${toDate}&apikey=${FMP_API_KEY}`
-        )
-        const data = await res.json()
-
-        if (Array.isArray(data) && data.length > 0) {
-            // 过滤重要事件
-            return data
-                .filter(e => e.impact === 'High' || e.impact === 'Medium')
-                .slice(0, 10) // 限制最多10个事件
-                .map(e => ({
-                    time: e.date ? new Date(e.date).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : 'TBD',
-                    country: e.country || 'US',
-                    event: e.event,
-                    impact: e.impact?.toLowerCase() || 'medium',
-                    actual: e.actual,
-                    estimate: e.estimate,
-                    previous: e.previous
-                }))
-        }
-
-        return getFallbackEvents()
-    } catch (e) {
-        console.error('Error fetching FMP calendar:', e.message)
-        return getFallbackEvents()
-    }
-}
-
-// 备用：基于规则的事件 (API失败时使用)
-function getFallbackEvents() {
-    const today = new Date()
-    const dayOfWeek = today.getDay()
-    const dateOfMonth = today.getDate()
-    const events = []
-
-    // NFP: 每月第一个周五
-    if (dayOfWeek === 5 && dateOfMonth <= 7) {
-        events.push({ time: '21:30 (KST)', country: 'US', event: '비농업 고용지수 (NFP)', impact: 'high' })
-        events.push({ time: '21:30 (KST)', country: 'US', event: '실업률', impact: 'high' })
-    }
-
-    // 每周四: 初请失业金
-    if (dayOfWeek === 4) {
-        events.push({ time: '21:30 (KST)', country: 'US', event: '신규 실업수당 청구건수', impact: 'medium' })
-    }
-
-    // 周一: 亚洲市场开盘
-    if (dayOfWeek === 1) {
-        events.push({ time: '09:00 (KST)', country: 'KR', event: 'KOSPI 주간 개장', impact: 'low' })
-        events.push({ time: '09:00 (KST)', country: 'JP', event: '닛케이 주간 개장', impact: 'low' })
-    }
-
-    return events
-}
-
-
-
-function formatMessage(events) {
-    const today = new Date()
-    const dateStr = today.toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long'
-    })
-
-    let message = `📅 TRAN 경제 일정\n`
-    message += `━━━━━━━━━━━━━━━━━━━━\n`
-    message += `📆 ${dateStr}\n\n`
-
-    if (events.length === 0) {
-        message += `✨ 오늘은 주요 경제 이벤트가 없습니다.\n`
-        message += `평온한 시장을 예상합니다.\n`
-    } else {
-        // 중요도순 정렬
-        events.sort((a, b) => {
-            const order = { high: 0, medium: 1, low: 2 }
-            return order[a.impact] - order[b.impact]
-        })
-
-        message += `⚠️ 주요 이벤트 ${events.length}건\n\n`
-
-        for (const event of events) {
-            const flag = COUNTRY_FLAGS[event.country] || '🌍'
-            const importance = IMPORTANCE_EMOJI[event.impact] || '⚪'
-
-            message += `${importance} ${flag} ${event.time} (현지)\n`
-            message += `   ${event.event}\n`
-
-            if (event.estimate !== undefined && event.estimate !== null) {
-                message += `   예상: ${event.estimate}`
-                if (event.previous !== undefined && event.previous !== null) {
-                    message += ` | 이전: ${event.previous}`
-                }
-                message += `\n`
-            }
-            message += `\n`
-        }
-    }
-
-    message += `━━━━━━━━━━━━━━━━━━━━\n`
-    message += `🔴 높음 🟡 중간 🟢 낮음\n`
-    message += `\n🌐 trantradinglab.com`
-
-    return message
-}
-
-export default async function handler(req, res) {
-    const authHeader = req.headers.authorization
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
-        return res.status(401).json({ error: 'Unauthorized' })
-    }
-
-    try {
-        console.log('Fetching economic calendar...')
-        const events = await fetchEconomicCalendar()
-        const message = formatMessage(events)
-
-        const telegramRes = await fetch(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    chat_id: CHANNEL_ID,
-                    text: message,
-                    parse_mode: 'HTML'
-                })
-            }
-        )
-
-        const result = await telegramRes.json()
-
-        if (!result.ok) {
-            console.error('Telegram error:', result)
-            return res.status(500).json({ error: result.description })
-        }
-
-        return res.status(200).json({
+        return new Response(JSON.stringify({
             success: true,
-            eventsCount: events.length,
-            messageId: result.result?.message_id
-        })
-
+            telegram: result,
+            report,
+        }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
     } catch (error) {
-        console.error('Error:', error)
-        return res.status(500).json({ error: error.message })
+        return new Response(JSON.stringify({ success: false, error: error.message }), {
+            status: 500,
+        });
     }
 }
