@@ -1,4 +1,6 @@
 import { siteStats } from "@/lib/site-stats";
+import Link from "next/link";
+import { Send } from "lucide-react";
 
 export function ArticleCTA() {
     return (
