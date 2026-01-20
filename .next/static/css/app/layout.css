@@ -570,6 +570,9 @@ video {
 .top-full{
   top: 100%;
 }
+.-top-4{
+  top: -1rem;
+}
 .z-10{
   z-index: 10;
 }
@@ -586,6 +589,10 @@ video {
 .my-12{
   margin-top: 3rem;
   margin-bottom: 3rem;
+}
+.my-16{
+  margin-top: 4rem;
+  margin-bottom: 4rem;
 }
 .mb-1{
   margin-bottom: 0.25rem;
@@ -824,6 +831,9 @@ video {
 .max-w-5xl{
   max-width: 64rem;
 }
+.max-w-lg{
+  max-width: 32rem;
+}
 .flex-1{
   flex: 1 1 0%;
 }
@@ -1022,6 +1032,13 @@ video {
 .border-gold\/50{
   border-color: rgb(212 175 55 / 0.5);
 }
+.border-gold\/20{
+  border-color: rgb(212 175 55 / 0.2);
+}
+.border-gold{
+  --tw-border-opacity: 1;
+  border-color: rgb(212 175 55 / var(--tw-border-opacity, 1));
+}
 .bg-background{
   background-color: hsl(var(--background));
 }
@@ -1090,6 +1107,9 @@ video {
 }
 .bg-muted\/20{
   background-color: hsl(var(--muted) / 0.2);
+}
+.bg-gold\/5{
+  background-color: rgb(212 175 55 / 0.05);
 }
 .bg-gradient-to-b{
   background-image: linear-gradient(to bottom, var(--tw-gradient-stops));
@@ -1167,6 +1187,9 @@ video {
 }
 .to-gold\/5{
   --tw-gradient-to: rgb(212 175 55 / 0.05) var(--tw-gradient-to-position);
+}
+.to-card\/50{
+  --tw-gradient-to: hsl(var(--card) / 0.5) var(--tw-gradient-to-position);
 }
 .object-cover{
   -o-object-fit: cover;
@@ -1385,6 +1408,9 @@ video {
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity, 1));
 }
+.text-muted-foreground\/30{
+  color: hsl(var(--muted-foreground) / 0.3);
+}
 .antialiased{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -1407,6 +1433,10 @@ video {
 }
 .shadow-black\/20{
   --tw-shadow-color: rgb(0 0 0 / 0.2);
+  --tw-shadow: var(--tw-shadow-colored);
+}
+.shadow-gold\/10{
+  --tw-shadow-color: rgb(212 175 55 / 0.1);
   --tw-shadow: var(--tw-shadow-colored);
 }
 .blur-3xl{
@@ -1741,6 +1771,10 @@ code {
   --tw-shadow-color: rgb(212 175 55 / 0.3);
   --tw-shadow: var(--tw-shadow-colored);
 }
+.hover\:shadow-gold\/20:hover{
+  --tw-shadow-color: rgb(212 175 55 / 0.2);
+  --tw-shadow: var(--tw-shadow-colored);
+}
 .focus\:border-gold\/50:focus{
   border-color: rgb(212 175 55 / 0.5);
 }
@@ -1890,6 +1924,10 @@ code {
 
   .md\:items-start{
     align-items: flex-start;
+  }
+
+  .md\:text-left{
+    text-align: left;
   }
 }
 @media (min-width: 1024px){

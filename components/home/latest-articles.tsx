@@ -4,36 +4,12 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { ArticleCard } from "@/components/blog/article-card";
 
-// Mock data - will be replaced with real MDX content
-const latestArticles = [
-    {
-        title: "2024년 1분기 한국 시장 전망: 코스피 방향성 분석",
-        excerpt: "미국 금리 인하 기대감과 반도체 사이클 회복이 한국 시장에 미치는 영향을 분석합니다.",
-        slug: "2024-q1-korea-market-outlook",
-        category: "analysis",
-        date: "2024-01-15",
-        readingTime: "8분",
-        image: "/images/market-analysis.jpg",
-    },
-    {
-        title: "SMC 전략 완벽 가이드: Order Block과 Fair Value Gap",
-        excerpt: "Smart Money Concept의 핵심 개념인 Order Block과 FVG를 활용한 트레이딩 전략을 상세히 설명합니다.",
-        slug: "smc-strategy-guide",
-        category: "strategy",
-        date: "2024-01-12",
-        readingTime: "12분",
-        image: "/images/smc-strategy.jpg",
-    },
-    {
-        title: "중국 부동산 위기가 한국 증시에 미치는 영향",
-        excerpt: "Evergrande 사태 이후 중국 부동산 시장의 변화와 한국 관련 종목에 대한 분석입니다.",
-        slug: "china-real-estate-korea-impact",
-        category: "news",
-        date: "2024-01-10",
-        readingTime: "6분",
-        image: "/images/china-news.jpg",
-    },
-];
+import { blogPosts } from "@/lib/blog-data";
+
+const latestArticles = blogPosts.slice(0, 3).map(post => ({
+    ...post,
+    image: `/images/${post.slug}.jpg` // Placeholder - using mock logic for images if needed, or remove image prop if ArticleCard handles it
+}));
 
 export function LatestArticles() {
     return (

@@ -15,7 +15,6 @@ const navItems = [
             { href: "/blog", label: "블로그" },
             { href: "/reports", label: "리포트" },
             { href: "/briefings", label: "브리핑" },
-            { href: "/sample", label: "Sample" },
         ]
     },
     {

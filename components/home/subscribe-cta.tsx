@@ -55,7 +55,7 @@ export function SubscribeCTA() {
                         </Link>
 
                         <span className="text-muted-foreground text-sm">
-                            <AnimatedCounter value={5000} suffix="+" /> 투자자가 함께합니다
+                            <AnimatedCounter value={5000} />명 이상의 투자자가 함께합니다
                         </span>
                     </div>
                 </motion.div>

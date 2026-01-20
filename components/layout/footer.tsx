@@ -16,14 +16,12 @@ const footerLinks = [
             { href: "/blog?category=strategy", label: "트레이딩 전략" },
             { href: "/blog?category=news", label: "뉴스 번역" },
             { href: "/reports", label: "리포트" },
-            { href: "/briefings", label: "브리핑" },
         ],
     },
     {
         title: "학습",
         links: [
-            { href: "/start", label: "시작하기" },
-            { href: "/sample", label: "Sample 리포트" },
+            { href: "/briefings", label: "브리핑" },
             { href: "/playbooks", label: "플레이북" },
             { href: "/glossary", label: "용어집" },
         ],

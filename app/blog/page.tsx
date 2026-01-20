@@ -8,57 +8,7 @@ import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/blog/article-card";
 import { Search } from "lucide-react";
 
-// Mock articles data
-const allArticles = [
-    {
-        title: "2024년 1분기 한국 시장 전망: 코스피 방향성 분석",
-        excerpt: "미국 금리 인하 기대감과 반도체 사이클 회복이 한국 시장에 미치는 영향을 분석합니다.",
-        slug: "2024-q1-korea-market-outlook",
-        category: "analysis",
-        date: "2024-01-15",
-        readingTime: "8분",
-    },
-    {
-        title: "SMC 전략 완벽 가이드: Order Block과 Fair Value Gap",
-        excerpt: "Smart Money Concept의 핵심 개념인 Order Block과 FVG를 활용한 트레이딩 전략을 상세히 설명합니다.",
-        slug: "smc-strategy-guide",
-        category: "strategy",
-        date: "2024-01-12",
-        readingTime: "12분",
-    },
-    {
-        title: "중국 부동산 위기가 한국 증시에 미치는 영향",
-        excerpt: "Evergrande 사태 이후 중국 부동산 시장의 변화와 한국 관련 종목에 대한 분석입니다.",
-        slug: "china-real-estate-korea-impact",
-        category: "news",
-        date: "2024-01-10",
-        readingTime: "6분",
-    },
-    {
-        title: "ORB 전략으로 시장 오픈 첫 30분 공략하기",
-        excerpt: "Opening Range Breakout 전략의 원리와 한국 시장 적용 방법을 알아봅니다.",
-        slug: "orb-strategy-korea",
-        category: "strategy",
-        date: "2024-01-08",
-        readingTime: "10분",
-    },
-    {
-        title: "테슬라 실적 발표 후 글로벌 시장 영향 분석",
-        excerpt: "테슬라 4분기 실적과 2024년 가이던스가 관련 종목에 미치는 영향을 분석합니다.",
-        slug: "tesla-earnings-analysis",
-        category: "analysis",
-        date: "2024-01-05",
-        readingTime: "7분",
-    },
-    {
-        title: "위안화 약세와 한국 수출주 투자 전략",
-        excerpt: "중국 위안화 움직임이 한국 수출 기업들에 미치는 영향과 투자 아이디어.",
-        slug: "yuan-weakness-korea-exports",
-        category: "news",
-        date: "2024-01-03",
-        readingTime: "5분",
-    },
-];
+import { blogPosts } from "@/lib/blog-data";
 
 const categories = [
     { id: "all", label: "전체" },
@@ -80,7 +30,7 @@ function BlogContent() {
         }
     }, [searchParams]);
 
-    const filteredArticles = allArticles.filter((article) => {
+    const filteredArticles = blogPosts.filter((article) => {
         const matchesSearch =
             article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());

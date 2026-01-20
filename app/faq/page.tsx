@@ -104,8 +104,25 @@ export default function FAQPage() {
         ? faqItems
         : faqItems.filter((item) => item.category === activeCategory);
 
+    const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map(item => ({
+            "@type": "Question",
+            "name": item.question,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.answer
+            }
+        }))
+    };
+
     return (
         <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

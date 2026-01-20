@@ -30,6 +30,41 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/faq/page.js"
+    ],
+    "/start/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/start/page.js"
+    ],
+    "/playbooks/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/playbooks/page.js"
+    ],
+    "/reports/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/reports/page.js"
+    ],
+    "/briefings/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/briefings/page.js"
+    ],
+    "/glossary/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/glossary/page.js"
+    ],
+    "/tools/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/tools/page.js"
+    ],
+    "/plans/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/plans/page.js"
     ]
   }
 }
