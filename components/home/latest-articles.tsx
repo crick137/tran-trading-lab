@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { ArticleCard } from "@/components/blog/article-card";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 import { blogPosts } from "@/lib/blog-data";
 
@@ -12,8 +14,42 @@ const latestArticles = blogPosts.slice(0, 3).map(post => ({
 }));
 
 export function LatestArticles() {
+    if (latestArticles.length === 0) {
+        return (
+            <section className="py-24 bg-background relative overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="text-center mb-16"
+                    >
+                        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+                            최신 글
+                        </h2>
+                        <div className="w-20 h-1 bg-gradient-to-r from-gold to-gold-light mx-auto rounded-full mb-8" />
+                        <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
+                            <p className="text-muted-foreground text-lg mb-6">
+                                콘텐츠 준비 중입니다. 텔레그램에서 최신 업데이트를 받아보세요.
+                            </p>
+                            <Link
+                                href="https://t.me/TranTradingLab"
+                                target="_blank"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
+                            >
+                                텔레그램 채널 입장
+                                <ArrowRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+        );
+    }
+
     return (
-        <section className="py-24 bg-background">
+        <section className="py-24 bg-background relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-12">

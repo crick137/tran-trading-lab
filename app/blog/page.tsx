@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/blog/article-card";
 import { Search } from "lucide-react";
-
+import Link from "next/link"; // Added missing import
 import { blogPosts } from "@/lib/blog-data";
 
 const categories = [
@@ -29,6 +28,37 @@ function BlogContent() {
             setSelectedCategory(categoryParam);
         }
     }, [searchParams]);
+
+    // Handle Empty State
+    if (!blogPosts || blogPosts.length === 0) {
+        return (
+            <>
+                <Navbar />
+                <main className="pt-24 pb-16 min-h-screen">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+                        <h1 className="text-4xl font-bold text-foreground mb-4">블로그</h1>
+                        <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
+                            콘텐츠 준비 중입니다.
+                        </p>
+                        <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
+                            <p className="text-muted-foreground text-lg mb-6">
+                                아직 등록된 게시물이 없습니다.<br />
+                                텔레그램에서 가장 빠른 소식을 받아보세요.
+                            </p>
+                            <Link
+                                href="https://t.me/TranTradingLab"
+                                target="_blank"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
+                            >
+                                텔레그램 채널 입장
+                            </Link>
+                        </div>
+                    </div>
+                </main>
+                <Footer />
+            </>
+        );
+    }
 
     const filteredArticles = blogPosts.filter((article) => {
         const matchesSearch =

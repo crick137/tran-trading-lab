@@ -1,8 +1,4 @@
-"use client";
-
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { Send } from "lucide-react";
+import { siteStats } from "@/lib/site-stats";
 
 export function ArticleCTA() {
     return (
@@ -14,12 +10,12 @@ export function ArticleCTA() {
                         매일 아침, 시장의 흐름을 놓치지 마세요
                     </h3>
                     <p className="text-muted-foreground max-w-lg">
-                        5,000명 이상의 투자자가 선택한 TranTradingLab 텔레그램 채널에서
+                        {siteStats.subscribers} 투자자가 선택한 TranTradingLab 텔레그램 채널에서
                         실시간 시그널과 심층 분석을 받아보세요.
                     </p>
                 </div>
                 <Link
-                    href="https://t.me/TranTradingLab"
+                    href={siteStats.telegramLink}
                     target="_blank"
                     className="flex-shrink-0 px-8 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all flex items-center gap-2"
                 >
