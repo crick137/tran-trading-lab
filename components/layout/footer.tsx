@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Send, Twitter, Youtube, Mail } from "lucide-react";
+import { BarChart3, Send, Twitter, Youtube } from "lucide-react";
 
 const socialLinks = [
     { href: "https://t.me/TranTradingLab", icon: Send, label: "Telegram" },
@@ -15,13 +15,35 @@ const footerLinks = [
             { href: "/blog?category=analysis", label: "시장 분석" },
             { href: "/blog?category=strategy", label: "트레이딩 전략" },
             { href: "/blog?category=news", label: "뉴스 번역" },
+            { href: "/reports", label: "리포트" },
+            { href: "/briefings", label: "브리핑" },
+        ],
+    },
+    {
+        title: "학습",
+        links: [
+            { href: "/start", label: "시작하기" },
+            { href: "/sample", label: "Sample 리포트" },
+            { href: "/playbooks", label: "플레이북" },
+            { href: "/glossary", label: "용어집" },
+        ],
+    },
+    {
+        title: "도구",
+        links: [
+            { href: "/tools", label: "도구 허브" },
+            { href: "/tools/position-sizing", label: "포지션 사이징" },
+            { href: "/tools/rr-calculator", label: "R:R 계산기" },
+            { href: "/tools/templates", label: "템플릿" },
         ],
     },
     {
         title: "정보",
         links: [
             { href: "/about", label: "소개" },
-            { href: "https://t.me/TranTradingLab", label: "커뮤니티" },
+            { href: "/plans", label: "플랜" },
+            { href: "/faq", label: "FAQ" },
+            { href: "/contact", label: "문의하기" },
         ],
     },
 ];
@@ -30,9 +52,9 @@ export function Footer() {
     return (
         <footer className="border-t border-border/50 bg-card/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
                     {/* Brand */}
-                    <div className="md:col-span-2">
+                    <div className="col-span-2">
                         <Link href="/" className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
                                 <BarChart3 className="w-5 h-5 text-background" />
@@ -41,22 +63,22 @@ export function Footer() {
                                 TranTradingLab
                             </span>
                         </Link>
-                        <p className="text-muted-foreground text-sm leading-relaxed max-w-md">
+                        <p className="text-muted-foreground text-sm leading-relaxed max-w-md mb-4">
                             한국 개인 투자자를 위한 전문 금융 교육 플랫폼.
                             시장 분석, SMC/ORB 트레이딩 전략, 중국 금융 뉴스 한국어 번역을 제공합니다.
                         </p>
 
                         {/* Social Links */}
-                        <div className="flex gap-4 mt-6">
+                        <div className="flex gap-3">
                             {socialLinks.map((social) => (
                                 <Link
                                     key={social.label}
                                     href={social.href}
                                     target="_blank"
-                                    className="w-10 h-10 rounded-lg bg-card border border-border/50 flex items-center justify-center text-muted-foreground hover:text-gold hover:border-gold/50 transition-all"
+                                    className="w-9 h-9 rounded-lg bg-card border border-border/50 flex items-center justify-center text-muted-foreground hover:text-gold hover:border-gold/50 transition-all"
                                     aria-label={social.label}
                                 >
-                                    <social.icon size={18} />
+                                    <social.icon size={16} />
                                 </Link>
                             ))}
                         </div>
@@ -65,7 +87,7 @@ export function Footer() {
                     {/* Footer Links */}
                     {footerLinks.map((section) => (
                         <div key={section.title}>
-                            <h3 className="font-semibold text-foreground mb-4">{section.title}</h3>
+                            <h3 className="font-semibold text-foreground mb-3 text-sm">{section.title}</h3>
                             <ul className="space-y-2">
                                 {section.links.map((link) => (
                                     <li key={link.href}>

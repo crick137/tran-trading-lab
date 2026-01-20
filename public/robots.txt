@@ -1,0 +1,10 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://trantradinglab.com/sitemap.xml
+
+# Disallow admin/api paths
+Disallow: /api/
+Disallow: /_next/
