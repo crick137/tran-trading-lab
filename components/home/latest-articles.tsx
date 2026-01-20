@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { ArticleCard } from "@/components/blog/article-card";
 import { motion } from "framer-motion";
-import Link from "next/link";
+
 
 import { blogPosts } from "@/lib/blog-data";
 

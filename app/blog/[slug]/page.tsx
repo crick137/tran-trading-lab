@@ -115,7 +115,7 @@ export default function BlogPostPage() {
                         {article.tags && article.tags.length > 0 && (
                             <div className="flex items-center gap-2 flex-wrap mb-6">
                                 <Tag className="w-4 h-4 text-muted-foreground" />
-                                {article.tags.map((tag) => (
+                                {article.tags.map((tag: string) => (
                                     <span
                                         key={tag}
                                         className="px-2 py-1 text-xs rounded-md bg-card border border-border/50 text-muted-foreground hover:border-gold/50 hover:text-gold transition-colors cursor-pointer"
@@ -174,7 +174,7 @@ export default function BlogPostPage() {
                                         </h3>
                                         {art.tags && (
                                             <div className="mt-2 flex gap-1 flex-wrap">
-                                                {art.tags.slice(0, 2).map((tag) => (
+                                                {art.tags.slice(0, 2).map((tag: string) => (
                                                     <span key={tag} className="text-xs text-muted-foreground">
                                                         #{tag}
                                                     </span>
