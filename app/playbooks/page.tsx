@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { GraduationCap, Lock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { GraduationCap, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
 const modules = [
     {
@@ -14,7 +14,7 @@ const modules = [
         description: "Smart Money Concept의 핵심 개념 이해",
         lessons: 5,
         duration: "45분",
-        free: true,
+        available: true,
         topics: ["SMC란?", "시장 구조", "Order Block", "Fair Value Gap", "Liquidity"],
     },
     {
@@ -23,7 +23,7 @@ const modules = [
         description: "OB 식별과 트레이딩 적용",
         lessons: 4,
         duration: "40분",
-        free: true,
+        available: true,
         topics: ["OB 유형", "유효한 OB 조건", "진입 타이밍", "실전 예시"],
     },
     {
@@ -32,7 +32,7 @@ const modules = [
         description: "Fair Value Gap 완벽 활용",
         lessons: 4,
         duration: "35분",
-        free: true,
+        available: true,
         topics: ["FVG 정의", "되돌림 확률", "FVG + OB 조합", "실전 적용"],
     },
     {
@@ -41,7 +41,7 @@ const modules = [
         description: "유동성 구역 파악과 활용",
         lessons: 5,
         duration: "50분",
-        free: false,
+        available: false,
         topics: ["유동성이란?", "Sweep vs. Grab", "BSL/SSL", "Stop Hunt 패턴", "진입 전략"],
     },
     {
@@ -50,7 +50,7 @@ const modules = [
         description: "시가 범위 돌파 전략 마스터",
         lessons: 6,
         duration: "55분",
-        free: true,
+        available: true,
         topics: ["ORB 원리", "시간대 설정", "필터링 조건", "진입/청산", "한국 시장 적용", "백테스트"],
     },
     {
@@ -59,7 +59,7 @@ const modules = [
         description: "자본 보존을 위한 필수 스킬",
         lessons: 4,
         duration: "30분",
-        free: true,
+        available: true,
         topics: ["포지션 사이징", "R:R 계산", "손절 원칙", "드로우다운 관리"],
     },
 ];
@@ -80,9 +80,9 @@ export default function PlaybooksPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
                             <GraduationCap className="w-8 h-8 text-gold" />
                         </div>
-                        <h1 className="text-4xl font-bold text-foreground mb-4">트레이딩 플레이북</h1>
+                        <h1 className="text-4xl font-bold text-foreground mb-4">학습 로드맵</h1>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            SMC, ORB, 리스크 관리까지 - 단계별로 배우는 트레이딩 교육 과정
+                            SMC, ORB, 리스크 관리까지 - 체계적인 트레이딩 커리큘럼으로 실력을 키우세요.
                         </p>
                     </motion.div>
 
@@ -100,11 +100,11 @@ export default function PlaybooksPage() {
                                     <h3 className="text-lg font-semibold text-foreground group-hover:text-gold transition-colors">
                                         {module.title}
                                     </h3>
-                                    {module.free ? (
+                                    {module.available ? (
                                         <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">무료</span>
                                     ) : (
                                         <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground flex items-center gap-1">
-                                            <Lock className="w-3 h-3" /> 준비중
+                                            <Clock className="w-3 h-3" /> 준비중
                                         </span>
                                     )}
                                 </div>
@@ -127,16 +127,19 @@ export default function PlaybooksPage() {
                                         </div>
                                     )}
                                 </div>
-                                <Link
-                                    href={module.free ? `/playbooks/${module.id}` : "/plans"}
-                                    className={`flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium transition-all ${module.free
-                                            ? "bg-gold/10 text-gold hover:bg-gold/20"
-                                            : "bg-muted text-muted-foreground"
-                                        }`}
-                                >
-                                    {module.free ? "시작하기" : "플랜 보기"}
-                                    <ArrowRight className="w-3 h-3" />
-                                </Link>
+                                {module.available ? (
+                                    <Link
+                                        href={`/playbooks/${module.id}`}
+                                        className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium transition-all bg-gold/10 text-gold hover:bg-gold/20"
+                                    >
+                                        시작하기
+                                        <ArrowRight className="w-3 h-3" />
+                                    </Link>
+                                ) : (
+                                    <div className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium bg-muted text-muted-foreground cursor-not-allowed">
+                                        콘텐츠 준비중
+                                    </div>
+                                )}
                             </motion.div>
                         ))}
                     </div>

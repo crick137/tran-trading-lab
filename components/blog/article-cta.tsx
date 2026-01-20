@@ -1,6 +1,6 @@
 import { siteStats } from "@/lib/site-stats";
 import Link from "next/link";
-import { Send } from "lucide-react";
+import { Send, Bell } from "lucide-react";
 
 export function ArticleCTA() {
     return (
@@ -9,21 +9,23 @@ export function ArticleCTA() {
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                 <div>
                     <h3 className="text-2xl font-bold text-foreground mb-2">
-                        매일 아침, 시장의 흐름을 놓치지 마세요
+                        무료 브리핑 구독하기
                     </h3>
                     <p className="text-muted-foreground max-w-lg">
-                        {siteStats.subscribers} 투자자가 선택한 TranTradingLab 텔레그램 채널에서
-                        실시간 시그널과 심층 분석을 받아보세요.
+                        매일 아침 08:00, 시장 핵심 요약과 트레이딩 아이디어를 텔레그램으로 받아보세요.
+                        가입비 없이 완전 무료입니다.
                     </p>
                 </div>
-                <Link
-                    href={siteStats.telegramLink}
-                    target="_blank"
-                    className="flex-shrink-0 px-8 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all flex items-center gap-2"
-                >
-                    <Send className="w-5 h-5" />
-                    텔레그램 무료 입장
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Link
+                        href={siteStats.telegramLink}
+                        target="_blank"
+                        className="flex-shrink-0 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all flex items-center gap-2"
+                    >
+                        <Send className="w-5 h-5" />
+                        텔레그램 입장
+                    </Link>
+                </div>
             </div>
         </section>
     );

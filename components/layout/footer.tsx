@@ -39,7 +39,6 @@ const footerLinks = [
         title: "정보",
         links: [
             { href: "/about", label: "소개" },
-            { href: "/plans", label: "플랜" },
             { href: "/faq", label: "FAQ" },
             { href: "/contact", label: "문의하기" },
         ],
