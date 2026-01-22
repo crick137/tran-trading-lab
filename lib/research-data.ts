@@ -2,6 +2,7 @@ export interface ResearchArticle {
     slug: string;
     title: string;
     subtitle?: string;
+    description: string; // 用于 meta description 和 OG 预览
     symbol: string;
     timeframe: string;
     bias: 'long' | 'short' | 'neutral';
@@ -36,6 +37,7 @@ export const researchArticles: ResearchArticle[] = [
         slug: "usdkrw-supply-zone-2026-01-21",
         title: "USD/KRW | 공급 존 테스트 임박",
         subtitle: "양방향 시나리오 점검",
+        description: "USD/KRW 환율 SMC 분석: 1,483~1,485원 공급 존 테스트 임박. 다중 BOS 상승 구조 확인, CHOCH 약화 신호 포착. 돌파 시 1,495원, 저항 시 1,445원 시나리오 점검.",
         symbol: "USD/KRW",
         timeframe: "4H",
         bias: "neutral",
