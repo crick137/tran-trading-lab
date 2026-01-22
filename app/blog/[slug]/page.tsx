@@ -18,6 +18,34 @@ import { ArticleCTA } from "@/components/blog/article-cta";
 function parseMarkdownToHtml(content: string): string {
     let html = content;
 
+    // Parse images first - ![alt](src)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-lg my-6 w-full" />');
+
+    // Parse tables
+    html = html.replace(/(\|.+\|\r?\n)+/g, (tableBlock) => {
+        const rows = tableBlock.trim().split(/\r?\n/);
+        if (rows.length < 2) return tableBlock;
+
+        let tableHtml = '<table class="w-full border-collapse my-6"><thead><tr>';
+        const headerCells = rows[0].split('|').filter(cell => cell.trim());
+        headerCells.forEach(cell => {
+            tableHtml += `<th class="border border-border/50 px-4 py-2 bg-card text-left">${cell.trim()}</th>`;
+        });
+        tableHtml += '</tr></thead><tbody>';
+
+        // Skip header and separator rows
+        for (let i = 2; i < rows.length; i++) {
+            const cells = rows[i].split('|').filter(cell => cell.trim());
+            tableHtml += '<tr>';
+            cells.forEach(cell => {
+                tableHtml += `<td class="border border-border/50 px-4 py-2">${cell.trim()}</td>`;
+            });
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table>';
+        return tableHtml;
+    });
+
     // Parse headings and add IDs
     html = html.replace(/^## (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
@@ -32,16 +60,28 @@ function parseMarkdownToHtml(content: string): string {
     html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
     html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
 
-    // Lists
-    html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
-    html = html.replace(/^(\d+)\. (.+)$/gm, "<li>$2</li>");
-
-    // Paragraphs
-    html = html.replace(/\n\n/g, "</p><p>");
-    html = `<p>${html}</p>`;
+    // Lists - wrap consecutive list items in ul
+    html = html.replace(/((?:^- .+$\r?\n?)+)/gm, (match) => {
+        const items = match.replace(/^- (.+)$/gm, "<li>$1</li>");
+        return `<ul class="list-disc pl-6 my-4">${items}</ul>`;
+    });
 
     // Horizontal rule
-    html = html.replace(/---/g, "<hr />");
+    html = html.replace(/^---$/gm, "<hr />");
+
+    // Paragraphs - split by double newlines but preserve block elements
+    const blocks = html.split(/\n\n+/);
+    html = blocks.map(block => {
+        const trimmed = block.trim();
+        if (!trimmed) return '';
+        // Don't wrap block-level elements
+        if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') ||
+            trimmed.startsWith('<table') || trimmed.startsWith('<hr') ||
+            trimmed.startsWith('<img')) {
+            return trimmed;
+        }
+        return `<p>${trimmed}</p>`;
+    }).join('\n');
 
     return html;
 }
