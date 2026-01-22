@@ -8,10 +8,7 @@ import { motion } from "framer-motion";
 
 import { blogPosts } from "@/lib/blog-data";
 
-const latestArticles = blogPosts.slice(0, 3).map(post => ({
-    ...post,
-    image: `/images/${post.slug}.jpg` // Placeholder - using mock logic for images if needed, or remove image prop if ArticleCard handles it
-}));
+const latestArticles = blogPosts.slice(0, 3);
 
 export function LatestArticles() {
     if (latestArticles.length === 0) {
