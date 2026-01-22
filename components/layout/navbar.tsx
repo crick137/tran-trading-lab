@@ -12,6 +12,7 @@ const navItems = [
     {
         label: "콘텐츠",
         children: [
+            { href: "/research", label: "리서치" },
             { href: "/blog", label: "블로그" },
             { href: "/reports", label: "리포트" },
             { href: "/briefings", label: "브리핑" },
