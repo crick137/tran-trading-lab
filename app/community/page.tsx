@@ -16,7 +16,6 @@ const communities = [
         icon: Send,
         href: siteConfig.social.telegram,
         color: "from-blue-500 to-cyan-400",
-        members: "1,200+",
     },
     {
         name: "KakaoTalk",
@@ -26,7 +25,6 @@ const communities = [
         icon: MessageCircle,
         href: siteConfig.social.kakao,
         color: "from-yellow-400 to-amber-500",
-        members: "신규",
     },
 ];
 
@@ -103,10 +101,7 @@ export default function CommunityPage() {
                                                     </h2>
                                                     <p className="text-sm text-muted-foreground">{community.nameKr}</p>
                                                 </div>
-                                                <div className="ml-auto flex items-center gap-1 text-sm text-muted-foreground">
-                                                    <Users className="w-4 h-4" />
-                                                    {community.members}
-                                                </div>
+
                                             </div>
 
                                             {/* Description */}
