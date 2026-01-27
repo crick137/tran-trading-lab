@@ -16,6 +16,7 @@ export const siteConfig = {
         { label: "플레이북", href: "/playbooks" },
         { label: "도구", href: "/tools" },
         { label: "아카데미", href: "/academy" },
+        { label: "커뮤니티", href: "/community" },
         { label: "소개", href: "/about" },
     ],
 
@@ -23,11 +24,12 @@ export const siteConfig = {
         primary: { label: "구독하기", href: "/subscribe" },
         secondary: { label: "샘플 리포트", href: "/research/sample-report" },
         telegram: { label: "Telegram", href: "https://t.me/TranTradingLab" },
-        kakaotalk: { label: "KakaoTalk", href: "https://open.kakao.com/o/gTranTradingLab" },
+        kakaotalk: { label: "KakaoTalk", href: "https://invite.kakao.com/tc/luxHFht3xL" },
     },
 
     social: {
         telegram: "https://t.me/TranTradingLab",
+        kakao: "https://invite.kakao.com/tc/luxHFht3xL",
         twitter: "https://x.com/TranTradingLab",
         youtube: "https://youtube.com/@TranTradingLab",
         email: "contact@trantradinglab.com",
