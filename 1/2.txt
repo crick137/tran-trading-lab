@@ -1,1 +1,0 @@
-第1部BSL/SSL 标注图 — 简洁K线图标注 Buy-Side Liquidity（高点上方）和 Sell-Side Liquidity（低点下方）第2部三阶段流程图 — Accumulation → Liquidity Sweep → Displacement 的横向流程第2部Spring / Upthrust 对比图 — 两个并排的K线结构，标注假突破与回收第4部Equal Highs / Equal Lows 示意 — 展示多次触及同一价位形成的流动性磁铁

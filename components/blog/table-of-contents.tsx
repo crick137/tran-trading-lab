@@ -63,7 +63,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="hidden xl:block fixed right-[max(2rem,calc((100vw-80rem)/2+2rem))] top-32 w-64"
+            className="hidden xl:block fixed right-4 top-32 w-56 max-h-[70vh] overflow-y-auto"
         >
             <div className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
                 <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -88,8 +88,8 @@ export function TableOfContents({ content }: TableOfContentsProps) {
                                         });
                                     }}
                                     className={`block text-sm py-1 transition-all duration-200 hover:text-gold ${activeId === heading.id
-                                            ? "text-gold font-medium"
-                                            : "text-muted-foreground"
+                                        ? "text-gold font-medium"
+                                        : "text-muted-foreground"
                                         }`}
                                 >
                                     {heading.text}
