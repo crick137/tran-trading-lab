@@ -47,11 +47,31 @@ export default function ResearchArticlePage() {
                     {/* Quick Summary */}
                     <QuickSummary items={article.quickSummary} />
 
-                    {/* Chart Image */}
-                    <ChartImage
-                        src={article.image}
-                        alt={`${article.symbol} ${article.timeframe} Chart`}
-                    />
+                    {/* Content Images for Education Articles */}
+                    {article.articleType === 'education' && article.contentImages && article.contentImages.length > 0 ? (
+                        <div className="mb-8 space-y-6">
+                            {article.contentImages.map((img, index) => (
+                                <figure key={index} className="rounded-lg overflow-hidden border border-border/50">
+                                    <img
+                                        src={img.src}
+                                        alt={img.alt}
+                                        className="w-full h-auto"
+                                    />
+                                    {img.caption && (
+                                        <figcaption className="bg-card/50 px-4 py-3 text-sm text-muted-foreground text-center">
+                                            {img.caption}
+                                        </figcaption>
+                                    )}
+                                </figure>
+                            ))}
+                        </div>
+                    ) : (
+                        /* Chart Image for Analysis Articles */
+                        <ChartImage
+                            src={article.image}
+                            alt={`${article.symbol} ${article.timeframe} Chart`}
+                        />
+                    )}
 
                     {/* Sections */}
                     {article.sections.map((section, index) => (

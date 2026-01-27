@@ -14,60 +14,86 @@ import { motion } from "framer-motion";
 import { blogPosts, categoryLabels } from "@/lib/blog-data";
 import { ArticleCTA } from "@/components/blog/article-cta";
 
-// Helper to parse simple markdown
+// Helper to parse simple markdown with premium styling
 function parseMarkdownToHtml(content: string): string {
     let html = content;
 
-    // Parse images first - ![alt](src)
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-lg my-6 w-full" />');
+    // Parse images first - ![alt](src) - with premium styling
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+        '<figure class="my-8 rounded-xl overflow-hidden border border-border/30 shadow-lg shadow-black/20">' +
+        '<img src="$2" alt="$1" class="w-full" />' +
+        '<figcaption class="bg-card/80 px-4 py-3 text-center text-sm text-muted-foreground border-t border-border/30">$1</figcaption>' +
+        '</figure>');
 
-    // Parse tables
+    // Parse tables with premium styling
     html = html.replace(/(\|.+\|\r?\n)+/g, (tableBlock) => {
         const rows = tableBlock.trim().split(/\r?\n/);
         if (rows.length < 2) return tableBlock;
 
-        let tableHtml = '<table class="w-full border-collapse my-6"><thead><tr>';
+        let tableHtml = '<div class="my-8 overflow-hidden rounded-xl border border-border/50"><table class="w-full border-collapse"><thead><tr>';
         const headerCells = rows[0].split('|').filter(cell => cell.trim());
         headerCells.forEach(cell => {
-            tableHtml += `<th class="border border-border/50 px-4 py-2 bg-card text-left">${cell.trim()}</th>`;
+            tableHtml += `<th class="border-b border-border/50 px-4 py-3 bg-gold/10 text-gold text-left font-semibold">${cell.trim()}</th>`;
         });
         tableHtml += '</tr></thead><tbody>';
 
-        // Skip header and separator rows
         for (let i = 2; i < rows.length; i++) {
             const cells = rows[i].split('|').filter(cell => cell.trim());
-            tableHtml += '<tr>';
+            tableHtml += `<tr class="${i % 2 === 0 ? 'bg-card/30' : 'bg-card/50'}">`;
             cells.forEach(cell => {
-                tableHtml += `<td class="border border-border/50 px-4 py-2">${cell.trim()}</td>`;
+                tableHtml += `<td class="border-b border-border/30 px-4 py-3">${cell.trim()}</td>`;
             });
             tableHtml += '</tr>';
         }
-        tableHtml += '</tbody></table>';
+        tableHtml += '</tbody></table></div>';
         return tableHtml;
     });
 
-    // Parse headings and add IDs
+    // Parse H1 with special title styling (emoji support)
+    html = html.replace(/^# (.+)$/gm, (match, text) => {
+        const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
+        return `<h1 id="${id}" class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gold to-gold-light bg-clip-text text-transparent mb-6">${text}</h1>`;
+    });
+
+    // Parse H2 as major section headers with decorative styling
     html = html.replace(/^## (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h2 id="${id}">${text}</h2>`;
+        // Check if starts with emoji by looking at first few characters
+        const firstChar = text.codePointAt(0) || 0;
+        const isEmoji = (firstChar >= 0x1F300 && firstChar <= 0x1F9FF) ||
+            (firstChar >= 0x2600 && firstChar <= 0x26FF) ||
+            (firstChar >= 0x2700 && firstChar <= 0x27BF);
+        if (isEmoji) {
+            // Split after emoji (handles 2-char emojis)
+            const emojiEnd = text.codePointAt(0)! > 0xFFFF ? 2 : 1;
+            const emoji = text.slice(0, emojiEnd);
+            const title = text.slice(emojiEnd).trim();
+            return `<div class="mt-12 mb-6 flex items-center gap-3" id="${id}">
+                <span class="text-3xl">${emoji}</span>
+                <h2 class="text-2xl font-bold text-foreground m-0">${title}</h2>
+            </div>`;
+        }
+        return `<h2 id="${id}" class="mt-12 mb-6 text-2xl font-bold text-foreground border-l-4 border-gold pl-4">${text}</h2>`;
     });
+
+    // Parse H3 as subsection headers
     html = html.replace(/^### (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h3 id="${id}">${text}</h3>`;
+        return `<h3 id="${id}" class="mt-8 mb-4 text-xl font-semibold text-gold/90">${text}</h3>`;
     });
 
     // Bold and italic
-    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em class="text-gold/80">$1</em>');
 
-    // Lists - wrap consecutive list items in ul
+    // Lists - wrap consecutive list items in ul with premium styling
     html = html.replace(/((?:^- .+$\r?\n?)+)/gm, (match) => {
-        const items = match.replace(/^- (.+)$/gm, "<li>$1</li>");
-        return `<ul class="list-disc pl-6 my-4">${items}</ul>`;
+        const items = match.replace(/^- (.+)$/gm, '<li class="relative pl-2 before:absolute before:left-[-1rem] before:top-[0.6rem] before:w-1.5 before:h-1.5 before:bg-gold before:rounded-full">$1</li>');
+        return `<ul class="my-6 ml-4 space-y-2 border-l-2 border-border/30 pl-6">${items}</ul>`;
     });
 
-    // Horizontal rule
-    html = html.replace(/^---$/gm, "<hr />");
+    // Horizontal rule as decorative divider
+    html = html.replace(/^---$/gm, '<div class="my-12 flex items-center justify-center gap-4"><span class="w-2 h-2 bg-gold/50 rounded-full"></span><span class="w-16 h-px bg-gradient-to-r from-transparent via-gold/50 to-transparent"></span><span class="w-2 h-2 bg-gold/50 rounded-full"></span></div>');
 
     // Paragraphs - split by double newlines but preserve block elements
     const blocks = html.split(/\n\n+/);
@@ -76,15 +102,16 @@ function parseMarkdownToHtml(content: string): string {
         if (!trimmed) return '';
         // Don't wrap block-level elements
         if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') ||
-            trimmed.startsWith('<table') || trimmed.startsWith('<hr') ||
-            trimmed.startsWith('<img')) {
+            trimmed.startsWith('<div') || trimmed.startsWith('<table') ||
+            trimmed.startsWith('<figure')) {
             return trimmed;
         }
-        return `<p>${trimmed}</p>`;
+        return `<p class="my-4 leading-relaxed">${trimmed}</p>`;
     }).join('\n');
 
     return html;
 }
+
 
 export default function BlogPostPage() {
     const params = useParams();

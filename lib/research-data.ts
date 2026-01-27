@@ -10,6 +10,10 @@ export interface ResearchArticle {
     readingTime: string;
     tags: string[];
     image: string;
+    // Optional fields for education articles
+    articleType?: 'analysis' | 'education';
+    fullContent?: string; // Markdown content for long-form articles
+    contentImages?: { src: string; alt: string; caption?: string }[];
     quickSummary: {
         icon: string;
         text: string;
