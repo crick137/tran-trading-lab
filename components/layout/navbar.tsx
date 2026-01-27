@@ -26,6 +26,7 @@ const navItems = [
             { href: "/tools", label: "도구" },
         ]
     },
+    { href: "/community", label: "커뮤니티" },
     { href: "/faq", label: "FAQ" },
 ];
 
