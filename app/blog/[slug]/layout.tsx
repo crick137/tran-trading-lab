@@ -65,7 +65,8 @@ export async function generateMetadata({
             title: article.title,
             description: article.excerpt,
             site: "@TranTradingLab",
-            images: [ogImageUrl],
+            // Use static image for Twitter to avoid robots.txt API blocking
+            images: article.image ? [`${SITE_URL}${article.image}`] : [ogImageUrl],
         },
         alternates: {
             canonical: url,
