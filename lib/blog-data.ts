@@ -17,7 +17,7 @@ export const blogPosts: BlogPost[] = [
         title: "SMC 유동성 사냥 구조 완전 정리",
         description: "왜 개미는 항상 스탑로스에서 털리는가? SMC(Smart Money Concepts) 관점에서 유동성 사냥의 전체 구조를 해부합니다.",
         excerpt: "시장에는 '유동성'이라는 보이지 않는 자원이 있고, 기관은 개인 투자자의 스탑로스를 의도적으로 사냥합니다. 왜 일어나고 어떻게 대응할 수 있는지 완전 정리.",
-        image: "/research/smc-liquidity-bsl-ssl.png",
+        image: "/og/smc-liquidity-hunting-structure.png",
         category: "strategy",
         date: "2026년 1월 27일",
         readingTime: "25분",
