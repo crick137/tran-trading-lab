@@ -1,30 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 
-export default function ReportsPage() {
+export default function BriefingsPage() {
+    const t = useTranslations("briefings");
+    const tc = useTranslations("common");
+
     return (
         <>
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
-                    <h1 className="text-4xl font-bold text-foreground mb-4">시장 리포트</h1>
+                    <h1 className="text-4xl font-bold text-foreground mb-4">{t("title")}</h1>
                     <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
-                        심층적인 시장 분석 리포트 아카이브입니다.
+                        {t("subtitle")}
                     </p>
                     <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto">
                         <p className="text-muted-foreground text-lg mb-6">
-                            현재 공개된 리포트가 없습니다.<br />
-                            텔레그램에서 최신 리포트 발간 소식을 받아보세요.
+                            {t("noBriefings")}<br />
+                            {t("telegramCta")}
                         </p>
                         <Link
                             href="https://t.me/TranTradingLab"
                             target="_blank"
                             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
                         >
-                            텔레그램 채널 입장
+                            {tc("joinTelegramChannel")}
                         </Link>
                     </div>
                 </div>

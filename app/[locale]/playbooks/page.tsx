@@ -2,75 +2,80 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { GraduationCap, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
-const modules = [
-    {
-        id: "smc-101",
-        title: "SMC 기초",
-        description: "Smart Money Concept의 핵심 개념 이해",
-        lessons: 5,
-        duration: "45분",
-        available: true,
-        topics: ["SMC란?", "시장 구조", "Order Block", "Fair Value Gap", "Liquidity"],
-    },
-    {
-        id: "order-block",
-        title: "Order Block 심화",
-        description: "OB 식별과 트레이딩 적용",
-        lessons: 4,
-        duration: "40분",
-        available: true,
-        topics: ["OB 유형", "유효한 OB 조건", "진입 타이밍", "실전 예시"],
-    },
-    {
-        id: "fvg-mastery",
-        title: "FVG 마스터리",
-        description: "Fair Value Gap 완벽 활용",
-        lessons: 4,
-        duration: "35분",
-        available: true,
-        topics: ["FVG 정의", "되돌림 확률", "FVG + OB 조합", "실전 적용"],
-    },
-    {
-        id: "liquidity",
-        title: "Liquidity 사냥",
-        description: "유동성 구역 파악과 활용",
-        lessons: 5,
-        duration: "50분",
-        available: false,
-        topics: ["유동성이란?", "Sweep vs. Grab", "BSL/SSL", "Stop Hunt 패턴", "진입 전략"],
-    },
-    {
-        id: "orb-strategy",
-        title: "ORB 전략",
-        description: "시가 범위 돌파 전략 마스터",
-        lessons: 6,
-        duration: "55분",
-        available: true,
-        topics: ["ORB 원리", "시간대 설정", "필터링 조건", "진입/청산", "한국 시장 적용", "백테스트"],
-    },
-    {
-        id: "risk-management",
-        title: "리스크 관리",
-        description: "자본 보존을 위한 필수 스킬",
-        lessons: 4,
-        duration: "30분",
-        available: true,
-        topics: ["포지션 사이징", "R:R 계산", "손절 원칙", "드로우다운 관리"],
-    },
-];
-
 export default function PlaybooksPage() {
+    const locale = useLocale();
+    const t = useTranslations("playbooks");
+    const tc = useTranslations("common");
+
+    const modules = [
+        {
+            id: "smc-101",
+            title: t("smcTitle"),
+            description: t("smcDesc"),
+            lessons: 5,
+            duration: "45min",
+            available: true,
+            topics: t.raw("smcTopics") as string[],
+        },
+        {
+            id: "order-block",
+            title: t("obTitle"),
+            description: t("obDesc"),
+            lessons: 4,
+            duration: "40min",
+            available: true,
+            topics: t.raw("obTopics") as string[],
+        },
+        {
+            id: "fvg-mastery",
+            title: t("fvgTitle"),
+            description: t("fvgDesc"),
+            lessons: 4,
+            duration: "35min",
+            available: true,
+            topics: t.raw("fvgTopics") as string[],
+        },
+        {
+            id: "liquidity",
+            title: t("liquidityTitle"),
+            description: t("liquidityDesc"),
+            lessons: 5,
+            duration: "50min",
+            available: false,
+            topics: t.raw("liquidityTopics") as string[],
+        },
+        {
+            id: "orb-strategy",
+            title: t("orbTitle"),
+            description: t("orbDesc"),
+            lessons: 6,
+            duration: "55min",
+            available: true,
+            topics: t.raw("orbTopics") as string[],
+        },
+        {
+            id: "risk-management",
+            title: t("riskTitle"),
+            description: t("riskDesc"),
+            lessons: 4,
+            duration: "30min",
+            available: true,
+            topics: t.raw("riskTopics") as string[],
+        },
+    ];
+
     return (
         <>
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Breadcrumb items={[{ label: "플레이북" }]} />
+                    <Breadcrumb items={[{ label: tc("playbooks") }]} />
 
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -80,9 +85,9 @@ export default function PlaybooksPage() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
                             <GraduationCap className="w-8 h-8 text-gold" />
                         </div>
-                        <h1 className="text-4xl font-bold text-foreground mb-4">학습 로드맵</h1>
+                        <h1 className="text-4xl font-bold text-foreground mb-4">{t("title")}</h1>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            SMC, ORB, 리스크 관리까지 - 체계적인 트레이딩 커리큘럼으로 실력을 키우세요.
+                            {t("subtitle")}
                         </p>
                     </motion.div>
 
@@ -101,16 +106,16 @@ export default function PlaybooksPage() {
                                         {module.title}
                                     </h3>
                                     {module.available ? (
-                                        <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">무료</span>
+                                        <span className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-500">{tc("free")}</span>
                                     ) : (
                                         <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground flex items-center gap-1">
-                                            <Clock className="w-3 h-3" /> 준비중
+                                            <Clock className="w-3 h-3" /> {tc("preparing")}
                                         </span>
                                     )}
                                 </div>
                                 <p className="text-sm text-muted-foreground mb-4">{module.description}</p>
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
-                                    <span>{module.lessons}개 레슨</span>
+                                    <span>{module.lessons}{tc("lessons")}</span>
                                     <span>•</span>
                                     <span>{module.duration}</span>
                                 </div>
@@ -123,21 +128,21 @@ export default function PlaybooksPage() {
                                     ))}
                                     {module.topics.length > 3 && (
                                         <div className="text-sm text-muted-foreground">
-                                            +{module.topics.length - 3}개 더...
+                                            +{module.topics.length - 3}{tc("more")}
                                         </div>
                                     )}
                                 </div>
                                 {module.available ? (
                                     <Link
-                                        href={`/playbooks/${module.id}`}
+                                        href={`/${locale}/playbooks/${module.id}`}
                                         className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium transition-all bg-gold/10 text-gold hover:bg-gold/20"
                                     >
-                                        시작하기
+                                        {tc("startLearning")}
                                         <ArrowRight className="w-3 h-3" />
                                     </Link>
                                 ) : (
                                     <div className="flex items-center justify-center gap-2 w-full py-2 rounded-lg text-sm font-medium bg-muted text-muted-foreground cursor-not-allowed">
-                                        콘텐츠 준비중
+                                        {tc("contentPreparing")}
                                     </div>
                                 )}
                             </motion.div>

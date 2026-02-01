@@ -1,0 +1,193 @@
+{
+    "common": {
+        "home": "首页",
+        "start": "开始",
+        "content": "内容",
+        "research": "研究",
+        "blog": "博客",
+        "reports": "报告",
+        "briefings": "简报",
+        "learning": "学习",
+        "playbooks": "策略手册",
+        "glossary": "术语表",
+        "tools": "工具",
+        "community": "社群",
+        "faq": "常见问题",
+        "about": "关于",
+        "joinTelegram": "加入Telegram",
+        "joinTelegramChannel": "加入Telegram频道",
+        "freeToJoin": "免费加入",
+        "allRightsReserved": "版权所有",
+        "free": "免费",
+        "preparing": "即将推出",
+        "lessons": "节课",
+        "more": "个更多...",
+        "startLearning": "开始学习",
+        "contentPreparing": "内容准备中",
+        "search": "搜索..."
+    },
+    "home": {
+        "heroTitle": "TRAN Trading Lab",
+        "heroSubtitle": "SMC · 流动性 · 时机",
+        "heroDescription": "为投资者打造的机构级市场研究平台",
+        "latestArticles": "最新文章",
+        "viewAll": "查看全部",
+        "noArticles": "暂无已发布的文章。",
+        "subscribeCta": "订阅通讯",
+        "subscribeDescription": "获取每周市场分析和洞察。"
+    },
+    "research": {
+        "title": "研究",
+        "subtitle": "基于Smart Money Concepts的深度市场分析报告",
+        "noResearch": "目前暂无公开的研究报告。"
+    },
+    "blog": {
+        "title": "博客",
+        "subtitle": "市场分析、交易策略和中国金融新闻翻译。投资所需的全部洞察。",
+        "emptyTitle": "博客",
+        "emptySubtitle": "内容正在准备中。",
+        "noPosts": "暂无已发布的文章。",
+        "telegramCta": "在Telegram获取最新消息。",
+        "noResults": "未找到结果。请尝试其他关键词。",
+        "categoryAll": "全部",
+        "categoryAnalysis": "市场分析",
+        "categoryStrategy": "交易策略",
+        "categoryNews": "新闻翻译"
+    },
+    "reports": {
+        "title": "市场报告",
+        "subtitle": "深度市场分析报告存档。",
+        "noReports": "目前暂无公开的报告。",
+        "telegramCta": "在Telegram获取最新报告发布消息。"
+    },
+    "briefings": {
+        "title": "每日简报",
+        "subtitle": "每日早间市场核心简报存档。",
+        "noBriefings": "目前暂无公开的简报。",
+        "telegramCta": "在Telegram获取实时简报。"
+    },
+    "playbooks": {
+        "title": "学习路线图",
+        "subtitle": "从SMC到ORB再到风险管理 - 通过系统化的交易课程提升您的技能。",
+        "smcTitle": "SMC基础",
+        "smcDesc": "理解Smart Money Concept的核心概念",
+        "smcTopics": [
+            "什么是SMC？",
+            "市场结构",
+            "Order Block",
+            "Fair Value Gap",
+            "流动性"
+        ],
+        "obTitle": "Order Block进阶",
+        "obDesc": "OB识别与交易应用",
+        "obTopics": [
+            "OB类型",
+            "有效OB条件",
+            "入场时机",
+            "实战案例"
+        ],
+        "fvgTitle": "FVG精通",
+        "fvgDesc": "完美利用Fair Value Gap",
+        "fvgTopics": [
+            "FVG定义",
+            "回撤概率",
+            "FVG + OB组合",
+            "实战应用"
+        ],
+        "liquidityTitle": "流动性狩猎",
+        "liquidityDesc": "识别和利用流动性区域",
+        "liquidityTopics": [
+            "什么是流动性？",
+            "Sweep vs. Grab",
+            "BSL/SSL",
+            "止损猎杀模式",
+            "入场策略"
+        ],
+        "orbTitle": "ORB策略",
+        "orbDesc": "掌握开盘区间突破策略",
+        "orbTopics": [
+            "ORB原理",
+            "时间设置",
+            "过滤条件",
+            "入场/出场",
+            "韩国市场应用",
+            "回测"
+        ],
+        "riskTitle": "风险管理",
+        "riskDesc": "资本保护的必备技能",
+        "riskTopics": [
+            "仓位管理",
+            "风险回报计算",
+            "止损原则",
+            "回撤管理"
+        ]
+    },
+    "community": {
+        "title": "链接入口",
+        "subtitle": "Link Hub",
+        "joinOurCommunity": "加入我们的全球社群",
+        "tgEnName": "TG-EN",
+        "tgEnLabel": "加入",
+        "tgEnDesc": "英语社群",
+        "tgEnDescKr": "English Community",
+        "tgKrName": "TG-KR",
+        "tgKrLabel": "加入",
+        "tgKrDesc": "韩语社群",
+        "tgKrDescKr": "Korean Community",
+        "kakaoName": "KakaoTalk",
+        "kakaoLabel": "开放聊天",
+        "kakaoDesc": "韩语开放聊天",
+        "kakaoDescKr": "KakaoTalk开放聊天",
+        "startName": "新手入口",
+        "startLabel": "入门",
+        "startDesc": "新手指南",
+        "startDescKr": "开始"
+    },
+    "start": {
+        "title": "开始",
+        "subtitle": "选择适合您投资风格的路径。TranTradingLab将为您逐步指导。",
+        "beginnerTitle": "新手投资者",
+        "beginnerSubtitle": "刚开始投资的人",
+        "traderTitle": "日内/波段交易者",
+        "traderSubtitle": "对技术分析感兴趣",
+        "macroTitle": "宏观经济",
+        "macroSubtitle": "需要全球市场分析",
+        "beginnerStep1": "阅读示例报告",
+        "beginnerStep2": "查看术语表",
+        "beginnerStep3": "学习SMC基础",
+        "beginnerStep4": "加入Telegram",
+        "traderStep1": "学习SMC/ORB策略",
+        "traderStep2": "使用工具",
+        "traderStep3": "获取每日简报",
+        "traderStep4": "设置实时提醒",
+        "macroStep1": "订阅周报",
+        "macroStep2": "中国新闻翻译",
+        "macroStep3": "查看经济日历",
+        "macroStep4": "订阅通讯",
+        "whatWeProvide": "我们提供的",
+        "whatWeDoNotProvide": "我们不提供的",
+        "provide1": "每日市场分析和简报",
+        "provide2": "SMC/ORB交易策略教育",
+        "provide3": "中国金融新闻翻译",
+        "provide4": "仓位管理和风险回报计算器",
+        "provide5": "每周综合报告",
+        "provide6": "Telegram社群访问",
+        "notProvide1": "买卖建议（非投资建议）",
+        "notProvide2": "收益保证",
+        "notProvide3": "一对一投资咨询",
+        "notProvide4": "自动交易信号",
+        "disclaimer": "所有投资决定应基于您自己的判断和责任。",
+        "readFirstReport": "阅读您的第一份报告",
+        "viewSampleReport": "查看示例报告"
+    },
+    "faq": {
+        "title": "常见问题",
+        "subtitle": "关于TranTradingLab的常见问题。"
+    },
+    "footer": {
+        "privacy": "隐私政策",
+        "terms": "服务条款",
+        "contact": "联系我们",
+        "riskDisclaimer": "仅供教育 – NFA."
+    }
+}

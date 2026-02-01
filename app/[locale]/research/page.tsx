@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { researchArticles } from "@/lib/research-data";
@@ -8,6 +9,9 @@ import { Calendar, Clock, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ResearchPage() {
+    const locale = useLocale();
+    const t = useTranslations("research");
+
     const biasConfig = {
         long: { label: "Long", color: "bg-emerald-500/20 text-emerald-400", icon: TrendingUp },
         short: { label: "Short", color: "bg-red-500/20 text-red-400", icon: TrendingDown },
@@ -22,10 +26,10 @@ export default function ResearchPage() {
                     {/* Header */}
                     <div className="text-center mb-12">
                         <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
-                            Research
+                            {t("title")}
                         </h1>
                         <p className="text-muted-foreground max-w-2xl mx-auto">
-                            Smart Money Concepts 기반의 심층 시장 분석 리포트
+                            {t("subtitle")}
                         </p>
                     </div>
 
@@ -44,7 +48,7 @@ export default function ResearchPage() {
                                         transition={{ duration: 0.5, delay: index * 0.1 }}
                                     >
                                         <Link
-                                            href={`/research/${article.slug}`}
+                                            href={`/${locale}/research/${article.slug}`}
                                             className="block group"
                                         >
                                             <article className="bg-card/50 border border-border/50 rounded-xl overflow-hidden hover:border-gold/50 transition-all duration-300 card-hover">
@@ -102,7 +106,7 @@ export default function ResearchPage() {
                     ) : (
                         <div className="text-center py-16">
                             <p className="text-muted-foreground">
-                                현재 공개된 리서치가 없습니다.
+                                {t("noResearch")}
                             </p>
                         </div>
                     )}

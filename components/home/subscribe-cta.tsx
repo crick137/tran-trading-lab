@@ -2,11 +2,15 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { NewsletterForm } from "./newsletter-form";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export function SubscribeCTA() {
+    const t = useTranslations("home");
+    const tc = useTranslations("common");
+
     return (
         <section className="py-24 relative overflow-hidden">
             {/* Background */}
@@ -24,11 +28,10 @@ export function SubscribeCTA() {
                     transition={{ duration: 0.5 }}
                 >
                     <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                        매일 아침, 시장 인사이트를 받아보세요
+                        {t("subscribeCta")}
                     </h2>
                     <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                        텔레그램 채널과 이메일 뉴스레터로 매일 아침 시장 분석 리포트와
-                        트레이딩 아이디어를 무료로 제공합니다.
+                        {t("subscribeDescription")}
                     </p>
 
                     {/* Newsletter Form */}
@@ -39,7 +42,7 @@ export function SubscribeCTA() {
                     {/* Or divider */}
                     <div className="flex items-center gap-4 max-w-md mx-auto mb-8">
                         <div className="flex-1 h-px bg-border/50" />
-                        <span className="text-muted-foreground text-sm">또는</span>
+                        <span className="text-muted-foreground text-sm">or</span>
                         <div className="flex-1 h-px bg-border/50" />
                     </div>
 
@@ -51,16 +54,16 @@ export function SubscribeCTA() {
                             className="group px-8 py-4 rounded-lg bg-gradient-to-r from-[#229ED9] to-[#1E88C2] text-white font-semibold transition-all hover:shadow-xl hover:shadow-[#229ED9]/30 flex items-center gap-3"
                         >
                             <Send className="w-5 h-5" />
-                            텔레그램 채널 가입
+                            {tc("joinTelegram")}
                         </Link>
 
                         <span className="text-muted-foreground text-sm">
-                            <AnimatedCounter value={5000} />명 이상의 투자자가 함께합니다
+                            <AnimatedCounter value={5000} />+
                         </span>
                     </div>
                 </motion.div>
 
-                {/* Feature highlights with animated counters */}
+                {/* Feature highlights */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -69,9 +72,9 @@ export function SubscribeCTA() {
                     className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8"
                 >
                     {[
-                        { label: "매일 아침 시장 브리핑", value: "08:00 KST" },
-                        { label: "실시간 트레이딩 시그널", value: "즉시 알림" },
-                        { label: "주간 종합 리포트", value: "매주 일요일" },
+                        { label: "Daily Briefing", value: "08:00 KST" },
+                        { label: "Real-time Alerts", value: "Instant" },
+                        { label: "Weekly Report", value: "Every Sunday" },
                     ].map((item) => (
                         <div key={item.label} className="text-center">
                             <p className="text-2xl font-bold text-gradient-gold mb-1">

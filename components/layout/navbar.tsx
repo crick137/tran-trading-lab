@@ -2,38 +2,42 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Menu, X, BarChart3, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-const navItems = [
-    { href: "/", label: "홈" },
-    { href: "/start", label: "시작하기" },
-    {
-        label: "콘텐츠",
-        children: [
-            { href: "/research", label: "리서치" },
-            { href: "/blog", label: "블로그" },
-            { href: "/reports", label: "리포트" },
-            { href: "/briefings", label: "브리핑" },
-        ]
-    },
-    {
-        label: "학습",
-        children: [
-            { href: "/playbooks", label: "플레이북" },
-            { href: "/glossary", label: "용어집" },
-            { href: "/tools", label: "도구" },
-        ]
-    },
-    { href: "/community", label: "커뮤니티" },
-    { href: "/faq", label: "FAQ" },
-];
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const locale = useLocale();
+    const t = useTranslations("common");
+
+    const navItems = [
+        { href: `/${locale}`, label: t("home") },
+        { href: `/${locale}/start`, label: t("start") },
+        {
+            label: t("content"),
+            children: [
+                { href: `/${locale}/research`, label: t("research") },
+                { href: `/${locale}/blog`, label: t("blog") },
+                { href: `/${locale}/reports`, label: t("reports") },
+                { href: `/${locale}/briefings`, label: t("briefings") },
+            ]
+        },
+        {
+            label: t("learning"),
+            children: [
+                { href: `/${locale}/playbooks`, label: t("playbooks") },
+                { href: `/${locale}/glossary`, label: t("glossary") },
+                { href: `/${locale}/tools`, label: t("tools") },
+            ]
+        },
+        { href: `/${locale}/community`, label: t("community") },
+        { href: `/${locale}/faq`, label: t("faq") },
+    ];
 
     useEffect(() => {
         const handleScroll = () => {
@@ -56,7 +60,7 @@ export function Navbar() {
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
+                    <Link href={`/${locale}`} className="flex items-center gap-2 group">
                         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
                             <BarChart3 className="w-5 h-5 text-background" />
                         </div>
@@ -108,15 +112,16 @@ export function Navbar() {
                         ))}
                     </div>
 
-                    {/* CTA Button + Theme Toggle */}
+                    {/* CTA Button + Theme Toggle + Language Switcher */}
                     <div className="hidden lg:flex items-center gap-3">
+                        <LanguageSwitcher />
                         <ThemeToggle />
                         <Link
                             href="https://t.me/TranTradingLab"
                             target="_blank"
                             className="px-4 py-2 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-medium transition-all hover:shadow-lg hover:shadow-gold/30 glow-gold-hover"
                         >
-                            텔레그램 가입
+                            {t("joinTelegram")}
                         </Link>
                     </div>
 
@@ -166,13 +171,14 @@ export function Navbar() {
                                 )
                             ))}
                             <div className="flex items-center gap-3 mt-4 px-2">
+                                <LanguageSwitcher />
                                 <ThemeToggle />
                                 <Link
                                     href="https://t.me/TranTradingLab"
                                     target="_blank"
                                     className="flex-1 py-2 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-medium text-center"
                                 >
-                                    텔레그램 가입
+                                    {t("joinTelegram")}
                                 </Link>
                             </div>
                         </div>

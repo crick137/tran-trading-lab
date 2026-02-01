@@ -2,24 +2,27 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/blog/article-card";
 import { Search } from "lucide-react";
-import Link from "next/link"; // Added missing import
+import Link from "next/link";
 import { blogPosts } from "@/lib/blog-data";
-
-const categories = [
-    { id: "all", label: "전체" },
-    { id: "analysis", label: "시장 분석" },
-    { id: "strategy", label: "트레이딩 전략" },
-    { id: "news", label: "뉴스 번역" },
-];
 
 function BlogContent() {
     const searchParams = useSearchParams();
+    const t = useTranslations("blog");
+    const tc = useTranslations("common");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
+
+    const categories = [
+        { id: "all", label: t("categoryAll") },
+        { id: "analysis", label: t("categoryAnalysis") },
+        { id: "strategy", label: t("categoryStrategy") },
+        { id: "news", label: t("categoryNews") },
+    ];
 
     // Sync with URL params
     useEffect(() => {
@@ -32,31 +35,27 @@ function BlogContent() {
     // Handle Empty State
     if (!blogPosts || blogPosts.length === 0) {
         return (
-            <>
-                <Navbar />
-                <main className="pt-24 pb-16 min-h-screen">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
-                        <h1 className="text-4xl font-bold text-foreground mb-4">블로그</h1>
-                        <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
-                            콘텐츠 준비 중입니다.
+            <main className="pt-24 pb-16 min-h-screen">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+                    <h1 className="text-4xl font-bold text-foreground mb-4">{t("emptyTitle")}</h1>
+                    <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
+                        {t("emptySubtitle")}
+                    </p>
+                    <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
+                        <p className="text-muted-foreground text-lg mb-6">
+                            {t("noPosts")}<br />
+                            {t("telegramCta")}
                         </p>
-                        <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
-                            <p className="text-muted-foreground text-lg mb-6">
-                                아직 등록된 게시물이 없습니다.<br />
-                                텔레그램에서 가장 빠른 소식을 받아보세요.
-                            </p>
-                            <Link
-                                href="https://t.me/TranTradingLab"
-                                target="_blank"
-                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
-                            >
-                                텔레그램 채널 입장
-                            </Link>
-                        </div>
+                        <Link
+                            href="https://t.me/TranTradingLab"
+                            target="_blank"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
+                        >
+                            {tc("joinTelegramChannel")}
+                        </Link>
                     </div>
-                </main>
-                <Footer />
-            </>
+                </div>
+            </main>
         );
     }
 
@@ -74,11 +73,9 @@ function BlogContent() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-foreground mb-4">블로그</h1>
+                    <h1 className="text-4xl font-bold text-foreground mb-4">{t("title")}</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        시장 분석, 트레이딩 전략, 그리고 중국 금융 뉴스 번역까지.
-                        <br />
-                        투자에 필요한 모든 인사이트를 제공합니다.
+                        {t("subtitle")}
                     </p>
                 </div>
 
@@ -89,7 +86,7 @@ function BlogContent() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <input
                             type="text"
-                            placeholder="검색..."
+                            placeholder={tc("search")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-3 rounded-lg bg-card border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
@@ -123,7 +120,7 @@ function BlogContent() {
                 ) : (
                     <div className="text-center py-16">
                         <p className="text-muted-foreground">
-                            검색 결과가 없습니다. 다른 키워드로 검색해 보세요.
+                            {t("noResults")}
                         </p>
                     </div>
                 )}

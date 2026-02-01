@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Calendar, Clock } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { ArrowRight } from "lucide-react";
 import { ArticleCard } from "@/components/blog/article-card";
 import { motion } from "framer-motion";
-
-
 import { blogPosts } from "@/lib/blog-data";
 
 const latestArticles = blogPosts.slice(0, 3);
 
 export function LatestArticles() {
+    const locale = useLocale();
+    const t = useTranslations("home");
+    const tc = useTranslations("common");
+
     if (latestArticles.length === 0) {
         return (
             <section className="py-24 bg-background relative overflow-hidden">
@@ -23,19 +26,19 @@ export function LatestArticles() {
                         className="text-center mb-16"
                     >
                         <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                            최신 글
+                            {t("latestArticles")}
                         </h2>
                         <div className="w-20 h-1 bg-gradient-to-r from-gold to-gold-light mx-auto rounded-full mb-8" />
                         <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
                             <p className="text-muted-foreground text-lg mb-6">
-                                콘텐츠 준비 중입니다. 텔레그램에서 최신 업데이트를 받아보세요.
+                                {t("noArticles")}
                             </p>
                             <Link
                                 href="https://t.me/TranTradingLab"
                                 target="_blank"
                                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
                             >
-                                텔레그램 채널 입장
+                                {tc("joinTelegram")}
                                 <ArrowRight className="w-4 h-4" />
                             </Link>
                         </div>
@@ -52,17 +55,17 @@ export function LatestArticles() {
                 <div className="flex items-center justify-between mb-12">
                     <div>
                         <h2 className="text-3xl font-bold text-foreground mb-2">
-                            최신 글
+                            {t("latestArticles")}
                         </h2>
                         <p className="text-muted-foreground">
-                            시장 분석, 트레이딩 전략, 뉴스 번역
+                            {t("heroSubtitle")}
                         </p>
                     </div>
                     <Link
-                        href="/blog"
+                        href={`/${locale}/blog`}
                         className="hidden sm:flex items-center gap-2 text-gold hover:text-gold-light transition-colors group"
                     >
-                        모든 글 보기
+                        {t("viewAll")}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                 </div>
@@ -77,10 +80,10 @@ export function LatestArticles() {
                 {/* Mobile Link */}
                 <div className="mt-8 text-center sm:hidden">
                     <Link
-                        href="/blog"
+                        href={`/${locale}/blog`}
                         className="inline-flex items-center gap-2 text-gold hover:text-gold-light transition-colors"
                     >
-                        모든 글 보기
+                        {t("viewAll")}
                         <ArrowRight className="w-4 h-4" />
                     </Link>
                 </div>

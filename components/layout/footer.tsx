@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { BarChart3, Send, Twitter, Youtube } from "lucide-react";
 
 const socialLinks = [
@@ -7,52 +10,53 @@ const socialLinks = [
     { href: "https://youtube.com/@TranTradingLab", icon: Youtube, label: "YouTube" },
 ];
 
-const footerLinks = [
-    {
-        title: "콘텐츠",
-        links: [
-            { href: "/blog", label: "블로그" },
-            { href: "/blog?category=analysis", label: "시장 분석" },
-            { href: "/blog?category=strategy", label: "트레이딩 전략" },
-            { href: "/blog?category=news", label: "뉴스 번역" },
-            { href: "/reports", label: "리포트" },
-        ],
-    },
-    {
-        title: "학습",
-        links: [
-            { href: "/briefings", label: "브리핑" },
-            { href: "/playbooks", label: "플레이북" },
-            { href: "/glossary", label: "용어집" },
-        ],
-    },
-    {
-        title: "도구",
-        links: [
-            { href: "/tools", label: "도구 허브" },
-            { href: "/tools/position-sizing", label: "포지션 사이징" },
-            { href: "/tools/rr-calculator", label: "R:R 계산기" },
-            { href: "/tools/templates", label: "템플릿" },
-        ],
-    },
-    {
-        title: "정보",
-        links: [
-            { href: "/about", label: "소개" },
-            { href: "/faq", label: "FAQ" },
-            { href: "/contact", label: "문의하기" },
-        ],
-    },
-];
-
 export function Footer() {
+    const locale = useLocale();
+    const t = useTranslations("common");
+    const tf = useTranslations("footer");
+
+    const footerLinks = [
+        {
+            title: t("content"),
+            links: [
+                { href: `/${locale}/blog`, label: t("blog") },
+                { href: `/${locale}/research`, label: t("research") },
+                { href: `/${locale}/reports`, label: t("reports") },
+            ],
+        },
+        {
+            title: t("learning"),
+            links: [
+                { href: `/${locale}/briefings`, label: t("briefings") },
+                { href: `/${locale}/playbooks`, label: t("playbooks") },
+                { href: `/${locale}/glossary`, label: t("glossary") },
+            ],
+        },
+        {
+            title: t("tools"),
+            links: [
+                { href: `/${locale}/tools`, label: t("tools") },
+                { href: `/${locale}/tools/position-sizing`, label: "Position Sizing" },
+                { href: `/${locale}/tools/rr-calculator`, label: "R:R Calculator" },
+            ],
+        },
+        {
+            title: t("about"),
+            links: [
+                { href: `/${locale}/about`, label: t("about") },
+                { href: `/${locale}/faq`, label: t("faq") },
+                { href: `/${locale}/contact`, label: tf("contact") },
+            ],
+        },
+    ];
+
     return (
         <footer className="border-t border-border/50 bg-card/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
                     {/* Brand */}
                     <div className="col-span-2">
-                        <Link href="/" className="flex items-center gap-2 mb-4">
+                        <Link href={`/${locale}`} className="flex items-center gap-2 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
                                 <BarChart3 className="w-5 h-5 text-background" />
                             </div>
@@ -61,8 +65,7 @@ export function Footer() {
                             </span>
                         </Link>
                         <p className="text-muted-foreground text-sm leading-relaxed max-w-md mb-4">
-                            한국 개인 투자자를 위한 전문 금융 교육 플랫폼.
-                            시장 분석, SMC/ORB 트레이딩 전략, 중국 금융 뉴스 한국어 번역을 제공합니다.
+                            {tf("riskDisclaimer")}
                         </p>
 
                         {/* Social Links */}
@@ -104,14 +107,14 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <p className="text-sm text-muted-foreground">
-                        © {new Date().getFullYear()} TranTradingLab. All rights reserved.
+                        © {new Date().getFullYear()} TranTradingLab. {t("allRightsReserved")}
                     </p>
                     <div className="flex gap-4 text-sm text-muted-foreground">
-                        <Link href="/privacy" className="hover:text-foreground transition-colors">
-                            개인정보 처리방침
+                        <Link href={`/${locale}/privacy`} className="hover:text-foreground transition-colors">
+                            {tf("privacy")}
                         </Link>
-                        <Link href="/terms" className="hover:text-foreground transition-colors">
-                            이용약관
+                        <Link href={`/${locale}/terms`} className="hover:text-foreground transition-colors">
+                            {tf("terms")}
                         </Link>
                     </div>
                 </div>

@@ -1,0 +1,193 @@
+{
+    "common": {
+        "home": "Home",
+        "start": "Get Started",
+        "content": "Content",
+        "research": "Research",
+        "blog": "Blog",
+        "reports": "Reports",
+        "briefings": "Briefings",
+        "learning": "Learning",
+        "playbooks": "Playbooks",
+        "glossary": "Glossary",
+        "tools": "Tools",
+        "community": "Community",
+        "faq": "FAQ",
+        "about": "About",
+        "joinTelegram": "Join Telegram",
+        "joinTelegramChannel": "Join Telegram Channel",
+        "freeToJoin": "Free to join",
+        "allRightsReserved": "All Rights Reserved",
+        "free": "Free",
+        "preparing": "Coming Soon",
+        "lessons": " Lessons",
+        "more": " more...",
+        "startLearning": "Start Learning",
+        "contentPreparing": "Content Coming Soon",
+        "search": "Search..."
+    },
+    "home": {
+        "heroTitle": "TRAN Trading Lab",
+        "heroSubtitle": "SMC · Liquidity · Timing",
+        "heroDescription": "Institutional-grade market research platform for investors",
+        "latestArticles": "Latest Articles",
+        "viewAll": "View All",
+        "noArticles": "No articles published yet.",
+        "subscribeCta": "Subscribe to Newsletter",
+        "subscribeDescription": "Get weekly market analysis and insights."
+    },
+    "research": {
+        "title": "Research",
+        "subtitle": "In-depth market analysis reports based on Smart Money Concepts",
+        "noResearch": "No research available at this time."
+    },
+    "blog": {
+        "title": "Blog",
+        "subtitle": "Market analysis, trading strategies, and Chinese financial news translations. All the insights you need for investing.",
+        "emptyTitle": "Blog",
+        "emptySubtitle": "Content is being prepared.",
+        "noPosts": "No posts published yet.",
+        "telegramCta": "Get the latest updates on Telegram.",
+        "noResults": "No results found. Try a different keyword.",
+        "categoryAll": "All",
+        "categoryAnalysis": "Market Analysis",
+        "categoryStrategy": "Trading Strategy",
+        "categoryNews": "News Translation"
+    },
+    "reports": {
+        "title": "Market Reports",
+        "subtitle": "Archive of in-depth market analysis reports.",
+        "noReports": "No reports available at this time.",
+        "telegramCta": "Get the latest report updates on Telegram."
+    },
+    "briefings": {
+        "title": "Daily Briefings",
+        "subtitle": "Archive of daily market briefings delivered every morning.",
+        "noBriefings": "No briefings available at this time.",
+        "telegramCta": "Get real-time briefings on Telegram."
+    },
+    "playbooks": {
+        "title": "Learning Roadmap",
+        "subtitle": "From SMC to ORB to risk management - build your skills with structured trading curriculum.",
+        "smcTitle": "SMC Basics",
+        "smcDesc": "Understanding core Smart Money Concepts",
+        "smcTopics": [
+            "What is SMC?",
+            "Market Structure",
+            "Order Block",
+            "Fair Value Gap",
+            "Liquidity"
+        ],
+        "obTitle": "Order Block Advanced",
+        "obDesc": "OB identification and trading application",
+        "obTopics": [
+            "OB Types",
+            "Valid OB Conditions",
+            "Entry Timing",
+            "Real Examples"
+        ],
+        "fvgTitle": "FVG Mastery",
+        "fvgDesc": "Perfect utilization of Fair Value Gap",
+        "fvgTopics": [
+            "FVG Definition",
+            "Retracement Probability",
+            "FVG + OB Combination",
+            "Practical Application"
+        ],
+        "liquidityTitle": "Liquidity Hunting",
+        "liquidityDesc": "Identifying and utilizing liquidity zones",
+        "liquidityTopics": [
+            "What is Liquidity?",
+            "Sweep vs. Grab",
+            "BSL/SSL",
+            "Stop Hunt Patterns",
+            "Entry Strategy"
+        ],
+        "orbTitle": "ORB Strategy",
+        "orbDesc": "Mastering Opening Range Breakout strategy",
+        "orbTopics": [
+            "ORB Principles",
+            "Time Settings",
+            "Filtering Conditions",
+            "Entry/Exit",
+            "Korean Market Application",
+            "Backtesting"
+        ],
+        "riskTitle": "Risk Management",
+        "riskDesc": "Essential skills for capital preservation",
+        "riskTopics": [
+            "Position Sizing",
+            "R:R Calculation",
+            "Stop Loss Rules",
+            "Drawdown Management"
+        ]
+    },
+    "community": {
+        "title": "Link Hub",
+        "subtitle": "Link Hub",
+        "joinOurCommunity": "Join our global community",
+        "tgEnName": "TG-EN",
+        "tgEnLabel": "Join",
+        "tgEnDesc": "English Community",
+        "tgEnDescKr": "English Community",
+        "tgKrName": "TG-KR",
+        "tgKrLabel": "Join",
+        "tgKrDesc": "Korean Community",
+        "tgKrDescKr": "Korean Community",
+        "kakaoName": "KakaoTalk",
+        "kakaoLabel": "Open Chat",
+        "kakaoDesc": "Korean Open Chat",
+        "kakaoDescKr": "KakaoTalk Open Chat",
+        "startName": "Start Here",
+        "startLabel": "Beginner",
+        "startDesc": "Beginner's Guide",
+        "startDescKr": "Get Started"
+    },
+    "start": {
+        "title": "Get Started",
+        "subtitle": "Choose the path that fits your investment style. TranTradingLab will guide you step by step.",
+        "beginnerTitle": "Beginner Investor",
+        "beginnerSubtitle": "For those just starting out",
+        "traderTitle": "Day/Swing Trader",
+        "traderSubtitle": "Interested in technical analysis",
+        "macroTitle": "Macro Economics",
+        "macroSubtitle": "Need global market analysis",
+        "beginnerStep1": "Read Sample Report",
+        "beginnerStep2": "Check Glossary",
+        "beginnerStep3": "Learn SMC Basics",
+        "beginnerStep4": "Join Telegram",
+        "traderStep1": "Learn SMC/ORB Strategy",
+        "traderStep2": "Use Tools",
+        "traderStep3": "Get Daily Briefings",
+        "traderStep4": "Set Real-time Alerts",
+        "macroStep1": "Subscribe Weekly Reports",
+        "macroStep2": "China News Translation",
+        "macroStep3": "Check Economic Calendar",
+        "macroStep4": "Subscribe Newsletter",
+        "whatWeProvide": "What We Provide",
+        "whatWeDoNotProvide": "What We Don't Provide",
+        "provide1": "Daily market analysis and briefings",
+        "provide2": "SMC/ORB trading strategy education",
+        "provide3": "Chinese financial news translation",
+        "provide4": "Position sizing and R:R calculator",
+        "provide5": "Weekly comprehensive reports",
+        "provide6": "Telegram community access",
+        "notProvide1": "Buy/sell recommendations (not investment advice)",
+        "notProvide2": "Profit guarantees",
+        "notProvide3": "1:1 investment consulting",
+        "notProvide4": "Automated trading signals",
+        "disclaimer": "All investment decisions should be made at your own judgment and responsibility.",
+        "readFirstReport": "Read your first report",
+        "viewSampleReport": "View Sample Report"
+    },
+    "faq": {
+        "title": "Frequently Asked Questions",
+        "subtitle": "Common questions about TranTradingLab."
+    },
+    "footer": {
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service",
+        "contact": "Contact",
+        "riskDisclaimer": "Edu only – NFA."
+    }
+}

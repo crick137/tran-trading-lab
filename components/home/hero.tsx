@@ -2,9 +2,32 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, TrendingUp, BarChart3, Newspaper } from "lucide-react";
 
 export function Hero() {
+    const locale = useLocale();
+    const t = useTranslations("home");
+    const tc = useTranslations("common");
+
+    const features = [
+        {
+            icon: TrendingUp,
+            titleKey: "research",
+            descKey: "researchDesc",
+        },
+        {
+            icon: BarChart3,
+            titleKey: "strategy",
+            descKey: "strategyDesc",
+        },
+        {
+            icon: Newspaper,
+            titleKey: "news",
+            descKey: "newsDesc",
+        },
+    ];
+
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-grid">
             {/* Animated Background Elements */}
@@ -23,7 +46,7 @@ export function Hero() {
                         className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/50 text-sm text-muted-foreground mb-8"
                     >
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        한국 투자자를 위한 전문 금융 교육
+                        {t("heroDescription")}
                     </motion.div>
 
                     {/* Main Heading */}
@@ -33,9 +56,7 @@ export function Hero() {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight mb-6"
                     >
-                        <span className="text-foreground">스마트한 투자,</span>
-                        <br />
-                        <span className="text-gradient-gold">TranTradingLab</span>
+                        <span className="text-gradient-gold">{t("heroTitle")}</span>
                     </motion.h1>
 
                     {/* Subtitle */}
@@ -45,9 +66,7 @@ export function Hero() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
                     >
-                        시장 분석, SMC/ORB 트레이딩 전략, 중국 금융 뉴스 번역까지.
-                        <br className="hidden sm:block" />
-                        전문적인 인사이트로 투자 결정을 도와드립니다.
+                        {t("heroSubtitle")}
                     </motion.p>
 
                     {/* CTA Buttons */}
@@ -58,10 +77,10 @@ export function Hero() {
                         className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                     >
                         <Link
-                            href="/blog"
+                            href={`/${locale}/blog`}
                             className="group px-8 py-4 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-semibold transition-all hover:shadow-xl hover:shadow-gold/30 flex items-center gap-2"
                         >
-                            블로그 보기
+                            {tc("blog")}
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </Link>
                         <Link
@@ -69,7 +88,7 @@ export function Hero() {
                             target="_blank"
                             className="px-8 py-4 rounded-lg border border-border hover:border-gold/50 text-foreground font-semibold transition-all hover:bg-card"
                         >
-                            텔레그램 가입
+                            {tc("joinTelegram")}
                         </Link>
                     </motion.div>
                 </div>
@@ -84,20 +103,20 @@ export function Hero() {
                     {[
                         {
                             icon: TrendingUp,
-                            title: "시장 분석",
-                            description: "매일 업데이트되는 전문 시장 분석 리포트",
+                            title: tc("research"),
+                            description: t("heroDescription"),
                         },
                         {
                             icon: BarChart3,
-                            title: "트레이딩 전략",
-                            description: "SMC, ORB 등 검증된 트레이딩 전략 교육",
+                            title: tc("playbooks"),
+                            description: t("heroSubtitle"),
                         },
                         {
                             icon: Newspaper,
-                            title: "뉴스 번역",
-                            description: "중국 금융 뉴스의 신속한 한국어 번역",
+                            title: tc("blog"),
+                            description: t("heroDescription"),
                         },
-                    ].map((feature, index) => (
+                    ].map((feature) => (
                         <div
                             key={feature.title}
                             className="group p-6 rounded-xl bg-card/50 border border-border/50 card-hover border-glow"
