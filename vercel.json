@@ -6,16 +6,32 @@
             "schedule": "0 * * * *"
         },
         {
+            "path": "/api/cron/publish-news-en",
+            "schedule": "30 * * * *"
+        },
+        {
             "path": "/api/cron/whale-alerts",
             "schedule": "0 3 * * *"
+        },
+        {
+            "path": "/api/cron/whale-alerts-en",
+            "schedule": "30 3 * * *"
         },
         {
             "path": "/api/cron/economic-calendar",
             "schedule": "30 22 * * *"
         },
         {
+            "path": "/api/cron/economic-calendar-en",
+            "schedule": "0 23 * * *"
+        },
+        {
             "path": "/api/cron/fear-greed-index",
             "schedule": "0 23 * * *"
+        },
+        {
+            "path": "/api/cron/fear-greed-index-en",
+            "schedule": "30 23 * * *"
         },
         {
             "path": "/api/cron/market-report",
@@ -24,6 +40,10 @@
         {
             "path": "/api/cron/price-alert",
             "schedule": "0 */4 * * *"
+        },
+        {
+            "path": "/api/cron/price-alert-en",
+            "schedule": "30 */4 * * *"
         },
         {
             "path": "/api/cron/weekly-report",
