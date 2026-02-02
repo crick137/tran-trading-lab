@@ -1,5 +1,5 @@
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNELS = ['@http4477', '@TranTradingLab', '@TranTradingLabNews']
+const CHANNELS = ['@TranTradingLabKR', '@TranTradingLab', '@TranTradingLabNews']
 
 if (!TELEGRAM_BOT_TOKEN) {
     console.error('❌ TELEGRAM_BOT_TOKEN environment variable is required')

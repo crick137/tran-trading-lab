@@ -7,7 +7,7 @@ export const config = {
 };
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '@http4477';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '@TranTradingLabKR';
 
 // 重要经济事件数据库 (静态定义常见事件)
 const RECURRING_EVENTS = {

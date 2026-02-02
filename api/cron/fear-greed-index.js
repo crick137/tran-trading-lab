@@ -1,13 +1,13 @@
 /**
  * 😱😈 TRAN 공포/탐욕 지수
  * Vercel Cron: 매일 08:00 (KST) 실행
- * 채널: @http4477
+ * 채널: @TranTradingLabKR
  * 
  * 암호화폐 시장의 공포/탐욕 지수를 알립니다
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@TranTradingLabKR'
 
 async function getFearAndGreed() {
     try {

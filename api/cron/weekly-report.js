@@ -7,7 +7,7 @@ export const config = {
 };
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7850025643:AAGdBsxu9XgKOkYf3g5bXOHjTgpNh6frVJ8';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '@http4477';
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '@TranTradingLabKR';
 
 const SYMBOLS = {
     crypto: ['BTC-USD', 'ETH-USD', 'XRP-USD'],

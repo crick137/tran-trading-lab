@@ -1,7 +1,7 @@
 /**
  * 🐋 TRAN 고래 알림
  * Vercel Cron: 매일 1회 실행 (UTC 03:00 = KST 12:00)
- * 채널: @http4477
+ * 채널: @TranTradingLabKR
  * 
  * 대형 거래 감지 및 알림
  */
@@ -9,7 +9,7 @@
 import { kv } from '@vercel/kv'
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@http4477'
+const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@TranTradingLabKR'
 
 if (!TELEGRAM_BOT_TOKEN) {
     throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
@@ -39,13 +39,13 @@ async function addRecentAlert(alertId) {
         if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
             const recentAlerts = await getRecentAlerts()
             recentAlerts.add(alertId)
-            
+
             // 限制大小
             if (recentAlerts.size > MAX_RECENT) {
                 const first = recentAlerts.values().next().value
                 recentAlerts.delete(first)
             }
-            
+
             await kv.set(ALERTS_STORAGE_KEY, Array.from(recentAlerts), { ex: 86400 }) // 24小时过期
             return true
         }

@@ -28,7 +28,7 @@ export default function CommunityPage() {
             description: t("tgKrDesc"),
             descriptionKr: t("tgKrDescKr"),
             icon: Send,
-            href: "https://t.me/http4477",
+            href: "https://t.me/TranTradingLabKR",
             color: "from-sky-400 to-blue-500",
             bgGlow: "bg-sky-500/20",
         },
