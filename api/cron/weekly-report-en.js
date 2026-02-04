@@ -1,24 +1,24 @@
 /**
- * 📊 TRAN 주간 시장 리뷰 (Weekly Report)
- * Vercel Cron: 일요일 20:00 KST (11:00 UTC Sunday)
- * 채널: @TranTradingLabKR
+ * 📊 TRAN Weekly Market Review (English)
+ * Vercel Cron: Sunday 20:30 KST (11:30 UTC Sunday)
+ * Channel: @TranTradingLabEN
  * 
- * 구조:
- * - 이번 주 요약 (주요 이벤트/자금 흐름)
- * - 핵심 가격 수준
- * - 다음 주 시나리오 (상승/하락/횡보)
- * - 리스크 이벤트 캘린더
+ * Structure:
+ * - This week summary (events/flows)
+ * - Key price levels
+ * - Next week scenarios (up/down/range)
+ * - Risk event calendar
  */
 
 import {
     getKSTTimeString,
     sendTelegram,
     getFearGreedData,
-    CTA_KR
+    CTA_EN
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabEN';
 
 // ============================================
 // Data Fetching
@@ -68,7 +68,7 @@ async function fetchWeeklyData(symbol) {
 function getWeekInfo() {
     const now = new Date();
     const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const month = kst.getMonth() + 1;
+    const month = kst.toLocaleDateString('en-US', { month: 'long' });
     const weekNum = Math.ceil(kst.getDate() / 7);
     return { month, weekNum };
 }
@@ -87,19 +87,19 @@ function generateScenarios(btc) {
 
     return [
         {
-            type: '상승',
-            condition: `$${formatPrice(resistance)} 돌파 + 거래량 증가`,
-            target: `$${formatPrice(resistance + 5000)} 1차 목표`
+            type: 'Bullish',
+            condition: `Break $${formatPrice(resistance)} with volume`,
+            target: `$${formatPrice(resistance + 5000)} first target`
         },
         {
-            type: '하락',
-            condition: `$${formatPrice(support)} 이탈 + 공포지수 25 이하`,
-            target: `$${formatPrice(support - 5000)} 지지 테스트`
+            type: 'Bearish',
+            condition: `Lose $${formatPrice(support)} + F&G below 25`,
+            target: `$${formatPrice(support - 5000)} support test`
         },
         {
-            type: '횡보',
-            condition: `$${formatPrice(support)} - $${formatPrice(resistance)} 레인지 유지`,
-            target: `방향성 탐색 지속, 이벤트 대기`
+            type: 'Range',
+            condition: `Hold $${formatPrice(support)} - $${formatPrice(resistance)}`,
+            target: `Consolidation, await catalyst`
         }
     ];
 }
@@ -111,15 +111,14 @@ function getNextWeekEvents() {
     const nextWeekStart = new Date(kstNow.getTime() + 7 * 24 * 60 * 60 * 1000);
     const nextDay = nextWeekStart.getDate();
 
-    // Simplified event prediction
     if (nextDay <= 7) {
-        events.push('월: ISM 제조업 PMI');
+        events.push('Mon: ISM Manufacturing PMI');
     }
     if (nextDay >= 10 && nextDay <= 15) {
-        events.push('수: 🇺🇸 CPI 발표');
+        events.push('Wed: 🇺🇸 CPI Release');
     }
-    events.push('목: 신규 실업수당 청구');
-    events.push('금: BTC ETF 주간 자금 흐름 집계');
+    events.push('Thu: Initial Jobless Claims');
+    events.push('Fri: BTC ETF Weekly Flow Summary');
 
     return events.slice(0, 3);
 }
@@ -127,54 +126,52 @@ function getNextWeekEvents() {
 async function generateMessage() {
     const { month, weekNum } = getWeekInfo();
 
-    // Fetch market data
-    const [btc, eth, usdkrw, kospi, fng] = await Promise.all([
+    const [btc, eth, dxy, fng] = await Promise.all([
         fetchWeeklyData('BTC-USD'),
         fetchWeeklyData('ETH-USD'),
-        fetchWeeklyData('USDKRW=X'),
-        fetchWeeklyData('^KS11'),
+        fetchWeeklyData('DX-Y.NYB'),
         getFearGreedData()
     ]);
 
-    let msg = `📊 <b>주간 시장 리뷰</b> | ${month}월 ${weekNum}주차\n\n`;
+    let msg = `📊 <b>Weekly Market Review</b> | ${month} Week ${weekNum}\n\n`;
     msg += `━━━━━━━━━━━━━━━━\n\n`;
 
-    // 이번 주 요약
-    msg += `📌 <b>이번 주 요약</b>\n`;
+    // This week summary
+    msg += `📌 <b>This Week Summary</b>\n`;
 
     if (btc) {
         const btcEmoji = btc.change > 0 ? '🔺' : '🔻';
-        const trend = btc.change > 3 ? '강세' : btc.change < -3 ? '약세' : '횡보';
-        msg += `• BTC ${trend} 주간 (${btcEmoji}${btc.change > 0 ? '+' : ''}${btc.change.toFixed(1)}%)\n`;
+        const trend = btc.change > 3 ? 'bullish' : btc.change < -3 ? 'bearish' : 'ranging';
+        msg += `• BTC ${trend} week (${btcEmoji}${btc.change > 0 ? '+' : ''}${btc.change.toFixed(1)}%)\n`;
     }
     if (eth) {
         const ethEmoji = eth.change > 0 ? '🔺' : '🔻';
         msg += `• ETH: ${ethEmoji}${eth.change > 0 ? '+' : ''}${eth.change.toFixed(1)}%\n`;
     }
     if (fng) {
-        const sentimentTrend = fng.change > 5 ? '회복' : fng.change < -5 ? '악화' : '유지';
-        msg += `• 시장 심리 ${sentimentTrend} (공포지수 ${fng.value} ${fng.emoji})\n`;
+        const sentimentTrend = fng.change > 5 ? 'recovering' : fng.change < -5 ? 'deteriorating' : 'stable';
+        msg += `• Sentiment ${sentimentTrend} (F&G: ${fng.value} ${fng.emoji})\n`;
     }
-    if (usdkrw) {
-        const krwEmoji = usdkrw.change > 0 ? '📈' : '📉';
-        msg += `• USD/KRW ${krwEmoji} ${formatPrice(usdkrw.current, 2)}원\n`;
+    if (dxy) {
+        const dxyEmoji = dxy.change > 0 ? '📈' : '📉';
+        msg += `• DXY ${dxyEmoji} ${formatPrice(dxy.current, 2)}\n`;
     }
 
     msg += `\n`;
 
-    // 핵심 가격 수준
-    msg += `📍 <b>핵심 수준</b>\n`;
+    // Key levels
+    msg += `📍 <b>Key Levels</b>\n`;
     if (btc) {
-        msg += `• BTC 저항: $${formatPrice(btc.high)} / 지지: $${formatPrice(btc.low)}\n`;
+        msg += `• BTC Resistance: $${formatPrice(btc.high)} / Support: $${formatPrice(btc.low)}\n`;
     }
     if (eth) {
-        msg += `• ETH 저항: $${formatPrice(eth.high)} / 지지: $${formatPrice(eth.low)}\n`;
+        msg += `• ETH Resistance: $${formatPrice(eth.high)} / Support: $${formatPrice(eth.low)}\n`;
     }
 
     msg += `\n`;
 
-    // 다음 주 시나리오
-    msg += `🎯 <b>다음 주 시나리오</b>\n`;
+    // Next week scenarios
+    msg += `🎯 <b>Next Week Scenarios</b>\n`;
     const scenarios = generateScenarios(btc);
     scenarios.forEach((s, i) => {
         const icons = ['1️⃣', '2️⃣', '3️⃣'];
@@ -184,18 +181,18 @@ async function generateMessage() {
 
     msg += `\n`;
 
-    // 리스크 이벤트
-    msg += `📅 <b>주요 리스크 이벤트</b>\n`;
+    // Risk events
+    msg += `📅 <b>Key Risk Events</b>\n`;
     const nextEvents = getNextWeekEvents();
     nextEvents.forEach(e => {
         msg += `• ${e}\n`;
     });
 
     msg += `\n━━━━━━━━━━━━━━━━\n`;
-    msg += `💡 다음 주도 성공적인 트레이딩 되세요!\n`;
+    msg += `💡 Good luck trading next week!\n`;
     msg += `⏰ ${getKSTTimeString()}\n`;
-    msg += CTA_KR;
-    msg += `\n\n#주간리뷰 #BTC #ETH #TranTradingLab`;
+    msg += CTA_EN;
+    msg += `\n\n#WeeklyReview #BTC #ETH #TranTradingLab`;
 
     return msg;
 }
@@ -213,13 +210,13 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log('📊 Generating weekly report...');
+        console.log('📊 Generating weekly report (EN)...');
 
         const message = await generateMessage();
         const result = await sendTelegram(CHANNEL_ID, message, TELEGRAM_BOT_TOKEN);
 
         if (result.ok) {
-            console.log('✅ Weekly report sent successfully');
+            console.log('✅ Weekly report (EN) sent successfully');
         }
 
         return res.status(200).json({
@@ -230,7 +227,7 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        console.error('Weekly report error:', error);
+        console.error('Weekly report EN error:', error);
         return res.status(500).json({ error: error.message });
     }
 }

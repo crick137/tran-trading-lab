@@ -1,182 +1,243 @@
 /**
- * 🐋 Whale Alerts (English)
- * Vercel Cron: Daily execution
+ * 🐋 TRAN Whale Alert (English)
+ * Vercel Cron: Every 6 hours (30 */6 * * * UTC)
  * Channel: @TranTradingLabEN
  * 
- * Large transaction detection and alerts
- */
+ * Conditions:
+ * - Amount ≥ $50M
+    * - Exchange - related transfers only
+        * 
+ * Limits:
+ * - Max 2 / day(whale type)
+    * - Max 4 / day trigger total
+        * - Dedup by txhash
+            */
 
-import { kv } from '@vercel/kv'
+import {
+    getKSTDisplayDateEN,
+    getKSTTimeString,
+    canSendTrigger,
+    incrementTrigger,
+    isDuplicate,
+    markSent,
+    getWhaleDedupKey,
+    sendTelegram,
+    CTA_EN
+} from '../../lib/telegram-utils.js';
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const CHANNEL_ID = '@TranTradingLabEN'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHANNEL_ID = '@TranTradingLabEN';
 
-if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
-}
+const MIN_AMOUNT_USD = 50000000;
 
-// Minimum alert amount (USD)
-const MIN_ALERT_AMOUNT = 10000000 // $10M
+const EXCHANGE_PATTERNS = {
+    'binance': ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', 'bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97'],
+    'coinbase': ['1FzWLkAahHooV3kzTgyx6qsswXJ6sCXkSR'],
+    'kraken': ['3AfpNBjcGCdpqXpBs8bhWEcbNmP6v7Sg38'],
+    'bitfinex': ['3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r'],
+    'huobi': ['1HckjUpRGcrrRAtFaaCAUaGjsPx9oYmLaZ'],
+    'okx': ['3LYJfcfHPXYJreMsASk2jkn69LTEYQgmBp']
+};
 
-// Duplicate prevention (Vercel KV)
-const ALERTS_STORAGE_KEY = 'whale-alerts-en:recent-alerts'
-const MAX_RECENT = 100
+// ============================================
+// Whale Detection
+// ============================================
 
-async function getRecentAlerts() {
+async function getBTCPrice() {
     try {
-        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            const stored = await kv.get(ALERTS_STORAGE_KEY)
-            return new Set(stored || [])
-        }
-    } catch (e) {
-        console.warn('KV storage not available, using fallback:', e.message)
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        return parseFloat(data.price);
+    } catch {
+        return 95000;
     }
-    return new Set()
 }
 
-async function addRecentAlert(alertId) {
-    try {
-        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            const recentAlerts = await getRecentAlerts()
-            recentAlerts.add(alertId)
+function isExchangeAddress(address) {
+    if (!address) return { isExchange: false };
 
-            if (recentAlerts.size > MAX_RECENT) {
-                const first = recentAlerts.values().next().value
-                recentAlerts.delete(first)
+    for (const [exchange, wallets] of Object.entries(EXCHANGE_PATTERNS)) {
+        for (const wallet of wallets) {
+            if (address.toLowerCase().includes(wallet.slice(0, 10).toLowerCase())) {
+                return { isExchange: true, exchange };
             }
-
-            await kv.set(ALERTS_STORAGE_KEY, Array.from(recentAlerts), { ex: 86400 })
-            return true
         }
-    } catch (e) {
-        console.warn('KV storage not available:', e.message)
     }
-    return false
+
+    if (address.includes('binance') || address.includes('coinbase')) {
+        return { isExchange: true, exchange: 'Unknown Exchange' };
+    }
+
+    return { isExchange: false };
 }
 
 async function getRecentLargeTransactions() {
-    const transactions = []
+    const transactions = [];
 
-    // Bitcoin large transactions (Blockchain.info API)
     try {
-        const btcRes = await fetch('https://blockchain.info/unconfirmed-transactions?format=json')
-        const btcData = await btcRes.json()
+        const btcPrice = await getBTCPrice();
+        const btcRes = await fetch('https://blockchain.info/unconfirmed-transactions?format=json', {
+            signal: AbortSignal.timeout(15000)
+        });
+        const btcData = await btcRes.json();
 
-        // Get BTC price
-        const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-        const priceData = await priceRes.json()
-        const btcPrice = parseFloat(priceData.price)
+        for (const tx of btcData.txs?.slice(0, 100) || []) {
+            const outputValue = tx.out?.reduce((sum, o) => sum + (o.value || 0), 0) / 1e8;
+            const usdValue = outputValue * btcPrice;
 
-        for (const tx of btcData.txs?.slice(0, 50) || []) {
-            const outputValue = tx.out?.reduce((sum, o) => sum + (o.value || 0), 0) / 1e8
-            const usdValue = outputValue * btcPrice
+            if (usdValue >= MIN_AMOUNT_USD) {
+                const fromAddr = tx.inputs?.[0]?.prev_out?.addr || '';
+                const toAddr = tx.out?.[0]?.addr || '';
 
-            if (usdValue >= MIN_ALERT_AMOUNT) {
-                transactions.push({
-                    id: tx.hash,
-                    coin: 'BTC',
-                    coinName: 'Bitcoin',
-                    amount: outputValue,
-                    amountUsd: usdValue,
-                    from: tx.inputs?.[0]?.prev_out?.addr?.slice(0, 8) + '...' || 'Unknown',
-                    to: tx.out?.[0]?.addr?.slice(0, 8) + '...' || 'Unknown',
-                    type: 'transfer',
-                    timestamp: tx.time * 1000
-                })
+                const fromCheck = isExchangeAddress(fromAddr);
+                const toCheck = isExchangeAddress(toAddr);
+
+                if (fromCheck.isExchange || toCheck.isExchange) {
+                    transactions.push({
+                        id: tx.hash,
+                        coin: 'BTC',
+                        amount: outputValue,
+                        amountUsd: usdValue,
+                        from: fromAddr ? fromAddr.slice(0, 8) + '...' : 'Unknown',
+                        to: toAddr ? toAddr.slice(0, 8) + '...' : 'Unknown',
+                        direction: toCheck.isExchange ? 'to_exchange' : 'from_exchange',
+                        exchange: toCheck.exchange || fromCheck.exchange || 'Exchange',
+                        timestamp: tx.time * 1000
+                    });
+                }
             }
         }
     } catch (e) {
-        console.error('BTC whale check error:', e.message)
+        console.error('Whale detection error:', e.message);
     }
 
-    return transactions
+    return transactions;
 }
 
-function formatWhaleAlert(tx) {
-    const emoji = tx.amountUsd >= 50000000 ? '🐳' : '🐋'
-    const size = tx.amountUsd >= 100000000 ? 'MEGA' : tx.amountUsd >= 50000000 ? 'LARGE' : 'MEDIUM'
+// ============================================
+// Message Generation
+// ============================================
 
-    const timeStr = new Date(tx.timestamp).toLocaleString('en-US', {
-        timeZone: 'UTC',
-        hour: '2-digit', minute: '2-digit'
-    })
-
-    const amountFormatted = tx.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })
-    const usdFormatted = (tx.amountUsd / 1000000).toFixed(1)
-
-    return `${emoji} ${size} Whale Movement Detected!
-
-━━━━━━━━━━━━━━━━━━━━
-
-💰 ${tx.coinName} ${amountFormatted} ${tx.coin}
-💵 ~$${usdFormatted}M
-
-📤 From: ${tx.from}
-📥 To: ${tx.to}
-
-━━━━━━━━━━━━━━━━━━━━
-
-⏰ ${timeStr} (UTC)
-🔗 Tx: ${tx.id?.slice(0, 16)}...
-
-#WhaleAlert #${tx.coinName} #TranTradingLab`
-}
-
-async function sendAlert(message) {
-    try {
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: CHANNEL_ID,
-                text: message
-            })
-        })
-        const result = await res.json()
-        return result.ok
-    } catch (e) {
-        console.error('Telegram send error:', e.message)
-        return false
+function getSemanticMessage(direction) {
+    if (direction === 'to_exchange') {
+        return {
+            icon: '📥',
+            label: 'Deposit to Exchange',
+            interpretation: '⚠️ Potential selling pressure ↑\n   (May also be internal consolidation)',
+            action: '💡 Consider holding or partial profit-taking'
+        };
+    } else {
+        return {
+            icon: '📤',
+            label: 'Withdrawal from Exchange',
+            interpretation: '📈 Potential selling pressure ↓\n   (May also be wallet migration)',
+            action: '💡 Positive signal but not sufficient for buy decision alone'
+        };
     }
 }
+
+function generateMessage(tx) {
+    const dateStr = getKSTDisplayDateEN();
+    const semantic = getSemanticMessage(tx.direction);
+
+    const amountStr = tx.amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const usdStr = (tx.amountUsd / 1000000).toFixed(0);
+
+    let msg = `🐋 <b>Large Transaction Detected</b> | ${tx.coin}\n\n`;
+    msg += `━━━━━━━━━━━━━━━━\n\n`;
+
+    msg += `💰 <b>${amountStr} ${tx.coin}</b> (~$${usdStr}M)\n`;
+    msg += `${semantic.icon} <b>${semantic.label}</b>\n\n`;
+
+    msg += `📍 ${tx.from} → ${tx.to}\n`;
+    msg += `🏦 Exchange: ${tx.exchange}\n\n`;
+
+    msg += `${semantic.interpretation}\n\n`;
+    msg += `${semantic.action}\n\n`;
+
+    msg += `<i>※ Whale movements alone are not sufficient for trading decisions.\n   Always combine with other indicators.</i>\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `⏰ ${getKSTTimeString()}\n`;
+    msg += CTA_EN;
+    msg += `\n\n#WhaleAlert #${tx.coin} #TranTradingLab`;
+
+    return msg;
+}
+
+// ============================================
+// Handler
+// ============================================
 
 export default async function handler(req, res) {
-    const authHeader = req.headers.authorization
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
-        return res.status(401).json({ error: 'Unauthorized' })
+    const authHeader = req.headers.authorization;
+    const isTest = req.url?.includes('test=true');
+
+    if (!isTest && authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-        console.log('Checking for whale transactions...')
+        console.log('🐋 Checking for whale transactions (EN)...');
 
-        const transactions = await getRecentLargeTransactions()
-        const recentAlerts = await getRecentAlerts()
+        const canSend = await canSendTrigger(CHANNEL_ID, 'whale');
+        if (!canSend && !isTest) {
+            console.log('Whale alert EN: Rate limit reached');
+            return res.status(200).json({
+                success: false,
+                reason: 'Rate limit reached'
+            });
+        }
 
-        let alertsSent = 0
+        const transactions = await getRecentLargeTransactions();
+
+        if (transactions.length === 0) {
+            return res.status(200).json({
+                success: true,
+                alertsSent: 0,
+                message: 'No whale transactions found'
+            });
+        }
+
+        let alertsSent = 0;
 
         for (const tx of transactions) {
-            if (recentAlerts.has(tx.id)) continue
+            const dedupKey = getWhaleDedupKey(tx.id);
+            const isDup = await isDuplicate(dedupKey);
 
-            const message = formatWhaleAlert(tx)
-            const sent = await sendAlert(message)
-
-            if (sent) {
-                alertsSent++
-                await addRecentAlert(tx.id)
+            if (isDup) {
+                continue;
             }
 
-            console.log(`Whale alert for ${tx.coinName}: ${sent ? 'Sent' : 'Failed'}`)
+            const stillCanSend = await canSendTrigger(CHANNEL_ID, 'whale');
+            if (!stillCanSend && !isTest) {
+                break;
+            }
+
+            const message = generateMessage(tx);
+            const result = await sendTelegram(CHANNEL_ID, message, TELEGRAM_BOT_TOKEN);
+
+            if (result.ok) {
+                await Promise.all([
+                    incrementTrigger(CHANNEL_ID, 'whale'),
+                    markSent(dedupKey)
+                ]);
+                alertsSent++;
+                console.log(`✅ Sent whale alert (EN) for ${tx.amount} ${tx.coin}`);
+            }
+
+            if (alertsSent >= 1) break;
         }
 
         return res.status(200).json({
             success: true,
-            transactionsFound: transactions.length,
             alertsSent,
+            totalFound: transactions.length,
             timestamp: new Date().toISOString()
-        })
+        });
 
     } catch (error) {
-        console.error('Whale alert error:', error)
-        return res.status(500).json({ error: error.message })
+        console.error('Whale alert EN error:', error);
+        return res.status(500).json({ error: error.message });
     }
 }

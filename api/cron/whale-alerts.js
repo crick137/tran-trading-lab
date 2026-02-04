@@ -1,195 +1,176 @@
 /**
- * 🐋 TRAN 고래 알림
- * Vercel Cron: 매일 1회 실행 (UTC 03:00 = KST 12:00)
+ * 🐋 TRAN 고래 알림 (Whale Alert)
+ * Vercel Cron: 6시간마다 실행 (0 */6 * * * UTC)
  * 채널: @TranTradingLabKR
  * 
- * 대형 거래 감지 및 알림
- */
+ * 조건:
+ * - 금액 ≥ $50M
+    * - 거래소 관련 전송만(입금 / 출금)
+        * 
+ * 제한:
+ * - 일일 최대 2회(whale 타입)
+    * - 트리거 총합 4회(whale + volatility)
+        * - txhash로 중복 방지
+            */
 
-import { kv } from '@vercel/kv'
+import { kv } from '@vercel/kv';
+import {
+    getKSTDisplayDate,
+    getKSTTimeString,
+    canSendTrigger,
+    incrementTrigger,
+    isDuplicate,
+    markSent,
+    getWhaleDedupKey,
+    sendTelegram,
+    CTA_KR
+} from '../../lib/telegram-utils.js';
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const NEWS_CHANNEL_ID = process.env.TELEGRAM_MAIN_CHANNEL_ID || '@TranTradingLabKR'
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const CHANNEL_ID = '@TranTradingLabKR';
 
-if (!TELEGRAM_BOT_TOKEN) {
-    throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
-}
+// Minimum amount for alert (USD)
+const MIN_AMOUNT_USD = 50000000; // $50M
 
-// 최소 알림 금액 (USD)
-const MIN_ALERT_AMOUNT = 10000000 // $10M
+// Known exchange wallet patterns (simplified)
+const EXCHANGE_PATTERNS = {
+    'binance': ['34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', 'bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97'],
+    'coinbase': ['1FzWLkAahHooV3kzTgyx6qsswXJ6sCXkSR'],
+    'kraken': ['3AfpNBjcGCdpqXpBs8bhWEcbNmP6v7Sg38'],
+    'bitfinex': ['3D2oetdNuZUqQHPJmcMDDHYoqkyNVsFk9r'],
+    'huobi': ['1HckjUpRGcrrRAtFaaCAUaGjsPx9oYmLaZ'],
+    'okx': ['3LYJfcfHPXYJreMsASk2jkn69LTEYQgmBp']
+};
 
-// 중복 방지를 위한 최근 알림 해시 (Vercel KV)
-const ALERTS_STORAGE_KEY = 'whale-alerts:recent-alerts'
-const MAX_RECENT = 100
+// ============================================
+// Whale Detection
+// ============================================
 
-async function getRecentAlerts() {
+async function getBTCPrice() {
     try {
-        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            const stored = await kv.get(ALERTS_STORAGE_KEY)
-            return new Set(stored || [])
-        }
-    } catch (e) {
-        console.warn('KV storage not available, using fallback:', e.message)
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+        const data = await res.json();
+        return parseFloat(data.price);
+    } catch {
+        return 95000; // Fallback
     }
-    return new Set()
 }
 
-async function addRecentAlert(alertId) {
-    try {
-        if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-            const recentAlerts = await getRecentAlerts()
-            recentAlerts.add(alertId)
+function isExchangeAddress(address) {
+    if (!address) return { isExchange: false };
 
-            // 限制大小
-            if (recentAlerts.size > MAX_RECENT) {
-                const first = recentAlerts.values().next().value
-                recentAlerts.delete(first)
+    for (const [exchange, wallets] of Object.entries(EXCHANGE_PATTERNS)) {
+        for (const wallet of wallets) {
+            if (address.toLowerCase().includes(wallet.slice(0, 10).toLowerCase())) {
+                return { isExchange: true, exchange };
             }
-
-            await kv.set(ALERTS_STORAGE_KEY, Array.from(recentAlerts), { ex: 86400 }) // 24小时过期
-            return true
         }
-    } catch (e) {
-        console.warn('KV storage not available:', e.message)
     }
-    return false
-}
 
-// ============================================
-// Whale Alert API (무료 대안: Blockchain.com API)
-// ============================================
+    // Check for common exchange patterns
+    if (address.includes('binance') || address.includes('coinbase')) {
+        return { isExchange: true, exchange: 'Unknown Exchange' };
+    }
+
+    return { isExchange: false };
+}
 
 async function getRecentLargeTransactions() {
-    const transactions = []
+    const transactions = [];
 
-    // Bitcoin 대형 거래 조회 (Blockchain.info API)
     try {
-        const btcRes = await fetch('https://blockchain.info/unconfirmed-transactions?format=json')
-        const btcData = await btcRes.json()
+        // Fetch unconfirmed BTC transactions
+        const btcPrice = await getBTCPrice();
+        const btcRes = await fetch('https://blockchain.info/unconfirmed-transactions?format=json', {
+            signal: AbortSignal.timeout(15000)
+        });
+        const btcData = await btcRes.json();
 
-        // BTC 가격 조회
-        const priceRes = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT')
-        const priceData = await priceRes.json()
-        const btcPrice = parseFloat(priceData.price)
+        for (const tx of btcData.txs?.slice(0, 100) || []) {
+            const outputValue = tx.out?.reduce((sum, o) => sum + (o.value || 0), 0) / 1e8;
+            const usdValue = outputValue * btcPrice;
 
-        for (const tx of btcData.txs?.slice(0, 50) || []) {
-            const outputValue = tx.out?.reduce((sum, o) => sum + (o.value || 0), 0) / 1e8
-            const usdValue = outputValue * btcPrice
+            if (usdValue >= MIN_AMOUNT_USD) {
+                // Check if exchange-related
+                const fromAddr = tx.inputs?.[0]?.prev_out?.addr || '';
+                const toAddr = tx.out?.[0]?.addr || '';
 
-            if (usdValue >= MIN_ALERT_AMOUNT) {
-                transactions.push({
-                    id: tx.hash,
-                    coin: 'BTC',
-                    coinName: '비트코인',
-                    amount: outputValue,
-                    amountUsd: usdValue,
-                    from: tx.inputs?.[0]?.prev_out?.addr?.slice(0, 8) + '...' || 'Unknown',
-                    to: tx.out?.[0]?.addr?.slice(0, 8) + '...' || 'Unknown',
-                    type: 'transfer',
-                    timestamp: tx.time * 1000
-                })
+                const fromCheck = isExchangeAddress(fromAddr);
+                const toCheck = isExchangeAddress(toAddr);
+
+                // Only include if exchange-related
+                if (fromCheck.isExchange || toCheck.isExchange) {
+                    transactions.push({
+                        id: tx.hash,
+                        coin: 'BTC',
+                        coinKR: '비트코인',
+                        amount: outputValue,
+                        amountUsd: usdValue,
+                        from: fromAddr ? fromAddr.slice(0, 8) + '...' : 'Unknown',
+                        to: toAddr ? toAddr.slice(0, 8) + '...' : 'Unknown',
+                        direction: toCheck.isExchange ? 'to_exchange' : 'from_exchange',
+                        exchange: toCheck.exchange || fromCheck.exchange || 'Exchange',
+                        timestamp: tx.time * 1000
+                    });
+                }
             }
         }
     } catch (e) {
-        console.error('BTC whale check error:', e.message)
+        console.error('Whale detection error:', e.message);
     }
 
-    // Ethereum 대형 거래 (Etherscan API - 무료 티어 사용)
-    // Note: 실제 운영시 ETHERSCAN_API_KEY 환경변수 필요
-    try {
-        const ethPrice = await getEthPrice()
-        const ethRes = await fetch('https://api.etherscan.io/api?module=account&action=txlist&address=0x0000000000000000000000000000000000000000&startblock=0&endblock=99999999&page=1&offset=10&sort=desc')
-        // Note: 이것은 예시입니다. 실제로는 큰 지갑들을 모니터링해야 합니다.
-    } catch (e) {
-        console.error('ETH whale check error:', e.message)
-    }
-
-    return transactions
-}
-
-async function getEthPrice() {
-    try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT')
-        const data = await res.json()
-        return parseFloat(data.price)
-    } catch {
-        return 3000
-    }
+    return transactions;
 }
 
 // ============================================
-// 거래소 입출금 감지 (Binance 대형 이체)
+// Message Generation
 // ============================================
 
-async function getExchangeFlows() {
-    const flows = []
-
-    // 바이낸스 대형 입출금 지갑 모니터링
-    const knownExchangeWallets = [
-        { address: '34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo', name: 'Binance Cold Wallet', exchange: 'Binance' },
-        { address: 'bc1qgdjqv0av3q56jvd82tkdjpy7gdp9ut8tlqmgrpmv24sq90ecnvqqjwvw97', name: 'Binance Hot Wallet', exchange: 'Binance' },
-    ]
-
-    // 이 부분은 실제 API 호출로 교체 필요
-    // 데모용으로 빈 배열 반환
-
-    return flows
-}
-
-// ============================================
-// 알림 메시지 생성
-// ============================================
-
-function formatWhaleAlert(tx) {
-    const emoji = tx.amountUsd >= 50000000 ? '🐳' : '🐋'
-    const size = tx.amountUsd >= 100000000 ? '초대형' : tx.amountUsd >= 50000000 ? '대형' : '중형'
-
-    const koreaTime = new Date(tx.timestamp).toLocaleString('ko-KR', {
-        timeZone: 'Asia/Seoul',
-        hour: '2-digit', minute: '2-digit'
-    })
-
-    const amountFormatted = tx.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })
-    const usdFormatted = (tx.amountUsd / 1000000).toFixed(1)
-
-    return `${emoji} ${size} 고래 이동 감지!
-
-━━━━━━━━━━━━━━━━━━━━
-
-💰 ${tx.coinName} ${amountFormatted} ${tx.coin}
-💵 약 $${usdFormatted}M (${(tx.amountUsd / 1e9 * 100).toFixed(2)}% of daily volume)
-
-📤 From: ${tx.from}
-📥 To: ${tx.to}
-
-━━━━━━━━━━━━━━━━━━━━
-
-⏰ ${koreaTime} (KST)
-🔗 Tx: ${tx.id?.slice(0, 16)}...
-
-#고래알림 #${tx.coinName} #TranTradingLab`
-}
-
-// ============================================
-// 텔레그램 전송
-// ============================================
-
-async function sendAlert(message) {
-    try {
-        const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: NEWS_CHANNEL_ID,
-                text: message
-            })
-        })
-        const result = await res.json()
-        return result.ok
-    } catch (e) {
-        console.error('Telegram send error:', e.message)
-        return false
+function getSemanticMessage(direction) {
+    if (direction === 'to_exchange') {
+        return {
+            icon: '📥',
+            label: '거래소 입금',
+            interpretation: '⚠️ 잠재적 매도 압력 ↑\n   (단, 내부 자금 정리 가능성도 있음)',
+            action: '💡 관망 또는 분할 익절 고려'
+        };
+    } else {
+        return {
+            icon: '📤',
+            label: '거래소 출금',
+            interpretation: '📈 잠재적 매도 압력 ↓\n   (단, 지갑 마이그레이션 가능성도 있음)',
+            action: '💡 긍정 신호지만 단독 매수 근거로 부족'
+        };
     }
+}
+
+function generateMessage(tx) {
+    const dateStr = getKSTDisplayDate();
+    const semantic = getSemanticMessage(tx.direction);
+
+    const amountStr = tx.amount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    const usdStr = (tx.amountUsd / 1000000).toFixed(0);
+
+    let msg = `🐋 <b>대형 거래 감지</b> | ${tx.coin}\n\n`;
+    msg += `━━━━━━━━━━━━━━━━\n\n`;
+
+    msg += `💰 <b>${amountStr} ${tx.coin}</b> (~$${usdStr}M)\n`;
+    msg += `${semantic.icon} <b>${semantic.label}</b>\n\n`;
+
+    msg += `📍 ${tx.from} → ${tx.to}\n`;
+    msg += `🏦 관련 거래소: ${tx.exchange}\n\n`;
+
+    msg += `${semantic.interpretation}\n\n`;
+    msg += `${semantic.action}\n\n`;
+
+    msg += `<i>※ 고래 움직임은 단독 매매 근거가 될 수 없습니다.\n   반드시 다른 지표와 함께 판단하세요.</i>\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `⏰ ${getKSTTimeString()}\n`;
+    msg += CTA_KR;
+    msg += `\n\n#고래알림 #${tx.coin} #TranTradingLab`;
+
+    return msg;
 }
 
 // ============================================
@@ -197,43 +178,83 @@ async function sendAlert(message) {
 // ============================================
 
 export default async function handler(req, res) {
-    const authHeader = req.headers.authorization
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
-        return res.status(401).json({ error: 'Unauthorized' })
+    const authHeader = req.headers.authorization;
+    const isTest = req.url?.includes('test=true');
+
+    if (!isTest && authHeader !== `Bearer ${process.env.CRON_SECRET}` && process.env.CRON_SECRET) {
+        return res.status(401).json({ error: 'Unauthorized' });
     }
 
     try {
-        console.log('Checking for whale transactions...')
+        console.log('🐋 Checking for whale transactions...');
 
-        const transactions = await getRecentLargeTransactions()
-        const recentAlerts = await getRecentAlerts()
+        // Rate limit check
+        const canSend = await canSendTrigger(CHANNEL_ID, 'whale');
+        if (!canSend && !isTest) {
+            console.log('Whale alert: Rate limit reached');
+            return res.status(200).json({
+                success: false,
+                reason: 'Rate limit reached (trigger ≤4/day or whale ≤2/day)'
+            });
+        }
 
-        let alertsSent = 0
+        // Get transactions
+        const transactions = await getRecentLargeTransactions();
+        console.log(`Found ${transactions.length} large exchange-related transactions`);
+
+        if (transactions.length === 0) {
+            return res.status(200).json({
+                success: true,
+                alertsSent: 0,
+                message: 'No whale transactions found'
+            });
+        }
+
+        let alertsSent = 0;
 
         for (const tx of transactions) {
-            // 중복 체크
-            if (recentAlerts.has(tx.id)) continue
+            // Check dedup
+            const dedupKey = getWhaleDedupKey(tx.id);
+            const isDup = await isDuplicate(dedupKey);
 
-            const message = formatWhaleAlert(tx)
-            const sent = await sendAlert(message)
-
-            if (sent) {
-                alertsSent++
-                await addRecentAlert(tx.id)
+            if (isDup) {
+                console.log(`Skipping duplicate tx: ${tx.id.slice(0, 16)}...`);
+                continue;
             }
 
-            console.log(`Whale alert for ${tx.coinName}: ${sent ? 'Sent' : 'Failed'}`)
+            // Re-check rate limit
+            const stillCanSend = await canSendTrigger(CHANNEL_ID, 'whale');
+            if (!stillCanSend && !isTest) {
+                console.log('Rate limit reached during processing');
+                break;
+            }
+
+            // Send message
+            const message = generateMessage(tx);
+            const result = await sendTelegram(CHANNEL_ID, message, TELEGRAM_BOT_TOKEN);
+
+            if (result.ok) {
+                await Promise.all([
+                    incrementTrigger(CHANNEL_ID, 'whale'),
+                    markSent(dedupKey)
+                ]);
+                alertsSent++;
+                console.log(`✅ Sent whale alert for ${tx.amount} ${tx.coin}`);
+            }
+
+            // Max 1 per run to spread alerts
+            if (alertsSent >= 1) break;
         }
 
         return res.status(200).json({
             success: true,
-            transactionsFound: transactions.length,
             alertsSent,
+            totalFound: transactions.length,
             timestamp: new Date().toISOString()
-        })
+        });
 
     } catch (error) {
-        console.error('Whale alert error:', error)
-        return res.status(500).json({ error: error.message })
+        console.error('Whale alert error:', error);
+        return res.status(500).json({ error: error.message });
     }
 }
