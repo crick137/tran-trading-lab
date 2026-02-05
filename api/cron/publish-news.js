@@ -6,7 +6,7 @@
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNewsKR'
 
 if (!TELEGRAM_BOT_TOKEN) {
     throw new Error('TELEGRAM_BOT_TOKEN environment variable is required')
@@ -127,8 +127,8 @@ export default async function handler(req, res) {
         const toPublish = allNews.slice(0, 5)
         const message = formatNewsForTelegram(toPublish)
 
-        // 发送纯文本消息到 @TranTradingLabNews (不生成AI图片)
-        console.log('📤 Sending text message to @TranTradingLabNews...')
+        // 发送纯文本消息到 @TranTradingLabNewsKR (不生成AI图片)
+        console.log('📤 Sending text message to @TranTradingLabNewsKR...')
         const result = await sendTelegramMessage(message)
 
         return res.status(200).json({
