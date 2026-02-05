@@ -1,7 +1,7 @@
 /**
  * ⚡ TRAN 급등/급락 알림 (Volatility Alert)
  * Vercel Cron: 매시간 실행 (0 * * * * UTC)
- * 채널: @TranTradingLabKR
+ * 채널: @TranTradingLabNewsKR
  * 
  * 트리거 조건:
  * - 1시간 변동 ≥ 2.5% (L1)
@@ -27,7 +27,7 @@ import {
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabNewsKR';
 
 // Coins to monitor
 const COINS = [

@@ -1,7 +1,7 @@
 /**
  * 📊 TRAN 매일 시장 요약 (Daily Summary)
  * Vercel Cron: 매일 20:00 KST (11:00 UTC)
- * 채널: @TranTradingLabKR
+ * 채널: @TranTradingLabNewsKR
  * 
  * 구조: TL;DR + 3대 요점(공포지수 포함) + 핵심 가격 + 리스크 경고 + CTA
  */
@@ -18,7 +18,7 @@ import {
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabNewsKR';
 
 // ============================================
 // Data Fetching

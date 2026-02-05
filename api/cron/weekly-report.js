@@ -1,7 +1,7 @@
 /**
  * 📊 TRAN 주간 시장 리뷰 (Weekly Report)
  * Vercel Cron: 일요일 20:00 KST (11:00 UTC Sunday)
- * 채널: @TranTradingLabKR
+ * 채널: @TranTradingLabNewsKR
  * 
  * 구조:
  * - 이번 주 요약 (주요 이벤트/자금 흐름)
@@ -18,7 +18,7 @@ import {
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabNewsKR';
 
 // ============================================
 // Data Fetching

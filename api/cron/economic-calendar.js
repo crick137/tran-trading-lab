@@ -1,7 +1,7 @@
 /**
  * 📅 TRAN 경제 캘린더 (Economic Calendar)
  * Vercel Cron: 매일 07:30 KST (22:30 UTC)
- * 채널: @TranTradingLabKR
+ * 채널: @TranTradingLabNewsKR
  * 
  * 특징:
  * - Top 3 이벤트만 선별
@@ -19,7 +19,7 @@ import {
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabNewsKR';
 
 // ============================================
 // Event Database (Static + Dynamic)

@@ -1,7 +1,7 @@
 /**
  * 🐋 TRAN 고래 알림 (Whale Alert)
  * Vercel Cron: 6시간마다 실행 (0 */6 * * * UTC)
- * 채널: @TranTradingLabKR
+ * 채널: @TranTradingLabNewsKR
  * 
  * 조건:
  * - 금액 ≥ $50M
@@ -27,7 +27,7 @@ import {
 } from '../../lib/telegram-utils.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const CHANNEL_ID = '@TranTradingLabKR';
+const CHANNEL_ID = '@TranTradingLabNewsKR';
 
 // Minimum amount for alert (USD)
 const MIN_AMOUNT_USD = 50000000; // $50M
