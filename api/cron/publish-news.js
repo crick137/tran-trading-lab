@@ -131,8 +131,16 @@ export default async function handler(req, res) {
         console.log('📤 Sending text message to @TranTradingLabNewsKR...')
         const result = await sendTelegramMessage(message)
 
+        // 打印 Telegram API 返回结果，便于调试
+        console.log('📨 Telegram API response:', JSON.stringify(result))
+
+        if (!result.ok) {
+            console.error('❌ Telegram send failed:', result.description)
+        }
+
         return res.status(200).json({
             success: result.ok,
+            error: result.ok ? undefined : result.description,
             published: toPublish.length,
             channel: TELEGRAM_CHANNEL_ID,
             time: new Date().toISOString()
