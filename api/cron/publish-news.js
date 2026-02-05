@@ -128,7 +128,9 @@ export default async function handler(req, res) {
         const message = formatNewsForTelegram(toPublish)
 
         // 发送纯文本消息到 @TranTradingLabNewsKR (不生成AI图片)
-        console.log('📤 Sending text message to @TranTradingLabNewsKR...')
+        console.log('📤 Sending text message...')
+        console.log('🔧 DEBUG: Channel ID =', TELEGRAM_CHANNEL_ID)
+        console.log('🔧 DEBUG: Bot Token prefix =', TELEGRAM_BOT_TOKEN?.slice(0, 10) + '...')
         const result = await sendTelegramMessage(message)
 
         // 打印 Telegram API 返回结果，便于调试
