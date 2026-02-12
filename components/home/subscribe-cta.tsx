@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Send } from "lucide-react";
 import { NewsletterForm } from "./newsletter-form";
-import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export function SubscribeCTA() {
     const t = useTranslations("home");
     const tc = useTranslations("common");
+    const ts = useTranslations("stats");
 
     return (
         <section className="py-24 relative overflow-hidden">
@@ -27,62 +27,38 @@ export function SubscribeCTA() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                        {t("subscribeCta")}
-                    </h2>
-                    <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                        {t("subscribeDescription")}
-                    </p>
-
-                    {/* Newsletter Form */}
-                    <div className="mb-8">
-                        <NewsletterForm />
+                    {/* Primary CTA: Telegram */}
+                    <div className="flex flex-col items-center gap-4 mb-12">
+                        <Link
+                            href="https://t.me/TranTradingLab"
+                            target="_blank"
+                            className="group px-10 py-5 rounded-lg bg-gradient-to-r from-[#229ED9] to-[#1E88C2] text-white font-bold text-lg transition-all hover:shadow-xl hover:shadow-[#229ED9]/30 flex items-center gap-3"
+                        >
+                            <Send className="w-5 h-5" />
+                            {tc("joinTelegram")}
+                        </Link>
+                        <span className="text-muted-foreground text-sm">
+                            {tc("freeToJoin")}
+                        </span>
                     </div>
 
-                    {/* Or divider */}
-                    <div className="flex items-center gap-4 max-w-md mx-auto mb-8">
+                    {/* Divider */}
+                    <div className="flex items-center gap-4 max-w-md mx-auto mb-10">
                         <div className="flex-1 h-px bg-border/50" />
                         <span className="text-muted-foreground text-sm">or</span>
                         <div className="flex-1 h-px bg-border/50" />
                     </div>
 
-                    {/* Telegram Button */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <Link
-                            href="https://t.me/TranTradingLab"
-                            target="_blank"
-                            className="group px-8 py-4 rounded-lg bg-gradient-to-r from-[#229ED9] to-[#1E88C2] text-white font-semibold transition-all hover:shadow-xl hover:shadow-[#229ED9]/30 flex items-center gap-3"
-                        >
-                            <Send className="w-5 h-5" />
-                            {tc("joinTelegram")}
-                        </Link>
-
-                        <span className="text-muted-foreground text-sm">
-                            <AnimatedCounter value={5000} />+
-                        </span>
+                    {/* Secondary CTA: Newsletter */}
+                    <h2 className="text-2xl font-bold text-foreground mb-2">
+                        {t("subscribeCta")}
+                    </h2>
+                    <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                        {t("subscribeDescription")}
+                    </p>
+                    <div className="mb-8">
+                        <NewsletterForm />
                     </div>
-                </motion.div>
-
-                {/* Feature highlights */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8"
-                >
-                    {[
-                        { label: "Daily Briefing", value: "08:00 KST" },
-                        { label: "Real-time Alerts", value: "Instant" },
-                        { label: "Weekly Report", value: "Every Sunday" },
-                    ].map((item) => (
-                        <div key={item.label} className="text-center">
-                            <p className="text-2xl font-bold text-gradient-gold mb-1">
-                                {item.value}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{item.label}</p>
-                        </div>
-                    ))}
                 </motion.div>
             </div>
         </section>

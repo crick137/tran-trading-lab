@@ -10,24 +10,6 @@ export function Hero() {
     const t = useTranslations("home");
     const tc = useTranslations("common");
 
-    const features = [
-        {
-            icon: TrendingUp,
-            titleKey: "research",
-            descKey: "researchDesc",
-        },
-        {
-            icon: BarChart3,
-            titleKey: "strategy",
-            descKey: "strategyDesc",
-        },
-        {
-            icon: Newspaper,
-            titleKey: "news",
-            descKey: "newsDesc",
-        },
-    ];
-
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-grid">
             {/* Animated Background Elements */}
@@ -38,17 +20,6 @@ export function Hero() {
 
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
                 <div className="text-center">
-                    {/* Badge */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border/50 text-sm text-muted-foreground mb-8"
-                    >
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                        {t("heroDescription")}
-                    </motion.div>
-
                     {/* Main Heading */}
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
@@ -64,9 +35,19 @@ export function Hero() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12"
+                        className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4"
                     >
                         {t("heroSubtitle")}
+                    </motion.p>
+
+                    {/* Tagline */}
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.25 }}
+                        className="text-sm text-muted-foreground/70 mb-12"
+                    >
+                        {t("heroTagline")}
                     </motion.p>
 
                     {/* CTA Buttons */}
@@ -77,18 +58,18 @@ export function Hero() {
                         className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                     >
                         <Link
-                            href={`/${locale}/blog`}
+                            href="https://t.me/TranTradingLab"
+                            target="_blank"
                             className="group px-8 py-4 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-semibold transition-all hover:shadow-xl hover:shadow-gold/30 flex items-center gap-2"
                         >
-                            {tc("blog")}
+                            {t("heroPrimaryCta")}
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </Link>
                         <Link
-                            href="https://t.me/TranTradingLab"
-                            target="_blank"
+                            href={`/${locale}/start`}
                             className="px-8 py-4 rounded-lg border border-border hover:border-gold/50 text-foreground font-semibold transition-all hover:bg-card"
                         >
-                            {tc("joinTelegram")}
+                            {t("heroSecondaryCta")}
                         </Link>
                     </motion.div>
                 </div>
@@ -104,17 +85,17 @@ export function Hero() {
                         {
                             icon: TrendingUp,
                             title: tc("research"),
-                            description: t("heroDescription"),
+                            description: t("researchCardDesc"),
                         },
                         {
                             icon: BarChart3,
                             title: tc("playbooks"),
-                            description: t("heroSubtitle"),
+                            description: t("playbookCardDesc"),
                         },
                         {
                             icon: Newspaper,
                             title: tc("blog"),
-                            description: t("heroDescription"),
+                            description: t("blogCardDesc"),
                         },
                     ].map((feature) => (
                         <div

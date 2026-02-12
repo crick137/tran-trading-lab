@@ -27,9 +27,14 @@
         "search": "Search..."
     },
     "home": {
-        "heroTitle": "TRAN Trading Lab",
-        "heroSubtitle": "SMC · Liquidity · Timing",
-        "heroDescription": "Institutional-grade market research platform for investors",
+        "heroTitle": "Lose less. Last longer.",
+        "heroSubtitle": "Daily liquidity analysis, risk-first trade setups, and a 5,000+ trader community.",
+        "heroTagline": "SMC · Liquidity · Timing",
+        "heroPrimaryCta": "Join 5,000+ Traders — Free",
+        "heroSecondaryCta": "See How It Works →",
+        "researchCardDesc": "Weekly deep-dive reports on market structure, liquidity flows, and macro positioning.",
+        "playbookCardDesc": "Step-by-step SMC and ORB strategy guides with real chart examples.",
+        "blogCardDesc": "Daily market commentary, trade breakdowns, and educational articles.",
         "latestArticles": "Latest Articles",
         "viewAll": "View All",
         "noArticles": "No articles published yet.",
@@ -123,25 +128,25 @@
         ]
     },
     "community": {
-        "title": "Link Hub",
-        "subtitle": "Link Hub",
-        "joinOurCommunity": "Join our global community",
+        "title": "Community Hub",
+        "subtitle": "Join our global trading community",
+        "joinOurCommunity": "Connect with traders worldwide",
         "tgEnName": "TG-EN",
         "tgEnLabel": "Join",
         "tgEnDesc": "English Community",
-        "tgEnDescKr": "English Community",
+        "tgEnDescKr": "Daily market analysis and discussion",
         "tgKrName": "TG-KR",
         "tgKrLabel": "Join",
         "tgKrDesc": "Korean Community",
-        "tgKrDescKr": "Korean Community",
+        "tgKrDescKr": "한국어 시장 분석과 토론",
         "kakaoName": "KakaoTalk",
         "kakaoLabel": "Open Chat",
-        "kakaoDesc": "Korean Open Chat",
-        "kakaoDescKr": "KakaoTalk Open Chat",
+        "kakaoDesc": "KakaoTalk",
+        "kakaoDescKr": "한국어 오픈 채팅방",
         "startName": "Start Here",
         "startLabel": "Beginner",
         "startDesc": "Beginner's Guide",
-        "startDescKr": "Get Started"
+        "startDescKr": "Start your trading journey here"
     },
     "start": {
         "title": "Get Started",
@@ -182,7 +187,73 @@
     },
     "faq": {
         "title": "Frequently Asked Questions",
-        "subtitle": "Common questions about TranTradingLab."
+        "subtitle": "Common questions about TranTradingLab.",
+        "allCategory": "All",
+        "categoryGeneral": "General",
+        "categoryTelegram": "Telegram",
+        "categoryStrategy": "Strategy",
+        "categoryContent": "Content",
+        "categoryContact": "Contact",
+        "contactTitle": "Can't find your answer?",
+        "contactDesc": "Ask us directly on Telegram.",
+        "contactCta": "Ask on Telegram",
+        "items": [
+            {
+                "category": "General",
+                "question": "What is TranTradingLab?",
+                "answer": "TranTradingLab is a free financial education platform for investors. We provide SMC (Smart Money Concept) and ORB (Opening Range Breakout) trading strategy education, daily morning market briefings, and Chinese financial news translations. All content is free to access, and you can receive real-time updates through our Telegram channel."
+            },
+            {
+                "category": "General",
+                "question": "Is there a subscription fee?",
+                "answer": "No, all content and tools on TranTradingLab are completely free. Blog posts, trading strategy guides, glossary, position sizing calculator, playbooks (learning curriculum) — everything is accessible without any signup or subscription fee. Joining our Telegram channel is also free."
+            },
+            {
+                "category": "Telegram",
+                "question": "What information is available on the Telegram channel?",
+                "answer": "We send core market briefings every morning at 08:00 KST. These include major index trends, important economic indicators, sectors/stocks to watch, and concise trading ideas. We also provide ad-hoc updates for significant market events, and you can discuss with community members in real-time."
+            },
+            {
+                "category": "Strategy",
+                "question": "What is SMC (Smart Money Concept)?",
+                "answer": "SMC is a technical analysis methodology that analyzes the trading patterns of large institutional investors (Smart Money) to help individual investors position accordingly. Key concepts include Market Structure, Order Blocks (institutional order accumulation zones), Fair Value Gaps (price inefficiency zones), and Liquidity zones. You can learn step by step in our Playbooks section."
+            },
+            {
+                "category": "Strategy",
+                "question": "How do I use the ORB strategy?",
+                "answer": "ORB (Opening Range Breakout) is a strategy that uses the high and low of the first 15-30 minutes after market open as reference points, entering in the direction of the breakout. For Korean markets (KOSPI/KOSDAQ), the 09:00-09:30 range is typically used. Our blog and playbooks cover entry/exit conditions, filtering criteria, and practical examples in detail."
+            },
+            {
+                "category": "Content",
+                "question": "What Chinese news translations do you provide?",
+                "answer": "We translate market analysis, policy changes, and major corporate news from leading Chinese financial media (华尔街见闻, 财新, 证券时报, etc.) into Korean and English. This helps understand how Chinese market trends impact other Asian markets. We quickly translate and share important policy announcements or market events via our Telegram channel."
+            },
+            {
+                "category": "Content",
+                "question": "How often is content updated?",
+                "answer": "Market briefings are sent every weekday morning at 08:00. Blog market analysis is published 2-3 times per week, and strategy guides or educational content about once a week. Chinese news translations are updated on an ad-hoc basis when significant events occur."
+            },
+            {
+                "category": "Contact",
+                "question": "Do you offer personal investment consulting?",
+                "answer": "We do not currently provide 1:1 personal investment consulting. Please use our blog, playbooks, and Telegram channel content to gain the education and insights you need for investing. General questions can be discussed with community members on our Telegram channel."
+            }
+        ]
+    },
+    "newsletter": {
+        "emailPlaceholder": "Enter your email",
+        "subscribeButton": "Subscribe",
+        "success": "Done!",
+        "error": "Error",
+        "description": "Get weekly market briefings and trading insights."
+    },
+    "stats": {
+        "tradersCount": "5,000+",
+        "tradersLabel": "Traders",
+        "briefingTime": "08:00 KST",
+        "briefingLabel": "Daily Briefing",
+        "reportSchedule": "Every Sunday",
+        "reportLabel": "Weekly Report"
     },
     "footer": {
         "privacy": "Privacy Policy",

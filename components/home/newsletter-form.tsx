@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Loader2, Check, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 export function NewsletterForm() {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<SubmitStatus>("idle");
+    const t = useTranslations("newsletter");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,7 +58,7 @@ export function NewsletterForm() {
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                         <input
                             type="email"
-                            placeholder="이메일 주소 입력"
+                            placeholder={t("emailPlaceholder")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             disabled={status === "loading" || status === "success"}
@@ -69,10 +71,10 @@ export function NewsletterForm() {
                         whileHover={{ scale: status === "idle" ? 1.02 : 1 }}
                         whileTap={{ scale: status === "idle" ? 0.98 : 1 }}
                         className={`px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 ${status === "success"
-                                ? "bg-green-500 text-white"
-                                : status === "error"
-                                    ? "bg-red-500/20 text-red-500 border border-red-500/50"
-                                    : "bg-gradient-to-r from-gold to-gold-light text-background hover:shadow-lg hover:shadow-gold/30"
+                            ? "bg-green-500 text-white"
+                            : status === "error"
+                                ? "bg-red-500/20 text-red-500 border border-red-500/50"
+                                : "bg-gradient-to-r from-gold to-gold-light text-background hover:shadow-lg hover:shadow-gold/30"
                             }`}
                     >
                         <AnimatePresence mode="wait">
@@ -94,7 +96,7 @@ export function NewsletterForm() {
                                     className="flex items-center gap-2"
                                 >
                                     <Check className="w-5 h-5" />
-                                    <span>완료!</span>
+                                    <span>{t("success")}</span>
                                 </motion.div>
                             ) : status === "error" ? (
                                 <motion.div
@@ -105,7 +107,7 @@ export function NewsletterForm() {
                                     className="flex items-center gap-2"
                                 >
                                     <AlertCircle className="w-5 h-5" />
-                                    <span>오류</span>
+                                    <span>{t("error")}</span>
                                 </motion.div>
                             ) : (
                                 <motion.span
@@ -114,14 +116,14 @@ export function NewsletterForm() {
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                 >
-                                    구독하기
+                                    {t("subscribeButton")}
                                 </motion.span>
                             )}
                         </AnimatePresence>
                     </motion.button>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground text-center">
-                    주간 마켓 브리핑과 트레이딩 인사이트를 받아보세요.
+                    {t("description")}
                 </p>
             </div>
         </motion.form>

@@ -128,7 +128,7 @@ export default function CommunityPage() {
                                                         </span>
                                                     </div>
                                                     <p className="text-sm text-muted-foreground truncate">
-                                                        {link.description} · {link.descriptionKr}
+                                                        {link.description} — {link.descriptionKr}
                                                     </p>
                                                 </div>
 

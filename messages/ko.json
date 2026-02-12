@@ -27,9 +27,14 @@
         "search": "검색..."
     },
     "home": {
-        "heroTitle": "TRAN Trading Lab",
-        "heroSubtitle": "SMC · 유동성 · 타이밍",
-        "heroDescription": "한국 투자자를 위한 기관급 시장 리서치 플랫폼",
+        "heroTitle": "덜 잃고, 더 오래 살아남기.",
+        "heroSubtitle": "매일 유동성 분석, 리스크 우선 트레이딩 셋업, 5,000명 이상의 글로벌 트레이더 커뮤니티.",
+        "heroTagline": "SMC · 유동성 · 타이밍",
+        "heroPrimaryCta": "5,000+ 트레이더와 함께하기 — 무료",
+        "heroSecondaryCta": "시작 가이드 보기 →",
+        "researchCardDesc": "매주 시장 구조, 유동성 흐름, 매크로 포지셔닝에 대한 심층 리포트.",
+        "playbookCardDesc": "실제 차트 예시를 활용한 단계별 SMC, ORB 전략 가이드.",
+        "blogCardDesc": "매일 시장 해설, 트레이드 복기, 교육 콘텐츠.",
         "latestArticles": "최신 아티클",
         "viewAll": "전체 보기",
         "noArticles": "아직 게시된 아티클이 없습니다.",
@@ -123,25 +128,25 @@
         ]
     },
     "community": {
-        "title": "Link Hub",
-        "subtitle": "링크 허브",
-        "joinOurCommunity": "글로벌 커뮤니티에 참여하세요",
+        "title": "커뮤니티 허브",
+        "subtitle": "글로벌 트레이딩 커뮤니티에 참여하세요",
+        "joinOurCommunity": "전 세계 트레이더와 소통하세요",
         "tgEnName": "TG-EN",
         "tgEnLabel": "가입",
         "tgEnDesc": "영어 커뮤니티",
-        "tgEnDescKr": "English Community",
+        "tgEnDescKr": "Daily market analysis and discussion",
         "tgKrName": "TG-KR",
         "tgKrLabel": "가입",
         "tgKrDesc": "한국어 커뮤니티",
-        "tgKrDescKr": "Korean Community",
+        "tgKrDescKr": "매일 시장 분석과 토론",
         "kakaoName": "KakaoTalk",
         "kakaoLabel": "오픈채팅",
         "kakaoDesc": "카카오톡 오픈채팅",
-        "kakaoDescKr": "Korean Open Chat",
+        "kakaoDescKr": "한국어 오픈 채팅방",
         "startName": "시작하기",
         "startLabel": "새로 오신 분",
         "startDesc": "초보자 가이드",
-        "startDescKr": "Beginner's Guide"
+        "startDescKr": "트레이딩 여정을 시작하세요"
     },
     "start": {
         "title": "시작하기",
@@ -182,7 +187,73 @@
     },
     "faq": {
         "title": "자주 묻는 질문",
-        "subtitle": "TranTradingLab에 대해 자주 묻는 질문들입니다."
+        "subtitle": "TranTradingLab에 대해 자주 묻는 질문들입니다.",
+        "allCategory": "전체",
+        "categoryGeneral": "서비스 일반",
+        "categoryTelegram": "텔레그램",
+        "categoryStrategy": "트레이딩 전략",
+        "categoryContent": "콘텐츠",
+        "categoryContact": "문의",
+        "contactTitle": "찾으시는 답변이 없으신가요?",
+        "contactDesc": "텔레그램 채널에서 직접 문의해 주세요.",
+        "contactCta": "텔레그램 문의하기",
+        "items": [
+            {
+                "category": "서비스 일반",
+                "question": "TranTradingLab은 어떤 서비스인가요?",
+                "answer": "TranTradingLab은 한국 개인 투자자를 위한 무료 금융 교육 플랫폼입니다. SMC(Smart Money Concept), ORB(Opening Range Breakout) 트레이딩 전략 교육, 매일 아침 시장 브리핑, 그리고 중국 금융 뉴스의 한국어 번역을 제공합니다. 모든 콘텐츠는 무료로 이용 가능하며, 텔레그램 채널을 통해 실시간으로 정보를 받아보실 수 있습니다."
+            },
+            {
+                "category": "서비스 일반",
+                "question": "서비스 이용료가 있나요?",
+                "answer": "아니요, TranTradingLab의 모든 콘텐츠와 도구는 완전 무료입니다. 블로그 글, 트레이딩 전략 가이드, 용어집, 포지션 사이징 계산기, 플레이북(학습 커리큘럼) 등 모든 것을 가입비나 구독료 없이 이용하실 수 있습니다. 텔레그램 채널 가입도 무료입니다."
+            },
+            {
+                "category": "텔레그램",
+                "question": "텔레그램 채널에서는 어떤 정보를 받을 수 있나요?",
+                "answer": "매일 아침 08:00 KST에 시장 핵심 브리핑을 발송합니다. 주요 지수 동향, 중요 경제지표 일정, 주목해야 할 종목/섹터, 그리고 트레이딩 아이디어를 간결하게 정리하여 제공합니다. 중요한 시장 이벤트 발생 시에는 수시로 업데이트하며, 커뮤니티 멤버들과 실시간으로 의견을 나눌 수 있습니다."
+            },
+            {
+                "category": "트레이딩 전략",
+                "question": "SMC(Smart Money Concept)란 무엇인가요?",
+                "answer": "SMC는 대형 기관 투자자(Smart Money)들의 트레이딩 패턴을 분석하여 개인 투자자도 비슷한 방향으로 포지션을 잡을 수 있도록 돕는 기술적 분석 방법론입니다. 핵심 개념으로는 시장 구조(Market Structure), Order Block(기관 주문 집적 구역), Fair Value Gap(가격 비효율 구간), Liquidity(유동성 구역) 등이 있습니다. 플레이북에서 단계별로 학습하실 수 있습니다."
+            },
+            {
+                "category": "트레이딩 전략",
+                "question": "ORB 전략은 어떻게 사용하나요?",
+                "answer": "ORB(Opening Range Breakout)는 장 시작 후 첫 15~30분간의 고점과 저점을 기준으로, 이 범위를 돌파하는 방향으로 진입하는 전략입니다. 한국 시장(KOSPI/KOSDAQ)에서는 09:00~09:30 구간을 기준으로 설정하는 것이 일반적입니다. 블로그와 플레이북에서 진입/청산 조건, 필터링 기준, 실전 적용 예시를 상세히 다루고 있습니다."
+            },
+            {
+                "category": "콘텐츠",
+                "question": "중국 뉴스 번역은 어떤 내용인가요?",
+                "answer": "중국 주요 금융 매체(华尔街见闻, 财新, 证券时报 등)의 시장 분석, 정책 변화, 주요 기업 뉴스 등을 한국어로 번역하여 제공합니다. 중국 시장 동향이 한국 증시에 미치는 영향을 파악하는 데 도움이 됩니다. 중요한 정책 발표나 시장 이벤트 발생 시 신속하게 번역하여 텔레그램 채널에 공유합니다."
+            },
+            {
+                "category": "콘텐츠",
+                "question": "콘텐츠는 얼마나 자주 업데이트되나요?",
+                "answer": "시장 브리핑은 평일 매일 아침 08:00에 발송됩니다. 블로그의 시장 분석은 주 2~3회, 전략 가이드나 교육 콘텐츠는 주 1회 정도 업데이트됩니다. 중국 뉴스 번역은 중요한 이벤트 발생 시 수시로 업데이트합니다."
+            },
+            {
+                "category": "문의",
+                "question": "개인적인 투자 상담도 가능한가요?",
+                "answer": "현재는 1:1 개인 투자 상담 서비스를 제공하지 않습니다. 블로그, 플레이북, 텔레그램 채널의 콘텐츠를 통해 투자에 필요한 교육과 인사이트를 얻으시기 바랍니다. 일반적인 질문은 텔레그램 채널에서 커뮤니티 멤버들과 함께 논의하실 수 있습니다."
+            }
+        ]
+    },
+    "newsletter": {
+        "emailPlaceholder": "이메일 주소 입력",
+        "subscribeButton": "구독하기",
+        "success": "완료!",
+        "error": "오류",
+        "description": "주간 마켓 브리핑과 트레이딩 인사이트를 받아보세요."
+    },
+    "stats": {
+        "tradersCount": "5,000+",
+        "tradersLabel": "트레이더",
+        "briefingTime": "08:00 KST",
+        "briefingLabel": "일일 브리핑",
+        "reportSchedule": "매주 일요일",
+        "reportLabel": "주간 리포트"
     },
     "footer": {
         "privacy": "개인정보처리방침",

@@ -15,37 +15,7 @@ export function LatestArticles() {
     const tc = useTranslations("common");
 
     if (latestArticles.length === 0) {
-        return (
-            <section className="py-24 bg-background relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="text-center mb-16"
-                    >
-                        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                            {t("latestArticles")}
-                        </h2>
-                        <div className="w-20 h-1 bg-gradient-to-r from-gold to-gold-light mx-auto rounded-full mb-8" />
-                        <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
-                            <p className="text-muted-foreground text-lg mb-6">
-                                {t("noArticles")}
-                            </p>
-                            <Link
-                                href="https://t.me/TranTradingLab"
-                                target="_blank"
-                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
-                            >
-                                {tc("joinTelegram")}
-                                <ArrowRight className="w-4 h-4" />
-                            </Link>
-                        </div>
-                    </motion.div>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     return (

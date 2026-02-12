@@ -27,9 +27,14 @@
         "search": "搜索..."
     },
     "home": {
-        "heroTitle": "TRAN Trading Lab",
-        "heroSubtitle": "SMC · 流动性 · 时机",
-        "heroDescription": "为投资者打造的机构级市场研究平台",
+        "heroTitle": "少亏损，活更久。",
+        "heroSubtitle": "每日流动性分析、风险优先的交易策略，以及5,000+交易者社群。",
+        "heroTagline": "SMC · 流动性 · 时机",
+        "heroPrimaryCta": "加入5,000+交易者 — 免费",
+        "heroSecondaryCta": "了解详情 →",
+        "researchCardDesc": "每周深度报告：市场结构、流动性流向和宏观定位。",
+        "playbookCardDesc": "配有真实图表案例的 SMC 和 ORB 策略分步指南。",
+        "blogCardDesc": "每日市场评论、交易复盘和教育文章。",
         "latestArticles": "最新文章",
         "viewAll": "查看全部",
         "noArticles": "暂无已发布的文章。",
@@ -123,25 +128,25 @@
         ]
     },
     "community": {
-        "title": "链接入口",
-        "subtitle": "Link Hub",
-        "joinOurCommunity": "加入我们的全球社群",
+        "title": "社群中心",
+        "subtitle": "加入我们的全球交易社群",
+        "joinOurCommunity": "与全球交易者交流",
         "tgEnName": "TG-EN",
         "tgEnLabel": "加入",
         "tgEnDesc": "英语社群",
-        "tgEnDescKr": "English Community",
+        "tgEnDescKr": "每日市场分析和讨论",
         "tgKrName": "TG-KR",
         "tgKrLabel": "加入",
         "tgKrDesc": "韩语社群",
-        "tgKrDescKr": "Korean Community",
+        "tgKrDescKr": "每日韩语市场分析与讨论",
         "kakaoName": "KakaoTalk",
         "kakaoLabel": "开放聊天",
-        "kakaoDesc": "韩语开放聊天",
-        "kakaoDescKr": "KakaoTalk开放聊天",
+        "kakaoDesc": "KakaoTalk",
+        "kakaoDescKr": "韩语开放聊天室",
         "startName": "新手入口",
         "startLabel": "入门",
         "startDesc": "新手指南",
-        "startDescKr": "开始"
+        "startDescKr": "开始你的交易旅程"
     },
     "start": {
         "title": "开始",
@@ -182,7 +187,73 @@
     },
     "faq": {
         "title": "常见问题",
-        "subtitle": "关于TranTradingLab的常见问题。"
+        "subtitle": "关于TranTradingLab的常见问题。",
+        "allCategory": "全部",
+        "categoryGeneral": "通用",
+        "categoryTelegram": "Telegram",
+        "categoryStrategy": "策略",
+        "categoryContent": "内容",
+        "categoryContact": "联系",
+        "contactTitle": "没有找到答案？",
+        "contactDesc": "在Telegram上直接联系我们。",
+        "contactCta": "Telegram咨询",
+        "items": [
+            {
+                "category": "通用",
+                "question": "TranTradingLab是什么？",
+                "answer": "TranTradingLab是面向投资者的免费金融教育平台。我们提供SMC和ORB交易策略教育、每日市场简报以及中国金融新闻翻译。所有内容均免费，可通过Telegram频道实时获取信息。"
+            },
+            {
+                "category": "通用",
+                "question": "需要付费吗？",
+                "answer": "不需要，TranTradingLab的所有内容和工具均完全免费。博客、策略指南、术语表、仓位计算器等均可免费使用，加入Telegram频道也是免费的。"
+            },
+            {
+                "category": "Telegram",
+                "question": "Telegram频道提供什么信息？",
+                "answer": "每天早上08:00 KST发送市场核心简报，包括主要指数走势、重要经济指标、值得关注的板块和交易想法。重大市场事件时也会实时更新。"
+            },
+            {
+                "category": "策略",
+                "question": "什么是SMC？",
+                "answer": "SMC（Smart Money Concept）是一种通过分析大型机构投资者交易模式的技术分析方法。核心概念包括市场结构、订单区块、公平价值缺口和流动性区域。可在策略手册中逐步学习。"
+            },
+            {
+                "category": "策略",
+                "question": "如何使用ORB策略？",
+                "answer": "ORB（开盘区间突破）策略以开盘后15-30分钟的高低点为参考，在突破方向进场。博客和策略手册中有详细的进出场条件和实际案例。"
+            },
+            {
+                "category": "内容",
+                "question": "提供哪些中国新闻翻译？",
+                "answer": "我们翻译来自华尔街见闻、财新、证券时报等主要中国金融媒体的市场分析、政策变化和公司新闻，帮助了解中国市场动态的影响。"
+            },
+            {
+                "category": "内容",
+                "question": "内容更新频率如何？",
+                "answer": "市场简报每个工作日早上08:00发送，市场分析每周2-3篇，策略指南每周约1篇，中国新闻翻译在重大事件时实时更新。"
+            },
+            {
+                "category": "联系",
+                "question": "提供个人投资咨询吗？",
+                "answer": "目前不提供1:1个人投资咨询。请通过博客、策略手册和Telegram频道获取教育内容和投资洞察。一般问题可在Telegram社群中讨论。"
+            }
+        ]
+    },
+    "newsletter": {
+        "emailPlaceholder": "输入邮箱地址",
+        "subscribeButton": "订阅",
+        "success": "完成！",
+        "error": "错误",
+        "description": "获取每周市场简报和交易洞察。"
+    },
+    "stats": {
+        "tradersCount": "5,000+",
+        "tradersLabel": "交易者",
+        "briefingTime": "08:00 KST",
+        "briefingLabel": "每日简报",
+        "reportSchedule": "每周日",
+        "reportLabel": "周报"
     },
     "footer": {
         "privacy": "隐私政策",
