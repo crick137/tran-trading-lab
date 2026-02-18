@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -16,22 +16,18 @@ interface FAQItem {
 
 function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boolean; onToggle: () => void }) {
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="border border-border/50 rounded-lg overflow-hidden"
-        >
+        <div className="border border-white/5 rounded-lg overflow-hidden bg-cv-elevated">
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-card/50 transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
             >
-                <span className="font-medium text-foreground pr-4">{item.question}</span>
+                <span className="font-medium text-white/90 pr-4">{item.question}</span>
                 <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
-                    className="flex-shrink-0"
+                    className="shrink-0"
                 >
-                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                    <ChevronDown className="w-5 h-5 text-white/30" />
                 </motion.div>
             </button>
             <AnimatePresence>
@@ -42,21 +38,23 @@ function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boole
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                     >
-                        <div className="px-4 pb-4 text-muted-foreground">
+                        <div className="px-4 pb-4 text-white/40 text-sm leading-relaxed">
                             {item.answer}
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
-        </motion.div>
+        </div>
     );
 }
 
 export default function FAQPage() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const t = useTranslations("faq");
+    const heroRef = useGsapScroll<HTMLDivElement>();
+    const listRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.06 });
+    const ctaRef = useGsapScroll<HTMLDivElement>();
 
-    // Get FAQ items from i18n
     const faqItems: FAQItem[] = [];
     let i = 0;
     while (true) {
@@ -100,40 +98,28 @@ export default function FAQPage() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             <Navbar />
-            <main className="pt-24 pb-16 min-h-screen">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Breadcrumb */}
-                    <Breadcrumb items={[{ label: "FAQ" }]} />
-
-                    {/* Header */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="text-center mb-12"
-                    >
+            <main className="pt-24 pb-16">
+                <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
+                    {/* Hero */}
+                    <div ref={heroRef} className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
                             <HelpCircle className="w-8 h-8 text-gold" />
                         </div>
-                        <h1 className="text-4xl font-bold text-foreground mb-4">{t("title")}</h1>
-                        <p className="text-lg text-muted-foreground">
+                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <p className="text-lg text-white/40">
                             {t("subtitle")}
                         </p>
-                    </motion.div>
+                    </div>
 
                     {/* Category Filter */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="flex flex-wrap justify-center gap-2 mb-8"
-                    >
+                    <div className="flex flex-wrap justify-center gap-2 mb-8">
                         <button
                             onClick={() => setActiveCategory(allCategory)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === allCategory
-                                ? "bg-gold text-background"
-                                : "bg-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-gold/50"
-                                }`}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                                activeCategory === allCategory
+                                    ? "bg-gold text-cv-primary"
+                                    : "bg-cv-elevated border border-white/5 text-white/50 hover:text-white hover:border-gold/30"
+                            }`}
                         >
                             {allCategory}
                         </button>
@@ -141,55 +127,47 @@ export default function FAQPage() {
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeCategory === category
-                                    ? "bg-gold text-background"
-                                    : "bg-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-gold/50"
-                                    }`}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                                    activeCategory === category
+                                        ? "bg-gold text-cv-primary"
+                                        : "bg-cv-elevated border border-white/5 text-white/50 hover:text-white hover:border-gold/30"
+                                }`}
                             >
                                 {category}
                             </button>
                         ))}
-                    </motion.div>
+                    </div>
 
                     {/* FAQ List */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="space-y-3"
-                    >
+                    <div ref={listRef} className="space-y-3">
                         {filteredItems.map((item, index) => (
                             <FAQAccordion
-                                key={index}
+                                key={`${activeCategory}-${index}`}
                                 item={item}
                                 isOpen={openIndex === index}
                                 onToggle={() => setOpenIndex(openIndex === index ? null : index)}
                             />
                         ))}
-                    </motion.div>
+                    </div>
 
                     {/* Contact CTA */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        className="mt-16 p-8 rounded-xl bg-card/50 border border-border/50 text-center"
-                    >
-                        <h2 className="text-xl font-semibold text-foreground mb-2">
+                    <div ref={ctaRef} className="mt-16 p-8 rounded-xl bg-cv-elevated border border-white/5 text-center">
+                        <h2 className="text-xl font-semibold text-white mb-2">
                             {t("contactTitle")}
                         </h2>
-                        <p className="text-muted-foreground mb-4">
+                        <p className="text-white/40 mb-4">
                             {t("contactDesc")}
                         </p>
                         <a
-                            href="https://t.me/TranTradingLab"
+                            href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-medium hover:shadow-lg hover:shadow-gold/30 transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-medium transition-all hover:shadow-lg hover:shadow-gold/20"
+                            style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("contactCta")}
                         </a>
-                    </motion.div>
+                    </div>
                 </div>
             </main>
             <Footer />
