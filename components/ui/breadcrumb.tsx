@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronRight, Home } from "lucide-react";
 
 interface BreadcrumbItem {
@@ -11,30 +14,33 @@ interface BreadcrumbProps {
 }
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
+    const locale = useLocale();
+    const t = useTranslations("common");
+
     return (
         <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center flex-wrap gap-1 text-sm">
                 <li>
                     <Link
-                        href="/"
-                        className="flex items-center gap-1 text-muted-foreground hover:text-gold transition-colors"
+                        href={`/${locale}`}
+                        className="flex items-center gap-1 text-white/40 hover:text-gold transition-colors"
                     >
                         <Home className="w-3.5 h-3.5" />
-                        <span>홈</span>
+                        <span>{t("home")}</span>
                     </Link>
                 </li>
                 {items.map((item, index) => (
                     <li key={index} className="flex items-center gap-1">
-                        <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+                        <ChevronRight className="w-3.5 h-3.5 text-white/20" />
                         {item.href ? (
                             <Link
                                 href={item.href}
-                                className="text-muted-foreground hover:text-gold transition-colors"
+                                className="text-white/40 hover:text-gold transition-colors"
                             >
                                 {item.label}
                             </Link>
                         ) : (
-                            <span className="text-foreground font-medium truncate max-w-[200px]">
+                            <span className="text-white font-medium truncate max-w-[200px]">
                                 {item.label}
                             </span>
                         )}

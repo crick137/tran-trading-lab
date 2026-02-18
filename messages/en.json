@@ -509,5 +509,64 @@
         "description": "An unexpected error occurred. Please try again.",
         "tryAgain": "Try Again",
         "goHome": "Go Home"
+    },
+    "positionSizingCalc": {
+        "title": "Position Sizing Calculator",
+        "subtitle": "Calculate position size based on your risk percentage",
+        "accountSize": "Account Size",
+        "riskPercent": "Risk Percentage (%)",
+        "entryPrice": "Entry Price",
+        "stopPrice": "Stop Loss Price",
+        "maxLoss": "Maximum Loss",
+        "positionSize": "Position Size (Qty)",
+        "totalValue": "Total Position Value",
+        "accountPercent": "Account Percentage",
+        "warningExceed": "Position exceeds 50% of account. Be cautious with leverage.",
+        "disclaimer": "* This calculator is for reference only. Actual investment decisions should be made at your own judgment."
+    },
+    "rrCalc": {
+        "title": "R:R Calculator",
+        "subtitle": "Calculate your risk-to-reward ratio",
+        "entryPrice": "Entry Price",
+        "stopLoss": "Stop Loss",
+        "takeProfit": "Take Profit",
+        "longPosition": "Long Position",
+        "shortPosition": "Short Position",
+        "rrRatio": "Risk:Reward Ratio",
+        "risk": "Risk",
+        "reward": "Reward",
+        "warningLowRR": "R:R is below 1. Look for a better entry point.",
+        "goodSetup": "Great setup — 2R or above!",
+        "disclaimer": "* Generally, a minimum of 1.5R trades is recommended."
+    },
+    "templatesPage": {
+        "title": "Trading Templates",
+        "subtitle": "Free templates for systematic trading",
+        "download": "Download",
+        "requestMissing": "Can't find the template you need?",
+        "requestLink": "Request on Telegram",
+        "templates": [
+            {
+                "id": "trading-journal",
+                "title": "Trading Journal",
+                "description": "Template for organizing trade records, screenshots, and review notes",
+                "format": "Notion / Excel",
+                "includes": ["Trade entry form", "P&L tracking", "Monthly stats", "Review section"]
+            },
+            {
+                "id": "weekly-review",
+                "title": "Weekly Review Template",
+                "description": "Template for reviewing weekly trading performance and finding improvements",
+                "format": "Notion / Markdown",
+                "includes": ["Weekly trade summary", "Strengths / Areas to improve", "Next week plan", "Psychology check"]
+            },
+            {
+                "id": "pre-trade-checklist",
+                "title": "Pre-Trade Checklist",
+                "description": "Checklist for verifying conditions before entering a trade",
+                "format": "PDF / Notion",
+                "includes": ["Daily trend check", "OB/FVG check", "R:R calculation", "Risk verification"]
+            }
+        ]
     }
 }

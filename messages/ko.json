@@ -509,5 +509,64 @@
         "description": "예상치 못한 오류가 발생했습니다. 다시 시도해 주세요.",
         "tryAgain": "다시 시도",
         "goHome": "홈으로"
+    },
+    "positionSizingCalc": {
+        "title": "포지션 사이징 계산기",
+        "subtitle": "리스크 비율에 맞는 포지션 크기를 계산합니다",
+        "accountSize": "계좌 크기",
+        "riskPercent": "리스크 비율 (%)",
+        "entryPrice": "진입가",
+        "stopPrice": "손절가",
+        "maxLoss": "최대 손실 금액",
+        "positionSize": "포지션 크기 (수량)",
+        "totalValue": "포지션 총 가치",
+        "accountPercent": "계좌 대비 비율",
+        "warningExceed": "포지션이 계좌의 50%를 초과합니다. 레버리지 사용에 주의하세요.",
+        "disclaimer": "* 이 계산기는 참고용이며, 실제 투자 결정은 본인의 판단에 따라야 합니다."
+    },
+    "rrCalc": {
+        "title": "R:R 계산기",
+        "subtitle": "리스크 리워드 비율을 계산합니다",
+        "entryPrice": "진입가",
+        "stopLoss": "손절가 (Stop Loss)",
+        "takeProfit": "목표가 (Take Profit)",
+        "longPosition": "롱 포지션",
+        "shortPosition": "숏 포지션",
+        "rrRatio": "리스크 리워드 비율",
+        "risk": "리스크",
+        "reward": "리워드",
+        "warningLowRR": "R:R이 1 미만입니다. 더 좋은 진입점을 찾아보세요.",
+        "goodSetup": "2R 이상의 좋은 셋업입니다!",
+        "disclaimer": "* 일반적으로 최소 1.5R 이상의 거래를 권장합니다."
+    },
+    "templatesPage": {
+        "title": "트레이딩 템플릿",
+        "subtitle": "체계적인 트레이딩을 위한 무료 템플릿",
+        "download": "다운로드",
+        "requestMissing": "원하는 템플릿이 없으신가요?",
+        "requestLink": "텔레그램에서 요청하기",
+        "templates": [
+            {
+                "id": "trading-journal",
+                "title": "트레이딩 저널",
+                "description": "거래 기록, 스크린샷, 복기 노트를 체계적으로 정리하는 템플릿",
+                "format": "Notion / Excel",
+                "includes": ["거래 입력 양식", "수익/손실 추적", "월별 통계", "복기 섹션"]
+            },
+            {
+                "id": "weekly-review",
+                "title": "주간 리뷰 템플릿",
+                "description": "매주 트레이딩 성과를 돌아보고 개선점을 찾는 템플릿",
+                "format": "Notion / Markdown",
+                "includes": ["금주 거래 요약", "잘한 점 / 개선점", "다음 주 계획", "심리 체크"]
+            },
+            {
+                "id": "pre-trade-checklist",
+                "title": "거래 전 체크리스트",
+                "description": "진입 전 확인해야 할 조건들을 점검하는 체크리스트",
+                "format": "PDF / Notion",
+                "includes": ["일봉 추세 확인", "OB/FVG 체크", "R:R 계산", "리스크 확인"]
+            }
+        ]
     }
 }

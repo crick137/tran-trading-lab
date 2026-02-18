@@ -1,13 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Calculator, AlertTriangle } from "lucide-react";
 
 export default function PositionSizingPage() {
+    const locale = useLocale();
+    const t = useTranslations("positionSizingCalc");
+    const tc = useTranslations("common");
+
     const [accountSize, setAccountSize] = useState<number>(10000000);
     const [riskPercent, setRiskPercent] = useState<number>(2);
     const [entryPrice, setEntryPrice] = useState<number>(100);
@@ -19,46 +24,45 @@ export default function PositionSizingPage() {
     const totalValue = positionSize * entryPrice;
     const percentOfAccount = (totalValue / accountSize) * 100;
 
+    const heroRef = useGsapScroll<HTMLDivElement>();
+    const calcRef = useGsapScroll<HTMLDivElement>({ from: { opacity: 0, y: 20 }, to: { opacity: 1, y: 0 } });
+
+    const formatCurrency = (value: number) => value.toLocaleString(locale === "ko" ? "ko-KR" : "en-US");
+
     return (
         <>
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Breadcrumb items={[{ label: "도구", href: "/tools" }, { label: "포지션 사이징" }]} />
+                    <Breadcrumb
+                        items={[
+                            { label: tc("tools"), href: `/${locale}/tools` },
+                            { label: t("title") },
+                        ]}
+                    />
 
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center mb-12"
-                    >
+                    <div ref={heroRef} className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
                             <Calculator className="w-8 h-8 text-gold" />
                         </div>
-                        <h1 className="text-3xl font-bold text-foreground mb-4">포지션 사이징 계산기</h1>
-                        <p className="text-muted-foreground">
-                            리스크 비율에 맞는 포지션 크기를 계산합니다
-                        </p>
-                    </motion.div>
+                        <h1 className="text-3xl font-bold text-white mb-4">{t("title")}</h1>
+                        <p className="text-white/40">{t("subtitle")}</p>
+                    </div>
 
                     {/* Calculator */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        className="p-6 rounded-xl bg-card border border-border/50 space-y-6"
-                    >
+                    <div ref={calcRef} className="p-6 rounded-xl bg-cv-elevated border border-white/5 space-y-6">
                         <div>
-                            <label className="block text-sm text-muted-foreground mb-2">계좌 크기 (₩)</label>
+                            <label className="block text-sm text-white/40 mb-2">{t("accountSize")}</label>
                             <input
                                 type="number"
                                 value={accountSize}
                                 onChange={(e) => setAccountSize(Number(e.target.value))}
-                                className="w-full px-4 py-3 rounded-lg bg-background border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-white/5 text-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm text-muted-foreground mb-2">리스크 비율 (%)</label>
+                            <label className="block text-sm text-white/40 mb-2">{t("riskPercent")}</label>
                             <input
                                 type="number"
                                 value={riskPercent}
@@ -66,65 +70,63 @@ export default function PositionSizingPage() {
                                 step="0.5"
                                 min="0.1"
                                 max="10"
-                                className="w-full px-4 py-3 rounded-lg bg-background border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-white/5 text-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-muted-foreground mb-2">진입가</label>
+                                <label className="block text-sm text-white/40 mb-2">{t("entryPrice")}</label>
                                 <input
                                     type="number"
                                     value={entryPrice}
                                     onChange={(e) => setEntryPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-background border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-white/5 text-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-muted-foreground mb-2">손절가</label>
+                                <label className="block text-sm text-white/40 mb-2">{t("stopPrice")}</label>
                                 <input
                                     type="number"
                                     value={stopPrice}
                                     onChange={(e) => setStopPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-background border border-border/50 text-foreground focus:outline-none focus:ring-2 focus:ring-gold/50"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-white/5 text-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
                                 />
                             </div>
                         </div>
 
-                        <hr className="border-border/50" />
+                        <hr className="border-white/5" />
 
                         {/* Results */}
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">최대 손실 금액</span>
-                                <span className="text-red-500 font-semibold">₩{riskAmount.toLocaleString()}</span>
+                                <span className="text-white/40">{t("maxLoss")}</span>
+                                <span className="text-bearish font-semibold">{formatCurrency(riskAmount)}</span>
+                            </div>
+                            <div className="flex justify-between items-baseline">
+                                <span className="text-white/40">{t("positionSize")}</span>
+                                <span className="text-gold font-bold text-xl font-data">{positionSize.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">포지션 크기 (수량)</span>
-                                <span className="text-gold font-bold text-xl">{positionSize.toFixed(2)}</span>
+                                <span className="text-white/40">{t("totalValue")}</span>
+                                <span className="text-white font-data">{formatCurrency(totalValue)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-muted-foreground">포지션 총 가치</span>
-                                <span className="text-foreground">₩{totalValue.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">계좌 대비 비율</span>
-                                <span className="text-foreground">{percentOfAccount.toFixed(1)}%</span>
+                                <span className="text-white/40">{t("accountPercent")}</span>
+                                <span className="text-white font-data">{percentOfAccount.toFixed(1)}%</span>
                             </div>
                         </div>
 
                         {percentOfAccount > 50 && (
                             <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                                <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5" />
-                                <p className="text-sm text-yellow-500">
-                                    포지션이 계좌의 50%를 초과합니다. 레버리지 사용에 주의하세요.
-                                </p>
+                                <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
+                                <p className="text-sm text-yellow-500">{t("warningExceed")}</p>
                             </div>
                         )}
-                    </motion.div>
+                    </div>
 
-                    <p className="text-xs text-muted-foreground text-center mt-6">
-                        * 이 계산기는 참고용이며, 실제 투자 결정은 본인의 판단에 따라야 합니다.
+                    <p className="text-xs text-white/30 text-center mt-6">
+                        {t("disclaimer")}
                     </p>
                 </div>
             </main>
