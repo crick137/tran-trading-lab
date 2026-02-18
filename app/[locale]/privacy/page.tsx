@@ -12,8 +12,8 @@ export async function generateMetadata({
     return createPageMetadata({
         locale,
         path: "/privacy",
-        title: (t as any).meta.privacyTitle,
-        description: (t as any).meta.privacyDescription,
+        title: t.meta.privacyTitle,
+        description: t.meta.privacyDescription,
     });
 }
 
