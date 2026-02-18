@@ -1,97 +1,118 @@
 {
     "common": {
         "home": "홈",
-        "start": "시작하기",
-        "content": "콘텐츠",
-        "research": "리서치",
+        "dashboard": "대시보드",
+        "switchboard": "스위치보드",
         "blog": "블로그",
-        "reports": "리포트",
+        "learn": "학습",
+        "boldCalls": "Bold Calls",
+        "about": "소개",
+        "community": "커뮤니티",
+        "newsletter": "뉴스레터",
+        "products": "서비스",
+        "content": "콘텐츠",
+        "company": "정보",
+        "subscribeFree": "무료 구독",
+        "allRightsReserved": "All Rights Reserved",
+        "search": "검색...",
+        "research": "리서치",
+        "reports": "보고서",
         "briefings": "브리핑",
-        "learning": "학습",
         "playbooks": "플레이북",
         "glossary": "용어집",
         "tools": "도구",
-        "community": "커뮤니티",
+        "start": "시작하기",
         "faq": "FAQ",
-        "about": "소개",
-        "joinTelegram": "텔레그램 가입",
-        "joinTelegramChannel": "텔레그램 채널 입장",
-        "freeToJoin": "무료 가입",
-        "allRightsReserved": "All Rights Reserved",
+        "learning": "학습",
+        "joinTelegram": "텔레그램 참여",
+        "joinTelegramChannel": "텔레그램 채널 참여",
+        "freeToJoin": "무료 참여",
         "free": "무료",
-        "preparing": "준비중",
-        "lessons": "개 레슨",
-        "more": "개 더...",
-        "startLearning": "시작하기",
-        "contentPreparing": "콘텐츠 준비중",
-        "search": "검색..."
+        "preparing": "준비 중",
+        "lessons": " 레슨",
+        "more": " 더 보기...",
+        "startLearning": "학습 시작",
+        "contentPreparing": "콘텐츠 준비 중"
     },
     "home": {
-        "heroTitle": "덜 잃고, 더 오래 살아남기.",
-        "heroSubtitle": "매일 유동성 분석, 리스크 우선 트레이딩 셋업, 5,000명 이상의 글로벌 트레이더 커뮤니티.",
-        "heroTagline": "SMC · 유동성 · 타이밍",
-        "heroPrimaryCta": "5,000+ 트레이더와 함께하기 — 무료",
-        "heroSecondaryCta": "시작 가이드 보기 →",
-        "researchCardDesc": "매주 시장 구조, 유동성 흐름, 매크로 포지셔닝에 대한 심층 리포트.",
-        "playbookCardDesc": "실제 차트 예시를 활용한 단계별 SMC, ORB 전략 가이드.",
-        "blogCardDesc": "매일 시장 해설, 트레이드 복기, 교육 콘텐츠.",
-        "latestArticles": "최신 아티클",
-        "viewAll": "전체 보기",
-        "noArticles": "아직 게시된 아티클이 없습니다.",
-        "subscribeCta": "뉴스레터 구독",
-        "subscribeDescription": "매주 시장 분석과 인사이트를 받아보세요."
+        "heroBadge": "리스크 우선 분석",
+        "heroTitle": "Lose Less. Last Longer.",
+        "heroSubtitle": "리스크 우선 시장 분석. English & 한국어 매일 인사이트.",
+        "heroTagline": "꿈을 팔지 않습니다. 리스크만 관리합니다.",
+        "heroPrimaryCta": "대시보드 보기",
+        "heroSecondaryCta": "무료 구독",
+        "heroSocialProof": "전 세계 800+ 트레이더가 신뢰합니다",
+        "marketPulseTitle": "시장 현황",
+        "switchboardTitle": "주간 스위치보드",
+        "switchboardWeek": "2026년 2월 17일 주간",
+        "switchboardCta": "전체 스위치보드 보기 →",
+        "boldCallTitle": "최신 Bold Call",
+        "boldCallSubtitle": "공개 기록. 숨기지 않습니다.",
+        "boldCallCta": "모든 Bold Calls 보기 →",
+        "latestArticles": "최신 글",
+        "viewAll": "전체 보기 →",
+        "noArticles": "아직 게시된 글이 없습니다.",
+        "subscribeCta": "TTL 주간 분석 무료 구독",
+        "subscribeDescription": "매주 월요일: 시장 전망, 리스크 레벨, Bold Call 1건.",
+        "subscribePlaceholder": "your@email.com",
+        "subscribeButton": "구독하기",
+        "subscribeSuccess": "구독 완료! 이메일을 확인하세요.",
+        "subscribeDisclaimer": "800+ 트레이더와 함께하세요. 언제든 구독 취소 가능.",
+        "researchCardDesc": "시장 구조, 유동성 흐름, 매크로 포지셔닝에 대한 주간 심층 분석 보고서.",
+        "playbookCardDesc": "실제 차트 예시를 포함한 단계별 SMC·ORB 전략 가이드.",
+        "blogCardDesc": "일일 시장 해설, 트레이드 분석, 교육 콘텐츠."
     },
     "research": {
-        "title": "Research",
-        "subtitle": "Smart Money Concepts 기반의 심층 시장 분석 리포트",
-        "noResearch": "현재 공개된 리서치가 없습니다."
+        "title": "리서치",
+        "subtitle": "Smart Money Concepts 기반 심층 시장 분석 보고서",
+        "noResearch": "현재 이용 가능한 리서치가 없습니다."
     },
     "blog": {
         "title": "블로그",
-        "subtitle": "시장 분석, 트레이딩 전략, 그리고 중국 금융 뉴스 번역까지. 투자에 필요한 모든 인사이트를 제공합니다.",
+        "subtitle": "시장 분석, 트레이딩 전략, 금융 교육 콘텐츠.",
         "emptyTitle": "블로그",
-        "emptySubtitle": "콘텐츠 준비 중입니다.",
-        "noPosts": "아직 등록된 게시물이 없습니다.",
-        "telegramCta": "텔레그램에서 가장 빠른 소식을 받아보세요.",
-        "noResults": "검색 결과가 없습니다. 다른 키워드로 검색해 보세요.",
+        "emptySubtitle": "콘텐츠가 준비 중입니다.",
+        "noPosts": "아직 게시된 글이 없습니다.",
+        "telegramCta": "텔레그램에서 최신 소식을 받아보세요.",
+        "noResults": "검색 결과가 없습니다. 다른 키워드로 시도해 보세요.",
         "categoryAll": "전체",
         "categoryAnalysis": "시장 분석",
         "categoryStrategy": "트레이딩 전략",
         "categoryNews": "뉴스 번역"
     },
     "reports": {
-        "title": "시장 리포트",
-        "subtitle": "심층적인 시장 분석 리포트 아카이브입니다.",
-        "noReports": "현재 공개된 리포트가 없습니다.",
-        "telegramCta": "텔레그램에서 최신 리포트 발간 소식을 받아보세요."
+        "title": "시장 보고서",
+        "subtitle": "심층 시장 분석 보고서 아카이브.",
+        "noReports": "현재 이용 가능한 보고서가 없습니다.",
+        "telegramCta": "텔레그램에서 최신 보고서 업데이트를 받아보세요."
     },
     "briefings": {
         "title": "일일 브리핑",
-        "subtitle": "매일 아침 배달되는 시장 핵심 브리핑 아카이브입니다.",
-        "noBriefings": "현재 공개된 브리핑이 없습니다.",
+        "subtitle": "매일 아침 발송되는 시장 브리핑 아카이브.",
+        "noBriefings": "현재 이용 가능한 브리핑이 없습니다.",
         "telegramCta": "텔레그램에서 실시간 브리핑을 받아보세요."
     },
     "playbooks": {
         "title": "학습 로드맵",
-        "subtitle": "SMC, ORB, 리스크 관리까지 - 체계적인 트레이딩 커리큘럼으로 실력을 키우세요.",
+        "subtitle": "SMC부터 ORB, 리스크 관리까지 — 체계적인 트레이딩 커리큘럼으로 실력을 키우세요.",
         "smcTitle": "SMC 기초",
-        "smcDesc": "Smart Money Concept의 핵심 개념 이해",
+        "smcDesc": "핵심 Smart Money Concepts 이해하기",
         "smcTopics": [
             "SMC란?",
             "시장 구조",
-            "Order Block",
-            "Fair Value Gap",
-            "Liquidity"
+            "오더 블록",
+            "FVG",
+            "유동성"
         ],
-        "obTitle": "Order Block 심화",
-        "obDesc": "OB 식별과 트레이딩 적용",
+        "obTitle": "오더 블록 고급",
+        "obDesc": "OB 식별 및 트레이딩 적용",
         "obTopics": [
             "OB 유형",
-            "유효한 OB 조건",
+            "유효 OB 조건",
             "진입 타이밍",
             "실전 예시"
         ],
-        "fvgTitle": "FVG 마스터리",
+        "fvgTitle": "FVG 마스터",
         "fvgDesc": "Fair Value Gap 완벽 활용",
         "fvgTopics": [
             "FVG 정의",
@@ -99,32 +120,32 @@
             "FVG + OB 조합",
             "실전 적용"
         ],
-        "liquidityTitle": "Liquidity 사냥",
-        "liquidityDesc": "유동성 구역 파악과 활용",
+        "liquidityTitle": "유동성 사냥",
+        "liquidityDesc": "유동성 구간 식별 및 활용",
         "liquidityTopics": [
             "유동성이란?",
             "Sweep vs. Grab",
             "BSL/SSL",
-            "Stop Hunt 패턴",
+            "스탑 헌팅 패턴",
             "진입 전략"
         ],
         "orbTitle": "ORB 전략",
-        "orbDesc": "시가 범위 돌파 전략 마스터",
+        "orbDesc": "Opening Range Breakout 전략 마스터",
         "orbTopics": [
             "ORB 원리",
-            "시간대 설정",
+            "시간 설정",
             "필터링 조건",
             "진입/청산",
             "한국 시장 적용",
-            "백테스트"
+            "백테스팅"
         ],
         "riskTitle": "리스크 관리",
-        "riskDesc": "자본 보존을 위한 필수 스킬",
+        "riskDesc": "자본 보존을 위한 필수 기술",
         "riskTopics": [
             "포지션 사이징",
             "R:R 계산",
-            "손절 원칙",
-            "드로우다운 관리"
+            "손절 규칙",
+            "드로다운 관리"
         ]
     },
     "community": {
@@ -132,133 +153,124 @@
         "subtitle": "글로벌 트레이딩 커뮤니티에 참여하세요",
         "joinOurCommunity": "전 세계 트레이더와 소통하세요",
         "tgEnName": "TG-EN",
-        "tgEnLabel": "가입",
+        "tgEnLabel": "참여",
         "tgEnDesc": "영어 커뮤니티",
         "tgEnDescKr": "Daily market analysis and discussion",
         "tgKrName": "TG-KR",
-        "tgKrLabel": "가입",
+        "tgKrLabel": "참여",
         "tgKrDesc": "한국어 커뮤니티",
-        "tgKrDescKr": "매일 시장 분석과 토론",
-        "kakaoName": "KakaoTalk",
+        "tgKrDescKr": "한국어 시장 분석과 토론",
+        "kakaoName": "카카오톡",
         "kakaoLabel": "오픈채팅",
-        "kakaoDesc": "카카오톡 오픈채팅",
+        "kakaoDesc": "카카오톡",
         "kakaoDescKr": "한국어 오픈 채팅방",
         "startName": "시작하기",
-        "startLabel": "새로 오신 분",
+        "startLabel": "초보자",
         "startDesc": "초보자 가이드",
-        "startDescKr": "트레이딩 여정을 시작하세요"
+        "startDescKr": "여기서 트레이딩 여정을 시작하세요"
     },
     "start": {
         "title": "시작하기",
         "subtitle": "투자 스타일에 맞는 경로를 선택하세요. TranTradingLab이 단계별로 안내해 드립니다.",
         "beginnerTitle": "초보 투자자",
-        "beginnerSubtitle": "처음 시작하시는 분",
-        "traderTitle": "단타/스윙 트레이더",
+        "beginnerSubtitle": "시작하는 분들을 위해",
+        "traderTitle": "데이/스윙 트레이더",
         "traderSubtitle": "기술적 분석에 관심 있는 분",
-        "macroTitle": "거시 경제 관심",
+        "macroTitle": "매크로 경제",
         "macroSubtitle": "글로벌 시장 분석이 필요한 분",
-        "beginnerStep1": "Sample 리포트 읽기",
+        "beginnerStep1": "샘플 보고서 읽기",
         "beginnerStep2": "용어집 확인",
         "beginnerStep3": "SMC 기초 배우기",
-        "beginnerStep4": "Telegram 가입",
-        "traderStep1": "SMC/ORB 전략 학습",
-        "traderStep2": "도구 활용하기",
-        "traderStep3": "매일 브리핑 받기",
+        "beginnerStep4": "텔레그램 참여",
+        "traderStep1": "SMC/ORB 전략 배우기",
+        "traderStep2": "도구 사용하기",
+        "traderStep3": "일일 브리핑 받기",
         "traderStep4": "실시간 알림 설정",
-        "macroStep1": "주간 리포트 구독",
+        "macroStep1": "주간 보고서 구독",
         "macroStep2": "중국 뉴스 번역",
         "macroStep3": "경제 캘린더 확인",
         "macroStep4": "뉴스레터 구독",
         "whatWeProvide": "제공하는 것",
         "whatWeDoNotProvide": "제공하지 않는 것",
-        "provide1": "매일 시장 분석 및 브리핑",
+        "provide1": "일일 시장 분석 및 브리핑",
         "provide2": "SMC/ORB 트레이딩 전략 교육",
-        "provide3": "중국 금융 뉴스 한국어 번역",
-        "provide4": "포지션 사이징, R:R 계산 도구",
-        "provide5": "주간 종합 리포트",
+        "provide3": "중국 금융 뉴스 번역",
+        "provide4": "포지션 사이징 및 R:R 계산기",
+        "provide5": "주간 종합 보고서",
         "provide6": "텔레그램 커뮤니티 접근",
-        "notProvide1": "매수/매도 추천 (투자 권유 아님)",
+        "notProvide1": "매수/매도 추천 (투자 조언 아님)",
         "notProvide2": "수익 보장",
-        "notProvide3": "1:1 투자 상담",
-        "notProvide4": "자동매매 시그널",
+        "notProvide3": "1:1 투자 컨설팅",
+        "notProvide4": "자동 트레이딩 시그널",
         "disclaimer": "모든 투자 결정은 본인의 판단과 책임 하에 이루어져야 합니다.",
-        "readFirstReport": "첫 번째 리포트를 읽어보세요",
-        "viewSampleReport": "Sample 리포트 보기"
+        "readFirstReport": "첫 보고서 읽기",
+        "viewSampleReport": "샘플 보고서 보기"
     },
     "faq": {
         "title": "자주 묻는 질문",
-        "subtitle": "TranTradingLab에 대해 자주 묻는 질문들입니다.",
+        "subtitle": "TranTradingLab에 대한 자주 묻는 질문입니다.",
         "allCategory": "전체",
-        "categoryGeneral": "서비스 일반",
+        "categoryGeneral": "일반",
         "categoryTelegram": "텔레그램",
-        "categoryStrategy": "트레이딩 전략",
+        "categoryStrategy": "전략",
         "categoryContent": "콘텐츠",
         "categoryContact": "문의",
-        "contactTitle": "찾으시는 답변이 없으신가요?",
-        "contactDesc": "텔레그램 채널에서 직접 문의해 주세요.",
-        "contactCta": "텔레그램 문의하기",
+        "contactTitle": "답을 못 찾으셨나요?",
+        "contactDesc": "텔레그램에서 직접 문의하세요.",
+        "contactCta": "텔레그램에서 질문하기",
         "items": [
             {
-                "category": "서비스 일반",
-                "question": "TranTradingLab은 어떤 서비스인가요?",
-                "answer": "TranTradingLab은 한국 개인 투자자를 위한 무료 금융 교육 플랫폼입니다. SMC(Smart Money Concept), ORB(Opening Range Breakout) 트레이딩 전략 교육, 매일 아침 시장 브리핑, 그리고 중국 금융 뉴스의 한국어 번역을 제공합니다. 모든 콘텐츠는 무료로 이용 가능하며, 텔레그램 채널을 통해 실시간으로 정보를 받아보실 수 있습니다."
+                "category": "일반",
+                "question": "TranTradingLab이 뭐예요?",
+                "answer": "TranTradingLab은 리스크 우선 시장 분석 플랫폼입니다. 일일 인사이트, 주간 스위치보드 시그널, 공개 Bold Calls를 완전한 책임감으로 제공합니다. 모든 콘텐츠가 무료입니다."
             },
             {
-                "category": "서비스 일반",
-                "question": "서비스 이용료가 있나요?",
-                "answer": "아니요, TranTradingLab의 모든 콘텐츠와 도구는 완전 무료입니다. 블로그 글, 트레이딩 전략 가이드, 용어집, 포지션 사이징 계산기, 플레이북(학습 커리큘럼) 등 모든 것을 가입비나 구독료 없이 이용하실 수 있습니다. 텔레그램 채널 가입도 무료입니다."
+                "category": "일반",
+                "question": "구독료가 있나요?",
+                "answer": "아닙니다. TranTradingLab의 모든 콘텐츠(대시보드, 블로그, 학습 허브, Bold Calls, 뉴스레터)는 완전히 무료입니다."
             },
             {
                 "category": "텔레그램",
-                "question": "텔레그램 채널에서는 어떤 정보를 받을 수 있나요?",
-                "answer": "매일 아침 08:00 KST에 시장 핵심 브리핑을 발송합니다. 주요 지수 동향, 중요 경제지표 일정, 주목해야 할 종목/섹터, 그리고 트레이딩 아이디어를 간결하게 정리하여 제공합니다. 중요한 시장 이벤트 발생 시에는 수시로 업데이트하며, 커뮤니티 멤버들과 실시간으로 의견을 나눌 수 있습니다."
+                "question": "텔레그램 채널에서 어떤 정보를 받을 수 있나요?",
+                "answer": "매일 아침 핵심 시장 브리핑을 보내드립니다. 주요 지수 동향, 경제 지표, 트레이딩 아이디어가 포함됩니다."
             },
             {
-                "category": "트레이딩 전략",
-                "question": "SMC(Smart Money Concept)란 무엇인가요?",
-                "answer": "SMC는 대형 기관 투자자(Smart Money)들의 트레이딩 패턴을 분석하여 개인 투자자도 비슷한 방향으로 포지션을 잡을 수 있도록 돕는 기술적 분석 방법론입니다. 핵심 개념으로는 시장 구조(Market Structure), Order Block(기관 주문 집적 구역), Fair Value Gap(가격 비효율 구간), Liquidity(유동성 구역) 등이 있습니다. 플레이북에서 단계별로 학습하실 수 있습니다."
+                "category": "전략",
+                "question": "주간 스위치보드가 뭐예요?",
+                "answer": "스위치보드는 8개 주요 자산(SPX, BTC, Gold, 10Y, DXY, Oil, VIX, KOSPI)을 다루는 주간 시그널 보드입니다. 각 자산에 리스크온, 리스크오프, 중립 시그널을 부여합니다. 매주 월요일 발행됩니다."
             },
             {
-                "category": "트레이딩 전략",
-                "question": "ORB 전략은 어떻게 사용하나요?",
-                "answer": "ORB(Opening Range Breakout)는 장 시작 후 첫 15~30분간의 고점과 저점을 기준으로, 이 범위를 돌파하는 방향으로 진입하는 전략입니다. 한국 시장(KOSPI/KOSDAQ)에서는 09:00~09:30 구간을 기준으로 설정하는 것이 일반적입니다. 블로그와 플레이북에서 진입/청산 조건, 필터링 기준, 실전 적용 예시를 상세히 다루고 있습니다."
-            },
-            {
-                "category": "콘텐츠",
-                "question": "중국 뉴스 번역은 어떤 내용인가요?",
-                "answer": "중국 주요 금융 매체(华尔街见闻, 财新, 证券时报 등)의 시장 분석, 정책 변화, 주요 기업 뉴스 등을 한국어로 번역하여 제공합니다. 중국 시장 동향이 한국 증시에 미치는 영향을 파악하는 데 도움이 됩니다. 중요한 정책 발표나 시장 이벤트 발생 시 신속하게 번역하여 텔레그램 채널에 공유합니다."
+                "category": "전략",
+                "question": "Bold Calls가 뭐예요?",
+                "answer": "Bold Calls는 명확한 무효 조건이 있는 공개 시장 예측입니다. 완전한 투명성을 위해 모든 콜(승리와 패배 모두)을 공개적으로 추적합니다."
             },
             {
                 "category": "콘텐츠",
                 "question": "콘텐츠는 얼마나 자주 업데이트되나요?",
-                "answer": "시장 브리핑은 평일 매일 아침 08:00에 발송됩니다. 블로그의 시장 분석은 주 2~3회, 전략 가이드나 교육 콘텐츠는 주 1회 정도 업데이트됩니다. 중국 뉴스 번역은 중요한 이벤트 발생 시 수시로 업데이트합니다."
-            },
-            {
-                "category": "문의",
-                "question": "개인적인 투자 상담도 가능한가요?",
-                "answer": "현재는 1:1 개인 투자 상담 서비스를 제공하지 않습니다. 블로그, 플레이북, 텔레그램 채널의 콘텐츠를 통해 투자에 필요한 교육과 인사이트를 얻으시기 바랍니다. 일반적인 질문은 텔레그램 채널에서 커뮤니티 멤버들과 함께 논의하실 수 있습니다."
+                "answer": "블로그 글은 주 2-3회. 스위치보드는 매주 월요일. Bold Calls는 수시로. 대시보드 데이터는 하루 종일 갱신됩니다."
             }
         ]
     },
     "newsletter": {
-        "emailPlaceholder": "이메일 주소 입력",
+        "emailPlaceholder": "이메일 입력",
         "subscribeButton": "구독하기",
         "success": "완료!",
         "error": "오류",
-        "description": "주간 마켓 브리핑과 트레이딩 인사이트를 받아보세요."
+        "description": "주간 시장 분석과 트레이딩 인사이트를 받아보세요."
     },
     "stats": {
-        "tradersCount": "5,000+",
+        "tradersCount": "800+",
         "tradersLabel": "트레이더",
-        "briefingTime": "08:00 KST",
-        "briefingLabel": "일일 브리핑",
-        "reportSchedule": "매주 일요일",
-        "reportLabel": "주간 리포트"
+        "briefingTime": "매주 월요일",
+        "briefingLabel": "주간 스위치보드",
+        "reportSchedule": "62%",
+        "reportLabel": "Bold Call 승률"
     },
     "footer": {
+        "tagline": "Lose Less. Last Longer. 리스크 우선 시장 분석 (English & 한국어).",
         "privacy": "개인정보처리방침",
         "terms": "이용약관",
         "contact": "문의",
-        "riskDisclaimer": "Edu only – NFA."
+        "riskDisclaimer": "투자 조언이 아닙니다. 교육 목적의 콘텐츠입니다. 항상 본인의 판단 하에 결정하세요. 과거 성과가 미래 수익을 보장하지 않습니다."
     }
 }

@@ -3,21 +3,22 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
+import { GsapProvider } from "@/components/providers/gsap-provider";
+import { MotionProvider } from "@/components/providers/motion-provider";
 import "../globals.css";
 
 const siteUrl = "https://trantradinglab.com";
 
 export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
     const titles: Record<string, string> = {
-        en: "Tran Trading Lab — Daily Liquidity Analysis & Risk-First Trading",
-        ko: "Tran Trading Lab — 매일 유동성 분석 & 리스크 우선 트레이딩",
-        zh: "Tran Trading Lab — 每日流动性分析 & 风险优先交易",
+        en: "Tran Trading Lab — Risk-First Market Analysis | Lose Less. Last Longer.",
+        ko: "Tran Trading Lab — 리스크 우선 시장 분석 | Lose Less. Last Longer.",
     };
 
     const descriptions: Record<string, string> = {
-        en: "Free trading education platform. Daily liquidity analysis, SMC & ORB strategy guides, and a 5,000+ global trader community.",
-        ko: "무료 트레이딩 교육 플랫폼. 매일 유동성 분석, SMC & ORB 전략 가이드, 5,000+ 글로벌 트레이더 커뮤니티.",
-        zh: "免费交易教育平台。每日流动性分析、SMC & ORB策略指南、5,000+全球交易者社群。",
+        en: "Risk-first trading analysis. Weekly Switchboard, public Bold Calls, and daily market insights in English & 한국어. Free.",
+        ko: "리스크 우선 트레이딩 분석. 주간 스위치보드, 공개 Bold Calls, 매일 시장 인사이트. English & 한국어. 무료.",
     };
 
     const title = titles[locale] || titles.en;
@@ -29,7 +30,11 @@ export async function generateMetadata({ params: { locale } }: { params: { local
             template: `%s | Tran Trading Lab`,
         },
         description,
-        keywords: ["trading", "SMC", "Smart Money Concept", "ORB", "liquidity analysis", "market research", "financial education", "trading community"],
+        keywords: [
+            "trading", "risk management", "market analysis", "switchboard",
+            "bold calls", "VIX", "S&P 500", "Bitcoin", "yield curve",
+            "fear greed index", "weekly market outlook", "financial education",
+        ],
         authors: [{ name: "TranTradingLab" }],
         metadataBase: new URL(siteUrl),
         alternates: {
@@ -37,7 +42,6 @@ export async function generateMetadata({ params: { locale } }: { params: { local
             languages: {
                 en: `${siteUrl}/en`,
                 ko: `${siteUrl}/ko`,
-                zh: `${siteUrl}/zh`,
             },
         },
         openGraph: {
@@ -46,13 +50,13 @@ export async function generateMetadata({ params: { locale } }: { params: { local
             url: `${siteUrl}/${locale}`,
             siteName: "Tran Trading Lab",
             type: "website",
-            locale: locale === "ko" ? "ko_KR" : locale === "zh" ? "zh_CN" : "en_US",
+            locale: locale === "ko" ? "ko_KR" : "en_US",
             images: [
                 {
                     url: `${siteUrl}/api/og`,
                     width: 1200,
                     height: 630,
-                    alt: "Tran Trading Lab",
+                    alt: "Tran Trading Lab — Lose Less. Last Longer.",
                 },
             ],
         },
@@ -96,9 +100,15 @@ export default async function LocaleLayout({
 
     return (
         <html lang={locale} className="dark">
-            <body className="min-h-screen bg-background antialiased">
+            <body className="noise-overlay min-h-screen antialiased">
                 <NextIntlClientProvider messages={messages}>
-                    {children}
+                    <MotionProvider>
+                        <GsapProvider>
+                            <SmoothScrollProvider>
+                                {children}
+                            </SmoothScrollProvider>
+                        </GsapProvider>
+                    </MotionProvider>
                 </NextIntlClientProvider>
             </body>
         </html>

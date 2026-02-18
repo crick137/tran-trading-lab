@@ -1,45 +1,66 @@
 {
     "common": {
         "home": "Home",
-        "start": "Get Started",
-        "content": "Content",
-        "research": "Research",
+        "dashboard": "Dashboard",
+        "switchboard": "Switchboard",
         "blog": "Blog",
+        "learn": "Learn",
+        "boldCalls": "Bold Calls",
+        "about": "About",
+        "community": "Community",
+        "newsletter": "Newsletter",
+        "products": "Products",
+        "content": "Content",
+        "company": "Company",
+        "subscribeFree": "Subscribe Free",
+        "allRightsReserved": "All Rights Reserved",
+        "search": "Search...",
+        "research": "Research",
         "reports": "Reports",
         "briefings": "Briefings",
-        "learning": "Learning",
         "playbooks": "Playbooks",
         "glossary": "Glossary",
         "tools": "Tools",
-        "community": "Community",
+        "start": "Get Started",
         "faq": "FAQ",
-        "about": "About",
+        "learning": "Learning",
         "joinTelegram": "Join Telegram",
         "joinTelegramChannel": "Join Telegram Channel",
         "freeToJoin": "Free to join",
-        "allRightsReserved": "All Rights Reserved",
         "free": "Free",
         "preparing": "Coming Soon",
         "lessons": " Lessons",
         "more": " more...",
         "startLearning": "Start Learning",
-        "contentPreparing": "Content Coming Soon",
-        "search": "Search..."
+        "contentPreparing": "Content Coming Soon"
     },
     "home": {
-        "heroTitle": "Lose less. Last longer.",
-        "heroSubtitle": "Daily liquidity analysis, risk-first trade setups, and a 5,000+ trader community.",
-        "heroTagline": "SMC · Liquidity · Timing",
-        "heroPrimaryCta": "Join 5,000+ Traders — Free",
-        "heroSecondaryCta": "See How It Works →",
+        "heroBadge": "Risk-First Analysis",
+        "heroTitle": "Lose Less. Last Longer.",
+        "heroSubtitle": "Risk-first market analysis. Daily insights in English & 한국어.",
+        "heroTagline": "Not selling dreams. Just managing risk.",
+        "heroPrimaryCta": "View Dashboard",
+        "heroSecondaryCta": "Subscribe Free",
+        "heroSocialProof": "Trusted by 800+ traders worldwide",
+        "marketPulseTitle": "Market Pulse",
+        "switchboardTitle": "Weekly Switchboard",
+        "switchboardWeek": "Week of Feb 17, 2026",
+        "switchboardCta": "View Full Switchboard →",
+        "boldCallTitle": "Latest Bold Call",
+        "boldCallSubtitle": "Public accountability. No hiding.",
+        "boldCallCta": "See All Bold Calls →",
+        "latestArticles": "Latest Posts",
+        "viewAll": "View All →",
+        "noArticles": "No articles published yet.",
+        "subscribeCta": "Get TTL's Weekly Analysis — Free",
+        "subscribeDescription": "Every Monday: Market outlook, risk levels, and 1 Bold Call.",
+        "subscribePlaceholder": "your@email.com",
+        "subscribeButton": "Subscribe",
+        "subscribeSuccess": "You're in! Check your inbox.",
+        "subscribeDisclaimer": "Join 800+ traders. Unsubscribe anytime.",
         "researchCardDesc": "Weekly deep-dive reports on market structure, liquidity flows, and macro positioning.",
         "playbookCardDesc": "Step-by-step SMC and ORB strategy guides with real chart examples.",
-        "blogCardDesc": "Daily market commentary, trade breakdowns, and educational articles.",
-        "latestArticles": "Latest Articles",
-        "viewAll": "View All",
-        "noArticles": "No articles published yet.",
-        "subscribeCta": "Subscribe to Newsletter",
-        "subscribeDescription": "Get weekly market analysis and insights."
+        "blogCardDesc": "Daily market commentary, trade breakdowns, and educational articles."
     },
     "research": {
         "title": "Research",
@@ -48,7 +69,7 @@
     },
     "blog": {
         "title": "Blog",
-        "subtitle": "Market analysis, trading strategies, and Chinese financial news translations. All the insights you need for investing.",
+        "subtitle": "Market analysis, trading strategies, and financial education.",
         "emptyTitle": "Blog",
         "emptySubtitle": "Content is being prepared.",
         "noPosts": "No posts published yet.",
@@ -201,42 +222,32 @@
             {
                 "category": "General",
                 "question": "What is TranTradingLab?",
-                "answer": "TranTradingLab is a free financial education platform for investors. We provide SMC (Smart Money Concept) and ORB (Opening Range Breakout) trading strategy education, daily morning market briefings, and Chinese financial news translations. All content is free to access, and you can receive real-time updates through our Telegram channel."
+                "answer": "TranTradingLab is a risk-first market analysis platform. We provide daily insights, weekly switchboard signals, and public Bold Calls with full accountability. All content is free."
             },
             {
                 "category": "General",
                 "question": "Is there a subscription fee?",
-                "answer": "No, all content and tools on TranTradingLab are completely free. Blog posts, trading strategy guides, glossary, position sizing calculator, playbooks (learning curriculum) — everything is accessible without any signup or subscription fee. Joining our Telegram channel is also free."
+                "answer": "No, all content on TranTradingLab is completely free — Dashboard, Blog, Learn hub, Bold Calls, and Newsletter."
             },
             {
                 "category": "Telegram",
                 "question": "What information is available on the Telegram channel?",
-                "answer": "We send core market briefings every morning at 08:00 KST. These include major index trends, important economic indicators, sectors/stocks to watch, and concise trading ideas. We also provide ad-hoc updates for significant market events, and you can discuss with community members in real-time."
+                "answer": "We send core market briefings every morning. These include major index trends, important economic indicators, and trading ideas."
             },
             {
                 "category": "Strategy",
-                "question": "What is SMC (Smart Money Concept)?",
-                "answer": "SMC is a technical analysis methodology that analyzes the trading patterns of large institutional investors (Smart Money) to help individual investors position accordingly. Key concepts include Market Structure, Order Blocks (institutional order accumulation zones), Fair Value Gaps (price inefficiency zones), and Liquidity zones. You can learn step by step in our Playbooks section."
+                "question": "What is the Weekly Switchboard?",
+                "answer": "The Switchboard is our weekly signal board covering 8 key assets (SPX, BTC, Gold, 10Y, DXY, Oil, VIX, KOSPI). Each asset gets a risk-on, risk-off, or neutral signal. Published every Monday."
             },
             {
                 "category": "Strategy",
-                "question": "How do I use the ORB strategy?",
-                "answer": "ORB (Opening Range Breakout) is a strategy that uses the high and low of the first 15-30 minutes after market open as reference points, entering in the direction of the breakout. For Korean markets (KOSPI/KOSDAQ), the 09:00-09:30 range is typically used. Our blog and playbooks cover entry/exit conditions, filtering criteria, and practical examples in detail."
-            },
-            {
-                "category": "Content",
-                "question": "What Chinese news translations do you provide?",
-                "answer": "We translate market analysis, policy changes, and major corporate news from leading Chinese financial media (华尔街见闻, 财新, 证券时报, etc.) into Korean and English. This helps understand how Chinese market trends impact other Asian markets. We quickly translate and share important policy announcements or market events via our Telegram channel."
+                "question": "What are Bold Calls?",
+                "answer": "Bold Calls are public, time-bound market predictions with clear invalidation criteria. We track every call publicly — wins and losses — for full transparency."
             },
             {
                 "category": "Content",
                 "question": "How often is content updated?",
-                "answer": "Market briefings are sent every weekday morning at 08:00. Blog market analysis is published 2-3 times per week, and strategy guides or educational content about once a week. Chinese news translations are updated on an ad-hoc basis when significant events occur."
-            },
-            {
-                "category": "Contact",
-                "question": "Do you offer personal investment consulting?",
-                "answer": "We do not currently provide 1:1 personal investment consulting. Please use our blog, playbooks, and Telegram channel content to gain the education and insights you need for investing. General questions can be discussed with community members on our Telegram channel."
+                "answer": "Blog posts 2-3 times per week. Switchboard every Monday. Bold Calls as they arise. Dashboard data refreshes throughout the day."
             }
         ]
     },
@@ -248,17 +259,18 @@
         "description": "Get weekly market briefings and trading insights."
     },
     "stats": {
-        "tradersCount": "5,000+",
+        "tradersCount": "800+",
         "tradersLabel": "Traders",
-        "briefingTime": "08:00 KST",
-        "briefingLabel": "Daily Briefing",
-        "reportSchedule": "Every Sunday",
-        "reportLabel": "Weekly Report"
+        "briefingTime": "Every Monday",
+        "briefingLabel": "Weekly Switchboard",
+        "reportSchedule": "62%",
+        "reportLabel": "Bold Call Win Rate"
     },
     "footer": {
+        "tagline": "Lose Less. Last Longer. Risk-first market analysis in English & 한국어.",
         "privacy": "Privacy Policy",
         "terms": "Terms of Service",
         "contact": "Contact",
-        "riskDisclaimer": "Edu only – NFA."
+        "riskDisclaimer": "Not financial advice. Educational content only. Always do your own research. Past performance is not indicative of future results."
     }
 }

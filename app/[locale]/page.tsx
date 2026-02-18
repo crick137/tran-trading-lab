@@ -1,8 +1,11 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/home/hero";
-import { StatsBar } from "@/components/home/stats-bar";
+import { LiveTicker } from "@/components/home/live-ticker";
+import { MarketPulse } from "@/components/home/market-pulse";
+import { SwitchboardPreview } from "@/components/home/switchboard-preview";
 import { LatestArticles } from "@/components/home/latest-articles";
+import { BoldCallSpotlight } from "@/components/home/bold-call-spotlight";
 import { SubscribeCTA } from "@/components/home/subscribe-cta";
 
 export default function Home() {
@@ -11,8 +14,11 @@ export default function Home() {
             <Navbar />
             <main>
                 <Hero />
-                <StatsBar />
+                <LiveTicker />
+                <MarketPulse />
+                <SwitchboardPreview />
                 <LatestArticles />
+                <BoldCallSpotlight />
                 <SubscribeCTA />
             </main>
             <Footer />
