@@ -118,9 +118,9 @@ export default function PositionSizingPage() {
                         </div>
 
                         {percentOfAccount > 50 && (
-                            <div className="flex items-start gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                                <AlertTriangle className="w-4 h-4 text-yellow-500 mt-0.5 shrink-0" />
-                                <p className="text-sm text-yellow-500">{t("warningExceed")}</p>
+                            <div className="flex items-start gap-2 p-3 rounded-lg bg-neutral/10 border border-neutral/30">
+                                <AlertTriangle className="w-4 h-4 text-neutral mt-0.5 shrink-0" />
+                                <p className="text-sm text-neutral">{t("warningExceed")}</p>
                             </div>
                         )}
                     </div>

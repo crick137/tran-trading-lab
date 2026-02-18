@@ -44,8 +44,8 @@ export function Navbar() {
             label: t("content"),
             items: [
                 { href: `/${locale}/blog`, label: t("blog") },
-                { href: `/${locale}/learn`, label: t("learn") },
-                { href: `/${locale}/newsletter`, label: t("newsletter") },
+                { href: `/${locale}/academy`, label: t("learn") },
+                { href: `/${locale}/subscribe`, label: t("newsletter") },
             ],
         },
         { href: `/${locale}/about`, label: t("about") },
@@ -206,7 +206,7 @@ export function Navbar() {
                     <div className="hidden lg:flex items-center gap-3">
                         <LanguageSwitcher />
                         <Link
-                            href={`/${locale}/newsletter`}
+                            href={`/${locale}/subscribe`}
                             className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98]"
                             style={{ background: "var(--gradient-cta)" }}
                         >
@@ -253,7 +253,7 @@ export function Navbar() {
                                 ))}
                                 <div className="mt-3 pt-3 border-t border-white/5">
                                     <Link
-                                        href={`/${locale}/newsletter`}
+                                        href={`/${locale}/subscribe`}
                                         className="block py-2.5 rounded-lg text-sm font-semibold text-center text-cv-primary"
                                         style={{ background: "var(--gradient-cta)" }}
                                     >

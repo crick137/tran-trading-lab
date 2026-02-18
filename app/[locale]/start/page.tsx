@@ -22,8 +22,8 @@ export default function StartPage() {
             icon: Rocket,
             title: t("beginnerTitle"),
             subtitle: t("beginnerSubtitle"),
-            gradient: "from-emerald-500/10 to-transparent",
-            border: "border-emerald-500/20 hover:border-emerald-500/40",
+            gradient: "from-bullish/10 to-transparent",
+            border: "border-bullish/20 hover:border-bullish/40",
             steps: [
                 { label: t("beginnerStep1"), href: `/${locale}/research` },
                 { label: t("beginnerStep2"), href: `/${locale}/glossary` },
@@ -56,7 +56,7 @@ export default function StartPage() {
                 { label: t("macroStep1"), href: `/${locale}/reports` },
                 { label: t("macroStep2"), href: `/${locale}/blog` },
                 { label: t("macroStep3"), href: `/${locale}/briefings` },
-                { label: t("macroStep4"), href: `/${locale}/newsletter` },
+                { label: t("macroStep4"), href: `/${locale}/subscribe` },
             ],
         },
     ];

@@ -69,8 +69,8 @@ export function Footer() {
             title: t("content"),
             links: [
                 { href: `/${locale}/blog`, label: t("blog") },
-                { href: `/${locale}/learn`, label: t("learn") },
-                { href: `/${locale}/newsletter`, label: t("newsletter") },
+                { href: `/${locale}/academy`, label: t("learn") },
+                { href: `/${locale}/subscribe`, label: t("newsletter") },
             ],
         },
         {

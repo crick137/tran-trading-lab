@@ -99,6 +99,7 @@ function BlogContent() {
                         <input
                             type="text"
                             placeholder={tc("search")}
+                            aria-label={tc("search")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full pl-12 pr-4 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-gold/40 transition-all"

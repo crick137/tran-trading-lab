@@ -47,7 +47,7 @@ function CategoryBadge({ category }: { category: string }) {
     const colorMap: Record<string, string> = {
         Macro: "text-blue-400 bg-blue-400/10 border-blue-400/20",
         Crypto: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-        Education: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+        Education: "text-bullish bg-bullish/10 border-bullish/20",
         Korea: "text-pink-400 bg-pink-400/10 border-pink-400/20",
     };
     return (

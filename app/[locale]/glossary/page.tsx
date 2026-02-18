@@ -123,6 +123,7 @@ export default function GlossaryPage() {
                                     setSearch(e.target.value);
                                     setDisplayCount(ITEMS_PER_PAGE);
                                 }}
+                                aria-label={t("searchPlaceholder")}
                                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-gold/40 transition-all"
                             />
                         </div>
@@ -186,7 +187,7 @@ export default function GlossaryPage() {
 
                     {/* NFA Disclaimer */}
                     <div className="mt-16 p-4 rounded-lg bg-cv-elevated/50 border border-white/5 flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        <AlertTriangle className="w-5 h-5 text-neutral flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-white/40">
                             <strong>{t("disclaimerTitle")}</strong> {t("disclaimerText")}
                         </p>
@@ -275,11 +276,11 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
 
                             {/* Common Mistakes */}
                             <div>
-                                <h4 className="text-sm font-semibold text-red-400 mb-2">{t("commonMistakes")}</h4>
+                                <h4 className="text-sm font-semibold text-bearish mb-2">{t("commonMistakes")}</h4>
                                 <ul className="space-y-1">
                                     {term.common_mistakes.map((item, i) => (
                                         <li key={i} className="text-sm text-white/40 flex items-start gap-2">
-                                            <span className="text-red-400 mt-1">{"\u2717"}</span>
+                                            <span className="text-bearish mt-1">{"\u2717"}</span>
                                             {item}
                                         </li>
                                     ))}

@@ -142,7 +142,7 @@ export function Hero() {
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                     <Link
-                        href={`/${locale}/newsletter`}
+                        href={`/${locale}/subscribe`}
                         className="px-8 py-3.5 rounded-lg border font-semibold transition-all hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98]"
                         style={{
                             borderColor: "rgba(255, 255, 255, 0.10)",

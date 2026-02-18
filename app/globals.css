@@ -58,21 +58,6 @@
     --gradient-cta: linear-gradient(135deg, #ffa500 0%, #ff8c00 50%, #e67e00 100%);
     --gradient-cta-hover: linear-gradient(135deg, #ffb732 0%, #ffa500 50%, #ff8c00 100%);
 
-    /* shadcn/ui compatible HSL tokens */
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --primary: 36 100% 50%;
-    --primary-foreground: 222 47% 6%;
-    --secondary: 217 91% 60%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222 20% 18%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 36 100% 50%;
-    --accent-foreground: 222 47% 6%;
-    --border: 222 20% 15%;
-    --ring: 36 100% 50%;
     --radius: 0.75rem;
 
     /* Fonts — powered by next/font CSS variables */
@@ -261,7 +246,7 @@ pre, code {
 
 /* Focus */
 :focus-visible {
-    outline: 2px solid hsl(var(--ring));
+    outline: 2px solid var(--neutral);
     outline-offset: 2px;
 }
 
