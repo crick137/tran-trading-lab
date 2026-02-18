@@ -61,7 +61,7 @@ export function SwitchboardPreview() {
                         {switchboardData.map((asset) => (
                             <div
                                 key={asset.name}
-                                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/5"
+                                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/5 transition-colors hover:bg-white/[0.04] hover:border-white/10"
                             >
                                 <SignalDot signal={asset.signal} />
                                 <span className="text-sm font-medium text-white/70">{asset.name}</span>

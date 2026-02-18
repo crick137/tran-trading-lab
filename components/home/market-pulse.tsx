@@ -48,7 +48,7 @@ const pulseData: PulseCard[] = [
 ];
 
 function MiniSparkline({ signal }: { signal: string }) {
-    const color = signal === "bullish" ? "#00c851" : signal === "bearish" ? "#ff3b3b" : "#ffa500";
+    const color = signal === "bullish" ? "var(--bullish)" : signal === "bearish" ? "var(--bearish)" : "var(--neutral)";
     return (
         <svg width="80" height="24" viewBox="0 0 80 24" className="opacity-40" aria-hidden="true">
             <polyline

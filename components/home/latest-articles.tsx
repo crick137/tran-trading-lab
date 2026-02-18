@@ -80,7 +80,7 @@ export function LatestArticles() {
                         className="text-sm text-gold hover:text-gold-light transition-colors flex items-center gap-1 group"
                     >
                         {t("viewAll")}
-                        <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                        <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
                     </Link>
                 </div>
 

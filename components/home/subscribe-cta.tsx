@@ -33,7 +33,7 @@ export function SubscribeCTA() {
                 >
                     {/* Ambient glow */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px]" aria-hidden="true" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/3 rounded-full blur-[60px]" aria-hidden="true" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/5 rounded-full blur-[60px]" aria-hidden="true" />
 
                     <div className="relative z-10 max-w-xl mx-auto text-center">
                         {/* Icon */}
@@ -62,13 +62,13 @@ export function SubscribeCTA() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder={t("subscribePlaceholder")}
-                                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold/40 transition-colors"
+                                    className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus-visible:outline-none focus:border-gold/40 transition-colors"
                                     required
                                 />
                                 <button
                                     type="submit"
                                     disabled={status === "loading"}
-                                    className="px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-all hover:shadow-lg hover:shadow-gold/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-[box-shadow,transform] hover:shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                                     style={{ background: "var(--gradient-cta)" }}
                                 >
                                     {status === "loading" ? "..." : t("subscribeButton")}

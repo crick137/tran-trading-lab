@@ -207,7 +207,7 @@ export function Navbar() {
                         <LanguageSwitcher />
                         <Link
                             href={`/${locale}/newsletter`}
-                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-gold/20"
+                            className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98]"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("subscribeFree")}
@@ -218,7 +218,7 @@ export function Navbar() {
                     <div className="flex lg:hidden items-center gap-2">
                         <LanguageSwitcher />
                         <button
-                            className="text-white/80 p-2"
+                            className="text-white/80 p-2 rounded-lg hover:text-white hover:bg-white/5 transition-colors"
                             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             aria-label="Toggle menu"
                         >

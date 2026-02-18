@@ -16,7 +16,7 @@ export function BoldCallSpotlight() {
             <div className="max-w-content mx-auto" ref={sectionRef}>
                 <MovingBorder
                     className="p-6 md:p-8"
-                    borderColor="rgba(255, 165, 0, 0.25)"
+                    borderColor="rgba(255, 165, 0, 0.3)"
                     duration={8}
                 >
                     {/* Header */}

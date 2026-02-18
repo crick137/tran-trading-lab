@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 interface TickerItem {
     symbol: string;
     price: string;
@@ -35,8 +33,6 @@ function TickerItemDisplay({ item }: { item: TickerItem }) {
 }
 
 export function LiveTicker() {
-    const t = useTranslations("home");
-
     return (
         <section
             className="relative border-y border-white/5 bg-cv-elevated/50 overflow-hidden py-2.5"
