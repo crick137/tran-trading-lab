@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Twitter, Send, Link2, Check } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface SocialShareProps {
 
 export function SocialShare({ title, url }: SocialShareProps) {
     const [copied, setCopied] = useState(false);
+    const t = useTranslations("blogPost");
     const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
 
     const shareLinks = [
@@ -40,7 +42,7 @@ export function SocialShare({ title, url }: SocialShareProps) {
 
     return (
         <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground mr-2">공유하기</span>
+            <span className="text-sm text-white/50 mr-2">{t("share")}</span>
             {shareLinks.map((link) => (
                 <motion.a
                     key={link.name}
@@ -49,8 +51,8 @@ export function SocialShare({ title, url }: SocialShareProps) {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`p-2 rounded-lg border border-border/50 text-muted-foreground transition-all ${link.color}`}
-                    title={`${link.name}에 공유`}
+                    className={`p-2 rounded-lg border border-white/10 text-white/50 transition-all ${link.color}`}
+                    title={`${t("shareOn")} ${link.name}`}
                 >
                     <link.icon className="w-4 h-4" />
                 </motion.a>
@@ -59,11 +61,11 @@ export function SocialShare({ title, url }: SocialShareProps) {
                 onClick={copyToClipboard}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className={`p-2 rounded-lg border border-border/50 transition-all ${copied
+                className={`p-2 rounded-lg border transition-all ${copied
                         ? "bg-green-500/20 text-green-500 border-green-500/50"
-                        : "text-muted-foreground hover:bg-gold/20 hover:text-gold hover:border-gold/50"
+                        : "border-white/10 text-white/50 hover:bg-gold/20 hover:text-gold hover:border-gold/50"
                     }`}
-                title="링크 복사"
+                title={t("copyLink")}
             >
                 <AnimatePresence mode="wait">
                     {copied ? (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TOCItem {
@@ -16,9 +17,9 @@ interface TableOfContentsProps {
 export function TableOfContents({ content }: TableOfContentsProps) {
     const [headings, setHeadings] = useState<TOCItem[]>([]);
     const [activeId, setActiveId] = useState<string>("");
+    const t = useTranslations("blogPost");
 
     useEffect(() => {
-        // Parse headings from content
         const headingRegex = /^(#{2,3})\s+(.+)$/gm;
         const matches: TOCItem[] = [];
         let match;
@@ -65,10 +66,10 @@ export function TableOfContents({ content }: TableOfContentsProps) {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="hidden xl:block fixed right-4 top-32 w-56 max-h-[70vh] overflow-y-auto"
         >
-            <div className="p-4 rounded-xl bg-card/50 border border-border/50 backdrop-blur-sm">
-                <h4 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+            <div className="p-4 rounded-xl bg-cv-elevated/50 border border-white/10 backdrop-blur-sm">
+                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                     <span className="w-1 h-4 bg-gold rounded-full" />
-                    목차
+                    {t("toc")}
                 </h4>
                 <ul className="space-y-2">
                     <AnimatePresence>
@@ -89,7 +90,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
                                     }}
                                     className={`block text-sm py-1 transition-all duration-200 hover:text-gold ${activeId === heading.id
                                         ? "text-gold font-medium"
-                                        : "text-muted-foreground"
+                                        : "text-white/50"
                                         }`}
                                 >
                                     {heading.text}
