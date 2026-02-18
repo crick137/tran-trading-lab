@@ -6,46 +6,30 @@ import { Activity, TrendingDown, Percent } from "lucide-react";
 import { Lamp } from "@/components/ui/aceternity/lamp";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
+import useSWR from "swr";
 
-interface PulseCard {
-    id: string;
-    icon: React.ElementType;
-    value: string;
-    label: string;
-    change: string;
-    emoji: string;
-    signal: "bullish" | "bearish" | "neutral";
+interface MarketData {
+    fearGreed: { value: number; classification: string } | null;
+    vix: { value: number; change: number } | null;
+    treasury: { value: number } | null;
 }
 
-const pulseData: PulseCard[] = [
-    {
-        id: "fear-greed",
-        icon: Activity,
-        value: "62",
-        label: "Fear & Greed",
-        change: "Greed",
-        emoji: "😏",
-        signal: "neutral",
-    },
-    {
-        id: "vix",
-        icon: TrendingDown,
-        value: "15.2",
-        label: "VIX",
-        change: "▼ -3.2%",
-        emoji: "😌",
-        signal: "bullish",
-    },
-    {
-        id: "yield",
-        icon: Percent,
-        value: "4.52%",
-        label: "10Y Yield",
-        change: "▲ +2bp",
-        emoji: "📈",
-        signal: "neutral",
-    },
-];
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+function getEmoji(value: number): string {
+    if (value <= 25) return "😨";
+    if (value <= 45) return "😟";
+    if (value <= 55) return "😐";
+    if (value <= 75) return "😏";
+    return "🤑";
+}
+
+function getSignal(classification: string): "bullish" | "bearish" | "neutral" {
+    const lower = classification.toLowerCase();
+    if (lower.includes("extreme fear") || lower.includes("fear")) return "bearish";
+    if (lower.includes("extreme greed") || lower.includes("greed")) return "bullish";
+    return "neutral";
+}
 
 function MiniSparkline({ signal }: { signal: string }) {
     const color = signal === "bullish" ? "var(--bullish)" : signal === "bearish" ? "var(--bearish)" : "var(--neutral)";
@@ -69,6 +53,46 @@ export function MarketPulse() {
         stagger: 0.1,
     });
 
+    const { data } = useSWR<MarketData>("/api/market-data", fetcher, {
+        refreshInterval: 300_000,
+        revalidateOnFocus: false,
+    });
+
+    const fearGreed = data?.fearGreed;
+    const vix = data?.vix;
+    const treasury = data?.treasury;
+
+    const cards = [
+        {
+            id: "fear-greed",
+            icon: Activity,
+            value: fearGreed ? String(fearGreed.value) : "—",
+            label: "Fear & Greed",
+            change: fearGreed ? fearGreed.classification : "—",
+            emoji: fearGreed ? getEmoji(fearGreed.value) : "📊",
+            signal: fearGreed ? getSignal(fearGreed.classification) : ("neutral" as const),
+        },
+        {
+            id: "vix",
+            icon: TrendingDown,
+            value: vix ? vix.value.toFixed(1) : "—",
+            label: "VIX",
+            change: vix ? `${vix.change >= 0 ? "▲" : "▼"} ${vix.change >= 0 ? "+" : ""}${vix.change.toFixed(1)}%` : "—",
+            emoji: vix ? (vix.value < 15 ? "😌" : vix.value < 20 ? "😐" : vix.value < 30 ? "😟" : "😨") : "📊",
+            signal: vix ? (vix.value < 15 ? "bullish" : vix.value < 25 ? "neutral" : "bearish") as "bullish" | "bearish" | "neutral" : "neutral" as const,
+        },
+        {
+            id: "yield",
+            icon: Percent,
+            value: treasury ? `${treasury.value.toFixed(2)}%` : "—",
+            label: "10Y Yield",
+            change: treasury ? "Daily" : "—",
+            emoji: "📈",
+            signal: "neutral" as const,
+        },
+    ];
+
+    // If no data at all, show cards with placeholder dashes
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
@@ -79,11 +103,11 @@ export function MarketPulse() {
                 </Lamp>
 
                 <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {pulseData.map((card) => (
+                    {cards.map((card) => (
                         <TiltCard key={card.id}>
                             <Link
                                 href={`/${locale}/dashboard`}
-                                className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover signal-${card.signal}`}
+                                className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover ${card.value !== "—" ? `signal-${card.signal}` : ""}`}
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-2">
@@ -97,13 +121,13 @@ export function MarketPulse() {
                                     <div>
                                         <p className="text-3xl font-bold font-data text-white">{card.value}</p>
                                         <p className={`text-sm font-data mt-1 ${card.signal === "bullish" ? "text-bullish" :
-                                                card.signal === "bearish" ? "text-bearish" :
-                                                    "text-neutral"
+                                            card.signal === "bearish" ? "text-bearish" :
+                                                "text-neutral"
                                             }`}>
                                             {card.change}
                                         </p>
                                     </div>
-                                    <MiniSparkline signal={card.signal} />
+                                    {card.value !== "—" && <MiniSparkline signal={card.signal} />}
                                 </div>
                             </Link>
                         </TiltCard>

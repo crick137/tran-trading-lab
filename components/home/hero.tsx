@@ -134,7 +134,7 @@ export function Hero() {
                     className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8"
                 >
                     <Link
-                        href={`/${locale}/dashboard`}
+                        href={`/${locale}/subscribe`}
                         className="group px-8 py-3.5 rounded-lg font-semibold transition-all flex items-center gap-2 text-cv-void hover:shadow-xl hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98]"
                         style={{ background: "var(--gradient-cta)" }}
                     >
@@ -142,7 +142,7 @@ export function Hero() {
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                     <Link
-                        href={`/${locale}/subscribe`}
+                        href={`/${locale}/about`}
                         className="px-8 py-3.5 rounded-lg border font-semibold transition-all hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98]"
                         style={{
                             borderColor: "rgba(255, 255, 255, 0.10)",

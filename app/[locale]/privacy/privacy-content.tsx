@@ -61,7 +61,7 @@ export function PrivacyContent() {
 
                         <h2 className="text-2xl font-semibold text-white mt-8 mb-4">{t("section7Title")}</h2>
                         <p className="text-white/60 mb-6">
-                            {t("section7Body")} <a href="https://t.me/TranTradingLab" className="text-gold hover:underline">Telegram</a>
+                            {t("section7Body")} <a href="https://t.me/TranTradingLab" target="_blank" rel="noopener noreferrer" className="text-gold hover:underline">Telegram</a>
                         </p>
                     </div>
                 </div>

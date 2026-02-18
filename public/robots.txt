@@ -1,38 +1,14 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
-
-# Allow specific bots
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Yandex
-Allow: /
-
-User-agent: DuckDuckBot
-Allow: /
-
-User-agent: Applebot
-Allow: /
-
-User-agent: GPTBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-# Sitemaps
-Sitemap: https://trantradinglab.com/sitemap.xml
+Disallow: /api/
+Disallow: /*/dashboard
 
 # Allow OG image API for social media previews
 Allow: /api/og
 
-# Disallow other api/internal paths
-Disallow: /api/
+# Disallow internal paths
 Disallow: /_next/
+
+# Sitemaps
+Sitemap: https://www.trantradinglab.com/sitemap.xml

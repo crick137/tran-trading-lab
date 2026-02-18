@@ -2,12 +2,11 @@
 
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Globe } from "lucide-react";
+import { useCallback } from "react";
 
 const locales = [
-    { code: "en", label: "EN", flag: "🇺🇸" },
-    { code: "ko", label: "한국어", flag: "🇰🇷" },
+    { code: "en", label: "EN" },
+    { code: "ko", label: "한국어" },
 ];
 
 export function LanguageSwitcher() {
@@ -15,24 +14,33 @@ export function LanguageSwitcher() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const currentLocale = locales.find((l) => l.code === locale) || locales[0];
-    const otherLocale = locales.find((l) => l.code !== locale) || locales[1];
-
-    const handleLocaleChange = () => {
-        const segments = pathname.split("/");
-        segments[1] = otherLocale.code;
-        const newPath = segments.join("/");
-        router.push(newPath);
-    };
+    const switchTo = useCallback(
+        (targetLocale: string) => {
+            if (targetLocale === locale) return;
+            const segments = pathname.split("/");
+            segments[1] = targetLocale;
+            router.push(segments.join("/"));
+        },
+        [locale, pathname, router]
+    );
 
     return (
-        <button
-            onClick={handleLocaleChange}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:border-gold/30 transition-all text-xs text-white/50 hover:text-white/80"
-            title={`Switch to ${otherLocale.label}`}
-        >
-            <Globe className="w-3.5 h-3.5" />
-            <span>{otherLocale.flag} {otherLocale.label}</span>
-        </button>
+        <div className="flex items-center rounded-lg border border-white/10 dark:border-white/10 overflow-hidden text-xs">
+            {locales.map((l, i) => (
+                <button
+                    key={l.code}
+                    onClick={() => switchTo(l.code)}
+                    className={`px-2.5 py-1.5 transition-all ${
+                        locale === l.code
+                            ? "bg-gold/20 text-gold font-semibold"
+                            : "text-white/50 hover:text-white/80 hover:bg-white/5"
+                    } ${i > 0 ? "border-l border-white/10" : ""}`}
+                    aria-label={`Switch to ${l.label}`}
+                    aria-current={locale === l.code ? "true" : undefined}
+                >
+                    {l.label}
+                </button>
+            ))}
+        </div>
     );
 }

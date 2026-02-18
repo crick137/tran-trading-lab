@@ -6,6 +6,9 @@ import { routing } from "@/i18n/routing";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { GsapProvider } from "@/components/providers/gsap-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { BackToTop } from "@/components/ui/back-to-top";
+import { RouteProgress } from "@/components/ui/route-progress";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, jetbrainsMono } from "@/lib/fonts";
@@ -102,7 +105,7 @@ export default async function LocaleLayout({
     const messages = await getMessages();
 
     return (
-        <html lang={locale} className={`dark ${inter.variable} ${jetbrainsMono.variable}`}>
+        <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
                 <link
@@ -114,17 +117,25 @@ export default async function LocaleLayout({
                     rel="stylesheet"
                     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
                 />
+                <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Tran Trading Lab" />
             </head>
             <body className="noise-overlay min-h-screen antialiased">
-                <NextIntlClientProvider messages={messages}>
-                    <MotionProvider>
-                        <GsapProvider>
-                            <SmoothScrollProvider>
-                                {children}
-                            </SmoothScrollProvider>
-                        </GsapProvider>
-                    </MotionProvider>
-                </NextIntlClientProvider>
+                <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-gold focus:text-cv-void focus:rounded-lg focus:font-semibold">
+                    Skip to main content
+                </a>
+                <ThemeProvider>
+                    <NextIntlClientProvider messages={messages}>
+                        <MotionProvider>
+                            <GsapProvider>
+                                <SmoothScrollProvider>
+                                    <RouteProgress />
+                                    {children}
+                                    <BackToTop />
+                                </SmoothScrollProvider>
+                            </GsapProvider>
+                        </MotionProvider>
+                    </NextIntlClientProvider>
+                </ThemeProvider>
                 <Analytics />
                 <SpeedInsights />
             </body>

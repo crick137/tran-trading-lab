@@ -1,38 +1,54 @@
 "use client";
 
-interface TickerItem {
+import useSWR from "swr";
+
+interface CoinPrice {
     symbol: string;
-    price: string;
-    change: string;
-    isPositive: boolean;
+    usd: number;
+    usd_24h_change: number;
 }
 
-const tickerData: TickerItem[] = [
-    { symbol: "SPX", price: "6,117", change: "+0.24%", isPositive: true },
-    { symbol: "NDQ", price: "19,843", change: "+0.41%", isPositive: true },
-    { symbol: "BTC", price: "95,432", change: "-1.2%", isPositive: false },
-    { symbol: "ETH", price: "2,684", change: "-0.8%", isPositive: false },
-    { symbol: "VIX", price: "15.2", change: "-3.1%", isPositive: true },
-    { symbol: "Gold", price: "2,931", change: "+0.5%", isPositive: true },
-    { symbol: "10Y", price: "4.52%", change: "+2bp", isPositive: false },
-    { symbol: "DXY", price: "106.8", change: "+0.3%", isPositive: true },
-    { symbol: "KOSPI", price: "2,612", change: "+0.3%", isPositive: true },
-    { symbol: "Oil", price: "71.2", change: "-1.5%", isPositive: false },
-];
+interface MarketData {
+    coins: CoinPrice[] | null;
+}
 
-function TickerItemDisplay({ item }: { item: TickerItem }) {
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+function formatPrice(price: number): string {
+    if (price >= 1000) return price.toLocaleString("en-US", { maximumFractionDigits: 0 });
+    return price.toLocaleString("en-US", { maximumFractionDigits: 2 });
+}
+
+function TickerItemDisplay({ symbol, price, change }: { symbol: string; price: string; change: string; isPositive: boolean }) {
+    const positive = !change.startsWith("-");
     return (
         <div className="flex items-center gap-2 px-4 whitespace-nowrap">
-            <span className="text-white/50 text-xs font-medium">{item.symbol}</span>
-            <span className="font-data text-sm text-white/90">{item.price}</span>
-            <span className={`font-data text-xs ${item.isPositive ? "text-bullish" : "text-bearish"}`}>
-                {item.isPositive ? "▲" : "▼"} {item.change}
+            <span className="text-white/50 text-xs font-medium">{symbol}</span>
+            <span className="font-data text-sm text-white/90">{price}</span>
+            <span className={`font-data text-xs ${positive ? "text-bullish" : "text-bearish"}`}>
+                {positive ? "▲" : "▼"} {change}
             </span>
         </div>
     );
 }
 
 export function LiveTicker() {
+    const { data } = useSWR<MarketData>("/api/market-data", fetcher, {
+        refreshInterval: 300_000, // 5 min
+        revalidateOnFocus: false,
+    });
+
+    const coins = data?.coins;
+
+    if (!coins || coins.length === 0) return null;
+
+    const items = coins.map((c) => ({
+        symbol: c.symbol,
+        price: `$${formatPrice(c.usd)}`,
+        change: `${c.usd_24h_change >= 0 ? "+" : ""}${c.usd_24h_change.toFixed(2)}%`,
+        isPositive: c.usd_24h_change >= 0,
+    }));
+
     return (
         <section
             className="relative border-y border-white/5 bg-cv-elevated/50 overflow-hidden py-2.5"
@@ -42,9 +58,8 @@ export function LiveTicker() {
             }}
         >
             <div className="animate-ticker flex">
-                {/* Duplicate the items for seamless scrolling */}
-                {[...tickerData, ...tickerData].map((item, index) => (
-                    <TickerItemDisplay key={`${item.symbol}-${index}`} item={item} />
+                {[...items, ...items, ...items].map((item, index) => (
+                    <TickerItemDisplay key={`${item.symbol}-${index}`} {...item} />
                 ))}
             </div>
         </section>

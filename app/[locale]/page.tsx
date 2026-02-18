@@ -2,10 +2,10 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Hero } from "@/components/home/hero";
 import { LiveTicker } from "@/components/home/live-ticker";
+import { ValueProposition } from "@/components/home/value-proposition";
 import { MarketPulse } from "@/components/home/market-pulse";
-import { SwitchboardPreview } from "@/components/home/switchboard-preview";
+import { WhatYouGet } from "@/components/home/what-you-get";
 import { LatestArticles } from "@/components/home/latest-articles";
-import { BoldCallSpotlight } from "@/components/home/bold-call-spotlight";
 import { CommunitySection } from "@/components/home/community-section";
 import { SubscribeCTA } from "@/components/home/subscribe-cta";
 import dynamic from "next/dynamic";
@@ -28,13 +28,13 @@ export default function Home() {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
             />
             <Navbar />
-            <main>
+            <main id="main-content">
                 <Hero />
                 <LiveTicker />
+                <ValueProposition />
                 <MarketPulse />
-                <SwitchboardPreview />
+                <WhatYouGet />
                 <LatestArticles />
-                <BoldCallSpotlight />
                 <CommunitySection />
                 <SubscribeCTA />
             </main>
