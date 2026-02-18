@@ -6,7 +6,9 @@ import { MarketPulse } from "@/components/home/market-pulse";
 import { SwitchboardPreview } from "@/components/home/switchboard-preview";
 import { LatestArticles } from "@/components/home/latest-articles";
 import { BoldCallSpotlight } from "@/components/home/bold-call-spotlight";
+import { CommunitySection } from "@/components/home/community-section";
 import { SubscribeCTA } from "@/components/home/subscribe-cta";
+import { ExitIntentPopup } from "@/components/ui/exit-intent-popup";
 
 export default function Home() {
     return (
@@ -19,9 +21,11 @@ export default function Home() {
                 <SwitchboardPreview />
                 <LatestArticles />
                 <BoldCallSpotlight />
+                <CommunitySection />
                 <SubscribeCTA />
             </main>
             <Footer />
+            <ExitIntentPopup />
         </>
     );
 }
