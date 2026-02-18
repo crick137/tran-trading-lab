@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Mail, ArrowRight, CheckCircle } from "lucide-react";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 
 export function SubscribeCTA() {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
     const t = useTranslations("home");
+    const sectionRef = useGsapScroll<HTMLDivElement>({
+        from: { opacity: 0, y: 30, scale: 0.97 },
+        to: { opacity: 1, y: 0, scale: 1 },
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,16 +27,13 @@ export function SubscribeCTA() {
 
     return (
         <section className="py-20 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-content mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="relative p-8 md:p-12 rounded-2xl bg-cv-secondary border border-gold/20 overflow-hidden"
+            <div className="max-w-content mx-auto" ref={sectionRef}>
+                <div
+                    className="relative p-8 md:p-12 rounded-2xl bg-cv-elevated border border-gold/20 overflow-hidden"
                 >
                     {/* Ambient glow */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px]" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/3 rounded-full blur-[60px]" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-[80px]" aria-hidden="true" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-gold/3 rounded-full blur-[60px]" aria-hidden="true" />
 
                     <div className="relative z-10 max-w-xl mx-auto text-center">
                         {/* Icon */}
@@ -67,7 +68,7 @@ export function SubscribeCTA() {
                                 <button
                                     type="submit"
                                     disabled={status === "loading"}
-                                    className="px-6 py-3 rounded-lg font-semibold text-sm text-cv-primary transition-all hover:shadow-lg hover:shadow-gold/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                                    className="px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-all hover:shadow-lg hover:shadow-gold/20 flex items-center justify-center gap-2 disabled:opacity-50"
                                     style={{ background: "var(--gradient-cta)" }}
                                 >
                                     {status === "loading" ? "..." : t("subscribeButton")}
@@ -80,7 +81,7 @@ export function SubscribeCTA() {
                             {t("subscribeDisclaimer")}
                         </p>
                     </div>
-                </motion.div>
+                </div>
             </div>
         </section>
     );

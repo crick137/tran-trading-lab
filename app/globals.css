@@ -6,6 +6,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Moving border animation — CSS Houdini @property for animatable custom property */
+@property --border-angle {
+    syntax: "<angle>";
+    initial-value: 0deg;
+    inherits: false;
+}
+
+@keyframes moving-border-spin {
+    0% { --border-angle: 0deg; }
+    100% { --border-angle: 360deg; }
+}
+
 :root {
     /* === Crypto-V Dark Theme — 5-Level Depth === */
     --bg-void: #050810;

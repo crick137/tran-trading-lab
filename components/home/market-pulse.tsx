@@ -1,9 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Activity, TrendingDown, Percent } from "lucide-react";
+import { Lamp } from "@/components/ui/aceternity/lamp";
+import { TiltCard } from "@/components/ui/tilt-card";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 
 interface PulseCard {
     id: string;
@@ -48,7 +50,7 @@ const pulseData: PulseCard[] = [
 function MiniSparkline({ signal }: { signal: string }) {
     const color = signal === "bullish" ? "#00c851" : signal === "bearish" ? "#ff3b3b" : "#ffa500";
     return (
-        <svg width="80" height="24" viewBox="0 0 80 24" className="opacity-40">
+        <svg width="80" height="24" viewBox="0 0 80 24" className="opacity-40" aria-hidden="true">
             <polyline
                 fill="none"
                 stroke={color}
@@ -62,31 +64,26 @@ function MiniSparkline({ signal }: { signal: string }) {
 export function MarketPulse() {
     const locale = useLocale();
     const t = useTranslations("home");
+    const gridRef = useGsapScroll<HTMLDivElement>({
+        children: true,
+        stagger: 0.1,
+    });
 
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
-                <motion.h2
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-sm font-medium text-white/40 uppercase tracking-wider mb-8"
-                >
-                    {t("marketPulseTitle")}
-                </motion.h2>
+                <Lamp className="mb-8">
+                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider text-center">
+                        {t("marketPulseTitle")}
+                    </h2>
+                </Lamp>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {pulseData.map((card, index) => (
-                        <motion.div
-                            key={card.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                        >
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {pulseData.map((card) => (
+                        <TiltCard key={card.id}>
                             <Link
                                 href={`/${locale}/dashboard`}
-                                className={`block p-6 rounded-xl bg-cv-secondary border border-white/5 card-hover signal-${card.signal}`}
+                                className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover signal-${card.signal}`}
                             >
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-2">
@@ -109,7 +106,7 @@ export function MarketPulse() {
                                     <MiniSparkline signal={card.signal} />
                                 </div>
                             </Link>
-                        </motion.div>
+                        </TiltCard>
                     ))}
                 </div>
             </div>

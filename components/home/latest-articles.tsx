@@ -1,9 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Clock } from "lucide-react";
+import { Lamp } from "@/components/ui/aceternity/lamp";
+import { TiltCard } from "@/components/ui/tilt-card";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 
 interface ArticlePreview {
     slug: string;
@@ -58,20 +60,21 @@ function CategoryBadge({ category }: { category: string }) {
 export function LatestArticles() {
     const locale = useLocale();
     const t = useTranslations("home");
+    const gridRef = useGsapScroll<HTMLDivElement>({
+        children: true,
+        stagger: 0.12,
+    });
 
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
-                    <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="text-sm font-medium text-white/40 uppercase tracking-wider"
-                    >
-                        {t("latestArticles")}
-                    </motion.h2>
+                    <Lamp>
+                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider">
+                            {t("latestArticles")}
+                        </h2>
+                    </Lamp>
                     <Link
                         href={`/${locale}/blog`}
                         className="text-sm text-gold hover:text-gold-light transition-colors flex items-center gap-1 group"
@@ -82,18 +85,12 @@ export function LatestArticles() {
                 </div>
 
                 {/* Articles Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockArticles.map((article, index) => (
-                        <motion.article
-                            key={article.slug}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: index * 0.1 }}
-                        >
+                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {mockArticles.map((article) => (
+                        <TiltCard key={article.slug}>
                             <Link
                                 href={`/${locale}/blog/${article.slug}`}
-                                className="block p-5 rounded-xl bg-cv-secondary border border-white/5 card-hover border-glow h-full"
+                                className="block p-5 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow h-full"
                             >
                                 <div className="flex items-center gap-2 mb-3">
                                     <CategoryBadge category={article.category} />
@@ -113,7 +110,7 @@ export function LatestArticles() {
                                     <span>{article.readTime}</span>
                                 </div>
                             </Link>
-                        </motion.article>
+                        </TiltCard>
                     ))}
                 </div>
             </div>

@@ -106,6 +106,10 @@ const config: Config = {
                     "0%, 100%": { transform: "translate(0%, 0%)" },
                     "50%": { transform: "translate(3%, 3%)" },
                 },
+                "moving-border-spin": {
+                    "0%": { "--border-angle": "0deg" },
+                    "100%": { "--border-angle": "360deg" },
+                },
             },
             borderRadius: {
                 lg: "var(--radius)",

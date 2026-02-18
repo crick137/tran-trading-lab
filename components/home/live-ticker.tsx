@@ -38,7 +38,13 @@ export function LiveTicker() {
     const t = useTranslations("home");
 
     return (
-        <section className="relative border-y border-white/5 bg-cv-secondary/50 overflow-hidden py-2.5">
+        <section
+            className="relative border-y border-white/5 bg-cv-elevated/50 overflow-hidden py-2.5"
+            style={{
+                maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+                WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
+            }}
+        >
             <div className="animate-ticker flex">
                 {/* Duplicate the items for seamless scrolling */}
                 {[...tickerData, ...tickerData].map((item, index) => (

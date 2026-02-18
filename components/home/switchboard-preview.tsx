@@ -1,9 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, BarChart3 } from "lucide-react";
+import { MovingBorder } from "@/components/ui/aceternity/moving-border";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 
 interface SignalAsset {
     name: string;
@@ -32,15 +33,15 @@ function SignalDot({ signal }: { signal: string }) {
 export function SwitchboardPreview() {
     const locale = useLocale();
     const t = useTranslations("home");
+    const sectionRef = useGsapScroll<HTMLDivElement>();
 
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-content mx-auto">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="p-6 md:p-8 rounded-xl bg-cv-secondary border border-white/5 border-glow"
+            <div className="max-w-content mx-auto" ref={sectionRef}>
+                <MovingBorder
+                    className="p-6 md:p-8"
+                    borderColor="rgba(255, 165, 0, 0.3)"
+                    duration={6}
                 >
                     {/* Header */}
                     <div className="flex items-center gap-3 mb-6">
@@ -76,7 +77,7 @@ export function SwitchboardPreview() {
                         {t("switchboardCta")}
                         <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                     </Link>
-                </motion.div>
+                </MovingBorder>
             </div>
         </section>
     );
