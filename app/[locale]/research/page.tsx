@@ -14,9 +14,9 @@ export default function ResearchPage() {
     const t = useTranslations("research");
 
     const biasConfig = {
-        long: { label: "Long", color: "bg-emerald-500/20 text-emerald-400", icon: TrendingUp },
-        short: { label: "Short", color: "bg-red-500/20 text-red-400", icon: TrendingDown },
-        neutral: { label: "Neutral", color: "bg-yellow-500/20 text-yellow-400", icon: Minus }
+        long: { label: "Long", color: "bg-bullish/20 text-bullish", icon: TrendingUp },
+        short: { label: "Short", color: "bg-bearish/20 text-bearish", icon: TrendingDown },
+        neutral: { label: "Neutral", color: "bg-neutral/20 text-neutral", icon: Minus }
     };
 
     return (
@@ -26,10 +26,10 @@ export default function ResearchPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4">
+                        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-muted-foreground max-w-2xl mx-auto">
+                        <p className="text-white/50 max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -52,7 +52,7 @@ export default function ResearchPage() {
                                             href={`/${locale}/research/${article.slug}`}
                                             className="block group"
                                         >
-                                            <article className="bg-card/50 border border-border/50 rounded-xl overflow-hidden hover:border-gold/50 transition-all duration-300 card-hover">
+                                            <article className="bg-cv-elevated/50 border border-white/10 rounded-xl overflow-hidden hover:border-gold/50 transition-all duration-300 card-hover">
                                                 {/* Image */}
                                                 <div className="relative aspect-video overflow-hidden">
                                                     <Image
@@ -76,7 +76,7 @@ export default function ResearchPage() {
                                                         {article.tags.slice(0, 3).map((tag) => (
                                                             <span
                                                                 key={tag}
-                                                                className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-muted-foreground"
+                                                                className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-white/50"
                                                             >
                                                                 {tag}
                                                             </span>
@@ -84,12 +84,12 @@ export default function ResearchPage() {
                                                     </div>
 
                                                     {/* Title */}
-                                                    <h2 className="text-lg font-bold text-foreground mb-2 group-hover:text-gold transition-colors line-clamp-2">
+                                                    <h2 className="text-lg font-bold text-white mb-2 group-hover:text-gold transition-colors line-clamp-2">
                                                         {article.title}
                                                     </h2>
 
                                                     {/* Meta */}
-                                                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                                    <div className="flex items-center gap-4 text-xs text-white/50">
                                                         <span className="flex items-center gap-1">
                                                             <Calendar className="w-3 h-3" />
                                                             {article.date}
@@ -108,7 +108,7 @@ export default function ResearchPage() {
                         </div>
                     ) : (
                         <div className="text-center py-16">
-                            <p className="text-muted-foreground">
+                            <p className="text-white/50">
                                 {t("noResearch")}
                             </p>
                         </div>

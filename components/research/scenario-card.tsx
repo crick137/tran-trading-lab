@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { TrendingUp, AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ScenarioCardProps {
     type: 'bullish' | 'bearish';
@@ -22,6 +23,7 @@ export function ScenarioCard({
     strategy,
     delay = 0
 }: ScenarioCardProps) {
+    const t = useTranslations("researchPost");
     const isBullish = type === 'bullish';
 
     return (
@@ -30,20 +32,20 @@ export function ScenarioCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: delay * 0.1 }}
             className={`rounded-xl border p-6 ${isBullish
-                    ? 'bg-emerald-500/5 border-emerald-500/30'
-                    : 'bg-red-500/5 border-red-500/30'
+                    ? 'bg-bullish/5 border-bullish/30'
+                    : 'bg-bearish/5 border-bearish/30'
                 }`}
         >
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isBullish ? 'bg-emerald-500/20' : 'bg-red-500/20'
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isBullish ? 'bg-bullish/20' : 'bg-bearish/20'
                     }`}>
                     {isBullish
-                        ? <TrendingUp className="w-5 h-5 text-emerald-400" />
-                        : <AlertTriangle className="w-5 h-5 text-red-400" />
+                        ? <TrendingUp className="w-5 h-5 text-bullish" />
+                        : <AlertTriangle className="w-5 h-5 text-bearish" />
                     }
                 </div>
-                <h3 className={`text-lg font-bold ${isBullish ? 'text-emerald-400' : 'text-red-400'
+                <h3 className={`text-lg font-bold ${isBullish ? 'text-bullish' : 'text-bearish'
                     }`}>
                     {title}
                 </h3>
@@ -52,24 +54,24 @@ export function ScenarioCard({
             {/* Details */}
             <div className="space-y-3 text-sm">
                 <div>
-                    <span className="text-muted-foreground font-medium">조건: </span>
-                    <span className="text-foreground">{condition}</span>
+                    <span className="text-white/50 font-medium">{t("conditionLabel")}: </span>
+                    <span className="text-white">{condition}</span>
                 </div>
                 {meaning && (
                     <div>
-                        <span className="text-muted-foreground font-medium">의미: </span>
-                        <span className="text-foreground">{meaning}</span>
+                        <span className="text-white/50 font-medium">{t("meaningLabel")}: </span>
+                        <span className="text-white">{meaning}</span>
                     </div>
                 )}
                 <div>
-                    <span className="text-muted-foreground font-medium">기대 흐름: </span>
-                    <span className="text-foreground">{expectedFlow}</span>
+                    <span className="text-white/50 font-medium">{t("expectedFlowLabel")}: </span>
+                    <span className="text-white">{expectedFlow}</span>
                 </div>
                 {strategy && (
-                    <div className={`mt-4 pt-4 border-t ${isBullish ? 'border-emerald-500/20' : 'border-red-500/20'
+                    <div className={`mt-4 pt-4 border-t ${isBullish ? 'border-bullish/20' : 'border-bearish/20'
                         }`}>
-                        <span className="text-muted-foreground font-medium">전략: </span>
-                        <span className="text-foreground">{strategy}</span>
+                        <span className="text-white/50 font-medium">{t("strategyLabel")}: </span>
+                        <span className="text-white">{strategy}</span>
                     </div>
                 )}
             </div>

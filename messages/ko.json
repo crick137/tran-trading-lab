@@ -128,6 +128,25 @@
         "subtitle": "Smart Money Concepts 기반 심층 시장 분석 보고서",
         "noResearch": "현재 이용 가능한 리서치가 없습니다."
     },
+    "researchPost": {
+        "backToResearch": "리서치로 돌아가기",
+        "tradingScenarios": "트레이딩 시나리오",
+        "sharePrompt": "이 분석이 도움이 되셨나요?",
+        "relatedResearch": "관련 리서치",
+        "checklist": "오늘의 핵심 체크리스트",
+        "conclusion": "결론",
+        "disclaimer": "교육 목적 전용 — 금융 조언 아님.",
+        "conditionLabel": "조건",
+        "meaningLabel": "의미",
+        "expectedFlowLabel": "기대 흐름",
+        "strategyLabel": "전략",
+        "quickSummary": "핵심 요약",
+        "tldr": "요약",
+        "longBias": "롱 바이어스",
+        "shortBias": "숏 바이어스",
+        "neutralBias": "중립",
+        "readSuffix": " 읽기"
+    },
     "blog": {
         "title": "블로그",
         "subtitle": "시장 분석, 트레이딩 전략, 금융 교육 콘텐츠.",

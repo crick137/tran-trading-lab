@@ -3,16 +3,19 @@
 import { ResearchArticle } from "@/lib/research-data";
 import { Calendar, Globe, Clock, BookOpen, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 interface ResearchHeaderProps {
     article: ResearchArticle;
 }
 
 export function ResearchHeader({ article }: ResearchHeaderProps) {
+    const t = useTranslations("researchPost");
+
     const biasConfig = {
-        long: { label: "Long Bias", color: "bg-emerald-500/20 text-emerald-400 border-emerald-500/50", icon: TrendingUp },
-        short: { label: "Short Bias", color: "bg-red-500/20 text-red-400 border-red-500/50", icon: TrendingDown },
-        neutral: { label: "Neutral", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/50", icon: Minus }
+        long: { label: t("longBias"), color: "bg-bullish/20 text-bullish border-bullish/50", icon: TrendingUp },
+        short: { label: t("shortBias"), color: "bg-bearish/20 text-bearish border-bearish/50", icon: TrendingDown },
+        neutral: { label: t("neutralBias"), color: "bg-neutral/20 text-neutral border-neutral/50", icon: Minus }
     };
 
     const bias = biasConfig[article.bias];
@@ -38,15 +41,15 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
                 {article.title}
             </h1>
             {article.subtitle && (
-                <p className="text-xl text-muted-foreground mb-6">{article.subtitle}</p>
+                <p className="text-xl text-white/50 mb-6">{article.subtitle}</p>
             )}
 
             {/* Metadata Row */}
-            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm text-muted-foreground">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm text-white/50">
                 <span className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gold" />
                     {article.date}
@@ -65,7 +68,7 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
                 </span>
                 <span className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-gold" />
-                    {article.readingTime} read
+                    {article.readingTime}{t("readSuffix")}
                 </span>
             </div>
         </motion.header>

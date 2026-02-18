@@ -128,6 +128,25 @@
         "subtitle": "In-depth market analysis reports based on Smart Money Concepts",
         "noResearch": "No research available at this time."
     },
+    "researchPost": {
+        "backToResearch": "Back to Research",
+        "tradingScenarios": "Trading Scenarios",
+        "sharePrompt": "Was this analysis helpful?",
+        "relatedResearch": "Related Research",
+        "checklist": "Key Checklist",
+        "conclusion": "Conclusion",
+        "disclaimer": "Edu only — NFA.",
+        "conditionLabel": "Condition",
+        "meaningLabel": "Meaning",
+        "expectedFlowLabel": "Expected Flow",
+        "strategyLabel": "Strategy",
+        "quickSummary": "Quick Summary",
+        "tldr": "TL;DR",
+        "longBias": "Long Bias",
+        "shortBias": "Short Bias",
+        "neutralBias": "Neutral",
+        "readSuffix": " read"
+    },
     "blog": {
         "title": "Blog",
         "subtitle": "Market analysis, trading strategies, and financial education.",
