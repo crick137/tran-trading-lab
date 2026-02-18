@@ -8,8 +8,13 @@ import { LatestArticles } from "@/components/home/latest-articles";
 import { BoldCallSpotlight } from "@/components/home/bold-call-spotlight";
 import { CommunitySection } from "@/components/home/community-section";
 import { SubscribeCTA } from "@/components/home/subscribe-cta";
-import { ExitIntentPopup } from "@/components/ui/exit-intent-popup";
+import dynamic from "next/dynamic";
 import { websiteJsonLd, organizationJsonLd } from "@/lib/json-ld";
+
+const ExitIntentPopup = dynamic(
+    () => import("@/components/ui/exit-intent-popup").then((mod) => mod.ExitIntentPopup),
+    { ssr: false }
+);
 
 export default function Home() {
     return (

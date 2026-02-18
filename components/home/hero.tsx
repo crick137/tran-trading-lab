@@ -8,10 +8,15 @@ import { ArrowRight, Shield, ChevronDown } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import dynamic from "next/dynamic";
 import { AuroraBackground } from "@/components/ui/aceternity/aurora-background";
 import { Spotlight } from "@/components/ui/aceternity/spotlight";
 import { TextGenerateEffect } from "@/components/ui/aceternity/text-generate-effect";
-import { ParticlesCanvas } from "@/components/ui/particles-canvas";
+
+const ParticlesCanvas = dynamic(
+    () => import("@/components/ui/particles-canvas").then((mod) => mod.ParticlesCanvas),
+    { ssr: false }
+);
 
 export function Hero() {
     const locale = useLocale();

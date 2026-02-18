@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 
 interface ChartImageProps {
@@ -20,9 +21,12 @@ export function ChartImage({ src, alt }: ChartImageProps) {
 
             {/* Image container with shadow */}
             <div className="relative rounded-xl overflow-hidden shadow-[0_0_40px_rgba(59,130,246,0.15)]">
-                <img
+                <Image
                     src={src}
                     alt={alt}
+                    width={800}
+                    height={450}
+                    sizes="(max-width: 768px) 100vw, 800px"
                     className="w-full h-auto rounded-xl"
                 />
             </div>

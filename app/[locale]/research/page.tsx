@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
@@ -54,10 +55,12 @@ export default function ResearchPage() {
                                             <article className="bg-card/50 border border-border/50 rounded-xl overflow-hidden hover:border-gold/50 transition-all duration-300 card-hover">
                                                 {/* Image */}
                                                 <div className="relative aspect-video overflow-hidden">
-                                                    <img
+                                                    <Image
                                                         src={article.image}
                                                         alt={article.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        fill
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                     />
                                                     {/* Bias Badge */}
                                                     <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${bias.color}`}>

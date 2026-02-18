@@ -8,7 +8,11 @@ const nextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: '**',
+                hostname: 'cdn.jsdelivr.net',
+            },
+            {
+                protocol: 'https',
+                hostname: 'trantradinglab.com',
             },
         ],
     },

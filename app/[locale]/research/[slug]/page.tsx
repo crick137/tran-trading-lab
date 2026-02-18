@@ -7,6 +7,7 @@ import { SocialShare } from "@/components/blog/social-share";
 import { ArticleCTA } from "@/components/blog/article-cta";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
@@ -51,10 +52,13 @@ export default function ResearchArticlePage() {
                     {article.articleType === 'education' && article.contentImages && article.contentImages.length > 0 ? (
                         <div className="mb-8 space-y-6">
                             {article.contentImages.map((img, index) => (
-                                <figure key={index} className="rounded-lg overflow-hidden border border-border/50">
-                                    <img
+                                <figure key={index} className="relative rounded-lg overflow-hidden border border-border/50">
+                                    <Image
                                         src={img.src}
                                         alt={img.alt}
+                                        width={800}
+                                        height={450}
+                                        sizes="(max-width: 768px) 100vw, 800px"
                                         className="w-full h-auto"
                                     />
                                     {img.caption && (
