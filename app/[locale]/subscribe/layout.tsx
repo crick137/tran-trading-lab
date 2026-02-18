@@ -10,14 +10,12 @@ export async function generateMetadata({
     const t = getMessages(locale);
     return createPageMetadata({
         locale,
-        path: "/research",
-        title: t.research.title,
-        description: t.research.subtitle,
-        keywords: ["SMC", "market research", "trading analysis", "smart money concepts"],
-        ogSubtitle: "Institutional Grade Analysis",
+        path: "/subscribe",
+        title: `${t.subscribe.title} ${t.subscribe.titleHighlight}`,
+        description: t.subscribe.subtitle,
     });
 }
 
-export default function ResearchLayout({ children }: { children: React.ReactNode }) {
-    return <>{children}</>;
+export default function SubscribeLayout({ children }: { children: React.ReactNode }) {
+    return children;
 }

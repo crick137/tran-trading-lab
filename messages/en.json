@@ -490,5 +490,12 @@
         ],
         "faqQuestion": "Have more questions?",
         "faqLink": "Check Frequently Asked Questions"
+    },
+    "meta": {
+        "glossaryDescription": "Essential trading terms across SMC, ORB, risk management, market structure, and order flow — organized and explained.",
+        "privacyTitle": "Privacy Policy",
+        "privacyDescription": "Privacy policy for TranTradingLab — how we collect, use, and protect your information.",
+        "termsTitle": "Terms of Service",
+        "termsDescription": "Terms of service for TranTradingLab — usage guidelines, disclaimers, and legal information."
     }
 }

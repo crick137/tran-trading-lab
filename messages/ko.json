@@ -490,5 +490,12 @@
         ],
         "faqQuestion": "더 궁금한 점이 있으신가요?",
         "faqLink": "자주 묻는 질문 확인하기"
+    },
+    "meta": {
+        "glossaryDescription": "SMC, ORB, 리스크 관리, 시장 구조, 주문 흐름에서 필수적인 트레이딩 용어를 정리했습니다.",
+        "privacyTitle": "개인정보 처리방침",
+        "privacyDescription": "TranTradingLab의 개인정보 처리방침입니다.",
+        "termsTitle": "이용약관",
+        "termsDescription": "TranTradingLab의 이용약관입니다."
     }
 }

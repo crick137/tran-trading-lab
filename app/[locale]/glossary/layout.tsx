@@ -10,14 +10,13 @@ export async function generateMetadata({
     const t = getMessages(locale);
     return createPageMetadata({
         locale,
-        path: "/research",
-        title: t.research.title,
-        description: t.research.subtitle,
-        keywords: ["SMC", "market research", "trading analysis", "smart money concepts"],
-        ogSubtitle: "Institutional Grade Analysis",
+        path: "/glossary",
+        title: t.glossary.title,
+        description: (t as any).meta.glossaryDescription,
+        keywords: ["trading glossary", "SMC terms", "trading terminology", "order block", "fair value gap"],
     });
 }
 
-export default function ResearchLayout({ children }: { children: React.ReactNode }) {
-    return <>{children}</>;
+export default function GlossaryLayout({ children }: { children: React.ReactNode }) {
+    return children;
 }

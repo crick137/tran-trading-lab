@@ -10,14 +10,13 @@ export async function generateMetadata({
     const t = getMessages(locale);
     return createPageMetadata({
         locale,
-        path: "/research",
-        title: t.research.title,
-        description: t.research.subtitle,
-        keywords: ["SMC", "market research", "trading analysis", "smart money concepts"],
-        ogSubtitle: "Institutional Grade Analysis",
+        path: "/tools/position-sizing",
+        title: t.tools.positionSizing,
+        description: t.tools.positionSizingDesc,
+        keywords: ["position sizing", "position size calculator", "risk management"],
     });
 }
 
-export default function ResearchLayout({ children }: { children: React.ReactNode }) {
-    return <>{children}</>;
+export default function PositionSizingLayout({ children }: { children: React.ReactNode }) {
+    return children;
 }

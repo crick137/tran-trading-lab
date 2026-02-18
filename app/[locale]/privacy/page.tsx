@@ -1,11 +1,22 @@
+import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { createPageMetadata } from "@/lib/metadata";
+import { getMessages } from "@/lib/get-messages";
 
-export const metadata = {
-    title: "개인정보 처리방침 | TranTradingLab",
-    description: "TranTradingLab의 개인정보 처리방침입니다.",
-};
+export async function generateMetadata({
+    params: { locale },
+}: {
+    params: { locale: string };
+}): Promise<Metadata> {
+    const t = getMessages(locale);
+    return createPageMetadata({
+        locale,
+        path: "/privacy",
+        title: (t as any).meta.privacyTitle,
+        description: (t as any).meta.privacyDescription,
+    });
+}
 
 export default function PrivacyPage() {
     return (
@@ -13,9 +24,7 @@ export default function PrivacyPage() {
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <Breadcrumb items={[{ label: "개인정보 처리방침" }]} />
-
-                    <h1 className="text-4xl font-bold text-foreground mb-8">개인정보 처리방침</h1>
+                    <h1 className="text-4xl font-bold text-white mb-8">개인정보 처리방침</h1>
 
                     <div className="prose prose-invert max-w-none prose-headings:text-foreground prose-p:text-muted-foreground">
                         <p className="text-muted-foreground mb-6">
