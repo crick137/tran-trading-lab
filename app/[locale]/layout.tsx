@@ -6,6 +6,8 @@ import { routing } from "@/i18n/routing";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { GsapProvider } from "@/components/providers/gsap-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { inter, jetbrainsMono } from "@/lib/fonts";
 import "../globals.css";
 
@@ -123,6 +125,8 @@ export default async function LocaleLayout({
                         </GsapProvider>
                     </MotionProvider>
                 </NextIntlClientProvider>
+                <Analytics />
+                <SpeedInsights />
             </body>
         </html>
     );
