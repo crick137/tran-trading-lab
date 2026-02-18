@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
 import { GsapProvider } from "@/components/providers/gsap-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
+import { inter, jetbrainsMono } from "@/lib/fonts";
 import "../globals.css";
 
 const siteUrl = "https://trantradinglab.com";
@@ -99,7 +100,19 @@ export default async function LocaleLayout({
     const messages = await getMessages();
 
     return (
-        <html lang={locale} className="dark">
+        <html lang={locale} className={`dark ${inter.variable} ${jetbrainsMono.variable}`}>
+            <head>
+                <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+                <link
+                    rel="preload"
+                    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+                    as="style"
+                />
+                <link
+                    rel="stylesheet"
+                    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
+                />
+            </head>
             <body className="noise-overlay min-h-screen antialiased">
                 <NextIntlClientProvider messages={messages}>
                     <MotionProvider>

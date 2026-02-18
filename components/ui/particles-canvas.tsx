@@ -129,6 +129,10 @@ export function ParticlesCanvas({
             const particles = particlesRef.current;
             const mouse = mouseRef.current;
 
+            // Pre-compute squared thresholds (avoid sqrt in hot loop)
+            const connDistSq = connectionDistance * connectionDistance;
+            const mouseDistSq = 40000; // 200 * 200
+
             // Update + draw particles
             for (let i = 0; i < particles.length; i++) {
                 const p = particles[i];
@@ -143,11 +147,12 @@ export function ParticlesCanvas({
                 if (p.y < 0) p.y = h;
                 if (p.y > h) p.y = 0;
 
-                // Mouse parallax — subtle push
+                // Mouse parallax — subtle push (squared distance check)
                 const dx = mouse.x - p.x;
                 const dy = mouse.y - p.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 200) {
+                const distSq = dx * dx + dy * dy;
+                if (distSq < mouseDistSq) {
+                    const dist = Math.sqrt(distSq);
                     const force = (200 - dist) / 200;
                     p.x -= dx * force * 0.008;
                     p.y -= dy * force * 0.008;
@@ -160,16 +165,17 @@ export function ParticlesCanvas({
                 ctx.fill();
             }
 
-            // Draw connections
+            // Draw connections (squared distance — sqrt only when drawing)
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const a = particles[i];
                     const b = particles[j];
                     const dx = a.x - b.x;
                     const dy = a.y - b.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const distSq = dx * dx + dy * dy;
 
-                    if (dist < connectionDistance) {
+                    if (distSq < connDistSq) {
+                        const dist = Math.sqrt(distSq);
                         const opacity =
                             (1 - dist / connectionDistance) * 0.15;
                         ctx.beginPath();

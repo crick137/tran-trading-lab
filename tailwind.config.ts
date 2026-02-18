@@ -57,8 +57,8 @@ const config: Config = {
                 "border-glow-gold": "rgba(255, 165, 0, 0.3)",
             },
             fontFamily: {
-                sans: ["'Inter'", "'Pretendard'", "system-ui", "sans-serif"],
-                mono: ["'JetBrains Mono'", "'SF Mono'", "monospace"],
+                sans: ["var(--font-inter)", "'Pretendard'", "system-ui", "sans-serif"],
+                mono: ["var(--font-jetbrains)", "'SF Mono'", "monospace"],
                 kr: ["'Pretendard'", "'Noto Sans KR'", "sans-serif"],
             },
             animation: {
