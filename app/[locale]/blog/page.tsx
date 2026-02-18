@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/blog/article-card";
-import { Search } from "lucide-react";
+import { useGsapScroll } from "@/hooks/use-gsap-scroll";
+import { Search, FileText, Send, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { blogPosts } from "@/lib/blog-data";
 
@@ -16,6 +17,7 @@ function BlogContent() {
     const tc = useTranslations("common");
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("all");
+    const heroRef = useGsapScroll<HTMLDivElement>();
 
     const categories = [
         { id: "all", label: t("categoryAll") },
@@ -36,23 +38,30 @@ function BlogContent() {
     if (!blogPosts || blogPosts.length === 0) {
         return (
             <main className="pt-24 pb-16 min-h-screen">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
-                    <h1 className="text-4xl font-bold text-foreground mb-4">{t("emptyTitle")}</h1>
-                    <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
+                <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
+                        <FileText className="w-8 h-8 text-gold" />
+                    </div>
+                    <h1 className="text-4xl font-bold text-white mb-4">{t("emptyTitle")}</h1>
+                    <p className="text-white/40 mb-12 max-w-2xl mx-auto">
                         {t("emptySubtitle")}
                     </p>
-                    <div className="bg-card/30 border border-border/50 rounded-2xl p-12 max-w-2xl mx-auto backdrop-blur-sm">
-                        <p className="text-muted-foreground text-lg mb-6">
+                    <div className="bg-cv-elevated/50 border border-white/5 rounded-2xl p-12 max-w-2xl mx-auto">
+                        <p className="text-white/40 text-lg mb-6">
                             {t("noPosts")}<br />
                             {t("telegramCta")}
                         </p>
-                        <Link
-                            href="https://t.me/TranTradingLab"
+                        <a
+                            href="https://t.me/TranTradingLabEN"
                             target="_blank"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-background font-bold hover:shadow-lg hover:shadow-gold/20 transition-all"
+                            rel="noopener noreferrer"
+                            className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-gold/20"
+                            style={{ background: "var(--gradient-cta)" }}
                         >
+                            <Send className="w-4 h-4" />
                             {tc("joinTelegramChannel")}
-                        </Link>
+                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </a>
                     </div>
                 </div>
             </main>
@@ -70,11 +79,14 @@ function BlogContent() {
 
     return (
         <main className="pt-24 pb-16 min-h-screen">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-foreground mb-4">{t("title")}</h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                <div ref={heroRef} className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
+                        <FileText className="w-8 h-8 text-gold" />
+                    </div>
+                    <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                    <p className="text-lg text-white/40 max-w-2xl mx-auto">
                         {t("subtitle")}
                     </p>
                 </div>
@@ -83,13 +95,13 @@ function BlogContent() {
                 <div className="mb-8 space-y-4">
                     {/* Search Bar */}
                     <div className="relative max-w-md mx-auto">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
                         <input
                             type="text"
                             placeholder={tc("search")}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 rounded-lg bg-card border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
+                            className="w-full pl-12 pr-4 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-gold/40 transition-all"
                         />
                     </div>
 
@@ -100,8 +112,8 @@ function BlogContent() {
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.id)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category.id
-                                    ? "bg-gold text-background"
-                                    : "bg-card border border-border/50 text-muted-foreground hover:text-foreground hover:border-gold/50"
+                                    ? "bg-gold text-cv-primary"
+                                    : "bg-cv-elevated border border-white/5 text-white/40 hover:text-white/70 hover:border-gold/30"
                                     }`}
                             >
                                 {category.label}
@@ -119,7 +131,7 @@ function BlogContent() {
                     </div>
                 ) : (
                     <div className="text-center py-16">
-                        <p className="text-muted-foreground">
+                        <p className="text-white/40">
                             {t("noResults")}
                         </p>
                     </div>
