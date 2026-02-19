@@ -9,15 +9,14 @@ interface SocialLink {
     href: string;
     label: string;
     icon: React.ReactNode;
-    hoverColor: string; // platform-specific hover color
 }
 
 const socialLinks: SocialLink[] = [
-    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X (Twitter)", hoverColor: "hover:text-white" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", hoverColor: "hover:text-white" },
-    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN", hoverColor: "hover:text-[#26A5E4]" },
-    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR", hoverColor: "hover:text-[#26A5E4]" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", hoverColor: "hover:text-[#FEE500]" },
+    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X (Twitter)" },
+    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
+    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN" },
+    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR" },
+    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
 ];
 
 export function Footer() {
@@ -53,11 +52,8 @@ export function Footer() {
     ];
 
     return (
-        <footer className="relative bg-cv-primary">
-            {/* Gold gradient divider */}
-            <div className="h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" aria-hidden="true" />
-
-            <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <footer className="relative bg-cv-primary border-t border-[var(--border-subtle)]">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                     {/* Brand */}
                     <div className="col-span-2">
@@ -70,30 +66,25 @@ export function Footer() {
                                 <span className="text-[var(--text-primary)]"> TRADING LAB</span>
                             </span>
                         </Link>
-                        <p className="text-[var(--text-tertiary)] text-sm leading-relaxed max-w-sm mb-5">
+                        <p className="text-sm text-[var(--text-tertiary)] leading-relaxed max-w-sm mb-5">
                             {tf("tagline")}
                         </p>
-                        <p className="text-[var(--text-muted)] text-xs leading-relaxed max-w-sm mb-6">
+                        <p className="text-[10px] text-[var(--text-ghost)] leading-relaxed max-w-sm mb-6">
                             {tf("riskDisclaimer")}
                         </p>
 
-                        {/* Social Links with platform-specific hover colors + tooltip */}
-                        <div className="flex gap-2">
+                        {/* Social Icons — 20px, white → gold hover */}
+                        <div className="flex gap-3">
                             {socialLinks.map((social) => (
                                 <a
                                     key={social.label}
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`group relative flex flex-col items-center gap-1`}
+                                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-accent transition-colors duration-200"
                                     aria-label={social.label}
                                 >
-                                    <span className={`w-10 h-10 rounded-xl bg-[var(--bg-wash)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] ${social.hoverColor} hover:border-[var(--border-strong)] hover:bg-[var(--border-default)] hover:scale-110 hover:shadow-md transition-all duration-200`}>
-                                        {social.icon}
-                                    </span>
-                                    <span className="text-[10px] text-[var(--text-ghost)] group-hover:text-[var(--text-secondary)] transition-colors">
-                                        {social.label}
-                                    </span>
+                                    {social.icon}
                                 </a>
                             ))}
                         </div>
@@ -102,7 +93,7 @@ export function Footer() {
                     {/* Footer Links */}
                     {footerLinks.map((section) => (
                         <div key={section.title}>
-                            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm">{section.title}</h3>
+                            <h3 className="text-overline text-[var(--text-secondary)] mb-4">{section.title}</h3>
                             <ul className="space-y-2.5">
                                 {section.links.map((link) => (
                                     <li key={link.href}>
@@ -121,10 +112,10 @@ export function Footer() {
 
                 {/* Bottom Bar */}
                 <div className="mt-12 pt-8 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-[var(--text-muted)]">
+                    <p className="text-overline text-[var(--text-muted)]" style={{ textTransform: "none", letterSpacing: "normal", fontSize: "11px" }}>
                         &copy; {new Date().getFullYear()} TranTradingLab. {t("allRightsReserved")}
                     </p>
-                    <div className="flex gap-6 text-xs text-[var(--text-muted)]">
+                    <div className="flex gap-6 text-[11px] text-[var(--text-muted)]">
                         <Link href={`/${locale}/privacy`} prefetch={false} className="hover:text-[var(--text-secondary)] transition-colors">
                             {tf("privacy")}
                         </Link>

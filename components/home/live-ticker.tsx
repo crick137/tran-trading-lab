@@ -24,8 +24,8 @@ function TickerItemDisplay({ symbol, price, change }: { symbol: string; price: s
     return (
         <div className="flex items-center gap-2 px-4 whitespace-nowrap">
             <span className="text-[var(--text-secondary)] text-xs font-medium">{symbol}</span>
-            <span className="font-data text-sm text-[var(--text-primary)]">{price}</span>
-            <span className={`font-data text-xs ${positive ? "text-bullish" : "text-bearish"}`}>
+            <span className="font-data tabular-nums text-sm text-[var(--text-primary)]">{price}</span>
+            <span className={`font-data tabular-nums text-xs ${positive ? "text-bullish" : "text-bearish"}`}>
                 {positive ? "▲" : "▼"} {change}
             </span>
         </div>

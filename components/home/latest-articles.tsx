@@ -12,12 +12,10 @@ export function LatestArticles() {
     const hasBlogPosts = blogPosts.length > 0;
     const hasResearch = researchArticles.length > 0;
 
-    // UX-07: If no real content at all, hide the section entirely
     if (!hasBlogPosts && !hasResearch) {
         return null;
     }
 
-    // Show real research articles if available
     const articlesToShow = hasResearch
         ? researchArticles.slice(0, 3).map((a) => ({
             slug: a.slug,
@@ -39,10 +37,10 @@ export function LatestArticles() {
         }));
 
     return (
-        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
-            <div className="max-w-content mx-auto">
-                <div className="flex items-center justify-between mb-10">
-                    <h2 className="text-label text-[var(--text-tertiary)]">
+        <section className="py-24 lg:py-40 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+                <div className="flex items-center justify-between mb-16">
+                    <h2 className="text-section text-[var(--text-primary)]">
                         {t("latestArticles")}
                     </h2>
                     <Link
@@ -54,25 +52,25 @@ export function LatestArticles() {
                     </Link>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {articlesToShow.map((article) => (
                         <Link
                             key={article.slug}
                             href={`/${locale}/${article.basePath}/${article.slug}`}
-                            className="block p-5 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full"
+                            className="block p-6 md:p-8 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--border-default)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] h-full"
                         >
-                            <div className="flex items-center gap-2 mb-3">
-                                <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider border text-accent bg-accent/10 border-accent/20">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-overline text-accent">
                                     {article.category}
                                 </span>
                                 <span className="text-[10px] text-[var(--text-muted)]">{article.date}</span>
                             </div>
 
-                            <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2 line-clamp-2 leading-snug">
+                            <h3 className="text-card-title text-[var(--text-primary)] mb-3 line-clamp-2">
                                 {article.title}
                             </h3>
 
-                            <p className="text-sm text-[var(--text-tertiary)] line-clamp-2 mb-4 leading-relaxed">
+                            <p className="text-sm text-[var(--text-tertiary)] line-clamp-2 leading-relaxed">
                                 {article.excerpt}
                             </p>
                         </Link>

@@ -21,7 +21,7 @@ function isDropdown(entry: NavEntry): entry is NavDropdown {
 }
 
 export function Navbar() {
-    const [scrollTier, setScrollTier] = useState<0 | 1 | 2>(0);
+    const [isScrolled, setIsScrolled] = useState(false);
     const [isHidden, setIsHidden] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -73,9 +73,7 @@ export function Navbar() {
     useEffect(() => {
         const handleScroll = () => {
             const y = window.scrollY;
-            if (y > 200) setScrollTier(2);
-            else if (y > 50) setScrollTier(1);
-            else setScrollTier(0);
+            setIsScrolled(y > 60);
 
             if (y > 100) {
                 const delta = y - lastScrollY.current;
@@ -90,23 +88,21 @@ export function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // Close mobile menu on route change
     useEffect(() => {
         setIsMobileMenuOpen(false);
     }, [pathname]);
 
-    // Close mobile menu on Escape key
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isMobileMenuOpen) {
-                setIsMobileMenuOpen(false);
+            if (e.key === "Escape") {
+                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+                if (openDropdown) setOpenDropdown(null);
             }
         };
         document.addEventListener("keydown", handleEscape);
         return () => document.removeEventListener("keydown", handleEscape);
-    }, [isMobileMenuOpen]);
+    }, [isMobileMenuOpen, openDropdown]);
 
-    // Lock body scroll when mobile menu is open
     useEffect(() => {
         if (isMobileMenuOpen) {
             document.body.style.overflow = "hidden";
@@ -115,12 +111,6 @@ export function Navbar() {
         }
         return () => { document.body.style.overflow = ""; };
     }, [isMobileMenuOpen]);
-
-    const tierClasses = [
-        "bg-transparent",
-        "glass-subtle shadow-lg shadow-black/20",
-        "glass-strong shadow-xl shadow-black/30",
-    ];
 
     const handleDropdownEnter = (label: string) => {
         if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
@@ -137,9 +127,12 @@ export function Navbar() {
                 initial={{ y: -100 }}
                 animate={{ y: isHidden && !isMobileMenuOpen ? -100 : 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${tierClasses[scrollTier]} ${scrollTier > 0 ? "border-b border-[var(--border-subtle)]" : ""}`}
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${isScrolled
+                    ? "bg-[var(--bg-void)]/85 backdrop-blur-2xl border-b border-[var(--border-subtle)]"
+                    : "bg-transparent"
+                    }`}
             >
-                <nav className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
+                <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
                         <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
@@ -163,7 +156,7 @@ export function Navbar() {
                                         onMouseLeave={handleDropdownLeave}
                                     >
                                         <button
-                                            className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors relative rounded-md hover:bg-[var(--bg-wash)] ${isDropdownActive(entry.items) ? "text-accent" : "text-[var(--text-secondary)] hover:text-white"
+                                            className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors relative rounded-md hover:bg-[var(--bg-wash)] ${isDropdownActive(entry.items) ? "text-accent" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                                 }`}
                                         >
                                             {entry.label}
@@ -180,7 +173,7 @@ export function Navbar() {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: 4 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute top-full left-0 mt-1 py-1.5 min-w-[180px] rounded-lg glass-strong border border-[var(--border-default)]"
+                                                    className="absolute top-full left-0 mt-1 py-1.5 min-w-[180px] rounded-xl bg-[var(--bg-overlay)] border border-[var(--border-default)] shadow-lg"
                                                 >
                                                     {entry.items.map((item) => (
                                                         <Link
@@ -188,7 +181,7 @@ export function Navbar() {
                                                             href={item.href}
                                                             className={`group/dd block px-4 py-2 text-sm transition-colors relative ${isActive(item.href)
                                                                 ? "text-accent bg-accent/5"
-                                                                : "text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)]"
+                                                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-wash)]"
                                                                 }`}
                                                         >
                                                             {item.label}
@@ -205,15 +198,12 @@ export function Navbar() {
                                     <Link
                                         key={entry.href}
                                         href={entry.href}
-                                        className={`px-3 py-2 text-sm transition-colors relative group rounded-md hover:bg-[var(--bg-wash)] ${isActive(entry.href) ? "text-accent" : "text-[var(--text-secondary)] hover:text-white"
+                                        className={`px-3 py-2 text-sm font-medium transition-colors relative group rounded-md hover:bg-[var(--bg-wash)] ${isActive(entry.href) ? "text-accent" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                                             }`}
                                     >
                                         {entry.label}
                                         {isActive(entry.href) ? (
-                                            <>
-                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
-                                                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-accent rounded-full" />
-                                            </>
+                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
                                         ) : (
                                             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-3/4 rounded-full" />
                                         )}
@@ -228,7 +218,7 @@ export function Navbar() {
                             <LanguageSwitcher />
                             <Link
                                 href={`/${locale}/subscribe`}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98]"
+                                className="h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-[#0a0a0f] hover:brightness-110 hover:-translate-y-px hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98] flex items-center"
                                 style={{ background: "var(--gradient-cta)" }}
                             >
                                 {t("subscribeFree")}
@@ -240,7 +230,7 @@ export function Navbar() {
                             <ThemeToggle />
                             <LanguageSwitcher />
                             <button
-                                className="text-[var(--text-primary)] p-2 rounded-lg hover:text-white hover:bg-[var(--bg-wash)] transition-colors"
+                                className="text-[var(--text-primary)] p-2 rounded-lg hover:bg-[var(--bg-wash)] transition-colors"
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 aria-label="Toggle menu"
                             >
@@ -261,11 +251,11 @@ export function Navbar() {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
-                            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+                            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
                             onClick={() => setIsMobileMenuOpen(false)}
                         />
 
-                        {/* Panel */}
+                        {/* Panel — slide from right */}
                         <motion.div
                             initial={{ x: "100%" }}
                             animate={{ x: 0 }}
@@ -277,7 +267,7 @@ export function Navbar() {
                                 <span className="text-sm font-semibold text-[var(--text-primary)]">Menu</span>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)] transition-colors"
+                                    className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-wash)] transition-colors"
                                     aria-label="Close menu"
                                 >
                                     <X size={20} />
@@ -289,9 +279,9 @@ export function Navbar() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`py-2.5 px-3 rounded-md text-sm transition-colors ${isActive(item.href)
-                                            ? "text-accent bg-accent/5"
-                                            : "text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)]"
+                                        className={`py-3 px-3 rounded-xl text-base transition-colors ${isActive(item.href)
+                                            ? "text-accent bg-accent/5 font-medium"
+                                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-wash)]"
                                             }`}
                                     >
                                         {item.label}
@@ -300,7 +290,7 @@ export function Navbar() {
                                 <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
                                     <Link
                                         href={`/${locale}/subscribe`}
-                                        className="block py-2.5 rounded-lg text-sm font-semibold text-center text-cv-primary"
+                                        className="block py-3 rounded-xl text-sm font-semibold text-center text-[#0a0a0f]"
                                         style={{ background: "var(--gradient-cta)" }}
                                     >
                                         {t("subscribeFree")}

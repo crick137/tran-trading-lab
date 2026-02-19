@@ -8,6 +8,7 @@ import { WhatYouGet } from "@/components/home/what-you-get";
 import { LatestArticles } from "@/components/home/latest-articles";
 import { CommunitySection } from "@/components/home/community-section";
 import { SubscribeCTA } from "@/components/home/subscribe-cta";
+import { SectionReveal } from "@/components/ui/section-reveal";
 import dynamic from "next/dynamic";
 import { websiteJsonLd, organizationJsonLd } from "@/lib/json-ld";
 
@@ -32,11 +33,21 @@ export default function Home() {
                 <Hero />
                 <LiveTicker />
                 <ValueProposition />
-                <MarketPulse />
-                <WhatYouGet />
-                <LatestArticles />
-                <CommunitySection />
-                <SubscribeCTA />
+                <SectionReveal>
+                    <MarketPulse />
+                </SectionReveal>
+                <SectionReveal>
+                    <WhatYouGet />
+                </SectionReveal>
+                <SectionReveal>
+                    <LatestArticles />
+                </SectionReveal>
+                <SectionReveal>
+                    <CommunitySection />
+                </SectionReveal>
+                <SectionReveal>
+                    <SubscribeCTA />
+                </SectionReveal>
             </main>
             <Footer />
             <ExitIntentPopup />

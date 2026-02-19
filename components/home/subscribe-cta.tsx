@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Mail, ArrowRight, CheckCircle, AlertCircle } from "lucide-react";
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function SubscribeCTA() {
@@ -11,12 +12,10 @@ export function SubscribeCTA() {
     const [errorMsg, setErrorMsg] = useState("");
     const [shake, setShake] = useState(false);
     const t = useTranslations("home");
-    // Auto-reset success state after 5s
+
     useEffect(() => {
         if (status === "success") {
-            const timer = setTimeout(() => {
-                setStatus("idle");
-            }, 5000);
+            const timer = setTimeout(() => setStatus("idle"), 5000);
             return () => clearTimeout(timer);
         }
     }, [status]);
@@ -53,11 +52,9 @@ export function SubscribeCTA() {
     };
 
     return (
-        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
-            <div className="max-w-content mx-auto">
-                <div
-                    className="relative p-8 md:p-12 rounded-2xl bg-cv-elevated border border-accent/20 overflow-hidden"
-                >
+        <section className="py-24 lg:py-40 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-5xl mx-auto">
+                <div className="relative p-8 md:p-16 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] overflow-hidden">
                     {/* Ambient glow */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-[80px]" aria-hidden="true" />
                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full blur-[60px]" aria-hidden="true" />
@@ -68,11 +65,11 @@ export function SubscribeCTA() {
                             <Mail className="w-5 h-5 text-accent" />
                         </div>
 
-                        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                        <h2 className="text-section text-[var(--text-primary)] mb-4">
                             {t("subscribeCta")}
                         </h2>
 
-                        <p className="text-sm text-[var(--text-tertiary)] mb-8 leading-relaxed">
+                        <p className="text-sm text-[var(--text-tertiary)] mb-10 leading-relaxed max-w-[680px] mx-auto">
                             {t("subscribeDescription")}
                         </p>
 
@@ -96,16 +93,16 @@ export function SubscribeCTA() {
                                             if (status === "error") setStatus("idle");
                                         }}
                                         placeholder={t("subscribePlaceholder")}
-                                        className={`flex-1 px-4 py-3 rounded-lg bg-[var(--bg-wash)] border text-white text-sm placeholder:text-[var(--text-muted)] focus-visible:outline-none transition-colors ${status === "error"
+                                        className={`flex-1 h-14 px-6 rounded-xl bg-[var(--bg-surface)] border text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus-visible:outline-none transition-colors ${status === "error"
                                             ? "border-bearish/50 focus:border-bearish/70"
-                                            : "border-[var(--border-default)] focus:border-accent/40"
+                                            : "border-[var(--border-default)] focus:border-accent focus:ring-2 focus:ring-accent/20"
                                             }`}
                                         required
                                     />
                                     <button
                                         type="submit"
                                         disabled={status === "loading"}
-                                        className="px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-[box-shadow,transform] hover:shadow-lg hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                        className="h-14 px-8 rounded-xl font-semibold text-sm text-[#0a0a0f] transition-all duration-200 hover:brightness-110 hover:-translate-y-px hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                                         style={{ background: "var(--gradient-cta)" }}
                                     >
                                         {status === "loading" ? "..." : t("subscribeButton")}
@@ -121,7 +118,7 @@ export function SubscribeCTA() {
                             </>
                         )}
 
-                        <p className="text-xs text-[var(--text-secondary)] mt-4">
+                        <p className="text-[13px] text-[var(--text-muted)] mt-6">
                             {t("subscribeDisclaimer")}
                         </p>
                     </div>
