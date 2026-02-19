@@ -35,7 +35,7 @@ export default function NotFound() {
                     {/* Brand logo */}
                     <div className="flex items-center justify-center gap-2 mb-6">
                         <div className="w-6 h-6 rounded-md bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                            <BarChart3 className="w-3.5 h-3.5 text-cv-primary" />
+                            <BarChart3 className="w-3.5 h-3.5 text-[#0a0a0f]" />
                         </div>
                         <span className="text-sm font-semibold text-[var(--text-tertiary)]">TRAN TRADING LAB</span>
                     </div>

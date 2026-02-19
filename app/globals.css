@@ -604,10 +604,6 @@ code {
 }
 
 /* === LIGHT MODE — remaining overrides === */
-/* Plain text-white still used in components; will be removed when each component is rebuilt */
-.light .text-white {
-    color: var(--text-primary);
-}
 
 /* bg-cv-elevated gets extra border/shadow in light mode */
 .light .bg-cv-elevated {

@@ -60,7 +60,7 @@ export function Footer() {
                     <div className="col-span-2">
                         <Link href={`/${locale}`} className="flex items-center gap-2.5 mb-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                                <BarChart3 className="w-5 h-5 text-cv-primary" />
+                                <BarChart3 className="w-5 h-5 text-[#0a0a0f]" />
                             </div>
                             <span className="font-bold text-lg tracking-tight">
                                 <span className="text-gradient-gold">TRAN</span>

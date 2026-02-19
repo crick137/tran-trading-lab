@@ -26,7 +26,7 @@ export function ArticleCTA() {
                         href={siteStats.telegramLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-shrink-0 px-6 py-3 rounded-lg bg-gradient-to-r from-accent to-accent-hover text-cv-primary font-bold hover:shadow-lg hover:shadow-accent/20 transition-all flex items-center gap-2"
+                        className="flex-shrink-0 px-6 py-3 rounded-lg bg-gradient-to-r from-accent to-accent-hover text-[#0a0a0f] font-bold hover:shadow-lg hover:shadow-accent/20 transition-all flex items-center gap-2"
                     >
                         <Send className="w-5 h-5" />
                         {t("telegramJoin")}
