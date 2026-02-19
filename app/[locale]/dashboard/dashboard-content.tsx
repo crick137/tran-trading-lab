@@ -178,13 +178,14 @@ export function DashboardContent() {
                         </div>
                     </div>
 
-                    {/* Market Data Cards — only show cards with real API data */}
-                    {(isLoading || hasAnyMarketData) && (
-                        <div className={`grid grid-cols-1 gap-4 mb-10 ${[fearGreed, vix, treasury].filter(Boolean).length === 1 ? "md:grid-cols-1 max-w-md" :
+                    {/* Market Data Cards — show skeletons until data arrives to prevent CLS */}
+                    {(!data || hasAnyMarketData) && (
+                        <div className={`grid grid-cols-1 gap-4 mb-10 ${!data ? "md:grid-cols-3" :
+                                [fearGreed, vix, treasury].filter(Boolean).length === 1 ? "md:grid-cols-1 max-w-md" :
                                 [fearGreed, vix, treasury].filter(Boolean).length === 2 ? "md:grid-cols-2 max-w-2xl" :
                                     "md:grid-cols-3"
                             }`}>
-                            {isLoading && !data ? (
+                            {!data ? (
                                 <>
                                     <SkeletonCard />
                                     <SkeletonCard />

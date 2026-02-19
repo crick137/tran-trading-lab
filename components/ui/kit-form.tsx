@@ -29,5 +29,5 @@ export function KitForm() {
         };
     }, []);
 
-    return <div ref={containerRef} className="kit-form-embed w-full" />;
+    return <div ref={containerRef} className="kit-form-embed w-full min-h-[240px]" />;
 }
