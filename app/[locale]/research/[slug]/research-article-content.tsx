@@ -39,7 +39,7 @@ export function ResearchArticleContent() {
                     {/* Back Link */}
                     <Link
                         href={`/${locale}/research`}
-                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-white transition-colors mb-8"
+                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t("backToResearch")}
@@ -94,7 +94,7 @@ export function ResearchArticleContent() {
 
                     {/* Trading Scenarios */}
                     <div className="mb-8">
-                        <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-white mb-6">
+                        <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-6">
                             <span className="text-2xl">💹</span>
                             {t("tradingScenarios")}
                         </h2>
@@ -136,7 +136,7 @@ export function ResearchArticleContent() {
                         <>
                             <hr className="my-12 border-[var(--border-default)]" />
                             <section>
-                                <h2 className="text-2xl font-bold text-white mb-6">{t("relatedResearch")}</h2>
+                                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">{t("relatedResearch")}</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {researchArticles
                                         .filter((a) => a.slug !== slug)
@@ -150,7 +150,7 @@ export function ResearchArticleContent() {
                                                 <span className="text-xs text-accent mb-2 block">
                                                     {art.symbol} | {art.timeframe}
                                                 </span>
-                                                <h3 className="font-semibold text-white group-hover:text-accent transition-colors line-clamp-2">
+                                                <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors line-clamp-2">
                                                     {art.title}
                                                 </h3>
                                             </Link>

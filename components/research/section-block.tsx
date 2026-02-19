@@ -16,7 +16,7 @@ export function SectionBlock({ icon, title, content, highlights, delay = 0 }: Se
         const parts = text.split(/(\*\*[^*]+\*\*)/g);
         return parts.map((part, i) => {
             if (part.startsWith('**') && part.endsWith('**')) {
-                return <strong key={i} className="text-white">{part.slice(2, -2)}</strong>;
+                return <strong key={i} className="text-[var(--text-primary)]">{part.slice(2, -2)}</strong>;
             }
             return part;
         });
@@ -30,7 +30,7 @@ export function SectionBlock({ icon, title, content, highlights, delay = 0 }: Se
             className="mb-8"
         >
             {/* Header */}
-            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-white mb-4">
+            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-4">
                 <span className="text-2xl">{icon}</span>
                 {title}
             </h2>

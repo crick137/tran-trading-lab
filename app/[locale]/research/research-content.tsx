@@ -26,7 +26,7 @@ export function ResearchContent() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                        <h1 className="text-4xl sm:text-5xl font-bold text-[var(--text-primary)] mb-4">
                             {t("title")}
                         </h1>
                         <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
@@ -84,7 +84,7 @@ export function ResearchContent() {
                                                     </div>
 
                                                     {/* Title */}
-                                                    <h2 className="text-lg font-bold text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
+                                                    <h2 className="text-lg font-bold text-[var(--text-primary)] mb-2 group-hover:text-accent transition-colors line-clamp-2">
                                                         {article.title}
                                                     </h2>
 

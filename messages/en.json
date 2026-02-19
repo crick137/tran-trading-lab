@@ -689,6 +689,61 @@
         "section7Title": "7. Contact",
         "section7Body": "For terms-related inquiries:"
     },
+    "changelog": {
+        "title": "Changelog",
+        "subtitle": "What's new and improved on TranTradingLab.",
+        "entries": [
+            {
+                "date": "Feb 19, 2026",
+                "version": "v2.4",
+                "items": [
+                    { "type": "feature", "text": "Phase B visual system — new typography scale, design tokens, unified card styles" },
+                    { "type": "improvement", "text": "Blog page upgraded with newsletter CTA and Phase B styling" },
+                    { "type": "fix", "text": "/learn now redirects to Academy (was 404)" },
+                    { "type": "fix", "text": "Hero section height reduced for better above-the-fold content" }
+                ]
+            },
+            {
+                "date": "Feb 18, 2026",
+                "version": "v2.3",
+                "items": [
+                    { "type": "feature", "text": "Market Pulse — live BTC, ETH prices and Fear & Greed Index" },
+                    { "type": "feature", "text": "SectionReveal — IntersectionObserver-based scroll animations" },
+                    { "type": "improvement", "text": "Navbar simplified to two-tier glassmorphism scroll" },
+                    { "type": "improvement", "text": "Footer social icons with brand-specific hover colors + tooltips" }
+                ]
+            },
+            {
+                "date": "Feb 17, 2026",
+                "version": "v2.2",
+                "items": [
+                    { "type": "feature", "text": "Complete site overhaul — new design tokens, performance optimization" },
+                    { "type": "improvement", "text": "Removed fake data from Switchboard and Bold Calls" },
+                    { "type": "improvement", "text": "Added EmptyState component for content-less pages" },
+                    { "type": "fix", "text": "Dark/light mode now properly themed across all components" }
+                ]
+            },
+            {
+                "date": "Feb 15, 2026",
+                "version": "v2.1",
+                "items": [
+                    { "type": "feature", "text": "Dashboard with TradingView charts and Fear & Greed gauge" },
+                    { "type": "feature", "text": "Real market data via CoinGecko and Alternative.me APIs" },
+                    { "type": "improvement", "text": "SEO metadata for all pages with JSON-LD structured data" }
+                ]
+            },
+            {
+                "date": "Feb 10, 2026",
+                "version": "v2.0",
+                "items": [
+                    { "type": "feature", "text": "Initial launch with bilingual support (English & Korean)" },
+                    { "type": "feature", "text": "Trading tools: Position Sizing Calculator, R:R Calculator" },
+                    { "type": "feature", "text": "Trading Glossary with 50+ SMC/ORB terms" },
+                    { "type": "feature", "text": "Academy learning path with structured curriculum" }
+                ]
+            }
+        ]
+    },
     "templatesPage": {
         "title": "Trading Templates",
         "subtitle": "Free templates for systematic trading",

@@ -40,7 +40,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
                                 {item.label}
                             </Link>
                         ) : (
-                            <span className="text-white font-medium truncate max-w-[200px]">
+                            <span className="text-[var(--text-primary)] font-medium truncate max-w-[200px]">
                                 {item.label}
                             </span>
                         )}

@@ -27,7 +27,7 @@ export function QuickSummary({ items }: QuickSummaryProps) {
                     <Zap className="w-5 h-5 text-accent" />
                 </div>
                 <div>
-                    <h2 className="text-lg font-bold text-white">{t("quickSummary")}</h2>
+                    <h2 className="text-lg font-bold text-[var(--text-primary)]">{t("quickSummary")}</h2>
                     <p className="text-xs text-[var(--text-secondary)]">{t("tldr")}</p>
                 </div>
             </div>

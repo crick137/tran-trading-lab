@@ -41,7 +41,7 @@ export function PositionSizingContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <Calculator className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
@@ -53,7 +53,7 @@ export function PositionSizingContent() {
                                 type="number"
                                 value={accountSize}
                                 onChange={(e) => setAccountSize(Number(e.target.value))}
-                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                             />
                         </div>
 
@@ -66,7 +66,7 @@ export function PositionSizingContent() {
                                 step="0.5"
                                 min="0.1"
                                 max="10"
-                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                             />
                         </div>
 
@@ -77,7 +77,7 @@ export function PositionSizingContent() {
                                     type="number"
                                     value={entryPrice}
                                     onChange={(e) => setEntryPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                                 />
                             </div>
                             <div>
@@ -86,7 +86,7 @@ export function PositionSizingContent() {
                                     type="number"
                                     value={stopPrice}
                                     onChange={(e) => setStopPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                                 />
                             </div>
                         </div>
@@ -105,11 +105,11 @@ export function PositionSizingContent() {
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-tertiary)]">{t("totalValue")}</span>
-                                <span className="text-white font-data">{formatCurrency(totalValue)}</span>
+                                <span className="text-[var(--text-primary)] font-data">{formatCurrency(totalValue)}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-[var(--text-tertiary)]">{t("accountPercent")}</span>
-                                <span className="text-white font-data">{percentOfAccount.toFixed(1)}%</span>
+                                <span className="text-[var(--text-primary)] font-data">{percentOfAccount.toFixed(1)}%</span>
                             </div>
                         </div>
 

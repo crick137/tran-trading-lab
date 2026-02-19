@@ -84,7 +84,7 @@ export function Checklist({ items }: ChecklistProps) {
             transition={{ duration: 0.5, delay: 0.4 }}
             className="mb-8"
         >
-            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-white mb-4">
+            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-4">
                 <span className="text-2xl">📍</span>
                 {t("checklist")}
             </h2>
@@ -116,7 +116,7 @@ export function Conclusion({ text }: ConclusionProps) {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="mb-8"
         >
-            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-white mb-4">
+            <h2 className="flex items-center gap-3 text-xl sm:text-2xl font-bold text-[var(--text-primary)] mb-4">
                 <span className="text-2xl">🎯</span>
                 {t("conclusion")}
             </h2>

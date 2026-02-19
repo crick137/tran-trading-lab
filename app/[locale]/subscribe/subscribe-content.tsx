@@ -23,7 +23,7 @@ export function SubscribeContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
                     <div className="text-center mb-12">
-                        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">
                             {t("title")} <span className="text-gradient-gold">{t("titleHighlight")}</span>
                         </h1>
                         <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
@@ -46,7 +46,7 @@ export function SubscribeContent() {
                     {/* Main CTA Card */}
                     <div className="bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8 mb-12">
                         <div className="text-center mb-8">
-                            <h2 className="text-2xl font-bold text-white mb-2">{t("ctaTitle")}</h2>
+                            <h2 className="text-section text-[var(--text-primary)] mb-2">{t("ctaTitle")}</h2>
                             <p className="text-[var(--text-tertiary)]">{t("ctaSubtitle")}</p>
                         </div>
 
@@ -64,7 +64,7 @@ export function SubscribeContent() {
                                 href="https://t.me/TranTradingLabEN"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/20"
+                                className="group px-8 py-4 rounded-lg text-[#0a0a0f] font-semibold transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/20"
                                 style={{ background: "var(--gradient-cta)" }}
                             >
                                 <Send className="w-5 h-5" />

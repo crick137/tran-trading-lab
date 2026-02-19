@@ -29,14 +29,14 @@ export function ContactContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <MessageCircle className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-lg text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {/* Contact Methods */}
                         <div className="space-y-4">
-                            <h2 className="text-xl font-semibold text-white mb-4">{t("quickContact")}</h2>
+                            <h2 className="text-card-title text-[var(--text-primary)] mb-4">{t("quickContact")}</h2>
 
                             <a
                                 href="https://t.me/TranTradingLabEN"
@@ -73,7 +73,7 @@ export function ContactContent() {
 
                         {/* Contact Form */}
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <h2 className="text-xl font-semibold text-white mb-4">{t("sendMessage")}</h2>
+                            <h2 className="text-card-title text-[var(--text-primary)] mb-4">{t("sendMessage")}</h2>
 
                             <div>
                                 <label className="block text-sm text-[var(--text-tertiary)] mb-2">{t("nameLabel")}</label>
@@ -81,7 +81,7 @@ export function ContactContent() {
                                     type="text"
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-white placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors"
                                     placeholder={t("namePlaceholder")}
                                     required
                                 />
@@ -93,7 +93,7 @@ export function ContactContent() {
                                     type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-white placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors"
                                     placeholder={t("emailPlaceholder")}
                                     required
                                 />
@@ -105,7 +105,7 @@ export function ContactContent() {
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     rows={5}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-white placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors resize-none"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-colors resize-none"
                                     placeholder={t("messagePlaceholder")}
                                     required
                                 />
@@ -117,7 +117,7 @@ export function ContactContent() {
                                 className={`w-full py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
                                     status === "success"
                                         ? "bg-bullish text-white"
-                                        : "text-cv-primary hover:shadow-lg hover:shadow-accent/20"
+                                        : "text-[#0a0a0f] hover:shadow-lg hover:shadow-accent/20"
                                 }`}
                                 style={status !== "success" ? { background: "var(--gradient-cta)" } : undefined}
                             >

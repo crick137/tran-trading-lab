@@ -55,23 +55,23 @@ export function ScenarioCard({
             <div className="space-y-3 text-sm">
                 <div>
                     <span className="text-[var(--text-secondary)] font-medium">{t("conditionLabel")}: </span>
-                    <span className="text-white">{condition}</span>
+                    <span className="text-[var(--text-primary)]">{condition}</span>
                 </div>
                 {meaning && (
                     <div>
                         <span className="text-[var(--text-secondary)] font-medium">{t("meaningLabel")}: </span>
-                        <span className="text-white">{meaning}</span>
+                        <span className="text-[var(--text-primary)]">{meaning}</span>
                     </div>
                 )}
                 <div>
                     <span className="text-[var(--text-secondary)] font-medium">{t("expectedFlowLabel")}: </span>
-                    <span className="text-white">{expectedFlow}</span>
+                    <span className="text-[var(--text-primary)]">{expectedFlow}</span>
                 </div>
                 {strategy && (
                     <div className={`mt-4 pt-4 border-t ${isBullish ? 'border-bullish/20' : 'border-bearish/20'
                         }`}>
                         <span className="text-[var(--text-secondary)] font-medium">{t("strategyLabel")}: </span>
-                        <span className="text-white">{strategy}</span>
+                        <span className="text-[var(--text-primary)]">{strategy}</span>
                     </div>
                 )}
             </div>

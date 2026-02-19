@@ -119,7 +119,7 @@ export function ExitIntentPopup() {
                                 <Mail className="w-5 h-5 text-accent" />
                             </div>
 
-                            <h3 className="text-xl font-bold text-white mb-2">
+                            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">
                                 {t("exitIntentTitle")}
                             </h3>
                             <p className="text-sm text-[var(--text-tertiary)] mb-6 leading-relaxed">
@@ -139,7 +139,7 @@ export function ExitIntentPopup() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder={t("exitIntentPlaceholder")}
-                                        className="w-full px-4 py-3 rounded-lg bg-[var(--bg-wash)] border border-[var(--border-default)] text-white text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-accent/40 transition-colors"
+                                        className="w-full px-4 py-3 rounded-lg bg-[var(--bg-wash)] border border-[var(--border-default)] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-accent/40 transition-colors"
                                         required
                                     />
                                     <button

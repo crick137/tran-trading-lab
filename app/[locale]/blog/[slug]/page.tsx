@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
 import { blogPosts } from "@/lib/blog-data";
+import { breadcrumbJsonLd, articleJsonLd } from "@/lib/json-ld";
 import { BlogPostContent } from "./blog-post-content";
 
 export async function generateMetadata({
@@ -24,6 +25,42 @@ export function generateStaticParams() {
     return blogPosts.map((post) => ({ slug: post.slug }));
 }
 
-export default function BlogPostPage() {
-    return <BlogPostContent />;
+export default function BlogPostPage({
+    params: { locale, slug },
+}: {
+    params: { locale: string; slug: string };
+}) {
+    const article = blogPosts.find((p) => p.slug === slug);
+
+    const breadcrumb = breadcrumbJsonLd([
+        { name: "Home", url: `/${locale}` },
+        { name: "Blog", url: `/${locale}/blog` },
+        ...(article ? [{ name: article.title, url: `/${locale}/blog/${slug}` }] : []),
+    ]);
+
+    const articleLd = article
+        ? articleJsonLd({
+            title: article.title,
+            description: article.excerpt,
+            url: `https://trantradinglab.com/${locale}/blog/${slug}`,
+            datePublished: article.date,
+            imageUrl: article.image || `https://trantradinglab.com/api/og?title=${encodeURIComponent(article.title)}`,
+        })
+        : null;
+
+    return (
+        <>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+            />
+            {articleLd && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
+                />
+            )}
+            <BlogPostContent />
+        </>
+    );
 }

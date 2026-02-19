@@ -100,7 +100,7 @@ export function FAQContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <HelpCircle className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-lg text-[var(--text-tertiary)]">
                             {t("subtitle")}
                         </p>
@@ -112,8 +112,8 @@ export function FAQContent() {
                             onClick={() => setActiveCategory(allCategory)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                                 activeCategory === allCategory
-                                    ? "bg-accent text-cv-primary"
-                                    : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white hover:border-accent/30"
+                                    ? "bg-accent text-[#0a0a0f]"
+                                    : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-accent/30"
                             }`}
                         >
                             {allCategory}
@@ -124,8 +124,8 @@ export function FAQContent() {
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                                     activeCategory === category
-                                        ? "bg-accent text-cv-primary"
-                                        : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white hover:border-accent/30"
+                                        ? "bg-accent text-[#0a0a0f]"
+                                        : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-accent/30"
                                 }`}
                             >
                                 {category}
@@ -147,7 +147,7 @@ export function FAQContent() {
 
                     {/* Contact CTA */}
                     <div className="mt-16 p-8 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] text-center">
-                        <h2 className="text-xl font-semibold text-white mb-2">
+                        <h2 className="text-card-title text-[var(--text-primary)] mb-2">
                             {t("contactTitle")}
                         </h2>
                         <p className="text-[var(--text-tertiary)] mb-4">
@@ -157,7 +157,7 @@ export function FAQContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-medium transition-all hover:shadow-lg hover:shadow-accent/20"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[#0a0a0f] font-medium transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("contactCta")}

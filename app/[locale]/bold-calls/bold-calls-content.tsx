@@ -22,7 +22,7 @@ export function BoldCallsContent() {
                                 <Target className="w-5 h-5 text-accent" />
                             </div>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                                <h1 className="text-display text-[var(--text-primary)]">
                                     {t("title")}
                                 </h1>
                                 <p className="text-sm text-[var(--text-tertiary)]">{t("subtitle")}</p>

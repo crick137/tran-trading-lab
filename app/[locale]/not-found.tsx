@@ -40,7 +40,7 @@ export default function NotFound() {
                         <span className="text-sm font-semibold text-[var(--text-tertiary)]">TRAN TRADING LAB</span>
                     </div>
 
-                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--text-primary)] mb-3">
                         {t("title")}
                     </h1>
                     <p className="text-[var(--text-tertiary)] mb-10 leading-relaxed max-w-md mx-auto">
@@ -59,7 +59,7 @@ export default function NotFound() {
                         </Link>
                         <Link
                             href={`/${locale}/dashboard`}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-semibold hover:bg-[var(--bg-wash)] hover:text-white transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-semibold hover:bg-[var(--bg-wash)] hover:text-[var(--text-primary)] transition-all"
                         >
                             <LayoutDashboard className="w-4 h-4" />
                             {t("viewDashboard")}

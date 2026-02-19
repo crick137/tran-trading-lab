@@ -22,7 +22,7 @@ export default function Error({
         <div className="min-h-screen bg-cv-void flex items-center justify-center px-4">
             <div className="text-center max-w-md">
                 <div className="text-6xl font-bold text-accent/30 mb-4">!</div>
-                <h1 className="text-2xl font-bold text-white mb-3">
+                <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">
                     {t("title")}
                 </h1>
                 <p className="text-[var(--text-secondary)] mb-8">
@@ -37,7 +37,7 @@ export default function Error({
                     </button>
                     <Link
                         href={`/${locale}`}
-                        className="px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-white hover:border-[var(--border-strong)] transition-colors"
+                        className="px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-strong)] transition-colors"
                     >
                         {t("goHome")}
                     </Link>

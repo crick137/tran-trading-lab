@@ -17,7 +17,7 @@ export function BriefingsContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <FileText className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-[var(--text-tertiary)] mb-12 max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
@@ -31,7 +31,7 @@ export function BriefingsContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
+                            className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[#0a0a0f] font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             <Send className="w-4 h-4" />

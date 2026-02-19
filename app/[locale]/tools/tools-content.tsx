@@ -44,7 +44,7 @@ export function ToolsContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <Wrench className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-lg text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 

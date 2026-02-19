@@ -689,6 +689,61 @@
         "section7Title": "7. 문의",
         "section7Body": "이용약관 관련 문의:"
     },
+    "changelog": {
+        "title": "변경 이력",
+        "subtitle": "TranTradingLab의 새로운 기능과 개선 사항입니다.",
+        "entries": [
+            {
+                "date": "2026년 2월 19일",
+                "version": "v2.4",
+                "items": [
+                    { "type": "feature", "text": "Phase B 비주얼 시스템 — 새로운 타이포그래피, 디자인 토큰, 통합 카드 스타일" },
+                    { "type": "improvement", "text": "블로그 페이지 뉴스레터 CTA 추가 및 Phase B 스타일링 적용" },
+                    { "type": "fix", "text": "/learn이 아카데미로 정상 리다이렉트 (404 해결)" },
+                    { "type": "fix", "text": "히어로 섹션 높이 조정으로 더 나은 첫 화면 구성" }
+                ]
+            },
+            {
+                "date": "2026년 2월 18일",
+                "version": "v2.3",
+                "items": [
+                    { "type": "feature", "text": "Market Pulse — 실시간 BTC, ETH 가격 및 공포&탐욕 지수" },
+                    { "type": "feature", "text": "SectionReveal — IntersectionObserver 기반 스크롤 애니메이션" },
+                    { "type": "improvement", "text": "내비게이션 바 2단계 글래스모피즘 스크롤로 간소화" },
+                    { "type": "improvement", "text": "푸터 소셜 아이콘 브랜드별 호버 색상 + 툴팁 추가" }
+                ]
+            },
+            {
+                "date": "2026년 2월 17일",
+                "version": "v2.2",
+                "items": [
+                    { "type": "feature", "text": "사이트 전면 개편 — 새로운 디자인 토큰, 성능 최적화" },
+                    { "type": "improvement", "text": "스위치보드 및 Bold Calls에서 가짜 데이터 제거" },
+                    { "type": "improvement", "text": "콘텐츠 없는 페이지용 EmptyState 컴포넌트 추가" },
+                    { "type": "fix", "text": "다크/라이트 모드 전체 컴포넌트 테마 적용 완료" }
+                ]
+            },
+            {
+                "date": "2026년 2월 15일",
+                "version": "v2.1",
+                "items": [
+                    { "type": "feature", "text": "TradingView 차트와 공포&탐욕 게이지가 포함된 대시보드" },
+                    { "type": "feature", "text": "CoinGecko 및 Alternative.me API를 통한 실시간 시장 데이터" },
+                    { "type": "improvement", "text": "모든 페이지에 SEO 메타데이터 및 JSON-LD 구조화 데이터 추가" }
+                ]
+            },
+            {
+                "date": "2026년 2월 10일",
+                "version": "v2.0",
+                "items": [
+                    { "type": "feature", "text": "이중 언어 지원 (영어 & 한국어) 최초 런칭" },
+                    { "type": "feature", "text": "트레이딩 도구: 포지션 사이징 계산기, R:R 계산기" },
+                    { "type": "feature", "text": "50개 이상의 SMC/ORB 용어가 포함된 트레이딩 용어집" },
+                    { "type": "feature", "text": "체계적인 커리큘럼의 아카데미 학습 경로" }
+                ]
+            }
+        ]
+    },
     "templatesPage": {
         "title": "트레이딩 템플릿",
         "subtitle": "체계적인 트레이딩을 위한 무료 템플릿",

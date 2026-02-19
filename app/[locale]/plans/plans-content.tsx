@@ -20,7 +20,7 @@ export function PlansContent() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-16">
-                        <h1 className="text-4xl font-bold text-white mb-4">
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">
                             {t("title")}
                         </h1>
                         <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
@@ -35,7 +35,7 @@ export function PlansContent() {
                                 <Sparkles className="w-6 h-6 text-accent" />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-bold text-white">{t("freeTitle")}</h2>
+                                <h2 className="text-section text-[var(--text-primary)]">{t("freeTitle")}</h2>
                                 <p className="text-[var(--text-tertiary)] text-sm">{t("freeSubtitle")}</p>
                             </div>
                         </div>
@@ -51,7 +51,7 @@ export function PlansContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
+                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-[#0a0a0f] font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             <Send className="w-4 h-4" />
@@ -62,7 +62,7 @@ export function PlansContent() {
 
                     {/* Roadmap Section */}
                     <div className="mb-16">
-                        <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                        <h2 className="text-section text-[var(--text-primary)] mb-6 text-center">
                             {t("roadmapTitle")}
                         </h2>
                         <p className="text-[var(--text-tertiary)] text-center mb-8">

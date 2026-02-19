@@ -39,7 +39,7 @@ export function RRCalculatorContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <Calculator className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-3xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
@@ -51,7 +51,7 @@ export function RRCalculatorContent() {
                                 type="number"
                                 value={entryPrice}
                                 onChange={(e) => setEntryPrice(Number(e.target.value))}
-                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                             />
                         </div>
 
@@ -62,7 +62,7 @@ export function RRCalculatorContent() {
                                     type="number"
                                     value={stopPrice}
                                     onChange={(e) => setStopPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-bearish/20 text-white focus:outline-none focus:ring-2 focus:ring-bearish/50 focus:border-bearish/50 transition-all"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-bearish/20 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-bearish/50 focus:border-bearish/50 transition-all"
                                 />
                             </div>
                             <div>
@@ -71,7 +71,7 @@ export function RRCalculatorContent() {
                                     type="number"
                                     value={targetPrice}
                                     onChange={(e) => setTargetPrice(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-bullish/20 text-white focus:outline-none focus:ring-2 focus:ring-bullish/50 focus:border-bullish/50 transition-all"
+                                    className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-bullish/20 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-bullish/50 focus:border-bullish/50 transition-all"
                                 />
                             </div>
                         </div>

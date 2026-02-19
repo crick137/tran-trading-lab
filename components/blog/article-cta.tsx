@@ -14,7 +14,7 @@ export function ArticleCTA() {
             <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                 <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">
+                    <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
                         {t("subscribeCta")}
                     </h3>
                     <p className="text-[var(--text-secondary)] max-w-lg">

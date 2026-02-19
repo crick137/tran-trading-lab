@@ -170,7 +170,7 @@ export function DashboardContent() {
                                 <BarChart3 className="w-5 h-5 text-accent" />
                             </div>
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                                <h1 className="text-display text-[var(--text-primary)]">
                                     {t("title")}
                                 </h1>
                                 <p className="text-sm text-[var(--text-tertiary)]">{t("subtitle")}</p>
@@ -200,7 +200,7 @@ export function DashboardContent() {
                                                 <span className="text-sm text-[var(--text-secondary)]">{t("fearGreed")}</span>
                                             </div>
                                             <FearGreedGauge value={fearGreed.value} />
-                                            <p className="text-3xl font-bold font-data text-white mt-2">{fearGreed.value}</p>
+                                            <p className="text-section font-data text-[var(--text-primary)] mt-2">{fearGreed.value}</p>
                                             <p className={`text-sm font-data mt-1 ${getClassificationColor(fearGreed.classification)}`}>
                                                 {getClassificationLabel(fearGreed.classification)}
                                             </p>
@@ -213,7 +213,7 @@ export function DashboardContent() {
                                                 <TrendingDown className={`w-4 h-4 ${vix.value < 15 ? "text-bullish" : vix.value < 25 ? "text-neutral" : "text-bearish"}`} />
                                                 <span className="text-sm text-[var(--text-secondary)]">VIX</span>
                                             </div>
-                                            <p className="text-4xl font-bold font-data text-white">{vix.value.toFixed(1)}</p>
+                                            <p className="text-display font-data text-[var(--text-primary)]">{vix.value.toFixed(1)}</p>
                                             <p className={`text-sm font-data mt-1 ${vix.change < 0 ? "text-bullish" : "text-bearish"}`}>
                                                 {vix.change >= 0 ? "▲" : "▼"} {vix.change >= 0 ? "+" : ""}{vix.change.toFixed(1)}%
                                             </p>
@@ -226,7 +226,7 @@ export function DashboardContent() {
                                                 <TrendingUp className="w-4 h-4 text-neutral" />
                                                 <span className="text-sm text-[var(--text-secondary)]">10Y Yield</span>
                                             </div>
-                                            <p className="text-4xl font-bold font-data text-white">{treasury.value.toFixed(2)}%</p>
+                                            <p className="text-display font-data text-[var(--text-primary)]">{treasury.value.toFixed(2)}%</p>
                                             <p className="text-sm font-data text-neutral mt-1">Daily</p>
                                         </div>
                                     )}

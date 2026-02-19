@@ -31,21 +31,21 @@ export function AcademyContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-6">
                             <GraduationCap className="w-4 h-4" />
                             {t("badge")}
                         </div>
-                        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
                             {t("subtitle")}
                         </p>
                     </div>
 
                     {/* Learning Path */}
                     <section className="mb-16">
-                        <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
+                        <h2 className="text-section text-[var(--text-primary)] mb-8 flex items-center gap-2">
                             <BookOpen className="w-6 h-6 text-accent" />
                             {t("learningPath")}
                         </h2>
@@ -56,7 +56,7 @@ export function AcademyContent() {
                                 return (
                                     <TiltCard key={mod.id}>
                                         <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full">
-                                            <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-cv-primary font-bold flex items-center justify-center text-sm">
+                                            <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-[#0a0a0f] font-bold flex items-center justify-center text-sm">
                                                 {index + 1}
                                             </div>
                                             <Icon className="w-10 h-10 text-accent mb-4" />
@@ -89,7 +89,7 @@ export function AcademyContent() {
 
                     {/* Quick Links */}
                     <section className="mb-16">
-                        <h2 className="text-2xl font-bold text-white mb-8">{t("quickLinks")}</h2>
+                        <h2 className="text-section text-[var(--text-primary)] mb-8">{t("quickLinks")}</h2>
                         <div className="grid md:grid-cols-3 gap-4">
                             {quickLinks.map((link) => (
                                 <Link
@@ -111,7 +111,7 @@ export function AcademyContent() {
 
                     {/* CTA */}
                     <section className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8">
-                        <h2 className="text-2xl font-bold text-white mb-4">
+                        <h2 className="text-section text-[var(--text-primary)] mb-4">
                             {t("ctaTitle")}
                         </h2>
                         <p className="text-[var(--text-tertiary)] mb-6 max-w-xl mx-auto">
@@ -121,7 +121,7 @@ export function AcademyContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-xl hover:shadow-accent/30"
+                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-[#0a0a0f] font-semibold transition-all hover:shadow-xl hover:shadow-accent/30"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("ctaButton")}

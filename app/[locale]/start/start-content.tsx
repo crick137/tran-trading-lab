@@ -62,10 +62,10 @@ export function StartContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
                     <div className="text-center mb-16">
-                        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">
                             <span className="text-gradient-gold">{t("title")}</span>
                         </h1>
-                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -78,7 +78,7 @@ export function StartContent() {
                                     <div className="w-14 h-14 rounded-lg bg-cv-surface flex items-center justify-center mb-4">
                                         <path.icon className="w-7 h-7 text-accent" />
                                     </div>
-                                    <h2 className="text-xl font-bold text-white mb-1">{path.title}</h2>
+                                    <h2 className="text-card-title text-[var(--text-primary)] mb-1">{path.title}</h2>
                                     <p className="text-sm text-[var(--text-tertiary)] mb-6">{path.subtitle}</p>
 
                                     <div className="space-y-3">
@@ -86,7 +86,7 @@ export function StartContent() {
                                             <Link
                                                 key={i}
                                                 href={step.href}
-                                                className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-white transition-colors group"
+                                                className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors group"
                                             >
                                                 <span className="w-6 h-6 rounded-full bg-cv-surface border border-[var(--border-default)] flex items-center justify-center text-xs font-medium group-hover:border-accent/40 group-hover:text-accent transition-colors">
                                                     {i + 1}
@@ -104,7 +104,7 @@ export function StartContent() {
                     {/* What We Provide / Don't Provide */}
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)]">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <h3 className="text-card-title text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <CheckCircle2 className="w-5 h-5 text-bullish" />
                                 {t("whatWeProvide")}
                             </h3>
@@ -119,7 +119,7 @@ export function StartContent() {
                         </div>
 
                         <div className="p-6 rounded-xl bg-cv-elevated border border-bearish/20">
-                            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <h3 className="text-card-title text-[var(--text-primary)] mb-4 flex items-center gap-2">
                                 <AlertTriangle className="w-5 h-5 text-bearish" />
                                 {t("whatWeDoNotProvide")}
                             </h3>
@@ -142,7 +142,7 @@ export function StartContent() {
                         <p className="text-[var(--text-tertiary)] mb-4">{t("readFirstReport")}</p>
                         <Link
                             href={`/${locale}/research`}
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-accent/20"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-[#0a0a0f] font-semibold transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("viewSampleReport")}

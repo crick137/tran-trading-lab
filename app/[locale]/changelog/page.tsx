@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
 import { getMessages } from "@/lib/get-messages";
+import { ChangelogContent } from "./changelog-content";
 
 export async function generateMetadata({
     params: { locale },
@@ -10,13 +11,12 @@ export async function generateMetadata({
     const t = getMessages(locale);
     return createPageMetadata({
         locale,
-        path: "/glossary",
-        title: t.glossary.title,
-        description: t.meta.glossaryDescription,
-        keywords: ["trading glossary", "SMC terms", "trading terminology", "order block", "fair value gap"],
+        path: "/changelog",
+        title: t.changelog.title,
+        description: t.changelog.subtitle,
     });
 }
 
-export default function GlossaryLayout({ children }: { children: React.ReactNode }) {
-    return children;
+export default function ChangelogPage() {
+    return <ChangelogContent />;
 }

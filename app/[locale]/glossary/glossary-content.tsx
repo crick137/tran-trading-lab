@@ -102,7 +102,7 @@ export function GlossaryContent() {
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <BookOpen className="w-8 h-8 text-accent" />
                         </div>
-                        <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
+                        <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle", { count: glossaryTerms.length })}
                         </p>
@@ -121,7 +121,7 @@ export function GlossaryContent() {
                                     setDisplayCount(ITEMS_PER_PAGE);
                                 }}
                                 aria-label={t("searchPlaceholder")}
-                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-white placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-all"
+                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-all"
                             />
                         </div>
                         <div className="flex gap-2 flex-wrap">
@@ -133,7 +133,7 @@ export function GlossaryContent() {
                                         setDisplayCount(ITEMS_PER_PAGE);
                                     }}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === cat
-                                        ? "bg-accent text-cv-primary"
+                                        ? "bg-accent text-[#0a0a0f]"
                                         : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-accent/30"
                                         }`}
                                 >

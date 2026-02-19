@@ -41,7 +41,7 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-3 leading-tight">
                 {article.title}
             </h1>
             {article.subtitle && (

@@ -69,10 +69,10 @@ function parseMarkdownToHtml(content: string): string {
             const title = text.slice(emojiEnd).trim();
             return `<div class="mt-12 mb-6 flex items-center gap-3" id="${id}">
                 <span class="text-3xl">${emoji}</span>
-                <h2 class="text-2xl font-bold text-white m-0">${title}</h2>
+                <h2 class="text-2xl font-bold text-[var(--text-primary)] m-0">${title}</h2>
             </div>`;
         }
-        return `<h2 id="${id}" class="mt-12 mb-6 text-2xl font-bold text-white border-l-4 border-accent pl-4">${text}</h2>`;
+        return `<h2 id="${id}" class="mt-12 mb-6 text-2xl font-bold text-[var(--text-primary)] border-l-4 border-accent pl-4">${text}</h2>`;
     });
 
     // Parse H3 as subsection headers
@@ -82,7 +82,7 @@ function parseMarkdownToHtml(content: string): string {
     });
 
     // Bold and italic
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>');
     html = html.replace(/\*(.+?)\*/g, '<em class="text-accent/80">$1</em>');
 
     // Lists - wrap consecutive list items in ul with premium styling
@@ -143,7 +143,7 @@ export function BlogPostContent() {
                     {/* Back Link */}
                     <Link
                         href={`/${locale}/blog`}
-                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-white transition-colors mb-8"
+                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t("backToBlog")}
@@ -162,7 +162,7 @@ export function BlogPostContent() {
                         </span>
 
                         {/* Title */}
-                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
+                        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-6 leading-tight">
                             {article.title}
                         </h1>
 
@@ -202,7 +202,7 @@ export function BlogPostContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-[var(--text-secondary)] prose-strong:text-white prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-code:text-accent prose-code:bg-cv-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-cv-elevated prose-pre:border prose-pre:border-[var(--border-default)] prose-li:text-[var(--text-secondary)] prose-blockquote:border-accent prose-blockquote:text-[var(--text-secondary)] prose-hr:border-[var(--border-default)]"
+                        className="prose prose-invert prose-lg max-w-none prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-code:text-accent prose-code:bg-cv-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-cv-elevated prose-pre:border prose-pre:border-[var(--border-default)] prose-li:text-[var(--text-secondary)] prose-blockquote:border-accent prose-blockquote:text-[var(--text-secondary)] prose-hr:border-[var(--border-default)]"
                         dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(article.content) }}
                     />
 
@@ -222,7 +222,7 @@ export function BlogPostContent() {
 
                     {/* Related Articles */}
                     <section>
-                        <h2 className="text-2xl font-bold text-white mb-6">{t("relatedPosts")}</h2>
+                        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-6">{t("relatedPosts")}</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {blogPosts
                                 .filter((p) => p.slug !== slug)
@@ -236,7 +236,7 @@ export function BlogPostContent() {
                                         <span className="text-xs text-accent mb-2 block">
                                             {categoryLabels[art.category] || art.category}
                                         </span>
-                                        <h3 className="font-semibold text-white group-hover:text-accent transition-colors line-clamp-2">
+                                        <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors line-clamp-2">
                                             {art.title}
                                         </h3>
                                         {art.tags && (
