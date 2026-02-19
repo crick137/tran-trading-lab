@@ -59,7 +59,7 @@ export function Hero() {
     return (
         <section
             ref={sectionRef}
-            className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"
+            className="relative min-h-[70vh] flex items-center justify-center overflow-hidden"
         >
             {/* Aurora background — low opacity */}
             <div aria-hidden="true">
