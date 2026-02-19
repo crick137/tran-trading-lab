@@ -16,18 +16,18 @@ interface FAQItem {
 
 function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boolean; onToggle: () => void }) {
     return (
-        <div className="border border-white/5 rounded-lg overflow-hidden bg-cv-elevated">
+        <div className="border border-[var(--border-subtle)] rounded-lg overflow-hidden bg-cv-elevated">
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--bg-wash)] transition-colors"
             >
-                <span className="font-medium text-white/90 pr-4">{item.question}</span>
+                <span className="font-medium text-[var(--text-primary)] pr-4">{item.question}</span>
                 <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="shrink-0"
                 >
-                    <ChevronDown className="w-5 h-5 text-white/30" />
+                    <ChevronDown className="w-5 h-5 text-[var(--text-muted)]" />
                 </motion.div>
             </button>
             <AnimatePresence>
@@ -38,7 +38,7 @@ function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boole
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
                     >
-                        <div className="px-4 pb-4 text-white/40 text-sm leading-relaxed">
+                        <div className="px-4 pb-4 text-[var(--text-tertiary)] text-sm leading-relaxed">
                             {item.answer}
                         </div>
                     </motion.div>
@@ -102,11 +102,11 @@ export function FAQContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
                     <div ref={heroRef} className="text-center mb-12">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
-                            <HelpCircle className="w-8 h-8 text-gold" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
+                            <HelpCircle className="w-8 h-8 text-accent" />
                         </div>
                         <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
-                        <p className="text-lg text-white/40">
+                        <p className="text-lg text-[var(--text-tertiary)]">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -117,8 +117,8 @@ export function FAQContent() {
                             onClick={() => setActiveCategory(allCategory)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                                 activeCategory === allCategory
-                                    ? "bg-gold text-cv-primary"
-                                    : "bg-cv-elevated border border-white/5 text-white/50 hover:text-white hover:border-gold/30"
+                                    ? "bg-accent text-cv-primary"
+                                    : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white hover:border-accent/30"
                             }`}
                         >
                             {allCategory}
@@ -129,8 +129,8 @@ export function FAQContent() {
                                 onClick={() => setActiveCategory(category)}
                                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                                     activeCategory === category
-                                        ? "bg-gold text-cv-primary"
-                                        : "bg-cv-elevated border border-white/5 text-white/50 hover:text-white hover:border-gold/30"
+                                        ? "bg-accent text-cv-primary"
+                                        : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-white hover:border-accent/30"
                                 }`}
                             >
                                 {category}
@@ -151,18 +151,18 @@ export function FAQContent() {
                     </div>
 
                     {/* Contact CTA */}
-                    <div ref={ctaRef} className="mt-16 p-8 rounded-xl bg-cv-elevated border border-white/5 text-center">
+                    <div ref={ctaRef} className="mt-16 p-8 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] text-center">
                         <h2 className="text-xl font-semibold text-white mb-2">
                             {t("contactTitle")}
                         </h2>
-                        <p className="text-white/40 mb-4">
+                        <p className="text-[var(--text-tertiary)] mb-4">
                             {t("contactDesc")}
                         </p>
                         <a
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-medium transition-all hover:shadow-lg hover:shadow-gold/20"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-medium transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("contactCta")}

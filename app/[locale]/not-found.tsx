@@ -34,16 +34,16 @@ export default function NotFound() {
 
                     {/* Brand logo */}
                     <div className="flex items-center justify-center gap-2 mb-6">
-                        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
                             <BarChart3 className="w-3.5 h-3.5 text-cv-primary" />
                         </div>
-                        <span className="text-sm font-semibold text-white/40">TRAN TRADING LAB</span>
+                        <span className="text-sm font-semibold text-[var(--text-tertiary)]">TRAN TRADING LAB</span>
                     </div>
 
                     <h1 className="text-2xl sm:text-3xl font-bold text-white mb-3">
                         {t("title")}
                     </h1>
-                    <p className="text-white/40 mb-10 leading-relaxed max-w-md mx-auto">
+                    <p className="text-[var(--text-tertiary)] mb-10 leading-relaxed max-w-md mx-auto">
                         {t("description")}
                     </p>
 
@@ -51,7 +51,7 @@ export default function NotFound() {
                     <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-12">
                         <Link
                             href={`/${locale}`}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all hover:shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98] text-cv-void"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold text-sm transition-all hover:shadow-lg hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98] text-cv-void"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             <Home className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default function NotFound() {
                         </Link>
                         <Link
                             href={`/${locale}/dashboard`}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg border border-white/10 text-white/70 text-sm font-semibold hover:bg-white/5 hover:text-white transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] text-sm font-semibold hover:bg-[var(--bg-wash)] hover:text-white transition-all"
                         >
                             <LayoutDashboard className="w-4 h-4" />
                             {t("viewDashboard")}
@@ -74,7 +74,7 @@ export default function NotFound() {
                                 href={social.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-white/30 hover:text-gold hover:border-gold/30 transition-all"
+                                className="w-9 h-9 rounded-lg bg-[var(--bg-wash)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-muted)] hover:text-accent hover:border-accent/30 transition-all"
                                 aria-label={social.label}
                             >
                                 {social.icon}

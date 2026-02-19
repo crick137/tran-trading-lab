@@ -102,11 +102,11 @@ export function GlossaryContent() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div ref={heroRef} className="text-center mb-12">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
-                            <BookOpen className="w-8 h-8 text-gold" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
+                            <BookOpen className="w-8 h-8 text-accent" />
                         </div>
                         <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
-                        <p className="text-lg text-white/40 max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle", { count: glossaryTerms.length })}
                         </p>
                     </div>
@@ -114,7 +114,7 @@ export function GlossaryContent() {
                     {/* Search & Filter */}
                     <div className="flex flex-col gap-4 mb-8">
                         <div className="relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]" />
                             <input
                                 type="text"
                                 placeholder={t("searchPlaceholder")}
@@ -124,7 +124,7 @@ export function GlossaryContent() {
                                     setDisplayCount(ITEMS_PER_PAGE);
                                 }}
                                 aria-label={t("searchPlaceholder")}
-                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-gold/40 transition-all"
+                                className="w-full pl-10 pr-4 py-3 rounded-lg bg-cv-elevated border border-[var(--border-default)] text-white placeholder:text-[var(--text-ghost)] focus:outline-none focus:border-accent/40 transition-all"
                             />
                         </div>
                         <div className="flex gap-2 flex-wrap">
@@ -136,8 +136,8 @@ export function GlossaryContent() {
                                         setDisplayCount(ITEMS_PER_PAGE);
                                     }}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeCategory === cat
-                                        ? "bg-gold text-cv-primary"
-                                        : "bg-cv-elevated border border-white/5 text-white/40 hover:text-white/70 hover:border-gold/30"
+                                        ? "bg-accent text-cv-primary"
+                                        : "bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-accent/30"
                                         }`}
                                 >
                                     {getCategoryLabel(cat)} <span className="text-xs opacity-70">({categoryCounts[cat] || 0})</span>
@@ -147,7 +147,7 @@ export function GlossaryContent() {
                     </div>
 
                     {/* Results count */}
-                    <p className="text-sm text-white/30 mb-4">
+                    <p className="text-sm text-[var(--text-muted)] mb-4">
                         {t("termsCount", { count: filteredTerms.length })} {displayedTerms.length < filteredTerms.length && `(${t("showing", { count: displayedTerms.length })})`}
                     </p>
 
@@ -172,7 +172,7 @@ export function GlossaryContent() {
                         <div className="text-center mt-6">
                             <button
                                 onClick={loadMore}
-                                className="px-6 py-3 rounded-lg bg-cv-elevated border border-white/5 text-white/70 hover:border-gold/30 transition-all"
+                                className="px-6 py-3 rounded-lg bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:border-accent/30 transition-all"
                             >
                                 {t("loadMore")} ({t("remaining", { count: filteredTerms.length - displayedTerms.length })})
                             </button>
@@ -180,15 +180,15 @@ export function GlossaryContent() {
                     )}
 
                     {filteredTerms.length === 0 && (
-                        <div className="text-center py-12 text-white/40">
+                        <div className="text-center py-12 text-[var(--text-tertiary)]">
                             {t("noResults")}
                         </div>
                     )}
 
                     {/* NFA Disclaimer */}
-                    <div className="mt-16 p-4 rounded-lg bg-cv-elevated/50 border border-white/5 flex items-start gap-3">
+                    <div className="mt-16 p-4 rounded-lg bg-cv-elevated/50 border border-[var(--border-subtle)] flex items-start gap-3">
                         <AlertTriangle className="w-5 h-5 text-neutral flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-white/40">
+                        <p className="text-sm text-[var(--text-tertiary)]">
                             <strong>{t("disclaimerTitle")}</strong> {t("disclaimerText")}
                         </p>
                     </div>
@@ -215,31 +215,31 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
     return (
         <div
             className={`rounded-lg border overflow-hidden transition-all duration-300 ${isHighlighted
-                    ? "bg-gold/10 border-gold shadow-lg shadow-gold/20"
-                    : "bg-cv-elevated border-white/5"
+                    ? "bg-accent/10 border-accent shadow-lg shadow-accent/20"
+                    : "bg-cv-elevated border-[var(--border-subtle)]"
                 }`}
         >
             <button
                 onClick={onToggle}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--bg-wash)] transition-colors"
             >
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-white/90">{term.term_kr}</span>
-                        <span className="text-sm text-white/40">({term.term_en})</span>
+                        <span className="font-semibold text-[var(--text-primary)]">{term.term_kr}</span>
+                        <span className="text-sm text-[var(--text-tertiary)]">({term.term_en})</span>
                         {term.abbreviation && (
-                            <span className="px-1.5 py-0.5 rounded text-xs bg-gold/20 text-gold font-mono">
+                            <span className="px-1.5 py-0.5 rounded text-xs bg-accent/20 text-accent font-mono">
                                 {term.abbreviation}
                             </span>
                         )}
                     </div>
-                    <p className="text-sm text-white/40 mt-1 line-clamp-1">{term.one_liner}</p>
+                    <p className="text-sm text-[var(--text-tertiary)] mt-1 line-clamp-1">{term.one_liner}</p>
                 </div>
                 <div className="flex items-center gap-2 ml-2">
-                    <span className="px-2 py-0.5 rounded text-xs bg-white/5 text-white/30 hidden sm:inline">
+                    <span className="px-2 py-0.5 rounded text-xs bg-[var(--bg-wash)] text-[var(--text-muted)] hidden sm:inline">
                         {getCategoryLabel(term.category)}
                     </span>
-                    <ChevronDown className={`w-5 h-5 text-white/30 transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`w-5 h-5 text-[var(--text-muted)] transition-transform flex-shrink-0 ${isOpen ? "rotate-180" : ""}`} />
                 </div>
             </button>
 
@@ -252,22 +252,22 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                     >
-                        <div className="px-4 pb-4 border-t border-white/5 pt-4 space-y-4">
+                        <div className="px-4 pb-4 border-t border-[var(--border-subtle)] pt-4 space-y-4">
                             {/* Definition */}
                             <div>
-                                <h4 className="text-sm font-semibold text-gold mb-2">{t("definition")}</h4>
-                                <div className="text-white/40 text-sm whitespace-pre-line">
+                                <h4 className="text-sm font-semibold text-accent mb-2">{t("definition")}</h4>
+                                <div className="text-[var(--text-tertiary)] text-sm whitespace-pre-line">
                                     {term.definition}
                                 </div>
                             </div>
 
                             {/* How to Use */}
                             <div>
-                                <h4 className="text-sm font-semibold text-gold mb-2">{t("howToUse")}</h4>
+                                <h4 className="text-sm font-semibold text-accent mb-2">{t("howToUse")}</h4>
                                 <ul className="space-y-1">
                                     {term.how_to_use.map((item, i) => (
-                                        <li key={i} className="text-sm text-white/40 flex items-start gap-2">
-                                            <span className="text-gold mt-1">•</span>
+                                        <li key={i} className="text-sm text-[var(--text-tertiary)] flex items-start gap-2">
+                                            <span className="text-accent mt-1">•</span>
                                             {item}
                                         </li>
                                     ))}
@@ -279,7 +279,7 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
                                 <h4 className="text-sm font-semibold text-bearish mb-2">{t("commonMistakes")}</h4>
                                 <ul className="space-y-1">
                                     {term.common_mistakes.map((item, i) => (
-                                        <li key={i} className="text-sm text-white/40 flex items-start gap-2">
+                                        <li key={i} className="text-sm text-[var(--text-tertiary)] flex items-start gap-2">
                                             <span className="text-bearish mt-1">{"\u2717"}</span>
                                             {item}
                                         </li>
@@ -289,10 +289,10 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
 
                             {/* Examples */}
                             {term.examples.length > 0 && (
-                                <div className="p-3 rounded bg-white/[0.03]">
-                                    <h4 className="text-sm font-semibold text-white/70 mb-2">{t("examples")}</h4>
+                                <div className="p-3 rounded bg-[var(--bg-wash)]">
+                                    <h4 className="text-sm font-semibold text-[var(--text-secondary)] mb-2">{t("examples")}</h4>
                                     {term.examples.map((ex, i) => (
-                                        <p key={i} className="text-sm text-white/40">{ex}</p>
+                                        <p key={i} className="text-sm text-[var(--text-tertiary)]">{ex}</p>
                                     ))}
                                 </div>
                             )}
@@ -300,7 +300,7 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
                             {/* Related Terms */}
                             {term.related_terms.length > 0 && (
                                 <div>
-                                    <h4 className="text-sm font-semibold text-white/30 mb-2">{t("relatedTerms")}</h4>
+                                    <h4 className="text-sm font-semibold text-[var(--text-muted)] mb-2">{t("relatedTerms")}</h4>
                                     <div className="flex flex-wrap gap-2">
                                         {term.related_terms.map((relatedId) => {
                                             const relatedTerm = glossaryTerms.find(t => t.id === relatedId);
@@ -312,7 +312,7 @@ const TermAccordion = ({ term, isOpen, isHighlighted, onToggle, onRelatedClick, 
                                                         e.stopPropagation();
                                                         onRelatedClick(relatedId);
                                                     }}
-                                                    className="px-2 py-1 rounded text-xs bg-cv-surface border border-white/5 text-white/40 hover:text-gold hover:border-gold/30 transition-colors flex items-center gap-1"
+                                                    className="px-2 py-1 rounded text-xs bg-cv-surface border border-[var(--border-subtle)] text-[var(--text-tertiary)] hover:text-accent hover:border-accent/30 transition-colors flex items-center gap-1"
                                                 >
                                                     {relatedTerm.term_kr}
                                                     <ExternalLink className="w-3 h-3" />

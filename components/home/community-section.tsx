@@ -2,9 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { ArrowUpRight } from "lucide-react";
-import { Lamp } from "@/components/ui/aceternity/lamp";
-import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
 interface SocialPlatform {
@@ -21,14 +18,14 @@ const platforms: SocialPlatform[] = [
         href: "https://x.com/TranTradingLab",
         icon: <XIcon className="w-5 h-5" />,
         color: "text-white",
-        borderColor: "border-white/10 hover:border-white/25",
+        borderColor: "border-[var(--border-default)] hover:border-[var(--border-strong)]",
     },
     {
         key: "threads",
         href: "https://www.threads.com/@_trantradinglab_",
         icon: <ThreadsIcon className="w-5 h-5" />,
         color: "text-white",
-        borderColor: "border-white/10 hover:border-white/25",
+        borderColor: "border-[var(--border-default)] hover:border-[var(--border-strong)]",
     },
     {
         key: "tgEn",
@@ -55,54 +52,43 @@ const platforms: SocialPlatform[] = [
 
 export function CommunitySection() {
     const t = useTranslations("home");
-    const gridRef = useGsapScroll<HTMLDivElement>({
-        children: true,
-        stagger: 0.1,
-    });
-
     return (
         <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
                 {/* Header */}
                 <div className="mb-10">
-                    <Lamp>
-                        <h2 className="text-label text-white/40">
-                            {t("communityTitle")}
-                        </h2>
-                    </Lamp>
-                    <p className="text-sm text-white/30 mt-3">
+                    <h2 className="text-label text-[var(--text-tertiary)]">
+                        {t("communityTitle")}
+                    </h2>
+                    <p className="text-sm text-[var(--text-muted)] mt-3">
                         {t("communitySubtitle")}
                     </p>
                 </div>
 
                 {/* Platform Cards */}
-                <div
-                    ref={gridRef}
-                    className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3"
-                >
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                     {platforms.map((platform) => (
-                        <TiltCard key={platform.key}>
-                            <a
-                                href={platform.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`block p-4 rounded-xl bg-cv-elevated border ${platform.borderColor} card-hover h-full transition-colors group`}
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className={`${platform.color}`}>
-                                        {platform.icon}
-                                    </div>
-                                    <ArrowUpRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 transition-colors" />
+                        <a
+                            key={platform.key}
+                            href={platform.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`block p-4 rounded-xl bg-cv-elevated border ${platform.borderColor} card-hover h-full transition-colors group`}
+                        >
+                            <div className="flex items-center justify-between mb-3">
+                                <div className={`${platform.color}`}>
+                                    {platform.icon}
                                 </div>
+                                <ArrowUpRight className="w-3.5 h-3.5 text-[var(--text-ghost)] group-hover:text-[var(--text-secondary)] transition-colors" />
+                            </div>
 
-                                <h3 className="text-sm font-semibold text-white/90 mb-1">
-                                    {t(`community${platform.key.charAt(0).toUpperCase() + platform.key.slice(1)}Name`)}
-                                </h3>
-                                <p className="text-xs text-white/40 leading-relaxed">
-                                    {t(`community${platform.key.charAt(0).toUpperCase() + platform.key.slice(1)}Desc`)}
-                                </p>
-                            </a>
-                        </TiltCard>
+                            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">
+                                {t(`community${platform.key.charAt(0).toUpperCase() + platform.key.slice(1)}Name`)}
+                            </h3>
+                            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed">
+                                {t(`community${platform.key.charAt(0).toUpperCase() + platform.key.slice(1)}Desc`)}
+                            </p>
+                        </a>
                     ))}
                 </div>
             </div>

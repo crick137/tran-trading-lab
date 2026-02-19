@@ -27,13 +27,13 @@ export function LanguageSwitcher() {
 
     return (
         <div
-            className={`relative flex items-center rounded-lg border border-white/10 overflow-hidden text-xs transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}
+            className={`relative flex items-center rounded-lg border border-[var(--border-default)] overflow-hidden text-xs transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}
             role="radiogroup"
             aria-label="Language"
         >
             {/* Sliding active indicator */}
             <div
-                className="absolute top-0 bottom-0 w-1/2 bg-gold/15 border-r-0 transition-transform duration-300 ease-out"
+                className="absolute top-0 bottom-0 w-1/2 bg-accent/15 border-r-0 transition-transform duration-300 ease-out"
                 style={{ transform: locale === "en" ? "translateX(0)" : "translateX(100%)" }}
             />
             {locales.map((l) => (
@@ -44,8 +44,8 @@ export function LanguageSwitcher() {
                     role="radio"
                     aria-checked={locale === l.code}
                     className={`relative z-10 px-3 py-1.5 transition-colors duration-200 ${locale === l.code
-                            ? "text-gold font-semibold"
-                            : "text-white/50 hover:text-white/80"
+                            ? "text-accent font-semibold"
+                            : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                         }`}
                     aria-label={`Switch to ${l.label}`}
                 >

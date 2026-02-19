@@ -45,11 +45,11 @@ export function ToolsContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
                     <div ref={heroRef} className="text-center mb-16">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
-                            <Wrench className="w-8 h-8 text-gold" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
+                            <Wrench className="w-8 h-8 text-accent" />
                         </div>
                         <h1 className="text-4xl font-bold text-white mb-4">{t("title")}</h1>
-                        <p className="text-lg text-white/40">{t("subtitle")}</p>
+                        <p className="text-lg text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
                     {/* Tools Grid */}
@@ -58,18 +58,18 @@ export function ToolsContent() {
                             <TiltCard key={tool.id}>
                                 <Link
                                     href={tool.href}
-                                    className="flex items-center gap-6 p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow group"
+                                    className="flex items-center gap-6 p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow group"
                                 >
                                     <div className="w-16 h-16 rounded-lg bg-cv-surface flex items-center justify-center shrink-0">
-                                        <tool.icon className="w-8 h-8 text-gold" />
+                                        <tool.icon className="w-8 h-8 text-accent" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-semibold text-white/90 group-hover:text-gold transition-colors mb-1">
+                                        <h3 className="text-xl font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors mb-1">
                                             {t(tool.titleKey)}
                                         </h3>
-                                        <p className="text-white/40 text-sm">{t(tool.descKey)}</p>
+                                        <p className="text-[var(--text-tertiary)] text-sm">{t(tool.descKey)}</p>
                                     </div>
-                                    <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-gold transition-colors shrink-0" />
+                                    <ArrowRight className="w-5 h-5 text-[var(--text-ghost)] group-hover:text-accent transition-colors shrink-0" />
                                 </Link>
                             </TiltCard>
                         ))}

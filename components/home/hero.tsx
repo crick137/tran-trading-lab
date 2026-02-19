@@ -5,19 +5,8 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Shield, ChevronDown } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-import dynamic from "next/dynamic";
 import { AuroraBackground } from "@/components/ui/aceternity/aurora-background";
-import { Spotlight } from "@/components/ui/aceternity/spotlight";
-import { TextGenerateEffect } from "@/components/ui/aceternity/text-generate-effect";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
-
-const ParticlesCanvas = dynamic(
-    () => import("@/components/ui/particles-canvas").then((mod) => mod.ParticlesCanvas),
-    { ssr: false }
-);
 
 const socialLinks = [
     { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X", brandColor: "rgba(255,255,255,0.85)" },
@@ -68,45 +57,14 @@ export function Hero() {
     const contentY = useTransform(scrollYProgress, [0, 1], [0, -80]);
     const contentOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
-    // GSAP scroll indicator fade
-    useEffect(() => {
-        gsap.registerPlugin(ScrollTrigger);
-
-        const indicator = document.getElementById("scroll-indicator");
-        if (!indicator) return;
-
-        const tween = gsap.to(indicator, {
-            opacity: 0,
-            scrollTrigger: {
-                trigger: sectionRef.current,
-                start: "top top",
-                end: "20% top",
-                scrub: true,
-            },
-        });
-
-        return () => {
-            tween.scrollTrigger?.kill();
-            tween.kill();
-        };
-    }, []);
-
     return (
         <section
             ref={sectionRef}
             className="relative min-h-[75vh] flex items-center justify-center overflow-hidden"
         >
-            {/* Layer 1: Aurora Background */}
+            {/* Background */}
             <div aria-hidden="true">
-                <AuroraBackground className="absolute inset-0">
-                    {/* Layer 2: Particle Network */}
-                    <ParticlesCanvas className="z-[1]" />
-                </AuroraBackground>
-
-                {/* Layer 3: Spotlight (desktop only) */}
-                <div className="hidden md:block">
-                    <Spotlight size={500} />
-                </div>
+                <AuroraBackground className="absolute inset-0" />
             </div>
 
             {/* Content with scroll parallax */}
@@ -125,20 +83,15 @@ export function Hero() {
                         borderColor: "rgba(255, 255, 255, 0.08)",
                     }}
                 >
-                    <Shield className="w-3.5 h-3.5 text-gold" />
-                    <span className="text-xs text-white/60 font-medium tracking-wide uppercase">
+                    <Shield className="w-3.5 h-3.5 text-accent" />
+                    <span className="text-xs text-[var(--text-secondary)] font-medium tracking-wide uppercase">
                         {t("heroBadge")}
                     </span>
                 </motion.div>
 
-                {/* Main Heading — word-by-word reveal */}
-                <h1 className="text-5xl sm:text-6xl lg:text-8xl font-extrabold tracking-tightest mb-6">
-                    <TextGenerateEffect
-                        words={t("heroTitle")}
-                        className="text-gradient-gold"
-                        delay={0.3}
-                        staggerDelay={0.12}
-                    />
+                {/* Main Heading */}
+                <h1 className="text-display text-gradient-gold mb-6">
+                    {t("heroTitle")}
                 </h1>
 
                 {/* Subtitle */}
@@ -172,7 +125,7 @@ export function Hero() {
                 >
                     <Link
                         href={`/${locale}/subscribe`}
-                        className="group px-8 py-3.5 rounded-lg font-semibold transition-all flex items-center gap-2 text-cv-void hover:shadow-xl hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98]"
+                        className="group px-8 py-3.5 rounded-lg font-semibold transition-all flex items-center gap-2 text-cv-void hover:shadow-xl hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98]"
                         style={{ background: "var(--gradient-cta)" }}
                     >
                         {t("heroPrimaryCta")}
@@ -180,7 +133,7 @@ export function Hero() {
                     </Link>
                     <Link
                         href={`/${locale}/about`}
-                        className="px-8 py-3.5 rounded-lg border font-semibold transition-all hover:bg-white/5 hover:scale-[1.02] active:scale-[0.98]"
+                        className="px-8 py-3.5 rounded-lg border font-semibold transition-all hover:bg-[var(--bg-wash)] hover:scale-[1.02] active:scale-[0.98]"
                         style={{
                             borderColor: "rgba(255, 255, 255, 0.10)",
                             color: "rgba(255, 255, 255, 0.8)",
@@ -227,7 +180,7 @@ export function Hero() {
                             >
                                 {social.icon}
                             </span>
-                            <span className="text-[10px] text-white/30 group-hover:text-white/60 transition-colors">
+                            <span className="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
                                 {social.label}
                             </span>
                         </a>
@@ -244,7 +197,7 @@ export function Hero() {
                     {stats.map((stat, index) => (
                         <>
                             {index > 0 && (
-                                <div key={`divider-${index}`} className="h-8 w-px bg-white/10" />
+                                <div key={`divider-${index}`} className="h-8 w-px bg-[var(--border-default)]" />
                             )}
                             <div key={stat.label} className="text-center">
                                 <p className="text-2xl sm:text-3xl font-bold font-data text-gradient-gold">
@@ -254,7 +207,7 @@ export function Hero() {
                                         stat.value
                                     )}
                                 </p>
-                                <p className="text-xs text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</p>
+                                <p className="text-xs text-[var(--text-muted)] uppercase tracking-wider mt-0.5">{stat.label}</p>
                             </div>
                         </>
                     ))}

@@ -23,8 +23,8 @@ function TickerItemDisplay({ symbol, price, change }: { symbol: string; price: s
     const positive = !change.startsWith("-");
     return (
         <div className="flex items-center gap-2 px-4 whitespace-nowrap">
-            <span className="text-white/50 text-xs font-medium">{symbol}</span>
-            <span className="font-data text-sm text-white/90">{price}</span>
+            <span className="text-[var(--text-secondary)] text-xs font-medium">{symbol}</span>
+            <span className="font-data text-sm text-[var(--text-primary)]">{price}</span>
             <span className={`font-data text-xs ${positive ? "text-bullish" : "text-bearish"}`}>
                 {positive ? "▲" : "▼"} {change}
             </span>
@@ -52,7 +52,7 @@ export function LiveTicker() {
 
     return (
         <section
-            className="relative border-y border-white/5 bg-cv-elevated/50 overflow-hidden py-2.5"
+            className="relative border-y border-[var(--border-subtle)] bg-cv-elevated/50 overflow-hidden py-2.5"
             style={{
                 maskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
                 WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",

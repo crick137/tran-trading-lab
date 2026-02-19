@@ -66,9 +66,9 @@ export function TableOfContents({ content }: TableOfContentsProps) {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="hidden xl:block fixed right-4 top-32 w-56 max-h-[70vh] overflow-y-auto"
         >
-            <div className="p-4 rounded-xl bg-cv-elevated/50 border border-white/10 backdrop-blur-sm">
+            <div className="p-4 rounded-xl bg-cv-elevated/50 border border-[var(--border-default)] backdrop-blur-sm">
                 <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                    <span className="w-1 h-4 bg-gold rounded-full" />
+                    <span className="w-1 h-4 bg-accent rounded-full" />
                     {t("toc")}
                 </h4>
                 <ul className="space-y-2">
@@ -88,9 +88,9 @@ export function TableOfContents({ content }: TableOfContentsProps) {
                                             behavior: "smooth",
                                         });
                                     }}
-                                    className={`block text-sm py-1 transition-all duration-200 hover:text-gold ${activeId === heading.id
-                                        ? "text-gold font-medium"
-                                        : "text-white/50"
+                                    className={`block text-sm py-1 transition-all duration-200 hover:text-accent ${activeId === heading.id
+                                        ? "text-accent font-medium"
+                                        : "text-[var(--text-secondary)]"
                                         }`}
                                 >
                                     {heading.text}

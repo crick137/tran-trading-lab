@@ -21,23 +21,23 @@ export default function Error({
     return (
         <div className="min-h-screen bg-cv-void flex items-center justify-center px-4">
             <div className="text-center max-w-md">
-                <div className="text-6xl font-bold text-gold/30 mb-4">!</div>
+                <div className="text-6xl font-bold text-accent/30 mb-4">!</div>
                 <h1 className="text-2xl font-bold text-white mb-3">
                     {t("title")}
                 </h1>
-                <p className="text-white/50 mb-8">
+                <p className="text-[var(--text-secondary)] mb-8">
                     {t("description")}
                 </p>
                 <div className="flex gap-4 justify-center">
                     <button
                         onClick={reset}
-                        className="px-6 py-2.5 rounded-lg bg-gold text-cv-primary font-semibold hover:bg-gold-light transition-colors"
+                        className="px-6 py-2.5 rounded-lg bg-accent text-cv-primary font-semibold hover:bg-accent-light transition-colors"
                     >
                         {t("tryAgain")}
                     </button>
                     <Link
                         href={`/${locale}`}
-                        className="px-6 py-2.5 rounded-lg border border-white/10 text-white/70 hover:text-white hover:border-white/20 transition-colors"
+                        className="px-6 py-2.5 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-white hover:border-[var(--border-strong)] transition-colors"
                     >
                         {t("goHome")}
                     </Link>

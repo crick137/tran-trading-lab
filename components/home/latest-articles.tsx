@@ -3,16 +3,12 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight } from "lucide-react";
-import { Lamp } from "@/components/ui/aceternity/lamp";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { blogPosts } from "@/lib/blog-data";
 import { researchArticles } from "@/lib/research-data";
 
 export function LatestArticles() {
     const locale = useLocale();
     const t = useTranslations("home");
-    const sectionRef = useGsapScroll<HTMLDivElement>();
-
     const hasBlogPosts = blogPosts.length > 0;
     const hasResearch = researchArticles.length > 0;
 
@@ -44,16 +40,14 @@ export function LatestArticles() {
 
     return (
         <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
-            <div className="max-w-content mx-auto" ref={sectionRef}>
+            <div className="max-w-content mx-auto">
                 <div className="flex items-center justify-between mb-10">
-                    <Lamp>
-                        <h2 className="text-label text-white/40">
-                            {t("latestArticles")}
-                        </h2>
-                    </Lamp>
+                    <h2 className="text-label text-[var(--text-tertiary)]">
+                        {t("latestArticles")}
+                    </h2>
                     <Link
                         href={`/${locale}/${hasResearch ? "research" : "blog"}`}
-                        className="text-sm text-gold hover:text-gold-light transition-colors flex items-center gap-1 group"
+                        className="text-sm text-accent hover:text-accent-hover transition-colors flex items-center gap-1 group"
                     >
                         {t("viewAll")}
                         <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
@@ -65,20 +59,20 @@ export function LatestArticles() {
                         <Link
                             key={article.slug}
                             href={`/${locale}/${article.basePath}/${article.slug}`}
-                            className="block p-5 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow h-full"
+                            className="block p-5 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full"
                         >
                             <div className="flex items-center gap-2 mb-3">
-                                <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider border text-gold bg-gold/10 border-gold/20">
+                                <span className="inline-flex px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wider border text-accent bg-accent/10 border-accent/20">
                                     {article.category}
                                 </span>
-                                <span className="text-[10px] text-white/30">{article.date}</span>
+                                <span className="text-[10px] text-[var(--text-muted)]">{article.date}</span>
                             </div>
 
-                            <h3 className="text-base font-semibold text-white/90 mb-2 line-clamp-2 leading-snug">
+                            <h3 className="text-base font-semibold text-[var(--text-primary)] mb-2 line-clamp-2 leading-snug">
                                 {article.title}
                             </h3>
 
-                            <p className="text-sm text-white/40 line-clamp-2 mb-4 leading-relaxed">
+                            <p className="text-sm text-[var(--text-tertiary)] line-clamp-2 mb-4 leading-relaxed">
                                 {article.excerpt}
                             </p>
                         </Link>

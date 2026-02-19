@@ -55,25 +55,25 @@ export function Footer() {
     return (
         <footer className="relative bg-cv-primary">
             {/* Gold gradient divider */}
-            <div className="h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent" aria-hidden="true" />
+            <div className="h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent" aria-hidden="true" />
 
             <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                     {/* Brand */}
                     <div className="col-span-2">
                         <Link href={`/${locale}`} className="flex items-center gap-2.5 mb-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
                                 <BarChart3 className="w-5 h-5 text-cv-primary" />
                             </div>
                             <span className="font-bold text-lg tracking-tight">
                                 <span className="text-gradient-gold">TRAN</span>
-                                <span className="text-white/90"> TRADING LAB</span>
+                                <span className="text-[var(--text-primary)]"> TRADING LAB</span>
                             </span>
                         </Link>
-                        <p className="text-white/40 text-sm leading-relaxed max-w-sm mb-5">
+                        <p className="text-[var(--text-tertiary)] text-sm leading-relaxed max-w-sm mb-5">
                             {tf("tagline")}
                         </p>
-                        <p className="text-white/30 text-xs leading-relaxed max-w-sm mb-6">
+                        <p className="text-[var(--text-muted)] text-xs leading-relaxed max-w-sm mb-6">
                             {tf("riskDisclaimer")}
                         </p>
 
@@ -88,10 +88,10 @@ export function Footer() {
                                     className={`group relative flex flex-col items-center gap-1`}
                                     aria-label={social.label}
                                 >
-                                    <span className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}>
+                                    <span className={`w-10 h-10 rounded-xl bg-[var(--bg-wash)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] ${social.hoverColor} hover:border-[var(--border-strong)] hover:bg-[var(--border-default)] hover:scale-110 hover:shadow-md transition-all duration-200`}>
                                         {social.icon}
                                     </span>
-                                    <span className="text-[10px] text-white/25 group-hover:text-white/50 transition-colors">
+                                    <span className="text-[10px] text-[var(--text-ghost)] group-hover:text-[var(--text-secondary)] transition-colors">
                                         {social.label}
                                     </span>
                                 </a>
@@ -102,13 +102,13 @@ export function Footer() {
                     {/* Footer Links */}
                     {footerLinks.map((section) => (
                         <div key={section.title}>
-                            <h3 className="font-semibold text-white/80 mb-4 text-sm">{section.title}</h3>
+                            <h3 className="font-semibold text-[var(--text-primary)] mb-4 text-sm">{section.title}</h3>
                             <ul className="space-y-2.5">
                                 {section.links.map((link) => (
                                     <li key={link.href}>
                                         <Link
                                             href={link.href}
-                                            className="text-sm text-white/40 hover:text-white/80 transition-colors"
+                                            className="text-sm text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
                                         >
                                             {link.label}
                                         </Link>
@@ -120,15 +120,15 @@ export function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="mt-12 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-white/30">
+                <div className="mt-12 pt-8 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p className="text-xs text-[var(--text-muted)]">
                         &copy; {new Date().getFullYear()} TranTradingLab. {t("allRightsReserved")}
                     </p>
-                    <div className="flex gap-6 text-xs text-white/30">
-                        <Link href={`/${locale}/privacy`} className="hover:text-white/60 transition-colors">
+                    <div className="flex gap-6 text-xs text-[var(--text-muted)]">
+                        <Link href={`/${locale}/privacy`} prefetch={false} className="hover:text-[var(--text-secondary)] transition-colors">
                             {tf("privacy")}
                         </Link>
-                        <Link href={`/${locale}/terms`} className="hover:text-white/60 transition-colors">
+                        <Link href={`/${locale}/terms`} prefetch={false} className="hover:text-[var(--text-secondary)] transition-colors">
                             {tf("terms")}
                         </Link>
                     </div>

@@ -37,14 +37,14 @@ export function AcademyContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div ref={heroRef} className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 text-gold text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
                             <GraduationCap className="w-4 h-4" />
                             {t("badge")}
                         </div>
                         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-lg text-white/40 max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -52,7 +52,7 @@ export function AcademyContent() {
                     {/* Learning Path */}
                     <section className="mb-16">
                         <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-2">
-                            <BookOpen className="w-6 h-6 text-gold" />
+                            <BookOpen className="w-6 h-6 text-accent" />
                             {t("learningPath")}
                         </h2>
                         <div ref={modulesRef} className="grid md:grid-cols-3 gap-6">
@@ -61,14 +61,14 @@ export function AcademyContent() {
                                 const topics: string[] = t.raw(mod.topicsKey) as string[];
                                 return (
                                     <TiltCard key={mod.id}>
-                                        <div className="relative p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow h-full">
-                                            <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gold text-cv-primary font-bold flex items-center justify-center text-sm">
+                                        <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full">
+                                            <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-cv-primary font-bold flex items-center justify-center text-sm">
                                                 {index + 1}
                                             </div>
-                                            <Icon className="w-10 h-10 text-gold mb-4" />
-                                            <h3 className="text-xl font-bold text-white/90 mb-2">{t(mod.titleKey)}</h3>
-                                            <p className="text-white/40 text-sm mb-4">{t(mod.descKey)}</p>
-                                            <div className="flex items-center gap-4 text-xs text-white/30 mb-4">
+                                            <Icon className="w-10 h-10 text-accent mb-4" />
+                                            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">{t(mod.titleKey)}</h3>
+                                            <p className="text-[var(--text-tertiary)] text-sm mb-4">{t(mod.descKey)}</p>
+                                            <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-4">
                                                 <span className="flex items-center gap-1">
                                                     <BookOpen className="w-3 h-3" />
                                                     {mod.lessons} {t("lessonsLabel")}
@@ -80,8 +80,8 @@ export function AcademyContent() {
                                             </div>
                                             <div className="space-y-1">
                                                 {topics.map((topic: string) => (
-                                                    <div key={topic} className="text-sm text-white/40 flex items-center gap-2">
-                                                        <div className="w-1 h-1 rounded-full bg-gold/50" />
+                                                    <div key={topic} className="text-sm text-[var(--text-tertiary)] flex items-center gap-2">
+                                                        <div className="w-1 h-1 rounded-full bg-accent/50" />
                                                         {topic}
                                                     </div>
                                                 ))}
@@ -101,39 +101,39 @@ export function AcademyContent() {
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="p-4 rounded-lg bg-cv-elevated border border-white/5 hover:border-gold/30 transition-all group flex items-center justify-between"
+                                    className="p-4 rounded-lg bg-cv-elevated border border-[var(--border-subtle)] hover:border-accent/30 transition-all group flex items-center justify-between"
                                 >
                                     <div>
-                                        <h3 className="font-semibold text-white/90 group-hover:text-gold transition-colors">
+                                        <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors">
                                             {t(link.labelKey)}
                                         </h3>
-                                        <p className="text-sm text-white/40">{t(link.descKey)}</p>
+                                        <p className="text-sm text-[var(--text-tertiary)]">{t(link.descKey)}</p>
                                     </div>
-                                    <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-gold transition-all group-hover:translate-x-1" />
+                                    <ArrowRight className="w-5 h-5 text-[var(--text-ghost)] group-hover:text-accent transition-all group-hover:translate-x-1" />
                                 </Link>
                             ))}
                         </div>
                     </section>
 
                     {/* CTA */}
-                    <section ref={ctaRef} className="text-center bg-cv-elevated border border-white/5 rounded-2xl p-8">
+                    <section ref={ctaRef} className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8">
                         <h2 className="text-2xl font-bold text-white mb-4">
                             {t("ctaTitle")}
                         </h2>
-                        <p className="text-white/40 mb-6 max-w-xl mx-auto">
+                        <p className="text-[var(--text-tertiary)] mb-6 max-w-xl mx-auto">
                             {t("ctaDesc")}
                         </p>
                         <a
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-xl hover:shadow-gold/30"
+                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-xl hover:shadow-accent/30"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("ctaButton")}
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                         </a>
-                        <p className="text-xs text-gold/60 font-medium mt-6">
+                        <p className="text-xs text-accent/60 font-medium mt-6">
                             {t("disclaimer")}
                         </p>
                     </section>

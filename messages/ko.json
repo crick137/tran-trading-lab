@@ -127,21 +127,17 @@
         "legendBearish": "비우호적 환경. 방어적 포지셔닝 또는 숏 바이어스가 권장됩니다.",
         "legendNeutral": "혼재된 시그널. 축소된 포지션 또는 레인지 트레이딩 접근.",
         "backToDashboard": "← 대시보드로 돌아가기",
+        "emptyTitle": "스위치보드를 준비하고 있습니다.",
+        "emptySubtitle": "분석 사이클이 시작되면 주간 시그널이 여기에 표시됩니다. 구독하여 알림을 받으세요.",
+        "emptyCta": "무료 구독",
         "disclaimer": "시그널은 주간 분석에 기반하며 매수/매도 추천이 아닙니다. 항상 본인의 판단 하에 결정하고 적절한 리스크 관리를 하세요."
     },
     "boldCalls": {
         "title": "Bold Calls",
         "subtitle": "완전한 책임감으로 공개하는 시장 예측.",
-        "winRate": "승률",
-        "totalCalls": "총 콜 수",
-        "wins": "승리",
-        "losses": "패배",
-        "activeCalls": "진행 중",
-        "activeSection": "진행 중인 콜",
-        "historySection": "콜 히스토리",
-        "deadline": "마감일",
-        "current": "현재",
-        "backToDashboard": "← 대시보드로 돌아가기",
+        "emptyTitle": "Bold Calls가 곧 시작됩니다.",
+        "emptySubtitle": "완전한 책임감을 갖춘 공개 시장 예측이 여기에 게시됩니다. 구독하여 알림을 받으세요.",
+        "emptyCta": "무료 구독",
         "disclaimer": "Bold Calls는 책임감 있는 공개 시장 예측입니다. 투자 조언이 아닙니다. 과거 성과가 미래 수익을 보장하지 않습니다."
     },
     "research": {

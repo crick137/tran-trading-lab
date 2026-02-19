@@ -31,7 +31,7 @@ export function SubscribeContent() {
                         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             {t("title")} <span className="text-gradient-gold">{t("titleHighlight")}</span>
                         </h1>
-                        <p className="text-lg text-white/40 max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -40,26 +40,26 @@ export function SubscribeContent() {
                     <div ref={benefitsRef} className="grid md:grid-cols-3 gap-6 mb-12">
                         {benefits.map((benefit) => (
                             <TiltCard key={benefit.textKey}>
-                                <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow h-full">
-                                    <benefit.icon className="w-8 h-8 text-gold mb-4" />
-                                    <p className="text-white/80 font-medium">{t(benefit.textKey)}</p>
+                                <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full">
+                                    <benefit.icon className="w-8 h-8 text-accent mb-4" />
+                                    <p className="text-[var(--text-primary)] font-medium">{t(benefit.textKey)}</p>
                                 </div>
                             </TiltCard>
                         ))}
                     </div>
 
                     {/* Main CTA Card */}
-                    <div ref={ctaRef} className="bg-cv-elevated border border-white/5 rounded-2xl p-8 mb-12">
+                    <div ref={ctaRef} className="bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8 mb-12">
                         <div className="text-center mb-8">
                             <h2 className="text-2xl font-bold text-white mb-2">{t("ctaTitle")}</h2>
-                            <p className="text-white/40">{t("ctaSubtitle")}</p>
+                            <p className="text-[var(--text-tertiary)]">{t("ctaSubtitle")}</p>
                         </div>
 
                         <div className="grid sm:grid-cols-2 gap-3 mb-8">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
                                 <div key={i} className="flex items-center gap-3">
                                     <CheckCircle2 className="w-5 h-5 text-bullish shrink-0" />
-                                    <span className="text-white/50 text-sm">{t(`feature${i}`)}</span>
+                                    <span className="text-[var(--text-secondary)] text-sm">{t(`feature${i}`)}</span>
                                 </div>
                             ))}
                         </div>
@@ -69,7 +69,7 @@ export function SubscribeContent() {
                                 href="https://t.me/TranTradingLabEN"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-gold/20"
+                                className="group px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-accent/20"
                                 style={{ background: "var(--gradient-cta)" }}
                             >
                                 <Send className="w-5 h-5" />
@@ -78,7 +78,7 @@ export function SubscribeContent() {
                             </a>
                             <Link
                                 href={`/${locale}/research`}
-                                className="px-8 py-4 rounded-lg border border-gold/30 text-gold hover:bg-gold/10 font-semibold transition-all text-center"
+                                className="px-8 py-4 rounded-lg border border-accent/30 text-accent hover:bg-accent/10 font-semibold transition-all text-center"
                             >
                                 {t("sampleCta")}
                             </Link>
@@ -87,10 +87,10 @@ export function SubscribeContent() {
 
                     {/* Disclaimer */}
                     <div className="text-center">
-                        <p className="text-sm text-gold/60 font-medium">
+                        <p className="text-sm text-accent/60 font-medium">
                             {t("disclaimerMain")}
                         </p>
-                        <p className="text-xs text-white/20 mt-2">
+                        <p className="text-xs text-[var(--text-ghost)] mt-2">
                             {t("disclaimerSub")}
                         </p>
                     </div>

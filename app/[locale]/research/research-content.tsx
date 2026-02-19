@@ -29,7 +29,7 @@ export function ResearchContent() {
                         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-white/50 max-w-2xl mx-auto">
+                        <p className="text-[var(--text-secondary)] max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -52,7 +52,7 @@ export function ResearchContent() {
                                             href={`/${locale}/research/${article.slug}`}
                                             className="block group"
                                         >
-                                            <article className="bg-cv-elevated/50 border border-white/10 rounded-xl overflow-hidden hover:border-gold/50 transition-all duration-300 card-hover">
+                                            <article className="bg-cv-elevated/50 border border-[var(--border-default)] rounded-xl overflow-hidden hover:border-accent/50 transition-all duration-300 card-hover">
                                                 {/* Image */}
                                                 <div className="relative aspect-video overflow-hidden">
                                                     <Image
@@ -76,7 +76,7 @@ export function ResearchContent() {
                                                         {article.tags.slice(0, 3).map((tag) => (
                                                             <span
                                                                 key={tag}
-                                                                className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-white/50"
+                                                                className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg-wash)] text-[var(--text-secondary)]"
                                                             >
                                                                 {tag}
                                                             </span>
@@ -84,12 +84,12 @@ export function ResearchContent() {
                                                     </div>
 
                                                     {/* Title */}
-                                                    <h2 className="text-lg font-bold text-white mb-2 group-hover:text-gold transition-colors line-clamp-2">
+                                                    <h2 className="text-lg font-bold text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
                                                         {article.title}
                                                     </h2>
 
                                                     {/* Meta */}
-                                                    <div className="flex items-center gap-4 text-xs text-white/50">
+                                                    <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
                                                         <span className="flex items-center gap-1">
                                                             <Calendar className="w-3 h-3" />
                                                             {article.date}
@@ -108,7 +108,7 @@ export function ResearchContent() {
                         </div>
                     ) : (
                         <div className="text-center py-16">
-                            <p className="text-white/50">
+                            <p className="text-[var(--text-secondary)]">
                                 {t("noResearch")}
                             </p>
                         </div>

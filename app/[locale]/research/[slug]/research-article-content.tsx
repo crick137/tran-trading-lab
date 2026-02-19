@@ -39,7 +39,7 @@ export function ResearchArticleContent() {
                     {/* Back Link */}
                     <Link
                         href={`/${locale}/research`}
-                        className="inline-flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-8"
+                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-white transition-colors mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t("backToResearch")}
@@ -55,7 +55,7 @@ export function ResearchArticleContent() {
                     {article.articleType === 'education' && article.contentImages && article.contentImages.length > 0 ? (
                         <div className="mb-8 space-y-6">
                             {article.contentImages.map((img, index) => (
-                                <figure key={index} className="relative rounded-lg overflow-hidden border border-white/10">
+                                <figure key={index} className="relative rounded-lg overflow-hidden border border-[var(--border-default)]">
                                     <Image
                                         src={img.src}
                                         alt={img.alt}
@@ -65,7 +65,7 @@ export function ResearchArticleContent() {
                                         className="w-full h-auto"
                                     />
                                     {img.caption && (
-                                        <figcaption className="bg-cv-elevated/50 px-4 py-3 text-sm text-white/50 text-center">
+                                        <figcaption className="bg-cv-elevated/50 px-4 py-3 text-sm text-[var(--text-secondary)] text-center">
                                             {img.caption}
                                         </figcaption>
                                     )}
@@ -121,9 +121,9 @@ export function ResearchArticleContent() {
                     <Conclusion text={article.conclusion} />
 
                     {/* Social Share */}
-                    <div className="mt-12 pt-8 border-t border-white/10">
+                    <div className="mt-12 pt-8 border-t border-[var(--border-default)]">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <p className="text-white/50">{t("sharePrompt")}</p>
+                            <p className="text-[var(--text-secondary)]">{t("sharePrompt")}</p>
                             <SocialShare title={article.title} />
                         </div>
                     </div>
@@ -134,7 +134,7 @@ export function ResearchArticleContent() {
                     {/* Related Articles */}
                     {researchArticles.length > 1 && (
                         <>
-                            <hr className="my-12 border-white/10" />
+                            <hr className="my-12 border-[var(--border-default)]" />
                             <section>
                                 <h2 className="text-2xl font-bold text-white mb-6">{t("relatedResearch")}</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -145,12 +145,12 @@ export function ResearchArticleContent() {
                                             <Link
                                                 key={art.slug}
                                                 href={`/${locale}/research/${art.slug}`}
-                                                className="p-4 rounded-lg bg-cv-elevated border border-white/10 hover:border-gold/50 transition-all group card-hover"
+                                                className="p-4 rounded-lg bg-cv-elevated border border-[var(--border-default)] hover:border-accent/50 transition-all group card-hover"
                                             >
-                                                <span className="text-xs text-gold mb-2 block">
+                                                <span className="text-xs text-accent mb-2 block">
                                                     {art.symbol} | {art.timeframe}
                                                 </span>
-                                                <h3 className="font-semibold text-white group-hover:text-gold transition-colors line-clamp-2">
+                                                <h3 className="font-semibold text-white group-hover:text-accent transition-colors line-clamp-2">
                                                     {art.title}
                                                 </h3>
                                             </Link>

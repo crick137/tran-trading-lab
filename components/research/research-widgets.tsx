@@ -33,7 +33,7 @@ export function ChartImage({ src, alt }: ChartImageProps) {
             </div>
 
             {/* Caption */}
-            <p className="text-center text-xs text-white/50 mt-3">
+            <p className="text-center text-xs text-[var(--text-secondary)] mt-3">
                 {alt} | TradingView
             </p>
         </motion.div>
@@ -55,7 +55,7 @@ export function TradingViewQuote({ symbol }: TradingViewQuoteProps) {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mb-8"
         >
-            <div className="bg-cv-elevated/50 border border-white/10 rounded-xl overflow-hidden">
+            <div className="bg-cv-elevated/50 border border-[var(--border-default)] rounded-xl overflow-hidden">
                 <iframe
                     src={`https://www.tradingview.com/widgetembed/?symbol=${tvSymbol}&interval=240&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=1a1a2e&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC`}
                     width="100%"
@@ -88,11 +88,11 @@ export function Checklist({ items }: ChecklistProps) {
                 <span className="text-2xl">📍</span>
                 {t("checklist")}
             </h2>
-            <div className="bg-cv-elevated/30 border border-white/10 rounded-xl p-6">
+            <div className="bg-cv-elevated/30 border border-[var(--border-default)] rounded-xl p-6">
                 <ul className="space-y-3">
                     {items.map((item, index) => (
-                        <li key={index} className="flex items-start gap-3 text-white/50">
-                            <span className="text-gold/60 mt-0.5">■</span>
+                        <li key={index} className="flex items-start gap-3 text-[var(--text-secondary)]">
+                            <span className="text-accent/60 mt-0.5">■</span>
                             <span>{item}</span>
                         </li>
                     ))}
@@ -120,10 +120,10 @@ export function Conclusion({ text }: ConclusionProps) {
                 <span className="text-2xl">🎯</span>
                 {t("conclusion")}
             </h2>
-            <p className="text-white/50 leading-relaxed">
+            <p className="text-[var(--text-secondary)] leading-relaxed">
                 {text}
             </p>
-            <p className="text-sm text-white/30 mt-4 italic">
+            <p className="text-sm text-[var(--text-muted)] mt-4 italic">
                 {t("disclaimer")}
             </p>
         </motion.div>

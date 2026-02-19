@@ -29,27 +29,27 @@ export function PlansContent() {
                         <h1 className="text-4xl font-bold text-white mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-lg text-white/40 max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
 
                     {/* Free Features Card */}
-                    <div ref={featuresRef} className="p-8 rounded-2xl bg-cv-elevated border border-gold/30 shadow-lg shadow-gold/5 mb-12">
+                    <div ref={featuresRef} className="p-8 rounded-2xl bg-cv-elevated border border-accent/30 shadow-lg shadow-accent/5 mb-12">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center">
-                                <Sparkles className="w-6 h-6 text-gold" />
+                            <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
+                                <Sparkles className="w-6 h-6 text-accent" />
                             </div>
                             <div>
                                 <h2 className="text-2xl font-bold text-white">{t("freeTitle")}</h2>
-                                <p className="text-white/40 text-sm">{t("freeSubtitle")}</p>
+                                <p className="text-[var(--text-tertiary)] text-sm">{t("freeSubtitle")}</p>
                             </div>
                         </div>
                         <ul className="grid md:grid-cols-2 gap-3 mb-8">
                             {features.map((feature: string) => (
                                 <li key={feature} className="flex items-center gap-3">
-                                    <Check className="w-5 h-5 text-gold flex-shrink-0" />
-                                    <span className="text-white/80">{feature}</span>
+                                    <Check className="w-5 h-5 text-accent flex-shrink-0" />
+                                    <span className="text-[var(--text-primary)]">{feature}</span>
                                 </li>
                             ))}
                         </ul>
@@ -57,7 +57,7 @@ export function PlansContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-gold/20"
+                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             <Send className="w-4 h-4" />
@@ -71,23 +71,23 @@ export function PlansContent() {
                         <h2 className="text-2xl font-bold text-white mb-6 text-center">
                             {t("roadmapTitle")}
                         </h2>
-                        <p className="text-white/40 text-center mb-8">
+                        <p className="text-[var(--text-tertiary)] text-center mb-8">
                             {t("roadmapSubtitle")}
                         </p>
                         <div ref={roadmapRef} className="grid md:grid-cols-2 gap-4">
                             {roadmapItems.map((item) => (
                                 <TiltCard key={item.title}>
-                                    <div className="p-4 rounded-lg bg-cv-elevated/50 border border-white/5 h-full">
+                                    <div className="p-4 rounded-lg bg-cv-elevated/50 border border-[var(--border-subtle)] h-full">
                                         <div className="flex items-center gap-2 mb-2">
                                             <span className={`px-2 py-0.5 rounded text-xs font-medium ${item.status === t("statusPreparing")
-                                                    ? "bg-gold/20 text-gold"
-                                                    : "bg-white/5 text-white/30"
+                                                    ? "bg-accent/20 text-accent"
+                                                    : "bg-[var(--bg-wash)] text-[var(--text-muted)]"
                                                 }`}>
                                                 {item.status}
                                             </span>
-                                            <h3 className="font-semibold text-white/90">{item.title}</h3>
+                                            <h3 className="font-semibold text-[var(--text-primary)]">{item.title}</h3>
                                         </div>
-                                        <p className="text-sm text-white/40">{item.description}</p>
+                                        <p className="text-sm text-[var(--text-tertiary)]">{item.description}</p>
                                     </div>
                                 </TiltCard>
                             ))}
@@ -96,12 +96,12 @@ export function PlansContent() {
 
                     {/* FAQ CTA */}
                     <div ref={faqRef} className="text-center">
-                        <p className="text-white/40 mb-4">
+                        <p className="text-[var(--text-tertiary)] mb-4">
                             {t("faqQuestion")}
                         </p>
                         <Link
                             href={`/${locale}/faq`}
-                            className="text-gold hover:underline"
+                            className="text-accent hover:underline"
                         >
                             {t("faqLink")}
                         </Link>

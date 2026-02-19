@@ -36,8 +36,8 @@ export function StartContent() {
             icon: TrendingUp,
             title: t("traderTitle"),
             subtitle: t("traderSubtitle"),
-            gradient: "from-gold/10 to-transparent",
-            border: "border-gold/20 hover:border-gold/40",
+            gradient: "from-accent/10 to-transparent",
+            border: "border-accent/20 hover:border-accent/40",
             steps: [
                 { label: t("traderStep1"), href: `/${locale}/playbooks` },
                 { label: t("traderStep2"), href: `/${locale}/tools` },
@@ -71,7 +71,7 @@ export function StartContent() {
                         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             <span className="text-gradient-gold">{t("title")}</span>
                         </h1>
-                        <p className="text-lg text-white/40 max-w-2xl mx-auto">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto">
                             {t("subtitle")}
                         </p>
                     </div>
@@ -82,19 +82,19 @@ export function StartContent() {
                             <TiltCard key={path.id}>
                                 <div className={`p-6 rounded-xl bg-gradient-to-b ${path.gradient} bg-cv-elevated border ${path.border} transition-colors h-full`}>
                                     <div className="w-14 h-14 rounded-lg bg-cv-surface flex items-center justify-center mb-4">
-                                        <path.icon className="w-7 h-7 text-gold" />
+                                        <path.icon className="w-7 h-7 text-accent" />
                                     </div>
                                     <h2 className="text-xl font-bold text-white mb-1">{path.title}</h2>
-                                    <p className="text-sm text-white/40 mb-6">{path.subtitle}</p>
+                                    <p className="text-sm text-[var(--text-tertiary)] mb-6">{path.subtitle}</p>
 
                                     <div className="space-y-3">
                                         {path.steps.map((step, i) => (
                                             <Link
                                                 key={i}
                                                 href={step.href}
-                                                className="flex items-center gap-3 text-sm text-white/50 hover:text-white transition-colors group"
+                                                className="flex items-center gap-3 text-sm text-[var(--text-secondary)] hover:text-white transition-colors group"
                                             >
-                                                <span className="w-6 h-6 rounded-full bg-cv-surface border border-white/10 flex items-center justify-center text-xs font-medium group-hover:border-gold/40 group-hover:text-gold transition-colors">
+                                                <span className="w-6 h-6 rounded-full bg-cv-surface border border-[var(--border-default)] flex items-center justify-center text-xs font-medium group-hover:border-accent/40 group-hover:text-accent transition-colors">
                                                     {i + 1}
                                                 </span>
                                                 {step.label}
@@ -109,12 +109,12 @@ export function StartContent() {
 
                     {/* What We Provide / Don't Provide */}
                     <div ref={provideRef} className="grid md:grid-cols-2 gap-8">
-                        <div className="p-6 rounded-xl bg-cv-elevated border border-white/5">
+                        <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)]">
                             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                                 <CheckCircle2 className="w-5 h-5 text-bullish" />
                                 {t("whatWeProvide")}
                             </h3>
-                            <ul className="space-y-2.5 text-sm text-white/50">
+                            <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
                                 {[1, 2, 3, 4, 5, 6].map((i) => (
                                     <li key={i} className="flex items-start gap-2">
                                         <span className="text-bullish mt-0.5">✓</span>
@@ -129,7 +129,7 @@ export function StartContent() {
                                 <AlertTriangle className="w-5 h-5 text-bearish" />
                                 {t("whatWeDoNotProvide")}
                             </h3>
-                            <ul className="space-y-2.5 text-sm text-white/50">
+                            <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
                                 {[1, 2, 3, 4].map((i) => (
                                     <li key={i} className="flex items-start gap-2">
                                         <span className="text-bearish mt-0.5">✕</span>
@@ -137,7 +137,7 @@ export function StartContent() {
                                     </li>
                                 ))}
                             </ul>
-                            <p className="mt-4 text-xs text-white/20">
+                            <p className="mt-4 text-xs text-[var(--text-ghost)]">
                                 {t("disclaimer")}
                             </p>
                         </div>
@@ -145,10 +145,10 @@ export function StartContent() {
 
                     {/* CTA */}
                     <div ref={ctaRef} className="mt-16 text-center">
-                        <p className="text-white/40 mb-4">{t("readFirstReport")}</p>
+                        <p className="text-[var(--text-tertiary)] mb-4">{t("readFirstReport")}</p>
                         <Link
                             href={`/${locale}/research`}
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-gold/20"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-accent/20"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("viewSampleReport")}

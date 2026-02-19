@@ -54,8 +54,8 @@ export function CommunityContent() {
             descriptionKr: t("startDescKr"),
             icon: Rocket,
             href: `/${locale}/start`,
-            iconColor: "text-gold",
-            borderHover: "hover:border-gold/30",
+            iconColor: "text-accent",
+            borderHover: "hover:border-accent/30",
             isInternal: true,
         },
     ];
@@ -67,16 +67,16 @@ export function CommunityContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
                     <div ref={heroRef} className="text-center mb-16">
-                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gold/10 mb-6">
-                            <Globe className="w-10 h-10 text-gold" />
+                        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-accent/10 mb-6">
+                            <Globe className="w-10 h-10 text-accent" />
                         </div>
                         <h1 className="text-4xl md:text-5xl font-bold mb-4">
                             <span className="text-gradient-gold">TRAN Trading Lab</span>
                         </h1>
-                        <p className="text-lg text-white/40 mb-2">
+                        <p className="text-lg text-[var(--text-tertiary)] mb-2">
                             {t("title")} · {t("subtitle")}
                         </p>
-                        <p className="text-sm text-white/30">
+                        <p className="text-sm text-[var(--text-muted)]">
                             {t("joinOurCommunity")}
                         </p>
                     </div>
@@ -89,26 +89,26 @@ export function CommunityContent() {
                                     href={link.href}
                                     target={link.isInternal ? "_self" : "_blank"}
                                     rel={link.isInternal ? undefined : "noopener noreferrer"}
-                                    className={`block p-5 rounded-xl bg-cv-elevated border border-white/5 ${link.borderHover} card-hover transition-colors group`}
+                                    className={`block p-5 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] ${link.borderHover} card-hover transition-colors group`}
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+                                        <div className="w-12 h-12 rounded-xl bg-[var(--bg-wash)] flex items-center justify-center shrink-0">
                                             <link.icon className={`w-6 h-6 ${link.iconColor}`} />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <h2 className="text-lg font-bold text-white/90 group-hover:text-gold transition-colors">
+                                                <h2 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-accent transition-colors">
                                                     {link.name}
                                                 </h2>
-                                                <span className="px-2 py-0.5 text-xs rounded-full bg-gold/10 text-gold border border-gold/20">
+                                                <span className="px-2 py-0.5 text-xs rounded-full bg-accent/10 text-accent border border-accent/20">
                                                     {link.label}
                                                 </span>
                                             </div>
-                                            <p className="text-sm text-white/40 truncate">
+                                            <p className="text-sm text-[var(--text-tertiary)] truncate">
                                                 {link.description} — {link.descriptionKr}
                                             </p>
                                         </div>
-                                        <ArrowRight className="w-5 h-5 text-white/20 group-hover:text-gold transition-all group-hover:translate-x-1 shrink-0" />
+                                        <ArrowRight className="w-5 h-5 text-[var(--text-ghost)] group-hover:text-accent transition-all group-hover:translate-x-1 shrink-0" />
                                     </div>
                                 </Link>
                             </TiltCard>
@@ -116,7 +116,7 @@ export function CommunityContent() {
                     </div>
 
                     <div className="text-center">
-                        <p className="text-sm text-gold mb-4">
+                        <p className="text-sm text-accent mb-4">
                             {tc("freeToJoin")} · 免费加入 · 무료 가입
                         </p>
                     </div>

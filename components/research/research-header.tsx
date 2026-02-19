@@ -33,7 +33,7 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
                 {article.tags.map((tag) => (
                     <span
                         key={tag}
-                        className="px-3 py-1 text-xs font-medium rounded-full border border-white/20 bg-white/5 text-white/80"
+                        className="px-3 py-1 text-xs font-medium rounded-full border border-[var(--border-strong)] bg-[var(--bg-wash)] text-[var(--text-primary)]"
                     >
                         {tag}
                     </span>
@@ -45,21 +45,21 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
                 {article.title}
             </h1>
             {article.subtitle && (
-                <p className="text-xl text-white/50 mb-6">{article.subtitle}</p>
+                <p className="text-xl text-[var(--text-secondary)] mb-6">{article.subtitle}</p>
             )}
 
             {/* Metadata Row */}
-            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm text-white/50">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-sm text-[var(--text-secondary)]">
                 <span className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gold" />
+                    <Calendar className="w-4 h-4 text-accent" />
                     {article.date}
                 </span>
                 <span className="flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-gold" />
+                    <Globe className="w-4 h-4 text-accent" />
                     {article.symbol}
                 </span>
                 <span className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-gold" />
+                    <Clock className="w-4 h-4 text-accent" />
                     {article.timeframe}
                 </span>
                 <span className={`flex items-center gap-2 px-3 py-1 rounded-full border ${bias.color}`}>
@@ -67,7 +67,7 @@ export function ResearchHeader({ article }: ResearchHeaderProps) {
                     {bias.label}
                 </span>
                 <span className="flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-gold" />
+                    <BookOpen className="w-4 h-4 text-accent" />
                     {article.readingTime}{t("readSuffix")}
                 </span>
             </div>

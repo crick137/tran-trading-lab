@@ -3,9 +3,6 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Activity, TrendingDown, Percent } from "lucide-react";
-import { Lamp } from "@/components/ui/aceternity/lamp";
-import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import useSWR from "swr";
 
 interface MarketData {
@@ -39,19 +36,19 @@ function MiniSparkline({ signal }: { signal: string }) {
 
 function SkeletonCard() {
     return (
-        <div className="block p-6 rounded-xl bg-cv-elevated border border-white/5 animate-pulse">
+        <div className="block p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] animate-pulse">
             <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded bg-white/10" />
-                    <div className="w-20 h-4 rounded bg-white/10" />
+                    <div className="w-4 h-4 rounded bg-[var(--border-default)]" />
+                    <div className="w-20 h-4 rounded bg-[var(--border-default)]" />
                 </div>
             </div>
             <div className="flex items-end justify-between">
                 <div>
-                    <div className="w-16 h-8 rounded bg-white/10 mb-2" />
-                    <div className="w-12 h-4 rounded bg-white/10" />
+                    <div className="w-16 h-8 rounded bg-[var(--border-default)] mb-2" />
+                    <div className="w-12 h-4 rounded bg-[var(--border-default)]" />
                 </div>
-                <div className="w-20 h-6 rounded bg-white/5" />
+                <div className="w-20 h-6 rounded bg-[var(--bg-wash)]" />
             </div>
         </div>
     );
@@ -69,11 +66,6 @@ interface CardData {
 export function MarketPulse() {
     const locale = useLocale();
     const t = useTranslations("home");
-    const gridRef = useGsapScroll<HTMLDivElement>({
-        children: true,
-        stagger: 0.1,
-    });
-
     const { data, isLoading } = useSWR<MarketData>("/api/market-data", fetcher, {
         refreshInterval: 300_000,
         revalidateOnFocus: false,
@@ -126,13 +118,11 @@ export function MarketPulse() {
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
-                <Lamp className="mb-8">
-                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider text-center">
-                        {t("marketPulseTitle")}
-                    </h2>
-                </Lamp>
+                <h2 className="text-label text-[var(--text-tertiary)] text-center mb-8">
+                    {t("marketPulseTitle")}
+                </h2>
 
-                <div ref={gridRef} className={`grid grid-cols-1 gap-4 ${cards.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : cards.length === 2 ? "md:grid-cols-2 max-w-2xl mx-auto" : "md:grid-cols-3"}`}>
+                <div className={`grid grid-cols-1 gap-4 ${cards.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : cards.length === 2 ? "md:grid-cols-2 max-w-2xl mx-auto" : "md:grid-cols-3"}`}>
                     {isLoading && !data ? (
                         <>
                             <SkeletonCard />
@@ -141,32 +131,31 @@ export function MarketPulse() {
                         </>
                     ) : (
                         cards.map((card) => (
-                            <TiltCard key={card.id}>
-                                <Link
-                                    href={`/${locale}/dashboard`}
-                                    className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover signal-${card.signal}`}
-                                >
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <card.icon className="w-4 h-4 text-white/40" />
-                                            <span className="text-sm text-white/50">{card.label}</span>
-                                        </div>
+                            <Link
+                                key={card.id}
+                                href={`/${locale}/dashboard`}
+                                className={`block p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover signal-${card.signal}`}
+                            >
+                                <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <card.icon className="w-4 h-4 text-[var(--text-tertiary)]" />
+                                        <span className="text-sm text-[var(--text-secondary)]">{card.label}</span>
                                     </div>
+                                </div>
 
-                                    <div className="flex items-end justify-between">
-                                        <div>
-                                            <p className="text-3xl font-bold font-data text-white">{card.value}</p>
-                                            <p className={`text-sm font-data mt-1 ${card.signal === "bullish" ? "text-bullish" :
-                                                card.signal === "bearish" ? "text-bearish" :
-                                                    "text-neutral"
-                                                }`}>
-                                                {card.change}
-                                            </p>
-                                        </div>
-                                        <MiniSparkline signal={card.signal} />
+                                <div className="flex items-end justify-between">
+                                    <div>
+                                        <p className="text-3xl font-bold font-data text-white">{card.value}</p>
+                                        <p className={`text-sm font-data mt-1 ${card.signal === "bullish" ? "text-bullish" :
+                                            card.signal === "bearish" ? "text-bearish" :
+                                                "text-neutral"
+                                            }`}>
+                                            {card.change}
+                                        </p>
                                     </div>
-                                </Link>
-                            </TiltCard>
+                                    <MiniSparkline signal={card.signal} />
+                                </div>
+                            </Link>
                         ))
                     )}
                 </div>

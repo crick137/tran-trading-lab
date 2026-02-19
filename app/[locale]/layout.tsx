@@ -3,8 +3,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider";
-import { GsapProvider } from "@/components/providers/gsap-provider";
 import { MotionProvider } from "@/components/providers/motion-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { BackToTop } from "@/components/ui/back-to-top";
@@ -108,6 +106,8 @@ export default async function LocaleLayout({
         <html lang={locale} className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
             <head>
                 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
+                <link rel="preconnect" href="https://api.coingecko.com" />
+                <link rel="preconnect" href="https://api.alternative.me" />
                 <link
                     rel="preload"
                     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
@@ -121,19 +121,15 @@ export default async function LocaleLayout({
                 <link rel="manifest" href="/site.webmanifest" />
             </head>
             <body className="noise-overlay min-h-screen antialiased">
-                <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-gold focus:text-cv-void focus:rounded-lg focus:font-semibold">
+                <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-accent focus:text-cv-void focus:rounded-lg focus:font-semibold">
                     Skip to main content
                 </a>
                 <ThemeProvider>
                     <NextIntlClientProvider messages={messages}>
                         <MotionProvider>
-                            <GsapProvider>
-                                <SmoothScrollProvider>
-                                    <RouteProgress />
-                                    {children}
-                                    <BackToTop />
-                                </SmoothScrollProvider>
-                            </GsapProvider>
+                            <RouteProgress />
+                            {children}
+                            <BackToTop />
                         </MotionProvider>
                     </NextIntlClientProvider>
                 </ThemeProvider>

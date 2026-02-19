@@ -137,18 +137,18 @@ export function Navbar() {
                 initial={{ y: -100 }}
                 animate={{ y: isHidden && !isMobileMenuOpen ? -100 : 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${tierClasses[scrollTier]} ${scrollTier > 0 ? "border-b border-white/5" : ""}`}
+                className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${tierClasses[scrollTier]} ${scrollTier > 0 ? "border-b border-[var(--border-subtle)]" : ""}`}
             >
                 <nav className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
                         <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gold to-gold-light flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
                                 <BarChart3 className="w-5 h-5 text-cv-primary" />
                             </div>
                             <span className="font-bold text-lg tracking-tight">
                                 <span className="text-gradient-gold">TRAN</span>
-                                <span className="text-white/90"> TRADING LAB</span>
+                                <span className="text-[var(--text-primary)]"> TRADING LAB</span>
                             </span>
                         </Link>
 
@@ -163,13 +163,13 @@ export function Navbar() {
                                         onMouseLeave={handleDropdownLeave}
                                     >
                                         <button
-                                            className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors relative rounded-md hover:bg-white/5 ${isDropdownActive(entry.items) ? "text-gold" : "text-white/60 hover:text-white"
+                                            className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors relative rounded-md hover:bg-[var(--bg-wash)] ${isDropdownActive(entry.items) ? "text-accent" : "text-[var(--text-secondary)] hover:text-white"
                                                 }`}
                                         >
                                             {entry.label}
                                             <ChevronDown className={`w-3 h-3 transition-transform ${openDropdown === entry.label ? "rotate-180" : ""}`} />
                                             {isDropdownActive(entry.items) && (
-                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gold rounded-full" />
+                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
                                             )}
                                         </button>
 
@@ -180,20 +180,20 @@ export function Navbar() {
                                                     animate={{ opacity: 1, y: 0 }}
                                                     exit={{ opacity: 0, y: 4 }}
                                                     transition={{ duration: 0.15 }}
-                                                    className="absolute top-full left-0 mt-1 py-1.5 min-w-[180px] rounded-lg glass-strong border border-white/10"
+                                                    className="absolute top-full left-0 mt-1 py-1.5 min-w-[180px] rounded-lg glass-strong border border-[var(--border-default)]"
                                                 >
                                                     {entry.items.map((item) => (
                                                         <Link
                                                             key={item.href}
                                                             href={item.href}
                                                             className={`group/dd block px-4 py-2 text-sm transition-colors relative ${isActive(item.href)
-                                                                ? "text-gold bg-gold/5"
-                                                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                                                ? "text-accent bg-accent/5"
+                                                                : "text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)]"
                                                                 }`}
                                                         >
                                                             {item.label}
                                                             {!isActive(item.href) && (
-                                                                <span className="absolute bottom-1 left-4 right-4 h-px bg-gold/40 scale-x-0 group-hover/dd:scale-x-100 transition-transform duration-200 origin-left" />
+                                                                <span className="absolute bottom-1 left-4 right-4 h-px bg-accent/40 scale-x-0 group-hover/dd:scale-x-100 transition-transform duration-200 origin-left" />
                                                             )}
                                                         </Link>
                                                     ))}
@@ -205,17 +205,17 @@ export function Navbar() {
                                     <Link
                                         key={entry.href}
                                         href={entry.href}
-                                        className={`px-3 py-2 text-sm transition-colors relative group rounded-md hover:bg-white/5 ${isActive(entry.href) ? "text-gold" : "text-white/60 hover:text-white"
+                                        className={`px-3 py-2 text-sm transition-colors relative group rounded-md hover:bg-[var(--bg-wash)] ${isActive(entry.href) ? "text-accent" : "text-[var(--text-secondary)] hover:text-white"
                                             }`}
                                     >
                                         {entry.label}
                                         {isActive(entry.href) ? (
                                             <>
-                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gold rounded-full" />
-                                                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-gold rounded-full" />
+                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
+                                                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-accent rounded-full" />
                                             </>
                                         ) : (
-                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-3/4 rounded-full" />
+                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-3/4 rounded-full" />
                                         )}
                                     </Link>
                                 )
@@ -228,7 +228,7 @@ export function Navbar() {
                             <LanguageSwitcher />
                             <Link
                                 href={`/${locale}/subscribe`}
-                                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-gold/20 hover:scale-[1.02] active:scale-[0.98]"
+                                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all text-cv-primary hover:shadow-lg hover:shadow-accent/20 hover:scale-[1.02] active:scale-[0.98]"
                                 style={{ background: "var(--gradient-cta)" }}
                             >
                                 {t("subscribeFree")}
@@ -240,7 +240,7 @@ export function Navbar() {
                             <ThemeToggle />
                             <LanguageSwitcher />
                             <button
-                                className="text-white/80 p-2 rounded-lg hover:text-white hover:bg-white/5 transition-colors"
+                                className="text-[var(--text-primary)] p-2 rounded-lg hover:text-white hover:bg-[var(--bg-wash)] transition-colors"
                                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                                 aria-label="Toggle menu"
                             >
@@ -271,13 +271,13 @@ export function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-cv-primary border-l border-white/10 lg:hidden overflow-y-auto"
+                            className="fixed top-0 right-0 bottom-0 z-50 w-72 bg-cv-primary border-l border-[var(--border-default)] lg:hidden overflow-y-auto"
                         >
-                            <div className="flex items-center justify-between p-4 border-b border-white/5">
-                                <span className="text-sm font-semibold text-white/80">Menu</span>
+                            <div className="flex items-center justify-between p-4 border-b border-[var(--border-subtle)]">
+                                <span className="text-sm font-semibold text-[var(--text-primary)]">Menu</span>
                                 <button
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                                    className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)] transition-colors"
                                     aria-label="Close menu"
                                 >
                                     <X size={20} />
@@ -290,14 +290,14 @@ export function Navbar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`py-2.5 px-3 rounded-md text-sm transition-colors ${isActive(item.href)
-                                            ? "text-gold bg-gold/5"
-                                            : "text-white/60 hover:text-white hover:bg-white/5"
+                                            ? "text-accent bg-accent/5"
+                                            : "text-[var(--text-secondary)] hover:text-white hover:bg-[var(--bg-wash)]"
                                             }`}
                                     >
                                         {item.label}
                                     </Link>
                                 ))}
-                                <div className="mt-3 pt-3 border-t border-white/5">
+                                <div className="mt-3 pt-3 border-t border-[var(--border-subtle)]">
                                     <Link
                                         href={`/${locale}/subscribe`}
                                         className="block py-2.5 rounded-lg text-sm font-semibold text-center text-cv-primary"

@@ -19,9 +19,9 @@ interface ArticleCardProps {
 
 // Unified gold color scheme with different opacities
 const categoryColors: Record<string, string> = {
-    analysis: "bg-gold/30 text-gold-light",
-    strategy: "bg-gold/20 text-gold",
-    news: "bg-gold/15 text-gold-dark border border-gold/30",
+    analysis: "bg-accent/30 text-accent-hover",
+    strategy: "bg-accent/20 text-accent",
+    news: "bg-accent/15 text-accent-dark border border-accent/30",
 };
 
 export function ArticleCard({
@@ -46,7 +46,7 @@ export function ArticleCard({
     return (
         <article ref={ref} className="group">
             <Link href={`/blog/${slug}`} className="block">
-                <div className="relative overflow-hidden rounded-xl bg-cv-elevated border border-white/5 transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-gold/50 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(212,175,55,0.15)]">
+                <div className="relative overflow-hidden rounded-xl bg-cv-elevated border border-[var(--border-subtle)] transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-accent/50 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(212,175,55,0.15)]">
                     {/* Image */}
                     {image && (
                         <div className="relative h-48 overflow-hidden">
@@ -64,24 +64,24 @@ export function ArticleCard({
                     <div className="p-6">
                         {/* Category Badge */}
                         <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${categoryColors[category] || "bg-white/10 text-white/40"
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 ${categoryColors[category] || "bg-[var(--border-default)] text-[var(--text-tertiary)]"
                                 }`}
                         >
                             {categoryLabelKeys[category] ? t(categoryLabelKeys[category]) : category}
                         </span>
 
                         {/* Title */}
-                        <h3 className="text-lg font-semibold text-white/90 mb-2 line-clamp-2 group-hover:text-gold transition-colors">
+                        <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2 line-clamp-2 group-hover:text-accent transition-colors">
                             {title}
                         </h3>
 
                         {/* Excerpt */}
-                        <p className="text-sm text-white/40 line-clamp-2 mb-4">
+                        <p className="text-sm text-[var(--text-tertiary)] line-clamp-2 mb-4">
                             {excerpt}
                         </p>
 
                         {/* Meta */}
-                        <div className="flex items-center gap-4 text-xs text-white/30">
+                        <div className="flex items-center gap-4 text-xs text-[var(--text-muted)]">
                             <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
                                 {date}

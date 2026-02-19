@@ -12,7 +12,7 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <button className="p-2 rounded-lg text-white/50" aria-label="Toggle theme">
+            <button className="p-2 rounded-lg text-[var(--text-secondary)]" aria-label="Toggle theme">
                 <Moon className="w-4 h-4" />
             </button>
         );
@@ -23,7 +23,7 @@ export function ThemeToggle() {
     return (
         <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
-            className="relative p-2 rounded-lg text-white/50 hover:text-gold hover:bg-gold/5 transition-all duration-200"
+            className="relative p-2 rounded-lg text-[var(--text-secondary)] hover:text-accent hover:bg-accent/5 transition-all duration-200"
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
             <div className="relative w-4 h-4">

@@ -56,7 +56,7 @@ export function AboutContent() {
             <main className="pt-24 pb-16">
                 {/* Hero */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center py-16" ref={heroRef}>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-white/10 text-sm text-white/50 mb-8">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-8">
                         <Users className="w-4 h-4" />
                         {t("badge")}
                     </div>
@@ -65,7 +65,7 @@ export function AboutContent() {
                         <br />
                         <span className="text-gradient-gold">{t("heroLine2")}</span>
                     </h1>
-                    <p className="text-lg text-white/40 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-lg text-[var(--text-tertiary)] max-w-2xl mx-auto leading-relaxed">
                         {t("heroDescription")}
                     </p>
                 </section>
@@ -78,7 +78,7 @@ export function AboutContent() {
                                 <p className="text-3xl sm:text-4xl font-bold text-gradient-gold font-data mb-2">
                                     {t(stat.valueKey)}
                                 </p>
-                                <p className="text-sm text-white/40">{t(stat.labelKey)}</p>
+                                <p className="text-sm text-[var(--text-tertiary)]">{t(stat.labelKey)}</p>
                             </div>
                         ))}
                     </div>
@@ -87,13 +87,13 @@ export function AboutContent() {
                 {/* Philosophy */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16" ref={philosophyRef}>
                     <div className="text-center">
-                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-8">
+                        <h2 className="text-sm font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-8">
                             {t("philosophyTitle")}
                         </h2>
                         <p className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gradient-gold tracking-tight mb-6">
                             {t("philosophyQuote")}
                         </p>
-                        <p className="text-lg text-white/40 max-w-xl mx-auto leading-relaxed">
+                        <p className="text-lg text-[var(--text-tertiary)] max-w-xl mx-auto leading-relaxed">
                             {t("philosophyDesc")}
                         </p>
                     </div>
@@ -107,14 +107,14 @@ export function AboutContent() {
                     <div ref={servicesRef} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {services.map((service) => (
                             <TiltCard key={service.titleKey}>
-                                <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 text-center h-full card-hover border-glow">
-                                    <div className="w-12 h-12 mx-auto rounded-lg bg-gold/10 flex items-center justify-center mb-4">
-                                        <service.icon className="w-6 h-6 text-gold" />
+                                <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] text-center h-full card-hover border-glow">
+                                    <div className="w-12 h-12 mx-auto rounded-lg bg-accent/10 flex items-center justify-center mb-4">
+                                        <service.icon className="w-6 h-6 text-accent" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-white/90 mb-2">
+                                    <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">
                                         {t(service.titleKey)}
                                     </h3>
-                                    <p className="text-sm text-white/40 leading-relaxed">
+                                    <p className="text-sm text-[var(--text-tertiary)] leading-relaxed">
                                         {t(service.descKey)}
                                     </p>
                                 </div>
@@ -125,14 +125,14 @@ export function AboutContent() {
 
                 {/* Mission */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16" ref={missionRef}>
-                    <div className="p-8 rounded-2xl bg-cv-elevated border border-white/5 border-l-4 border-l-gold/40">
+                    <div className="p-8 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] border-l-4 border-l-accent/40">
                         <h2 className="text-2xl font-bold text-white mb-4">
                             {t("missionTitle")}
                         </h2>
-                        <p className="text-white/40 leading-relaxed mb-6">
+                        <p className="text-[var(--text-tertiary)] leading-relaxed mb-6">
                             {t("missionP1")}
                         </p>
-                        <p className="text-white/40 leading-relaxed">
+                        <p className="text-[var(--text-tertiary)] leading-relaxed">
                             {t("missionP2")}
                         </p>
                     </div>
@@ -140,7 +140,7 @@ export function AboutContent() {
 
                 {/* Social Links */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center" ref={socialRef}>
-                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-6">
+                    <h2 className="text-sm font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-6">
                         {t("connectTitle")}
                     </h2>
                     <div className="flex justify-center gap-3">
@@ -150,11 +150,11 @@ export function AboutContent() {
                                 href={social.href}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`group relative w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}
+                                className={`group relative w-12 h-12 rounded-xl bg-[var(--bg-wash)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--text-tertiary)] ${social.hoverColor} hover:border-[var(--border-strong)] hover:bg-[var(--border-default)] hover:scale-110 hover:shadow-md transition-all duration-200`}
                                 aria-label={social.label}
                             >
                                 {social.icon}
-                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-cv-surface text-[10px] text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-cv-surface text-[10px] text-[var(--text-secondary)] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                                     {social.label}
                                 </span>
                             </a>
@@ -167,12 +167,12 @@ export function AboutContent() {
                     <h2 className="text-2xl font-bold text-white mb-4">
                         {t("ctaTitle")}
                     </h2>
-                    <p className="text-white/40 mb-8">
+                    <p className="text-[var(--text-tertiary)] mb-8">
                         {t("ctaDescription")}
                     </p>
                     <Link
                         href={`/${locale}/community`}
-                        className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-gold/20"
+                        className="inline-flex items-center gap-2 px-8 py-4 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-accent/20"
                         style={{ background: "var(--gradient-cta)" }}
                     >
                         {t("ctaButton")}

@@ -42,7 +42,7 @@ export function SocialShare({ title, url }: SocialShareProps) {
 
     return (
         <div className="flex items-center gap-2">
-            <span className="text-sm text-white/50 mr-2">{t("share")}</span>
+            <span className="text-sm text-[var(--text-secondary)] mr-2">{t("share")}</span>
             {shareLinks.map((link) => (
                 <motion.a
                     key={link.name}
@@ -51,7 +51,7 @@ export function SocialShare({ title, url }: SocialShareProps) {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`p-2 rounded-lg border border-white/10 text-white/50 transition-all ${link.color}`}
+                    className={`p-2 rounded-lg border border-[var(--border-default)] text-[var(--text-secondary)] transition-all ${link.color}`}
                     title={`${t("shareOn")} ${link.name}`}
                 >
                     <link.icon className="w-4 h-4" />
@@ -63,7 +63,7 @@ export function SocialShare({ title, url }: SocialShareProps) {
                 whileTap={{ scale: 0.95 }}
                 className={`p-2 rounded-lg border transition-all ${copied
                         ? "bg-green-500/20 text-green-500 border-green-500/50"
-                        : "border-white/10 text-white/50 hover:bg-gold/20 hover:text-gold hover:border-gold/50"
+                        : "border-[var(--border-default)] text-[var(--text-secondary)] hover:bg-accent/20 hover:text-accent hover:border-accent/50"
                     }`}
                 title={t("copyLink")}
             >

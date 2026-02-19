@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 interface AuroraBackgroundProps {
-    children: ReactNode;
+    children?: ReactNode;
     className?: string;
 }
 

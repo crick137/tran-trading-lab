@@ -40,28 +40,28 @@ export function RRCalculatorContent() {
                     />
 
                     <div ref={heroRef} className="text-center mb-12">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gold/10 mb-6">
-                            <Calculator className="w-8 h-8 text-gold" />
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
+                            <Calculator className="w-8 h-8 text-accent" />
                         </div>
                         <h1 className="text-3xl font-bold text-white mb-4">{t("title")}</h1>
-                        <p className="text-white/40">{t("subtitle")}</p>
+                        <p className="text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
                     {/* Calculator */}
-                    <div ref={calcRef} className="p-6 rounded-xl bg-cv-elevated border border-white/5 space-y-6">
+                    <div ref={calcRef} className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] space-y-6">
                         <div>
-                            <label className="block text-sm text-white/40 mb-2">{t("entryPrice")}</label>
+                            <label className="block text-sm text-[var(--text-tertiary)] mb-2">{t("entryPrice")}</label>
                             <input
                                 type="number"
                                 value={entryPrice}
                                 onChange={(e) => setEntryPrice(Number(e.target.value))}
-                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-white/5 text-white focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold/50 transition-all"
+                                className="w-full px-4 py-3 rounded-lg bg-cv-primary border border-[var(--border-subtle)] text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm text-white/40 mb-2">{t("stopLoss")}</label>
+                                <label className="block text-sm text-[var(--text-tertiary)] mb-2">{t("stopLoss")}</label>
                                 <input
                                     type="number"
                                     value={stopPrice}
@@ -70,7 +70,7 @@ export function RRCalculatorContent() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm text-white/40 mb-2">{t("takeProfit")}</label>
+                                <label className="block text-sm text-[var(--text-tertiary)] mb-2">{t("takeProfit")}</label>
                                 <input
                                     type="number"
                                     value={targetPrice}
@@ -80,7 +80,7 @@ export function RRCalculatorContent() {
                             </div>
                         </div>
 
-                        <hr className="border-white/5" />
+                        <hr className="border-[var(--border-subtle)]" />
 
                         {/* Results */}
                         <div className="text-center">
@@ -90,26 +90,26 @@ export function RRCalculatorContent() {
                                 ) : (
                                     <TrendingDown className="w-5 h-5 text-bearish" />
                                 )}
-                                <span className="text-white/40">
+                                <span className="text-[var(--text-tertiary)]">
                                     {isLong ? t("longPosition") : t("shortPosition")}
                                 </span>
                             </div>
-                            <div className="text-5xl font-bold text-gold mb-2 font-data">
+                            <div className="text-5xl font-bold text-accent mb-2 font-data">
                                 {rr.toFixed(2)}R
                             </div>
-                            <p className="text-white/40">{t("rrRatio")}</p>
+                            <p className="text-[var(--text-tertiary)]">{t("rrRatio")}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-center">
                             <div className="p-4 rounded-lg bg-bearish/10 border border-bearish/20">
                                 <p className="text-bearish font-semibold font-data">{risk.toFixed(2)}</p>
-                                <p className="text-xs text-white/40">
+                                <p className="text-xs text-[var(--text-tertiary)]">
                                     {t("risk")} ({Math.abs(stopPercent).toFixed(2)}%)
                                 </p>
                             </div>
                             <div className="p-4 rounded-lg bg-bullish/10 border border-bullish/20">
                                 <p className="text-bullish font-semibold font-data">{reward.toFixed(2)}</p>
-                                <p className="text-xs text-white/40">
+                                <p className="text-xs text-[var(--text-tertiary)]">
                                     {t("reward")} ({Math.abs(targetPercent).toFixed(2)}%)
                                 </p>
                             </div>
@@ -131,7 +131,7 @@ export function RRCalculatorContent() {
                         )}
                     </div>
 
-                    <p className="text-xs text-white/30 text-center mt-6">
+                    <p className="text-xs text-[var(--text-muted)] text-center mt-6">
                         {t("disclaimer")}
                     </p>
                 </div>

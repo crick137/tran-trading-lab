@@ -36,17 +36,17 @@ export function SectionBlock({ icon, title, content, highlights, delay = 0 }: Se
             </h2>
 
             {/* Content */}
-            <p className="text-white/60 leading-relaxed mb-4">
+            <p className="text-[var(--text-secondary)] leading-relaxed mb-4">
                 {parseContent(content)}
             </p>
 
             {/* Highlights Box */}
             {highlights && highlights.length > 0 && (
-                <div className="bg-cv-elevated/30 border-l-4 border-gold rounded-r-lg p-4">
+                <div className="bg-cv-elevated/30 border-l-4 border-accent rounded-r-lg p-4">
                     <ul className="space-y-2">
                         {highlights.map((item, index) => (
-                            <li key={index} className="flex items-start gap-2 text-white/60">
-                                <span className="text-gold mt-1">▸</span>
+                            <li key={index} className="flex items-start gap-2 text-[var(--text-secondary)]">
+                                <span className="text-accent mt-1">▸</span>
                                 <span>{parseContent(item)}</span>
                             </li>
                         ))}

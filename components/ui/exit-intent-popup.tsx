@@ -97,17 +97,17 @@ export function ExitIntentPopup() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="relative w-full max-w-md p-8 rounded-2xl bg-cv-elevated border border-gold/20 overflow-hidden"
+                        className="relative w-full max-w-md p-8 rounded-2xl bg-cv-elevated border border-accent/20 overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Ambient glow */}
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-[60px]" aria-hidden="true" />
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-gold/3 rounded-full blur-[40px]" aria-hidden="true" />
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-[60px]" aria-hidden="true" />
+                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-accent/3 rounded-full blur-[40px]" aria-hidden="true" />
 
                         {/* Close button */}
                         <button
                             onClick={handleDismiss}
-                            className="absolute top-4 right-4 p-1.5 rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors"
+                            className="absolute top-4 right-4 p-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-wash)] transition-colors"
                             aria-label="Close"
                         >
                             <X className="w-4 h-4" />
@@ -115,14 +115,14 @@ export function ExitIntentPopup() {
 
                         <div className="relative z-10 text-center">
                             {/* Icon */}
-                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gold/10 mb-5">
-                                <Mail className="w-5 h-5 text-gold" />
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mb-5">
+                                <Mail className="w-5 h-5 text-accent" />
                             </div>
 
                             <h3 className="text-xl font-bold text-white mb-2">
                                 {t("exitIntentTitle")}
                             </h3>
-                            <p className="text-sm text-white/40 mb-6 leading-relaxed">
+                            <p className="text-sm text-[var(--text-tertiary)] mb-6 leading-relaxed">
                                 {t("exitIntentSubtitle")}
                             </p>
 
@@ -139,13 +139,13 @@ export function ExitIntentPopup() {
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder={t("exitIntentPlaceholder")}
-                                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-gold/40 transition-colors"
+                                        className="w-full px-4 py-3 rounded-lg bg-[var(--bg-wash)] border border-[var(--border-default)] text-white text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:border-accent/40 transition-colors"
                                         required
                                     />
                                     <button
                                         type="submit"
                                         disabled={status === "loading"}
-                                        className="w-full px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-all hover:shadow-lg hover:shadow-gold/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                                        className="w-full px-6 py-3 rounded-lg font-semibold text-sm text-cv-void transition-all hover:shadow-lg hover:shadow-accent/20 flex items-center justify-center gap-2 disabled:opacity-50"
                                         style={{ background: "var(--gradient-cta)" }}
                                     >
                                         {status === "loading" ? "..." : t("exitIntentButton")}
@@ -158,7 +158,7 @@ export function ExitIntentPopup() {
                             {status !== "success" && (
                                 <button
                                     onClick={handleDismiss}
-                                    className="mt-4 text-xs text-white/20 hover:text-white/40 transition-colors"
+                                    className="mt-4 text-xs text-[var(--text-ghost)] hover:text-[var(--text-tertiary)] transition-colors"
                                 >
                                     {t("exitIntentDismiss")}
                                 </button>

@@ -15,6 +15,12 @@ const nextConfig = {
                 hostname: 'trantradinglab.com',
             },
         ],
+        formats: ['image/avif', 'image/webp'],
+    },
+    compress: true,
+    poweredByHeader: false,
+    experimental: {
+        optimizePackageImports: ['lucide-react', 'framer-motion'],
     },
     // Ignore server and api directories (they're for Telegram publisher)
     webpack: (config) => {
