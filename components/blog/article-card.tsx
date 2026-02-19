@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Clock, Calendar } from "lucide-react";
 
 interface ArticleCardProps {
@@ -35,8 +34,6 @@ export function ArticleCard({
     index = 0,
 }: ArticleCardProps) {
     const t = useTranslations("blog");
-    const ref = useGsapScroll<HTMLElement>();
-
     const categoryLabelKeys: Record<string, string> = {
         analysis: "categoryAnalysis",
         strategy: "categoryStrategy",
@@ -44,7 +41,7 @@ export function ArticleCard({
     };
 
     return (
-        <article ref={ref} className="group">
+        <article className="group">
             <Link href={`/blog/${slug}`} className="block">
                 <div className="relative overflow-hidden rounded-xl bg-cv-elevated border border-[var(--border-subtle)] transition-all duration-300 ease-out group-hover:-translate-y-2 group-hover:border-accent/50 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_30px_rgba(212,175,55,0.15)]">
                     {/* Image */}

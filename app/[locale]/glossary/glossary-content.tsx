@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { BookOpen, Search, ChevronDown, ExternalLink, AlertTriangle } from "lucide-react";
 import { glossaryTerms, glossaryCategories, type GlossaryTerm } from "@/lib/glossary-data";
 
@@ -30,8 +29,6 @@ export function GlossaryContent() {
     const [highlightedTermId, setHighlightedTermId] = useState<string | null>(null);
     const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
     const termRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    const heroRef = useGsapScroll<HTMLDivElement>();
-
     const filteredTerms = useMemo(() => {
         return glossaryTerms.filter((term) => {
             const searchLower = search.toLowerCase();
@@ -101,7 +98,7 @@ export function GlossaryContent() {
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div ref={heroRef} className="text-center mb-12">
+                    <div className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <BookOpen className="w-8 h-8 text-accent" />
                         </div>

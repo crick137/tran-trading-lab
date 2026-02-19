@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { FileSpreadsheet, ExternalLink, CheckCircle2 } from "lucide-react";
 
 interface Template {
@@ -22,10 +21,6 @@ export function TemplatesContent() {
 
     const templates = t.raw("templates") as Template[];
 
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const gridRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
-    const ctaRef = useGsapScroll<HTMLDivElement>();
-
     return (
         <>
             <Navbar />
@@ -38,7 +33,7 @@ export function TemplatesContent() {
                         ]}
                     />
 
-                    <div ref={heroRef} className="text-center mb-12">
+                    <div className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <FileSpreadsheet className="w-8 h-8 text-accent" />
                         </div>
@@ -47,7 +42,7 @@ export function TemplatesContent() {
                     </div>
 
                     {/* Templates Grid */}
-                    <div ref={gridRef} className="grid gap-6">
+                    <div className="grid gap-6">
                         {templates.map((template) => (
                             <div
                                 key={template.id}
@@ -83,7 +78,7 @@ export function TemplatesContent() {
                         ))}
                     </div>
 
-                    <div ref={ctaRef} className="mt-12 p-6 rounded-xl bg-cv-elevated/50 border border-[var(--border-subtle)] text-center">
+                    <div className="mt-12 p-6 rounded-xl bg-cv-elevated/50 border border-[var(--border-subtle)] text-center">
                         <p className="text-[var(--text-tertiary)] mb-4">
                             {t("requestMissing")}
                         </p>

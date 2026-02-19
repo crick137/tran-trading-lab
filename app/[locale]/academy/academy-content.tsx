@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { BookOpen, GraduationCap, Target, ArrowRight, Layers, TrendingUp, Clock } from "lucide-react";
 
 const moduleIcons = [Layers, Target, TrendingUp];
@@ -13,11 +12,6 @@ const moduleIcons = [Layers, Target, TrendingUp];
 export function AcademyContent() {
     const locale = useLocale();
     const t = useTranslations("academy");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const modulesRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.12 });
-    const linksRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
-    const ctaRef = useGsapScroll<HTMLDivElement>();
-
     const modules = [
         { id: "foundations", titleKey: "foundationsTitle", descKey: "foundationsDesc", topicsKey: "foundationsTopics", lessons: 8, durationKey: "foundationsDuration" },
         { id: "smc", titleKey: "smcTitle", descKey: "smcDesc", topicsKey: "smcTopics", lessons: 12, durationKey: "smcDuration" },
@@ -36,7 +30,7 @@ export function AcademyContent() {
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div ref={heroRef} className="text-center mb-16">
+                    <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-6">
                             <GraduationCap className="w-4 h-4" />
                             {t("badge")}
@@ -55,7 +49,7 @@ export function AcademyContent() {
                             <BookOpen className="w-6 h-6 text-accent" />
                             {t("learningPath")}
                         </h2>
-                        <div ref={modulesRef} className="grid md:grid-cols-3 gap-6">
+                        <div className="grid md:grid-cols-3 gap-6">
                             {modules.map((mod, index) => {
                                 const Icon = moduleIcons[index];
                                 const topics: string[] = t.raw(mod.topicsKey) as string[];
@@ -96,7 +90,7 @@ export function AcademyContent() {
                     {/* Quick Links */}
                     <section className="mb-16">
                         <h2 className="text-2xl font-bold text-white mb-8">{t("quickLinks")}</h2>
-                        <div ref={linksRef} className="grid md:grid-cols-3 gap-4">
+                        <div className="grid md:grid-cols-3 gap-4">
                             {quickLinks.map((link) => (
                                 <Link
                                     key={link.href}
@@ -116,7 +110,7 @@ export function AcademyContent() {
                     </section>
 
                     {/* CTA */}
-                    <section ref={ctaRef} className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8">
+                    <section className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8">
                         <h2 className="text-2xl font-bold text-white mb-4">
                             {t("ctaTitle")}
                         </h2>

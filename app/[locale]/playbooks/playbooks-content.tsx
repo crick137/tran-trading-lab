@@ -5,16 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { GraduationCap, ArrowRight, CheckCircle2, Clock } from "lucide-react";
 
 export function PlaybooksContent() {
     const locale = useLocale();
     const t = useTranslations("playbooks");
     const tc = useTranslations("common");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const gridRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
-
     const modules = [
         { id: "smc-101", titleKey: "smcTitle", descKey: "smcDesc", topicsKey: "smcTopics", lessons: 5, duration: "45min", available: true },
         { id: "order-block", titleKey: "obTitle", descKey: "obDesc", topicsKey: "obTopics", lessons: 4, duration: "40min", available: true },
@@ -30,7 +26,7 @@ export function PlaybooksContent() {
             <main className="pt-24 pb-16">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
-                    <div ref={heroRef} className="text-center mb-16">
+                    <div className="text-center mb-16">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <GraduationCap className="w-8 h-8 text-accent" />
                         </div>
@@ -41,7 +37,7 @@ export function PlaybooksContent() {
                     </div>
 
                     {/* Modules Grid */}
-                    <div ref={gridRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {modules.map((module) => {
                             const topics = t.raw(module.topicsKey) as string[];
                             return (

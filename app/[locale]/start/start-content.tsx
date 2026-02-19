@@ -5,17 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Rocket, TrendingUp, Globe, ArrowRight, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export function StartContent() {
     const locale = useLocale();
     const t = useTranslations("start");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const pathsRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.12 });
-    const provideRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
-    const ctaRef = useGsapScroll<HTMLDivElement>();
-
     const paths = [
         {
             id: "beginner",
@@ -67,7 +61,7 @@ export function StartContent() {
             <main className="pt-24 pb-16">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
-                    <div ref={heroRef} className="text-center mb-16">
+                    <div className="text-center mb-16">
                         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
                             <span className="text-gradient-gold">{t("title")}</span>
                         </h1>
@@ -77,7 +71,7 @@ export function StartContent() {
                     </div>
 
                     {/* Paths */}
-                    <div ref={pathsRef} className="grid md:grid-cols-3 gap-6 mb-16">
+                    <div className="grid md:grid-cols-3 gap-6 mb-16">
                         {paths.map((path) => (
                             <TiltCard key={path.id}>
                                 <div className={`p-6 rounded-xl bg-gradient-to-b ${path.gradient} bg-cv-elevated border ${path.border} transition-colors h-full`}>
@@ -108,7 +102,7 @@ export function StartContent() {
                     </div>
 
                     {/* What We Provide / Don't Provide */}
-                    <div ref={provideRef} className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-8">
                         <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)]">
                             <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                                 <CheckCircle2 className="w-5 h-5 text-bullish" />
@@ -144,7 +138,7 @@ export function StartContent() {
                     </div>
 
                     {/* CTA */}
-                    <div ref={ctaRef} className="mt-16 text-center">
+                    <div className="mt-16 text-center">
                         <p className="text-[var(--text-tertiary)] mb-4">{t("readFirstReport")}</p>
                         <Link
                             href={`/${locale}/research`}

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import useSWR from "swr";
 import {
     Activity,
@@ -146,7 +145,6 @@ function SkeletonCard() {
 export function DashboardContent() {
     const locale = useLocale();
     const t = useTranslations("dashboard");
-    const heroRef = useGsapScroll<HTMLDivElement>();
     const [activeChart, setActiveChart] = useState("SPX");
 
     const { data, isLoading } = useSWR<MarketApiData>("/api/market-data", fetcher, {
@@ -166,7 +164,7 @@ export function DashboardContent() {
             <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-content mx-auto">
                     {/* Hero */}
-                    <div ref={heroRef} className="mb-12">
+                    <div className="mb-12">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
                                 <BarChart3 className="w-5 h-5 text-accent" />

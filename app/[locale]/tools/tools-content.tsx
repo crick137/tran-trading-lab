@@ -5,15 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Wrench, Calculator, FileSpreadsheet, ArrowRight } from "lucide-react";
 
 export function ToolsContent() {
     const locale = useLocale();
     const t = useTranslations("tools");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const gridRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.12 });
-
     const tools = [
         {
             id: "position-sizing",
@@ -44,7 +40,7 @@ export function ToolsContent() {
             <main className="pt-24 pb-16">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
-                    <div ref={heroRef} className="text-center mb-16">
+                    <div className="text-center mb-16">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <Wrench className="w-8 h-8 text-accent" />
                         </div>
@@ -53,7 +49,7 @@ export function ToolsContent() {
                     </div>
 
                     {/* Tools Grid */}
-                    <div ref={gridRef} className="grid gap-5 max-w-3xl mx-auto">
+                    <div className="grid gap-5 max-w-3xl mx-auto">
                         {tools.map((tool) => (
                             <TiltCard key={tool.id}>
                                 <Link

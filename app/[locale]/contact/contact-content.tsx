@@ -4,16 +4,12 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Send, Mail, MessageCircle, Check, Loader2 } from "lucide-react";
 
 export function ContactContent() {
     const [formData, setFormData] = useState({ name: "", email: "", message: "" });
     const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
     const t = useTranslations("contact");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const contentRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.15 });
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setStatus("loading");
@@ -29,7 +25,7 @@ export function ContactContent() {
             <main className="pt-24 pb-16">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
-                    <div ref={heroRef} className="text-center mb-12">
+                    <div className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <MessageCircle className="w-8 h-8 text-accent" />
                         </div>
@@ -37,7 +33,7 @@ export function ContactContent() {
                         <p className="text-lg text-[var(--text-tertiary)]">{t("subtitle")}</p>
                     </div>
 
-                    <div ref={contentRef} className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                         {/* Contact Methods */}
                         <div className="space-y-4">
                             <h2 className="text-xl font-semibold text-white mb-4">{t("quickContact")}</h2>

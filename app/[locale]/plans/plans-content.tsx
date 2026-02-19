@@ -5,17 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Check, Sparkles, ArrowRight, Send } from "lucide-react";
 
 export function PlansContent() {
     const locale = useLocale();
     const t = useTranslations("plans");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const featuresRef = useGsapScroll<HTMLDivElement>();
-    const roadmapRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.08 });
-    const faqRef = useGsapScroll<HTMLDivElement>();
-
     const features: string[] = t.raw("features") as string[];
     const roadmapItems: Array<{ status: string; title: string; description: string }> = t.raw("roadmap") as Array<{ status: string; title: string; description: string }>;
 
@@ -25,7 +19,7 @@ export function PlansContent() {
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div ref={heroRef} className="text-center mb-16">
+                    <div className="text-center mb-16">
                         <h1 className="text-4xl font-bold text-white mb-4">
                             {t("title")}
                         </h1>
@@ -35,7 +29,7 @@ export function PlansContent() {
                     </div>
 
                     {/* Free Features Card */}
-                    <div ref={featuresRef} className="p-8 rounded-2xl bg-cv-elevated border border-accent/30 shadow-lg shadow-accent/5 mb-12">
+                    <div className="p-8 rounded-2xl bg-cv-elevated border border-accent/30 shadow-lg shadow-accent/5 mb-12">
                         <div className="flex items-center gap-3 mb-6">
                             <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center">
                                 <Sparkles className="w-6 h-6 text-accent" />
@@ -74,7 +68,7 @@ export function PlansContent() {
                         <p className="text-[var(--text-tertiary)] text-center mb-8">
                             {t("roadmapSubtitle")}
                         </p>
-                        <div ref={roadmapRef} className="grid md:grid-cols-2 gap-4">
+                        <div className="grid md:grid-cols-2 gap-4">
                             {roadmapItems.map((item) => (
                                 <TiltCard key={item.title}>
                                     <div className="p-4 rounded-lg bg-cv-elevated/50 border border-[var(--border-subtle)] h-full">
@@ -95,7 +89,7 @@ export function PlansContent() {
                     </div>
 
                     {/* FAQ CTA */}
-                    <div ref={faqRef} className="text-center">
+                    <div className="text-center">
                         <p className="text-[var(--text-tertiary)] mb-4">
                             {t("faqQuestion")}
                         </p>

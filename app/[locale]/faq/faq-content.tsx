@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -51,10 +50,6 @@ function FAQAccordion({ item, isOpen, onToggle }: { item: FAQItem; isOpen: boole
 export function FAQContent() {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const t = useTranslations("faq");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const listRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.06 });
-    const ctaRef = useGsapScroll<HTMLDivElement>();
-
     const faqItems: FAQItem[] = [];
     let i = 0;
     while (true) {
@@ -101,7 +96,7 @@ export function FAQContent() {
             <main className="pt-24 pb-16">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero */}
-                    <div ref={heroRef} className="text-center mb-12">
+                    <div className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <HelpCircle className="w-8 h-8 text-accent" />
                         </div>
@@ -139,7 +134,7 @@ export function FAQContent() {
                     </div>
 
                     {/* FAQ List */}
-                    <div ref={listRef} className="space-y-3">
+                    <div className="space-y-3">
                         {filteredItems.map((item, index) => (
                             <FAQAccordion
                                 key={`${activeCategory}-${index}`}
@@ -151,7 +146,7 @@ export function FAQContent() {
                     </div>
 
                     {/* Contact CTA */}
-                    <div ref={ctaRef} className="mt-16 p-8 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] text-center">
+                    <div className="mt-16 p-8 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] text-center">
                         <h2 className="text-xl font-semibold text-white mb-2">
                             {t("contactTitle")}
                         </h2>

@@ -3,21 +3,17 @@
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { FileText, Send, ArrowRight } from "lucide-react";
 
 export function BriefingsContent() {
     const t = useTranslations("briefings");
     const tc = useTranslations("common");
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const contentRef = useGsapScroll<HTMLDivElement>();
-
     return (
         <>
             <Navbar />
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
-                    <div ref={heroRef}>
+                    <div>
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <FileText className="w-8 h-8 text-accent" />
                         </div>
@@ -26,7 +22,7 @@ export function BriefingsContent() {
                             {t("subtitle")}
                         </p>
                     </div>
-                    <div ref={contentRef} className="bg-cv-elevated/50 border border-[var(--border-subtle)] rounded-2xl p-12 max-w-2xl mx-auto">
+                    <div className="bg-cv-elevated/50 border border-[var(--border-subtle)] rounded-2xl p-12 max-w-2xl mx-auto">
                         <p className="text-[var(--text-tertiary)] text-lg mb-6">
                             {t("noBriefings")}<br />
                             {t("telegramCta")}

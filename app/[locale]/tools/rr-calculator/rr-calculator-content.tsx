@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { Calculator, TrendingUp, TrendingDown } from "lucide-react";
 
 export function RRCalculatorContent() {
@@ -24,9 +23,6 @@ export function RRCalculatorContent() {
     const stopPercent = ((entryPrice - stopPrice) / entryPrice) * 100;
     const targetPercent = ((targetPrice - entryPrice) / entryPrice) * 100;
 
-    const heroRef = useGsapScroll<HTMLDivElement>();
-    const calcRef = useGsapScroll<HTMLDivElement>({ from: { opacity: 0, y: 20 }, to: { opacity: 1, y: 0 } });
-
     return (
         <>
             <Navbar />
@@ -39,7 +35,7 @@ export function RRCalculatorContent() {
                         ]}
                     />
 
-                    <div ref={heroRef} className="text-center mb-12">
+                    <div className="text-center mb-12">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
                             <Calculator className="w-8 h-8 text-accent" />
                         </div>
@@ -48,7 +44,7 @@ export function RRCalculatorContent() {
                     </div>
 
                     {/* Calculator */}
-                    <div ref={calcRef} className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] space-y-6">
+                    <div className="p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] space-y-6">
                         <div>
                             <label className="block text-sm text-[var(--text-tertiary)] mb-2">{t("entryPrice")}</label>
                             <input
