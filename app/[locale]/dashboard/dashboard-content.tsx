@@ -5,81 +5,32 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { TiltCard } from "@/components/ui/tilt-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
+import useSWR from "swr";
 import {
     Activity,
-    TrendingUp,
     TrendingDown,
+    TrendingUp,
     BarChart3,
     Target,
     ArrowRight,
     AlertTriangle,
 } from "lucide-react";
 
-type Signal = "bullish" | "bearish" | "neutral";
-
-interface MarketAsset {
-    symbol: string;
-    name: string;
-    price: string;
-    change: string;
-    signal: Signal;
-    sparkline: string;
+interface MarketApiData {
+    fearGreed: { value: number; classification: string } | null;
+    vix: { value: number; change: number } | null;
+    treasury: { value: number } | null;
+    coins: { symbol: string; usd: number; usd_24h_change: number }[] | null;
 }
 
-interface KeyLevel {
-    asset: string;
-    support: string;
-    resistance: string;
-    note: string;
-}
-
-const marketAssets: MarketAsset[] = [
-    { symbol: "SPX", name: "S&P 500", price: "6,117", change: "+0.24%", signal: "bullish", sparkline: "0,20 12,18 24,15 36,16 48,12 60,10 72,11 80,8" },
-    { symbol: "NDQ", name: "Nasdaq 100", price: "19,843", change: "+0.41%", signal: "bullish", sparkline: "0,18 12,16 24,17 36,14 48,11 60,12 72,9 80,6" },
-    { symbol: "BTC", name: "Bitcoin", price: "95,432", change: "-1.20%", signal: "bearish", sparkline: "0,8 12,10 24,9 36,12 48,14 60,13 72,16 80,18" },
-    { symbol: "ETH", name: "Ethereum", price: "2,684", change: "-0.80%", signal: "bearish", sparkline: "0,10 12,11 24,9 36,13 48,15 60,14 72,17 80,18" },
-    { symbol: "Gold", name: "Gold", price: "2,931", change: "+0.50%", signal: "neutral", sparkline: "0,16 12,14 24,15 36,13 48,12 60,13 72,11 80,10" },
-    { symbol: "Oil", name: "Crude Oil", price: "71.2", change: "-1.50%", signal: "bearish", sparkline: "0,8 12,10 24,12 36,11 48,14 60,16 72,15 80,18" },
-    { symbol: "DXY", name: "US Dollar", price: "106.8", change: "+0.30%", signal: "bullish", sparkline: "0,18 12,16 24,14 36,15 48,12 60,11 72,10 80,8" },
-    { symbol: "KOSPI", name: "KOSPI", price: "2,612", change: "+0.30%", signal: "neutral", sparkline: "0,14 12,16 24,14 36,12 48,14 60,13 72,12 80,11" },
-];
-
-const keyLevels: KeyLevel[] = [
-    { asset: "SPX", support: "6,050", resistance: "6,200", note: "Range-bound near ATH" },
-    { asset: "BTC", support: "90,000", resistance: "100,000", note: "Testing psychological level" },
-    { asset: "Gold", support: "2,880", resistance: "2,960", note: "Consolidating in uptrend" },
-    { asset: "10Y Yield", support: "4.40%", resistance: "4.65%", note: "Rising trend pressuring equities" },
-];
-
-const signalColor: Record<Signal, string> = {
-    bullish: "text-bullish",
-    bearish: "text-bearish",
-    neutral: "text-neutral",
-};
-
-const signalBorder: Record<Signal, string> = {
-    bullish: "signal-bullish",
-    bearish: "signal-bearish",
-    neutral: "signal-neutral",
-};
-
-function MiniSparkline({ signal, points }: { signal: Signal; points: string }) {
-    const color = signal === "bullish" ? "#00c851" : signal === "bearish" ? "#ff3b3b" : "#ffa500";
-    return (
-        <svg width="80" height="24" viewBox="0 0 80 24" className="opacity-40" aria-hidden="true">
-            <polyline fill="none" stroke={color} strokeWidth="1.5" points={points} />
-        </svg>
-    );
-}
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 /* SVG semi-circle gauge for Fear & Greed */
 function FearGreedGauge({ value }: { value: number }) {
     const clampedValue = Math.min(100, Math.max(0, value));
-    const angle = -90 + (clampedValue / 100) * 180; // -90 (left) to 90 (right)
+    const angle = 180 + (clampedValue / 100) * 180; // SVG Y-down: 180°=left(fear) → 270°=up(neutral) → 360°=right(greed)
 
-    // Gradient: 0=red, 25=orange, 50=gold, 75=lime, 100=green
     const getColor = (v: number) => {
         if (v <= 25) return "#ff3b3b";
         if (v <= 45) return "#ff8c00";
@@ -136,6 +87,22 @@ function FearGreedGauge({ value }: { value: number }) {
     );
 }
 
+function getClassificationLabel(classification: string): string {
+    const lower = classification.toLowerCase();
+    if (lower.includes("extreme fear")) return "Extreme Fear";
+    if (lower.includes("fear")) return "Fear";
+    if (lower.includes("extreme greed")) return "Extreme Greed";
+    if (lower.includes("greed")) return "Greed";
+    return "Neutral";
+}
+
+function getClassificationColor(classification: string): string {
+    const lower = classification.toLowerCase();
+    if (lower.includes("extreme fear") || lower.includes("fear")) return "text-bearish";
+    if (lower.includes("extreme greed") || lower.includes("greed")) return "text-bullish";
+    return "text-neutral";
+}
+
 /* TradingView widget embed */
 const TV_SYMBOLS: Record<string, string> = {
     SPX: "OANDA:SPX500USD",
@@ -163,13 +130,35 @@ function TradingViewChart({ symbol }: { symbol: string }) {
     );
 }
 
+function SkeletonCard() {
+    return (
+        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 animate-pulse">
+            <div className="flex items-center gap-2 mb-3">
+                <div className="w-4 h-4 rounded bg-white/10" />
+                <div className="w-20 h-4 rounded bg-white/10" />
+            </div>
+            <div className="w-16 h-10 rounded bg-white/10 mb-2" />
+            <div className="w-12 h-4 rounded bg-white/10" />
+        </div>
+    );
+}
+
 export function DashboardContent() {
     const locale = useLocale();
     const t = useTranslations("dashboard");
     const heroRef = useGsapScroll<HTMLDivElement>();
-    const gridRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.08 });
-    const levelsRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
     const [activeChart, setActiveChart] = useState("SPX");
+
+    const { data, isLoading } = useSWR<MarketApiData>("/api/market-data", fetcher, {
+        refreshInterval: 300_000,
+        revalidateOnFocus: false,
+        dedupingInterval: 60_000,
+    });
+
+    const fearGreed = data?.fearGreed;
+    const vix = data?.vix;
+    const treasury = data?.treasury;
+    const hasAnyMarketData = fearGreed || vix || treasury;
 
     return (
         <>
@@ -191,37 +180,64 @@ export function DashboardContent() {
                         </div>
                     </div>
 
-                    {/* Fear & Greed Gauge + VIX + 10Y in cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                        {/* Fear & Greed — SVG Gauge */}
-                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral flex flex-col items-center">
-                            <div className="flex items-center gap-2 mb-3 self-start">
-                                <Activity className="w-4 h-4 text-neutral" />
-                                <span className="text-sm text-white/50">{t("fearGreed")}</span>
-                            </div>
-                            <FearGreedGauge value={62} />
-                            <p className="text-3xl font-bold font-data text-white mt-2">62</p>
-                            <p className="text-sm font-data text-neutral mt-1">{t("greed")} 😏</p>
+                    {/* Market Data Cards — only show cards with real API data */}
+                    {(isLoading || hasAnyMarketData) && (
+                        <div className={`grid grid-cols-1 gap-4 mb-10 ${[fearGreed, vix, treasury].filter(Boolean).length === 1 ? "md:grid-cols-1 max-w-md" :
+                                [fearGreed, vix, treasury].filter(Boolean).length === 2 ? "md:grid-cols-2 max-w-2xl" :
+                                    "md:grid-cols-3"
+                            }`}>
+                            {isLoading && !data ? (
+                                <>
+                                    <SkeletonCard />
+                                    <SkeletonCard />
+                                    <SkeletonCard />
+                                </>
+                            ) : (
+                                <>
+                                    {/* Fear & Greed — SVG Gauge */}
+                                    {fearGreed && (
+                                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral flex flex-col items-center">
+                                            <div className="flex items-center gap-2 mb-3 self-start">
+                                                <Activity className="w-4 h-4 text-neutral" />
+                                                <span className="text-sm text-white/50">{t("fearGreed")}</span>
+                                            </div>
+                                            <FearGreedGauge value={fearGreed.value} />
+                                            <p className="text-3xl font-bold font-data text-white mt-2">{fearGreed.value}</p>
+                                            <p className={`text-sm font-data mt-1 ${getClassificationColor(fearGreed.classification)}`}>
+                                                {getClassificationLabel(fearGreed.classification)}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {/* VIX */}
+                                    {vix && (
+                                        <div className={`p-5 rounded-xl bg-cv-elevated border border-white/5 ${vix.value < 15 ? "signal-bullish" : vix.value < 25 ? "signal-neutral" : "signal-bearish"}`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <TrendingDown className={`w-4 h-4 ${vix.value < 15 ? "text-bullish" : vix.value < 25 ? "text-neutral" : "text-bearish"}`} />
+                                                <span className="text-sm text-white/50">VIX</span>
+                                            </div>
+                                            <p className="text-4xl font-bold font-data text-white">{vix.value.toFixed(1)}</p>
+                                            <p className={`text-sm font-data mt-1 ${vix.change < 0 ? "text-bullish" : "text-bearish"}`}>
+                                                {vix.change >= 0 ? "▲" : "▼"} {vix.change >= 0 ? "+" : ""}{vix.change.toFixed(1)}%
+                                            </p>
+                                        </div>
+                                    )}
+                                    {/* 10Y Yield */}
+                                    {treasury && (
+                                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <TrendingUp className="w-4 h-4 text-neutral" />
+                                                <span className="text-sm text-white/50">10Y Yield</span>
+                                            </div>
+                                            <p className="text-4xl font-bold font-data text-white">{treasury.value.toFixed(2)}%</p>
+                                            <p className="text-sm font-data text-neutral mt-1">Daily</p>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
-                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-bullish">
-                            <div className="flex items-center gap-2 mb-2">
-                                <TrendingDown className="w-4 h-4 text-bullish" />
-                                <span className="text-sm text-white/50">VIX</span>
-                            </div>
-                            <p className="text-4xl font-bold font-data text-white">15.2</p>
-                            <p className="text-sm font-data text-bullish mt-1">▼ -3.2% 😌</p>
-                        </div>
-                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral">
-                            <div className="flex items-center gap-2 mb-2">
-                                <TrendingUp className="w-4 h-4 text-neutral" />
-                                <span className="text-sm text-white/50">10Y Yield</span>
-                            </div>
-                            <p className="text-4xl font-bold font-data text-white">4.52%</p>
-                            <p className="text-sm font-data text-neutral mt-1">▲ +2bp 📈</p>
-                        </div>
-                    </div>
+                    )}
 
-                    {/* TradingView Chart Area */}
+                    {/* TradingView Chart Area — real embeds, always available */}
                     <div className="mb-12">
                         <div className="flex items-center gap-2 mb-4 overflow-x-auto">
                             {tvTabs.map((tab) => (
@@ -229,8 +245,8 @@ export function DashboardContent() {
                                     key={tab}
                                     onClick={() => setActiveChart(tab)}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${activeChart === tab
-                                            ? "bg-gold/20 text-gold border border-gold/30"
-                                            : "bg-white/[0.03] text-white/40 border border-white/5 hover:text-white/60 hover:bg-white/[0.06]"
+                                        ? "bg-gold/20 text-gold border border-gold/30"
+                                        : "bg-white/[0.03] text-white/40 border border-white/5 hover:text-white/60 hover:bg-white/[0.06]"
                                         }`}
                                 >
                                     {tab}
@@ -238,58 +254,6 @@ export function DashboardContent() {
                             ))}
                         </div>
                         <TradingViewChart symbol={activeChart} />
-                    </div>
-
-                    {/* Market Overview Grid */}
-                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-5">
-                        {t("marketOverview")}
-                    </h2>
-                    <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-                        {marketAssets.map((asset) => (
-                            <TiltCard key={asset.symbol}>
-                                <div className={`p-5 rounded-xl bg-cv-elevated border border-white/5 h-full ${signalBorder[asset.signal]}`}>
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div>
-                                            <span className="text-xs text-white/40 uppercase tracking-wider">{asset.symbol}</span>
-                                            <p className="text-sm text-white/60">{asset.name}</p>
-                                        </div>
-                                        <MiniSparkline signal={asset.signal} points={asset.sparkline} />
-                                    </div>
-                                    <p className="text-2xl font-bold font-data text-white">{asset.price}</p>
-                                    <p className={`text-sm font-data mt-1 ${signalColor[asset.signal]}`}>
-                                        {asset.change.startsWith("-") ? "▼" : "▲"} {asset.change}
-                                    </p>
-                                </div>
-                            </TiltCard>
-                        ))}
-                    </div>
-
-                    {/* Key Levels */}
-                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-5">
-                        {t("keyLevels")}
-                    </h2>
-                    <div ref={levelsRef} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-                        {keyLevels.map((level) => (
-                            <div
-                                key={level.asset}
-                                className="p-5 rounded-xl bg-cv-elevated border border-white/5"
-                            >
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="font-semibold text-white/90">{level.asset}</span>
-                                    <span className="text-xs text-white/30">{level.note}</span>
-                                </div>
-                                <div className="flex gap-6">
-                                    <div>
-                                        <span className="text-xs text-white/40 uppercase">{t("support")}</span>
-                                        <p className="text-lg font-data text-bullish font-semibold">{level.support}</p>
-                                    </div>
-                                    <div>
-                                        <span className="text-xs text-white/40 uppercase">{t("resistance")}</span>
-                                        <p className="text-lg font-data text-bearish font-semibold">{level.resistance}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
                     </div>
 
                     {/* Quick Links */}

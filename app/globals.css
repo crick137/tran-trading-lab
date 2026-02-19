@@ -118,6 +118,10 @@
     margin: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 html,
 body {
     max-width: 100vw;
@@ -154,7 +158,7 @@ body {
     font-family: var(--font-kr), var(--font-sans);
 }
 
-/* Typography */
+/* Typography — Hierarchy */
 h1,
 h2,
 h3,
@@ -165,6 +169,43 @@ h6 {
     font-weight: 700;
     letter-spacing: -0.02em;
     color: var(--text-primary);
+}
+
+/* Font-size hierarchy utility classes */
+.text-hero {
+    font-size: clamp(3rem, 6vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    font-weight: 800;
+}
+
+.text-section {
+    font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+}
+
+.text-card-title {
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+}
+
+.text-body {
+    font-size: 1rem;
+    line-height: 1.75;
+    letter-spacing: 0;
+    font-weight: 400;
+}
+
+.text-label {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    text-transform: uppercase;
 }
 
 [lang="ko"] h1,
@@ -291,15 +332,23 @@ h6 {
     transition: transform 0.3s ease-out,
         box-shadow 0.3s ease-out,
         border-color 0.3s ease-out;
+    will-change: transform;
 }
 
 .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
 .light .card-hover:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Focus ring for keyboard navigation */
+.focus-ring:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 /* Border glow on hover */
@@ -359,6 +408,7 @@ h6 {
 ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 3px;
+    transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -408,6 +458,11 @@ code {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
+}
+
+/* Tabular nums — for any numeric element that needs consistent column alignment */
+.font-tabular {
+    font-variant-numeric: tabular-nums;
 }
 
 /* === LIGHT MODE — text overrides for tailwind text-white classes === */

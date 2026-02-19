@@ -20,15 +20,15 @@ const ParticlesCanvas = dynamic(
 );
 
 const socialLinks = [
-    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
-    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "TG EN" },
-    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "TG KR" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
+    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X", brandColor: "rgba(255,255,255,0.85)" },
+    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", brandColor: "rgba(255,255,255,0.85)" },
+    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "TG EN", brandColor: "#26A5E4" },
+    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "TG KR", brandColor: "#26A5E4" },
+    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", brandColor: "#FEE500" },
 ];
 
 const stats = [
-    { value: "800+", numericTarget: 800, suffix: "+", label: "Traders" },
+    { value: "2022", numericTarget: null, suffix: "", label: "Since" },
     { value: "5", numericTarget: 5, suffix: "", label: "Platforms" },
     { value: "EN/KR", numericTarget: null, suffix: "", label: "Bilingual" },
 ];
@@ -94,7 +94,7 @@ export function Hero() {
     return (
         <section
             ref={sectionRef}
-            className="relative min-h-[85vh] flex items-center justify-center overflow-hidden"
+            className="relative min-h-[75vh] flex items-center justify-center overflow-hidden"
         >
             {/* Layer 1: Aurora Background */}
             <div aria-hidden="true">
@@ -112,7 +112,7 @@ export function Hero() {
             {/* Content with scroll parallax */}
             <motion.div
                 style={{ y: contentY, opacity: contentOpacity }}
-                className="relative z-10 max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center"
+                className="relative z-10 max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center"
             >
                 {/* Badge */}
                 <motion.div
@@ -206,7 +206,7 @@ export function Hero() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.4 }}
-                    className="flex justify-center gap-2 mb-6"
+                    className="flex justify-center gap-3 mb-6"
                 >
                     {socialLinks.map((social) => (
                         <a
@@ -214,10 +214,22 @@ export function Hero() {
                             href={social.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="w-9 h-9 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-white/30 hover:text-gold hover:border-gold/30 hover:bg-white/[0.08] transition-all"
+                            className="flex flex-col items-center gap-1 group"
                             aria-label={social.label}
                         >
-                            {social.icon}
+                            <span
+                                className="w-9 h-9 rounded-lg border flex items-center justify-center transition-all group-hover:scale-110"
+                                style={{
+                                    background: `${social.brandColor}08`,
+                                    borderColor: `${social.brandColor}20`,
+                                    color: `${social.brandColor}99`,
+                                }}
+                            >
+                                {social.icon}
+                            </span>
+                            <span className="text-[10px] text-white/30 group-hover:text-white/60 transition-colors">
+                                {social.label}
+                            </span>
                         </a>
                     ))}
                 </motion.div>
@@ -227,19 +239,24 @@ export function Hero() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.5 }}
-                    className="flex justify-center gap-8 sm:gap-12"
+                    className="flex justify-center items-center gap-6 sm:gap-8"
                 >
-                    {stats.map((stat) => (
-                        <div key={stat.label} className="text-center">
-                            <p className="text-xl sm:text-2xl font-bold font-data text-gradient-gold">
-                                {stat.numericTarget !== null ? (
-                                    <CountUp target={stat.numericTarget} suffix={stat.suffix} />
-                                ) : (
-                                    stat.value
-                                )}
-                            </p>
-                            <p className="text-xs text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</p>
-                        </div>
+                    {stats.map((stat, index) => (
+                        <>
+                            {index > 0 && (
+                                <div key={`divider-${index}`} className="h-8 w-px bg-white/10" />
+                            )}
+                            <div key={stat.label} className="text-center">
+                                <p className="text-2xl sm:text-3xl font-bold font-data text-gradient-gold">
+                                    {stat.numericTarget !== null ? (
+                                        <CountUp target={stat.numericTarget} suffix={stat.suffix} />
+                                    ) : (
+                                        stat.value
+                                    )}
+                                </p>
+                                <p className="text-xs text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</p>
+                            </div>
+                        </>
                     ))}
                 </motion.div>
             </motion.div>

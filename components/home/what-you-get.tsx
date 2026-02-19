@@ -22,17 +22,17 @@ export function WhatYouGet() {
     });
 
     return (
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
-                <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider text-center mb-8">
+                <h2 className="text-label text-white/40 text-center mb-10">
                     {t("whatYouGetTitle")}
                 </h2>
 
                 <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     {features.map((feature) => {
                         const content = (
-                            <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover h-full">
-                                <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center mb-4">
+                            <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 border-t-2 border-t-gold/40 card-hover h-full">
+                                <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center mb-4 shadow-[0_0_12px_rgba(255,165,0,0.15)]">
                                     <feature.icon className="w-5 h-5 text-gold" />
                                 </div>
                                 <h3 className="text-base font-semibold text-white/90 mb-2">

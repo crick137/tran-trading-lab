@@ -61,16 +61,16 @@ export function CommunitySection() {
     });
 
     return (
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-10">
                     <Lamp>
-                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider">
+                        <h2 className="text-label text-white/40">
                             {t("communityTitle")}
                         </h2>
                     </Lamp>
-                    <p className="text-sm text-white/30 mt-2">
+                    <p className="text-sm text-white/30 mt-3">
                         {t("communitySubtitle")}
                     </p>
                 </div>

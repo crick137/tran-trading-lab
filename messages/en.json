@@ -55,7 +55,7 @@
         "subscribeCta": "Get TTL's Weekly Analysis — Free",
         "subscribeDescription": "Every Monday: Market outlook, risk levels, and 1 Bold Call.",
         "subscribePlaceholder": "your@email.com",
-        "subscribeButton": "Subscribe",
+        "subscribeButton": "Get Free Analysis →",
         "subscribeSuccess": "You're in! Check your inbox.",
         "subscribeErrorEmpty": "Please enter your email address.",
         "subscribeErrorInvalid": "Please enter a valid email address.",
@@ -116,6 +116,7 @@
     "switchboard": {
         "title": "Weekly Switchboard",
         "subtitle": "8-asset signal board updated every Monday.",
+        "description": "8 key assets, one signal each. Risk-On, Risk-Off, or Neutral — our recommended weekly stance at a glance.",
         "week": "Week of Feb 17, 2026",
         "summary": "This Week:",
         "riskOn": "Risk-On",
@@ -348,6 +349,21 @@
                 "category": "Content",
                 "question": "How often is content updated?",
                 "answer": "Blog posts 2-3 times per week. Switchboard every Monday. Bold Calls as they arise. Dashboard data refreshes throughout the day."
+            },
+            {
+                "category": "Strategy",
+                "question": "When is the Switchboard updated?",
+                "answer": "Every Monday morning. Each of the 8 assets (SPX, BTC, Gold, 10Y, DXY, Oil, VIX, KOSPI) receives a fresh Risk-On, Risk-Off, or Neutral signal for the week ahead."
+            },
+            {
+                "category": "General",
+                "question": "Which markets do you cover?",
+                "answer": "We cover US equities (S&P 500), crypto (BTC/ETH), commodities (Gold, Oil), macro (DXY, 10Y Yield, VIX), and Asian markets (KOSPI). All analysis is bilingual — English and Korean."
+            },
+            {
+                "category": "General",
+                "question": "Is this suitable for beginners?",
+                "answer": "Absolutely. Our content is designed from zero to advanced. Start with the Learning Hub and Glossary, then follow the weekly Switchboard and Daily Briefings as you build confidence."
             }
         ]
     },
@@ -419,8 +435,8 @@
         "badge": "About TranTradingLab",
         "heroLine1": "Risk-First Analysis for",
         "heroLine2": "Global Traders",
-        "heroDescription": "TranTradingLab is a bilingual market analysis platform providing professional insights and trading strategies. Since 2022, we've grown alongside 800+ traders worldwide.",
-        "statMembers": "800+",
+        "heroDescription": "TranTradingLab is a bilingual market analysis platform providing professional insights and trading strategies. Join our growing trading community.",
+        "statMembers": "Growing",
         "statMembersLabel": "Active Traders",
         "statContent": "EN & KR",
         "statContentLabel": "Bilingual Coverage",

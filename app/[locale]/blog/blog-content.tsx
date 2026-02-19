@@ -146,10 +146,38 @@ function BlogInner() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-16">
-                        <p className="text-white/40">
-                            {t("noResults")}
+                    <div className="text-center py-16 max-w-lg mx-auto">
+                        <div className="w-14 h-14 mx-auto rounded-xl bg-gold/10 flex items-center justify-center mb-6">
+                            <FileText className="w-7 h-7 text-gold" />
+                        </div>
+                        <h2 className="text-xl font-bold text-white mb-3">
+                            {t("emptyTitle")}
+                        </h2>
+                        <p className="text-sm text-white/40 leading-relaxed mb-6">
+                            {t("emptySubtitle")}
                         </p>
+                        <p className="text-sm text-white/40 mb-8">
+                            {t("telegramCta")}
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <Link
+                                href={`/${locale}/dashboard`}
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-semibold transition-all hover:shadow-lg hover:shadow-gold/20"
+                                style={{ background: "var(--gradient-cta)" }}
+                            >
+                                <BarChart3 className="w-4 h-4" />
+                                {tc("dashboard")}
+                            </Link>
+                            <a
+                                href="https://t.me/TranTradingLabEN"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white/70 hover:text-white hover:border-gold/30 font-medium transition-all"
+                            >
+                                <Send className="w-4 h-4" />
+                                {tc("joinTelegram")}
+                            </a>
+                        </div>
                     </div>
                 )}
             </div>

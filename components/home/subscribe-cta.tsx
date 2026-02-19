@@ -60,7 +60,7 @@ export function SubscribeCTA() {
     };
 
     return (
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto" ref={sectionRef}>
                 <div
                     className="relative p-8 md:p-12 rounded-2xl bg-cv-elevated border border-gold/20 overflow-hidden"
@@ -104,8 +104,8 @@ export function SubscribeCTA() {
                                         }}
                                         placeholder={t("subscribePlaceholder")}
                                         className={`flex-1 px-4 py-3 rounded-lg bg-white/5 border text-white text-sm placeholder:text-white/30 focus-visible:outline-none transition-colors ${status === "error"
-                                                ? "border-bearish/50 focus:border-bearish/70"
-                                                : "border-white/10 focus:border-gold/40"
+                                            ? "border-bearish/50 focus:border-bearish/70"
+                                            : "border-white/10 focus:border-gold/40"
                                             }`}
                                         required
                                     />
@@ -128,7 +128,7 @@ export function SubscribeCTA() {
                             </>
                         )}
 
-                        <p className="text-xs text-white/20 mt-4">
+                        <p className="text-xs text-white/50 mt-4">
                             {t("subscribeDisclaimer")}
                         </p>
                     </div>

@@ -18,7 +18,7 @@ export function useGsapScroll<T extends HTMLElement>(
 ) {
     const ref = useRef<T>(null);
     const {
-        from = { opacity: 0, y: 30 },
+        from = { opacity: 0, y: 20 },
         to = { opacity: 1, y: 0 },
         trigger,
         start = "top 85%",

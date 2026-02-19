@@ -186,12 +186,15 @@ export function Navbar() {
                                                         <Link
                                                             key={item.href}
                                                             href={item.href}
-                                                            className={`block px-4 py-2 text-sm transition-colors ${isActive(item.href)
-                                                                    ? "text-gold bg-gold/5"
-                                                                    : "text-white/60 hover:text-white hover:bg-white/5"
+                                                            className={`group/dd block px-4 py-2 text-sm transition-colors relative ${isActive(item.href)
+                                                                ? "text-gold bg-gold/5"
+                                                                : "text-white/60 hover:text-white hover:bg-white/5"
                                                                 }`}
                                                         >
                                                             {item.label}
+                                                            {!isActive(item.href) && (
+                                                                <span className="absolute bottom-1 left-4 right-4 h-px bg-gold/40 scale-x-0 group-hover/dd:scale-x-100 transition-transform duration-200 origin-left" />
+                                                            )}
                                                         </Link>
                                                     ))}
                                                 </motion.div>
@@ -287,8 +290,8 @@ export function Navbar() {
                                         key={item.href}
                                         href={item.href}
                                         className={`py-2.5 px-3 rounded-md text-sm transition-colors ${isActive(item.href)
-                                                ? "text-gold bg-gold/5"
-                                                : "text-white/60 hover:text-white hover:bg-white/5"
+                                            ? "text-gold bg-gold/5"
+                                            : "text-white/60 hover:text-white hover:bg-white/5"
                                             }`}
                                     >
                                         {item.label}

@@ -28,7 +28,7 @@ const COLORS = [
 export function ParticlesCanvas({
     className,
     particleCount,
-    connectionDistance = 120,
+    connectionDistance = 100,
 }: ParticlesCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const animationRef = useRef<number>(0);
@@ -39,8 +39,8 @@ export function ParticlesCanvas({
 
     const getParticleCount = useCallback(() => {
         if (particleCount) return particleCount;
-        if (typeof window === "undefined") return 60;
-        return window.innerWidth < 768 ? 25 : 70;
+        if (typeof window === "undefined") return 40;
+        return window.innerWidth < 768 ? 15 : 40;
     }, [particleCount]);
 
     const initParticles = useCallback(
@@ -54,9 +54,9 @@ export function ParticlesCanvas({
                 particles.push({
                     x: Math.random() * width,
                     y: Math.random() * height,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: (Math.random() - 0.5) * 0.3,
-                    size: 1 + Math.random() * 1.5,
+                    vx: (Math.random() - 0.5) * 0.2,
+                    vy: (Math.random() - 0.5) * 0.2,
+                    size: 1 + Math.random() * 1,
                     color: colorTemplate.replace("ALPHA", String(alpha)),
                 });
             }
@@ -177,7 +177,7 @@ export function ParticlesCanvas({
                     if (distSq < connDistSq) {
                         const dist = Math.sqrt(distSq);
                         const opacity =
-                            (1 - dist / connectionDistance) * 0.15;
+                            (1 - dist / connectionDistance) * 0.1;
                         ctx.beginPath();
                         ctx.moveTo(a.x, a.y);
                         ctx.lineTo(b.x, b.y);

@@ -43,11 +43,11 @@ export function LatestArticles() {
         }));
 
     return (
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <section className="py-section-mobile lg:py-section px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto" ref={sectionRef}>
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between mb-10">
                     <Lamp>
-                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider">
+                        <h2 className="text-label text-white/40">
                             {t("latestArticles")}
                         </h2>
                     </Lamp>

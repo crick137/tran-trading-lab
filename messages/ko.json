@@ -55,7 +55,7 @@
         "subscribeCta": "TTL 주간 분석 무료 구독",
         "subscribeDescription": "매주 월요일: 시장 전망, 리스크 레벨, Bold Call 1건.",
         "subscribePlaceholder": "your@email.com",
-        "subscribeButton": "구독하기",
+        "subscribeButton": "무료 분석 받기 →",
         "subscribeSuccess": "구독 완료! 이메일을 확인하세요.",
         "subscribeErrorEmpty": "이메일 주소를 입력해주세요.",
         "subscribeErrorInvalid": "유효한 이메일 주소를 입력해주세요.",
@@ -116,6 +116,7 @@
     "switchboard": {
         "title": "주간 스위치보드",
         "subtitle": "매주 월요일 업데이트되는 8자산 시그널 보드.",
+        "description": "8개 핵심 자산, 각각 하나의 시그널. 리스크온, 리스크오프, 중립 — 한눈에 보는 주간 추천 포지션.",
         "week": "2026년 2월 17일 주간",
         "summary": "이번 주:",
         "riskOn": "리스크온",
@@ -348,6 +349,21 @@
                 "category": "콘텐츠",
                 "question": "콘텐츠는 얼마나 자주 업데이트되나요?",
                 "answer": "블로그 글은 주 2-3회. 스위치보드는 매주 월요일. Bold Calls는 수시로. 대시보드 데이터는 하루 종일 갱신됩니다."
+            },
+            {
+                "category": "전략",
+                "question": "스위치보드는 언제 업데이트되나요?",
+                "answer": "매주 월요일 아침에 업데이트됩니다. 8개 자산(SPX, BTC, Gold, 10Y, DXY, Oil, VIX, KOSPI) 각각에 새로운 리스크온, 리스크오프, 또는 중립 시그널이 부여됩니다."
+            },
+            {
+                "category": "일반",
+                "question": "어떤 시장을 다루나요?",
+                "answer": "미국 주식(S&P 500), 암호화폐(BTC/ETH), 원자재(금, 원유), 매크로(달러 인덱스, 미국 10년물, VIX), 아시아 시장(KOSPI)을 다룹니다. 모든 분석은 한국어와 영어로 제공됩니다."
+            },
+            {
+                "category": "일반",
+                "question": "초보자에게도 적합한가요?",
+                "answer": "물론입니다. 콘텐츠는 입문부터 고급까지 설계되어 있습니다. 학습 허브와 용어집으로 시작한 후, 주간 스위치보드와 데일리 브리핑을 따라가며 실력을 키워보세요."
             }
         ]
     },
@@ -419,8 +435,8 @@
         "badge": "About TranTradingLab",
         "heroLine1": "한국 투자자를 위한",
         "heroLine2": "전문 금융 교육 플랫폼",
-        "heroDescription": "TranTradingLab은 한국 개인 투자자들에게 전문적인 시장 분석과 트레이딩 전략을 제공하는 교육 플랫폼입니다. 2022년 시작 이래로 800명 이상의 투자자들과 함께 성장해왔습니다.",
-        "statMembers": "800+",
+        "heroDescription": "TranTradingLab은 한국 개인 투자자들에게 전문적인 시장 분석과 트레이딩 전략을 제공하는 교육 플랫폼입니다. 성장하는 트레이딩 커뮤니티에 참여하세요.",
+        "statMembers": "성장 중",
         "statMembersLabel": "활성 트레이더",
         "statContent": "EN & KR",
         "statContentLabel": "이중 언어 지원",

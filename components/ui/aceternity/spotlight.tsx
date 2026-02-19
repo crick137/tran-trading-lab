@@ -41,7 +41,7 @@ export function Spotlight({ className, size = 400 }: SpotlightProps) {
                     width: size,
                     height: size,
                     opacity: isVisible ? 1 : 0,
-                    background: `radial-gradient(circle at center, rgba(255, 165, 0, 0.06) 0%, rgba(255, 165, 0, 0.02) 30%, transparent 70%)`,
+                    background: `radial-gradient(circle at center, rgba(255, 165, 0, 0.04) 0%, rgba(255, 165, 0, 0.01) 30%, transparent 70%)`,
                     borderRadius: "50%",
                 }}
             />

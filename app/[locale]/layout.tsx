@@ -118,6 +118,7 @@ export default async function LocaleLayout({
                     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css"
                 />
                 <link rel="alternate" type="application/rss+xml" href="/feed.xml" title="Tran Trading Lab" />
+                <link rel="manifest" href="/site.webmanifest" />
             </head>
             <body className="noise-overlay min-h-screen antialiased">
                 <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-gold focus:text-cv-void focus:rounded-lg focus:font-semibold">

@@ -40,6 +40,7 @@ export function LiveTicker() {
 
     const coins = data?.coins;
 
+    // Only show ticker when we have real API data — no hardcoded prices
     if (!coins || coins.length === 0) return null;
 
     const items = coins.map((c) => ({

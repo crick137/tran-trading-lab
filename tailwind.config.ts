@@ -111,7 +111,13 @@ const config: Config = {
             },
             spacing: {
                 "section": "120px",
-                "section-mobile": "64px",
+                "section-mobile": "80px",
+            },
+            fontSize: {
+                "hero": ["clamp(3rem, 6vw, 5.5rem)", { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "800" }],
+                "section-title": ["clamp(1.75rem, 3.5vw, 2.75rem)", { lineHeight: "1.15", letterSpacing: "-0.025em", fontWeight: "700" }],
+                "card-title": ["clamp(1.125rem, 1.5vw, 1.375rem)", { lineHeight: "1.3", letterSpacing: "-0.015em", fontWeight: "600" }],
+                "label": ["0.75rem", { lineHeight: "1.5", letterSpacing: "0.05em", fontWeight: "500" }],
             },
         },
     },

@@ -125,7 +125,7 @@ export function AboutContent() {
 
                 {/* Mission */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16" ref={missionRef}>
-                    <div className="p-8 rounded-2xl bg-cv-elevated border border-white/5">
+                    <div className="p-8 rounded-2xl bg-cv-elevated border border-white/5 border-l-4 border-l-gold/40">
                         <h2 className="text-2xl font-bold text-white mb-4">
                             {t("missionTitle")}
                         </h2>

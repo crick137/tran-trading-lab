@@ -6,7 +6,8 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
-import { Send, MessageCircle, ArrowRight, Globe, Rocket } from "lucide-react";
+import { ArrowRight, Globe, Rocket } from "lucide-react";
+import { TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
 export function CommunityContent() {
     const locale = useLocale();
@@ -21,7 +22,7 @@ export function CommunityContent() {
             label: t("tgEnLabel"),
             description: t("tgEnDesc"),
             descriptionKr: t("tgEnDescKr"),
-            icon: Send,
+            icon: TelegramIcon,
             href: "https://t.me/TranTradingLabEN",
             iconColor: "text-[#29b6f6]",
             borderHover: "hover:border-[#29b6f6]/30",
@@ -31,7 +32,7 @@ export function CommunityContent() {
             label: t("tgKrLabel"),
             description: t("tgKrDesc"),
             descriptionKr: t("tgKrDescKr"),
-            icon: Send,
+            icon: TelegramIcon,
             href: "https://t.me/TranTradingLabKR",
             iconColor: "text-[#29b6f6]",
             borderHover: "hover:border-[#29b6f6]/30",
@@ -41,7 +42,7 @@ export function CommunityContent() {
             label: t("kakaoLabel"),
             description: t("kakaoDesc"),
             descriptionKr: t("kakaoDescKr"),
-            icon: MessageCircle,
+            icon: KakaoIcon,
             href: "https://invite.kakao.com/tc/luxHFht3xL",
             iconColor: "text-[#fee500]",
             borderHover: "hover:border-[#fee500]/30",

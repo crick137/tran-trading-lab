@@ -7,15 +7,13 @@ import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { MovingBorder } from "@/components/ui/aceternity/moving-border";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
-import { BarChart3, ArrowRight, Info } from "lucide-react";
+import { BarChart3, ArrowRight, Info, AlertCircle } from "lucide-react";
 
 type Signal = "bullish" | "bearish" | "neutral";
 
 interface SwitchboardAsset {
     symbol: string;
     name: string;
-    price: string;
-    change: string;
     signal: Signal;
     analysis: string;
 }
@@ -24,66 +22,50 @@ const switchboardData: SwitchboardAsset[] = [
     {
         symbol: "SPX",
         name: "S&P 500",
-        price: "6,117",
-        change: "+0.24%",
         signal: "bullish",
-        analysis: "Holding above 20-day MA. Breadth improving. Risk-on bias maintained above 6,050.",
+        analysis: "Holding above 20-day MA. Breadth improving. Risk-on bias maintained.",
     },
     {
         symbol: "BTC",
         name: "Bitcoin",
-        price: "95,432",
-        change: "-1.20%",
         signal: "bearish",
-        analysis: "Rejected at 100K psychological level. Funding rates elevated. Watch 90K support.",
+        analysis: "Rejected at psychological level. Funding rates elevated. Watch key support.",
     },
     {
         symbol: "Gold",
         name: "Gold",
-        price: "2,931",
-        change: "+0.50%",
         signal: "neutral",
-        analysis: "Consolidating near ATH. Central bank buying continues. Range 2,880-2,960.",
+        analysis: "Consolidating near ATH. Central bank buying continues.",
     },
     {
         symbol: "10Y",
         name: "10Y Yield",
-        price: "4.52%",
-        change: "+2bp",
         signal: "bullish",
-        analysis: "Rising yields but orderly. Watch 4.65% for equity pressure. Curve steepening.",
+        analysis: "Rising yields but orderly. Curve steepening.",
     },
     {
         symbol: "DXY",
         name: "US Dollar",
-        price: "106.8",
-        change: "+0.30%",
         signal: "bullish",
-        analysis: "Strong above 106. Rate differential widening. Headwind for EM and commodities.",
+        analysis: "Strong trend. Rate differential widening. Headwind for EM and commodities.",
     },
     {
         symbol: "Oil",
         name: "Crude Oil",
-        price: "71.2",
-        change: "-1.50%",
         signal: "bearish",
-        analysis: "Demand concerns outweighing supply cuts. Break below 70 targets 65 zone.",
+        analysis: "Demand concerns outweighing supply cuts.",
     },
     {
         symbol: "VIX",
         name: "VIX",
-        price: "15.2",
-        change: "-3.10%",
         signal: "bullish",
-        analysis: "Low vol = complacency or calm? Below 16 is risk-on. Term structure in contango.",
+        analysis: "Low vol environment. Term structure in contango. Risk-on signal.",
     },
     {
         symbol: "KOSPI",
         name: "KOSPI",
-        price: "2,612",
-        change: "+0.30%",
         signal: "neutral",
-        analysis: "Sideways between 2,550-2,680. Foreign flows mixed. Samsung earnings key catalyst.",
+        analysis: "Sideways range. Foreign flows mixed. Earnings key catalyst.",
     },
 ];
 
@@ -133,7 +115,7 @@ function getRiskInsight(counts: { bullish: number; bearish: number; neutral: num
 /* SVG gauge for Risk Meter */
 function RiskGauge({ score }: { score: number }) {
     const clampedScore = Math.min(100, Math.max(0, score));
-    const angle = -90 + (clampedScore / 100) * 180;
+    const angle = 180 + (clampedScore / 100) * 180; // SVG Y-down: 180°=left → 270°=up → 360°=right
     const color = getRiskColor(score);
 
     return (
@@ -228,7 +210,8 @@ export function SwitchboardContent() {
                                 <p className="text-sm text-white/40">{t("subtitle")}</p>
                             </div>
                         </div>
-                        <p className="text-xs text-white/30 mt-4">{t("week")}</p>
+                        <p className="text-sm text-white/50 mt-3 max-w-2xl">{t("description")}</p>
+                        <p className="text-xs text-white/30 mt-2">{t("week")}</p>
                     </div>
 
                     {/* TTL Risk Meter */}
@@ -258,6 +241,28 @@ export function SwitchboardContent() {
                                 <p className="text-sm text-white/50 leading-relaxed">
                                     <strong className="text-white/70">Key Insight:</strong> {insight}
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* How to Read Signals — Legend (always visible) */}
+                    <div className="p-5 rounded-xl bg-cv-elevated border border-gold/10 mb-10">
+                        <div className="flex items-center gap-2 mb-3">
+                            <AlertCircle className="w-4 h-4 text-gold" />
+                            <h3 className="text-sm font-semibold text-white/70">{t("legendTitle")}</h3>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-white/40">
+                            <div className="flex items-start gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-bullish mt-0.5 shrink-0" />
+                                <span><strong className="text-bullish">Risk-On:</strong> {t("legendBullish")}</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-bearish mt-0.5 shrink-0" />
+                                <span><strong className="text-bearish">Risk-Off:</strong> {t("legendBearish")}</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <div className="w-2.5 h-2.5 rounded-full bg-neutral mt-0.5 shrink-0" />
+                                <span><strong className="text-neutral">Neutral:</strong> {t("legendNeutral")}</span>
                             </div>
                         </div>
                     </div>
@@ -296,17 +301,12 @@ export function SwitchboardContent() {
                                                     <p className="text-sm text-white/70">{asset.name}</p>
                                                 </div>
                                             </div>
-                                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>
+                                            <span className={`text-sm font-bold px-3 py-1.5 rounded-full ${cfg.bg} ${cfg.color}`}>
                                                 {cfg.label}
                                             </span>
                                         </div>
 
-                                        <div className="flex items-end justify-between mb-3">
-                                            <p className="text-2xl font-bold font-data text-white">{asset.price}</p>
-                                            <p className={`text-sm font-data ${cfg.color}`}>
-                                                {asset.change.startsWith("-") ? "▼" : "▲"} {asset.change}
-                                            </p>
-                                        </div>
+
 
                                         <p className="text-xs text-white/40 leading-relaxed">{asset.analysis}</p>
                                     </div>
@@ -315,27 +315,6 @@ export function SwitchboardContent() {
                         })}
                     </div>
 
-                    {/* Legend */}
-                    <div ref={legendRef} className="p-5 rounded-xl bg-cv-elevated border border-white/5 mb-10">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Info className="w-4 h-4 text-white/40" />
-                            <h3 className="text-sm font-semibold text-white/70">{t("legendTitle")}</h3>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-white/40">
-                            <div className="flex items-start gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full bg-bullish mt-0.5 shrink-0" />
-                                <span><strong className="text-bullish">Risk-On:</strong> {t("legendBullish")}</span>
-                            </div>
-                            <div className="flex items-start gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full bg-bearish mt-0.5 shrink-0" />
-                                <span><strong className="text-bearish">Risk-Off:</strong> {t("legendBearish")}</span>
-                            </div>
-                            <div className="flex items-start gap-2">
-                                <div className="w-2.5 h-2.5 rounded-full bg-neutral mt-0.5 shrink-0" />
-                                <span><strong className="text-neutral">Neutral:</strong> {t("legendNeutral")}</span>
-                            </div>
-                        </div>
-                    </div>
 
                     {/* CTA */}
                     <Link

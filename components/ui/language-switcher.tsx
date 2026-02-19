@@ -26,18 +26,28 @@ export function LanguageSwitcher() {
     );
 
     return (
-        <div className={`flex items-center rounded-lg border border-white/10 dark:border-white/10 overflow-hidden text-xs ${isPending ? "opacity-60" : ""}`}>
-            {locales.map((l, i) => (
+        <div
+            className={`relative flex items-center rounded-lg border border-white/10 overflow-hidden text-xs transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}
+            role="radiogroup"
+            aria-label="Language"
+        >
+            {/* Sliding active indicator */}
+            <div
+                className="absolute top-0 bottom-0 w-1/2 bg-gold/15 border-r-0 transition-transform duration-300 ease-out"
+                style={{ transform: locale === "en" ? "translateX(0)" : "translateX(100%)" }}
+            />
+            {locales.map((l) => (
                 <button
                     key={l.code}
                     onClick={() => switchTo(l.code)}
                     disabled={isPending}
-                    className={`px-2.5 py-1.5 transition-all ${locale === l.code
-                            ? "bg-gold/20 text-gold font-semibold"
-                            : "text-white/50 hover:text-white/80 hover:bg-white/5"
-                        } ${i > 0 ? "border-l border-white/10" : ""}`}
+                    role="radio"
+                    aria-checked={locale === l.code}
+                    className={`relative z-10 px-3 py-1.5 transition-colors duration-200 ${locale === l.code
+                            ? "text-gold font-semibold"
+                            : "text-white/50 hover:text-white/80"
+                        }`}
                     aria-label={`Switch to ${l.label}`}
-                    aria-current={locale === l.code ? "true" : undefined}
                 >
                     {l.label}
                 </button>

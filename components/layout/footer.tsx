@@ -85,12 +85,13 @@ export function Footer() {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`group relative w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}
+                                    className={`group relative flex flex-col items-center gap-1`}
                                     aria-label={social.label}
                                 >
-                                    {social.icon}
-                                    {/* Tooltip */}
-                                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-cv-surface text-[10px] text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    <span className={`w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}>
+                                        {social.icon}
+                                    </span>
+                                    <span className="text-[10px] text-white/25 group-hover:text-white/50 transition-colors">
                                         {social.label}
                                     </span>
                                 </a>

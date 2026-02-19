@@ -28,7 +28,6 @@ const boldCalls: BoldCall[] = [
         prediction: "SPX will NOT break 6,200 before March",
         deadline: "Mar 1, 2026",
         status: "active",
-        currentValue: "SPX: 6,117",
     },
     {
         id: "BC-046",
@@ -36,7 +35,6 @@ const boldCalls: BoldCall[] = [
         prediction: "BTC will retest 90,000 before 110,000",
         deadline: "Mar 10, 2026",
         status: "active",
-        currentValue: "BTC: 95,432",
     },
     {
         id: "BC-045",
@@ -185,10 +183,16 @@ export function BoldCallsContent() {
                                         <p className="text-white/90 font-medium mb-3">
                                             &ldquo;{call.prediction}&rdquo;
                                         </p>
-                                        <div className="flex flex-wrap gap-3 text-xs">
-                                            <span className="text-white/30">{t("deadline")}: {call.deadline}</span>
+                                        <div className="flex flex-wrap gap-4 text-sm mt-1">
+                                            <div>
+                                                <span className="text-white/30 text-xs uppercase tracking-wide">{t("deadline")}</span>
+                                                <p className="font-data font-semibold text-white/70">{call.deadline}</p>
+                                            </div>
                                             {call.currentValue && (
-                                                <span className="text-white/30">{t("current")}: <span className="font-data text-white/60">{call.currentValue}</span></span>
+                                                <div>
+                                                    <span className="text-white/30 text-xs uppercase tracking-wide">{t("current")}</span>
+                                                    <p className="font-data font-bold text-gold text-base">{call.currentValue}</p>
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -207,7 +211,8 @@ export function BoldCallsContent() {
                             return (
                                 <div
                                     key={call.id}
-                                    className="p-4 rounded-xl bg-cv-elevated border border-white/5 flex flex-col sm:flex-row sm:items-center gap-3"
+                                    className={`p-4 rounded-xl bg-cv-elevated border border-white/5 flex flex-col sm:flex-row sm:items-center gap-3 border-l-2 ${call.status === "won" ? "border-l-bullish" : call.status === "lost" ? "border-l-bearish" : "border-l-gold"
+                                        }`}
                                 >
                                     <div className="flex items-center gap-3 shrink-0">
                                         <span className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.bg} ${cfg.color}`}>

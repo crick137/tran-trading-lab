@@ -25,6 +25,7 @@ export function ArticleCTA() {
                     <Link
                         href={siteStats.telegramLink}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className="flex-shrink-0 px-6 py-3 rounded-lg bg-gradient-to-r from-gold to-gold-light text-cv-primary font-bold hover:shadow-lg hover:shadow-gold/20 transition-all flex items-center gap-2"
                     >
                         <Send className="w-5 h-5" />

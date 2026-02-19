@@ -13,14 +13,16 @@ export function ValueProposition() {
     const t = useTranslations("home");
 
     return (
-        <section className="py-6 px-4 sm:px-6 lg:px-8 border-b border-white/5">
-            <div className="flex items-center justify-center gap-6 sm:gap-8 max-w-2xl mx-auto">
+        <section className="py-8 px-4 sm:px-6 lg:px-8 border-b border-white/5">
+            <div className="flex items-center justify-center gap-8 sm:gap-10 max-w-2xl mx-auto">
                 {propositions.map((prop, i) => (
-                    <div key={prop.labelKey} className="flex items-center gap-2">
+                    <div key={prop.labelKey} className="flex items-center gap-2.5">
                         {i > 0 && (
-                            <div className="w-px h-4 bg-white/10 -ml-3 mr-1 sm:-ml-4 sm:mr-0 hidden sm:block" />
+                            <div className="w-px h-5 bg-white/10 -ml-4 mr-1 sm:-ml-5 sm:mr-0" />
                         )}
-                        <prop.icon className="w-4 h-4 text-gold shrink-0" />
+                        <div className="w-7 h-7 rounded-md bg-gold/10 flex items-center justify-center shrink-0">
+                            <prop.icon className="w-3.5 h-3.5 text-gold" />
+                        </div>
                         <span className="text-sm text-white/50 whitespace-nowrap">{t(prop.labelKey)}</span>
                     </div>
                 ))}
@@ -28,3 +30,4 @@ export function ValueProposition() {
         </section>
     );
 }
+

@@ -16,21 +16,6 @@ interface MarketData {
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-// Fallback data in case API is down
-const FALLBACK_DATA: MarketData = {
-    fearGreed: { value: 62, classification: "Greed" },
-    vix: { value: 15.2, change: -3.2 },
-    treasury: { value: 4.52 },
-};
-
-function getEmoji(value: number): string {
-    if (value <= 25) return "😨";
-    if (value <= 45) return "😟";
-    if (value <= 55) return "😐";
-    if (value <= 75) return "😏";
-    return "🤑";
-}
-
 function getSignal(classification: string): "bullish" | "bearish" | "neutral" {
     const lower = classification.toLowerCase();
     if (lower.includes("extreme fear") || lower.includes("fear")) return "bearish";
@@ -60,7 +45,6 @@ function SkeletonCard() {
                     <div className="w-4 h-4 rounded bg-white/10" />
                     <div className="w-20 h-4 rounded bg-white/10" />
                 </div>
-                <div className="w-6 h-6 rounded bg-white/10" />
             </div>
             <div className="flex items-end justify-between">
                 <div>
@@ -71,6 +55,15 @@ function SkeletonCard() {
             </div>
         </div>
     );
+}
+
+interface CardData {
+    id: string;
+    icon: React.ElementType;
+    value: string;
+    label: string;
+    change: string;
+    signal: "bullish" | "bearish" | "neutral";
 }
 
 export function MarketPulse() {
@@ -87,41 +80,48 @@ export function MarketPulse() {
         dedupingInterval: 60_000,
     });
 
-    // Use API data → fallback data (never show "—")
-    const resolved = data ?? (isLoading ? null : FALLBACK_DATA);
-    const fearGreed = resolved?.fearGreed ?? FALLBACK_DATA.fearGreed;
-    const vix = resolved?.vix ?? FALLBACK_DATA.vix;
-    const treasury = resolved?.treasury ?? FALLBACK_DATA.treasury;
+    // Build cards array — only include cards with real API data
+    const cards: CardData[] = [];
 
-    const cards = [
-        {
+    const fearGreed = data?.fearGreed;
+    if (fearGreed) {
+        cards.push({
             id: "fear-greed",
             icon: Activity,
-            value: fearGreed ? String(fearGreed.value) : "—",
+            value: String(fearGreed.value),
             label: "Fear & Greed",
-            change: fearGreed ? fearGreed.classification : "—",
-            emoji: fearGreed ? getEmoji(fearGreed.value) : "📊",
-            signal: fearGreed ? getSignal(fearGreed.classification) : ("neutral" as const),
-        },
-        {
+            change: fearGreed.classification,
+            signal: getSignal(fearGreed.classification),
+        });
+    }
+
+    const vix = data?.vix;
+    if (vix) {
+        cards.push({
             id: "vix",
             icon: TrendingDown,
-            value: vix ? vix.value.toFixed(1) : "—",
+            value: vix.value.toFixed(1),
             label: "VIX",
-            change: vix ? `${vix.change >= 0 ? "▲" : "▼"} ${vix.change >= 0 ? "+" : ""}${vix.change.toFixed(1)}%` : "—",
-            emoji: vix ? (vix.value < 15 ? "😌" : vix.value < 20 ? "😐" : vix.value < 30 ? "😟" : "😨") : "📊",
-            signal: vix ? (vix.value < 15 ? "bullish" : vix.value < 25 ? "neutral" : "bearish") as "bullish" | "bearish" | "neutral" : "neutral" as const,
-        },
-        {
+            change: `${vix.change >= 0 ? "▲" : "▼"} ${vix.change >= 0 ? "+" : ""}${vix.change.toFixed(1)}%`,
+            signal: vix.value < 15 ? "bullish" : vix.value < 25 ? "neutral" : "bearish",
+        });
+    }
+
+    const treasury = data?.treasury;
+    if (treasury) {
+        cards.push({
             id: "yield",
             icon: Percent,
-            value: treasury ? `${treasury.value.toFixed(2)}%` : "—",
+            value: `${treasury.value.toFixed(2)}%`,
             label: "10Y Yield",
-            change: treasury ? "Daily" : "—",
-            emoji: "📈",
-            signal: "neutral" as const,
-        },
-    ];
+            change: "Daily",
+            signal: "neutral",
+        });
+    }
+
+    // If loading and no data yet, show skeletons
+    // If loaded but no cards (all API calls returned null), hide the section entirely
+    if (!isLoading && cards.length === 0) return null;
 
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
@@ -132,7 +132,7 @@ export function MarketPulse() {
                     </h2>
                 </Lamp>
 
-                <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div ref={gridRef} className={`grid grid-cols-1 gap-4 ${cards.length === 1 ? "md:grid-cols-1 max-w-md mx-auto" : cards.length === 2 ? "md:grid-cols-2 max-w-2xl mx-auto" : "md:grid-cols-3"}`}>
                     {isLoading && !data ? (
                         <>
                             <SkeletonCard />
@@ -151,7 +151,6 @@ export function MarketPulse() {
                                             <card.icon className="w-4 h-4 text-white/40" />
                                             <span className="text-sm text-white/50">{card.label}</span>
                                         </div>
-                                        <span className="text-lg">{card.emoji}</span>
                                     </div>
 
                                     <div className="flex items-end justify-between">
