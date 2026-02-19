@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
+import { KitForm } from "@/components/ui/kit-form";
 import { ArrowRight, Users } from "lucide-react";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
@@ -119,6 +120,18 @@ export function CommunityContent() {
                             : "Five platforms. Two languages. One mission."}
                     </p>
                 </section>
+
+                {/* Email Subscription */}
+                <SectionReveal>
+                    <section className="max-w-xl mx-auto px-6 pb-8 text-center">
+                        <p className="text-sm text-[var(--text-tertiary)] mb-4">
+                            {locale === "ko"
+                                ? "매주 무료 시장 분석을 이메일로 받아보세요"
+                                : "Get our free weekly analysis by email"}
+                        </p>
+                        <KitForm />
+                    </section>
+                </SectionReveal>
 
                 {/* Platform Cards */}
                 <SectionReveal>
