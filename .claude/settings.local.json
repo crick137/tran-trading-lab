@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo:*)",
+      "Bash(git diff:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(dir:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "WebSearch",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(node -e:*)",
+      "Bash(python3:*)",
+      "Bash(find:*)",
+      "Bash(npm ls:*)"
+    ]
+  }
+}

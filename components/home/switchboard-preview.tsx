@@ -30,6 +30,45 @@ function SignalDot({ signal }: { signal: string }) {
     return <div className={`w-2.5 h-2.5 rounded-full ${color} ${glow} animate-glow-pulse`} />;
 }
 
+function MiniRiskBar({ data }: { data: SignalAsset[] }) {
+    const bullish = data.filter((a) => a.signal === "bullish").length;
+    const bearish = data.filter((a) => a.signal === "bearish").length;
+    const neutral = data.filter((a) => a.signal === "neutral").length;
+    const total = data.length;
+
+    // Risk score: 0 (all bearish) to 100 (all bullish)
+    const score = Math.round(50 + ((bullish - bearish) / total) * 50);
+    const label = score <= 30 ? "Risk-Off" : score <= 45 ? "Cautious" : score <= 55 ? "Neutral" : score <= 70 ? "Risk-On" : "Strong Risk-On";
+    const barColor = score <= 30 ? "bg-bearish" : score <= 45 ? "bg-orange-400" : score <= 55 ? "bg-neutral" : score <= 70 ? "bg-lime-400" : "bg-bullish";
+
+    return (
+        <div className="mb-5">
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-white/40 uppercase tracking-wider">Risk Meter</span>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs font-data font-bold text-white/70">{score}</span>
+                    <span className="text-[10px] text-white/30">/ 100</span>
+                </div>
+            </div>
+            {/* Track */}
+            <div className="relative h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                <div
+                    className={`absolute left-0 top-0 h-full rounded-full ${barColor} transition-all duration-1000 ease-out`}
+                    style={{ width: `${score}%` }}
+                />
+            </div>
+            <div className="flex items-center justify-between mt-1.5">
+                <div className="flex items-center gap-3 text-[10px]">
+                    <span className="text-bullish">{bullish} On</span>
+                    <span className="text-bearish">{bearish} Off</span>
+                    <span className="text-neutral">{neutral} Ntrl</span>
+                </div>
+                <span className="text-[10px] text-white/40 font-medium">{label}</span>
+            </div>
+        </div>
+    );
+}
+
 export function SwitchboardPreview() {
     const locale = useLocale();
     const t = useTranslations("home");
@@ -55,6 +94,9 @@ export function SwitchboardPreview() {
                             <p className="text-xs text-white/40">{t("switchboardWeek")}</p>
                         </div>
                     </div>
+
+                    {/* Mini Risk Meter */}
+                    <MiniRiskBar data={switchboardData} />
 
                     {/* Signal Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

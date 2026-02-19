@@ -7,6 +7,23 @@ import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { BarChart3, Target, Newspaper, Users, ArrowRight } from "lucide-react";
+import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+
+const socialLinksEn = [
+    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X", hoverColor: "hover:text-white" },
+    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", hoverColor: "hover:text-white" },
+    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN", hoverColor: "hover:text-[#26A5E4]" },
+    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR", hoverColor: "hover:text-[#26A5E4]" },
+    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", hoverColor: "hover:text-[#FEE500]" },
+];
+
+const socialLinksKo = [
+    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", hoverColor: "hover:text-[#FEE500]" },
+    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR", hoverColor: "hover:text-[#26A5E4]" },
+    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X", hoverColor: "hover:text-white" },
+    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", hoverColor: "hover:text-white" },
+    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN", hoverColor: "hover:text-[#26A5E4]" },
+];
 
 export function AboutContent() {
     const locale = useLocale();
@@ -14,8 +31,12 @@ export function AboutContent() {
     const heroRef = useGsapScroll<HTMLDivElement>();
     const statsRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
     const servicesRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.12 });
+    const philosophyRef = useGsapScroll<HTMLDivElement>();
     const missionRef = useGsapScroll<HTMLDivElement>();
+    const socialRef = useGsapScroll<HTMLDivElement>();
     const ctaRef = useGsapScroll<HTMLDivElement>();
+
+    const socialLinks = locale === "ko" ? socialLinksKo : socialLinksEn;
 
     const services = [
         { icon: BarChart3, titleKey: "serviceAnalysis" as const, descKey: "serviceAnalysisDesc" as const },
@@ -63,6 +84,21 @@ export function AboutContent() {
                     </div>
                 </section>
 
+                {/* Philosophy */}
+                <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16" ref={philosophyRef}>
+                    <div className="text-center">
+                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-8">
+                            {t("philosophyTitle")}
+                        </h2>
+                        <p className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gradient-gold tracking-tight mb-6">
+                            {t("philosophyQuote")}
+                        </p>
+                        <p className="text-lg text-white/40 max-w-xl mx-auto leading-relaxed">
+                            {t("philosophyDesc")}
+                        </p>
+                    </div>
+                </section>
+
                 {/* Services */}
                 <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-16">
                     <h2 className="text-2xl font-bold text-white text-center mb-12">
@@ -99,6 +135,30 @@ export function AboutContent() {
                         <p className="text-white/40 leading-relaxed">
                             {t("missionP2")}
                         </p>
+                    </div>
+                </section>
+
+                {/* Social Links */}
+                <section className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center" ref={socialRef}>
+                    <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-6">
+                        {t("connectTitle")}
+                    </h2>
+                    <div className="flex justify-center gap-3">
+                        {socialLinks.map((social) => (
+                            <a
+                                key={social.label}
+                                href={social.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`group relative w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}
+                                aria-label={social.label}
+                            >
+                                {social.icon}
+                                <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-cv-surface text-[10px] text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                    {social.label}
+                                </span>
+                            </a>
+                        ))}
                     </div>
                 </section>
 

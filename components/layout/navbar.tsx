@@ -163,9 +163,8 @@ export function Navbar() {
                                         onMouseLeave={handleDropdownLeave}
                                     >
                                         <button
-                                            className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors relative rounded-md hover:bg-white/5 ${
-                                                isDropdownActive(entry.items) ? "text-gold" : "text-white/60 hover:text-white"
-                                            }`}
+                                            className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors relative rounded-md hover:bg-white/5 ${isDropdownActive(entry.items) ? "text-gold" : "text-white/60 hover:text-white"
+                                                }`}
                                         >
                                             {entry.label}
                                             <ChevronDown className={`w-3 h-3 transition-transform ${openDropdown === entry.label ? "rotate-180" : ""}`} />
@@ -187,11 +186,10 @@ export function Navbar() {
                                                         <Link
                                                             key={item.href}
                                                             href={item.href}
-                                                            className={`block px-4 py-2 text-sm transition-colors ${
-                                                                isActive(item.href)
+                                                            className={`block px-4 py-2 text-sm transition-colors ${isActive(item.href)
                                                                     ? "text-gold bg-gold/5"
                                                                     : "text-white/60 hover:text-white hover:bg-white/5"
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {item.label}
                                                         </Link>
@@ -204,13 +202,15 @@ export function Navbar() {
                                     <Link
                                         key={entry.href}
                                         href={entry.href}
-                                        className={`px-3 py-2 text-sm transition-colors relative group rounded-md hover:bg-white/5 ${
-                                            isActive(entry.href) ? "text-gold" : "text-white/60 hover:text-white"
-                                        }`}
+                                        className={`px-3 py-2 text-sm transition-colors relative group rounded-md hover:bg-white/5 ${isActive(entry.href) ? "text-gold" : "text-white/60 hover:text-white"
+                                            }`}
                                     >
                                         {entry.label}
                                         {isActive(entry.href) ? (
-                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gold rounded-full" />
+                                            <>
+                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gold rounded-full" />
+                                                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-gold rounded-full" />
+                                            </>
                                         ) : (
                                             <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-gold transition-all duration-300 group-hover:w-3/4 rounded-full" />
                                         )}
@@ -286,11 +286,10 @@ export function Navbar() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`py-2.5 px-3 rounded-md text-sm transition-colors ${
-                                            isActive(item.href)
+                                        className={`py-2.5 px-3 rounded-md text-sm transition-colors ${isActive(item.href)
                                                 ? "text-gold bg-gold/5"
                                                 : "text-white/60 hover:text-white hover:bg-white/5"
-                                        }`}
+                                            }`}
                                     >
                                         {item.label}
                                     </Link>

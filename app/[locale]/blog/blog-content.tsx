@@ -2,17 +2,18 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ArticleCard } from "@/components/blog/article-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
-import { Search, FileText, Send, ArrowRight } from "lucide-react";
+import { Search, FileText, Send, ArrowRight, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { blogPosts } from "@/lib/blog-data";
 
 function BlogInner() {
     const searchParams = useSearchParams();
+    const locale = useLocale();
     const t = useTranslations("blog");
     const tc = useTranslations("common");
     const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +37,10 @@ function BlogInner() {
 
     // Handle Empty State
     if (!blogPosts || blogPosts.length === 0) {
+        const communityLink = locale === "ko"
+            ? { href: "https://invite.kakao.com/tc/luxHFht3xL", label: "카카오톡 참여" }
+            : { href: "https://t.me/TranTradingLabEN", label: tc("joinTelegramChannel") };
+
         return (
             <main className="pt-24 pb-16 min-h-screen">
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
@@ -46,22 +51,32 @@ function BlogInner() {
                     <p className="text-white/40 mb-12 max-w-2xl mx-auto">
                         {t("emptySubtitle")}
                     </p>
-                    <div className="bg-cv-elevated/50 border border-white/5 rounded-2xl p-12 max-w-2xl mx-auto">
-                        <p className="text-white/40 text-lg mb-6">
+                    <div className="bg-cv-elevated/50 border border-gold/10 rounded-2xl p-12 max-w-2xl mx-auto">
+                        <p className="text-white/40 text-lg mb-8">
                             {t("noPosts")}<br />
                             {t("telegramCta")}
                         </p>
-                        <a
-                            href="https://t.me/TranTradingLabEN"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-gold/20"
-                            style={{ background: "var(--gradient-cta)" }}
-                        >
-                            <Send className="w-4 h-4" />
-                            {tc("joinTelegramChannel")}
-                            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                        </a>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                            <a
+                                href={communityLink.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-cv-primary font-bold transition-all hover:shadow-lg hover:shadow-gold/20"
+                                style={{ background: "var(--gradient-cta)" }}
+                            >
+                                <Send className="w-4 h-4" />
+                                {communityLink.label}
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </a>
+                            <Link
+                                href={`/${locale}/dashboard`}
+                                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-cv-elevated border border-white/10 text-white/60 text-sm font-semibold hover:text-white hover:border-gold/30 transition-all group"
+                            >
+                                <BarChart3 className="w-4 h-4" />
+                                {locale === "ko" ? "대시보드 보기" : "View Dashboard"}
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </main>

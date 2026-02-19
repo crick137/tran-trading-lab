@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, ArrowRight, CheckCircle } from "lucide-react";
@@ -25,7 +26,12 @@ export function ExitIntentPopup() {
     const [isVisible, setIsVisible] = useState(false);
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+    const [mounted, setMounted] = useState(false);
     const t = useTranslations("home");
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleDismiss = useCallback(() => {
         setIsVisible(false);
@@ -70,7 +76,7 @@ export function ExitIntentPopup() {
         }, 1000);
     };
 
-    return (
+    const popupContent = (
         <AnimatePresence>
             {isVisible && (
                 <motion.div
@@ -78,8 +84,9 @@ export function ExitIntentPopup() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
                     onClick={handleDismiss}
+                    style={{ isolation: "isolate" }}
                 >
                     {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -162,4 +169,8 @@ export function ExitIntentPopup() {
             )}
         </AnimatePresence>
     );
+
+    // Use React Portal to render outside DOM flow, preventing layout interference with Hero
+    if (!mounted) return null;
+    return createPortal(popupContent, document.body);
 }

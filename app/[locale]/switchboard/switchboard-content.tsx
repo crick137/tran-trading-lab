@@ -93,6 +93,107 @@ const signalConfig: Record<Signal, { label: string; color: string; bg: string; d
     neutral: { label: "Neutral", color: "text-neutral", bg: "bg-neutral/10", dot: "bg-neutral shadow-[0_0_8px_rgba(255,165,0,0.5)]", border: "signal-neutral" },
 };
 
+/* Risk score: bullish=+1, bearish=-1, neutral=0, normalize to 0-100 */
+function computeRiskScore(data: SwitchboardAsset[]): number {
+    let raw = 0;
+    data.forEach((a) => {
+        if (a.signal === "bullish") raw += 1;
+        else if (a.signal === "bearish") raw -= 1;
+    });
+    // raw range: [-N, +N] with N = data.length
+    // normalize to 0-100: 50 is neutral
+    return Math.round(50 + (raw / data.length) * 50);
+}
+
+function getRiskLabel(score: number): string {
+    if (score <= 30) return "Risk-Off";
+    if (score <= 45) return "Cautious";
+    if (score <= 55) return "Neutral";
+    if (score <= 70) return "Risk-On";
+    return "Strong Risk-On";
+}
+
+function getRiskColor(score: number): string {
+    if (score <= 30) return "#ff3b3b";
+    if (score <= 45) return "#ff8c00";
+    if (score <= 55) return "#ffa500";
+    if (score <= 70) return "#7ec850";
+    return "#00c851";
+}
+
+function getRiskInsight(counts: { bullish: number; bearish: number; neutral: number }): string {
+    if (counts.bullish > counts.bearish + counts.neutral) {
+        return "Broad risk-on sentiment across asset classes. Equities and DXY leading. Watch for complacency signals in VIX.";
+    } else if (counts.bearish > counts.bullish) {
+        return "Risk-off signals dominating. Defensive positioning recommended. Monitor support levels closely.";
+    }
+    return "Mixed signals across the board. Selective positioning preferred. Key levels and catalysts will determine direction.";
+}
+
+/* SVG gauge for Risk Meter */
+function RiskGauge({ score }: { score: number }) {
+    const clampedScore = Math.min(100, Math.max(0, score));
+    const angle = -90 + (clampedScore / 100) * 180;
+    const color = getRiskColor(score);
+
+    return (
+        <svg viewBox="0 0 200 110" className="w-full max-w-[280px]">
+            {/* Background arc */}
+            <path
+                d="M 15 100 A 85 85 0 0 1 185 100"
+                fill="none"
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="12"
+                strokeLinecap="round"
+            />
+            {/* Colored arc segment */}
+            <path
+                d="M 15 100 A 85 85 0 0 1 185 100"
+                fill="none"
+                stroke="url(#riskGaugeGrad)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray="267"
+                strokeDashoffset={267 - (clampedScore / 100) * 267}
+                className="transition-all duration-1000 ease-out"
+            />
+            {/* Needle */}
+            <line
+                x1="100"
+                y1="100"
+                x2={100 + 65 * Math.cos((angle * Math.PI) / 180)}
+                y2={100 + 65 * Math.sin((angle * Math.PI) / 180)}
+                stroke={color}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+            />
+            {/* Center dot */}
+            <circle cx="100" cy="100" r="5" fill={color} />
+            {/* Score text */}
+            <text x="100" y="88" textAnchor="middle" className="text-3xl font-bold font-data" fill="white" fontSize="28">
+                {score}
+            </text>
+            {/* Label */}
+            <text x="100" y="70" textAnchor="middle" fill={color} fontSize="10" fontWeight="600">
+                {getRiskLabel(score)}
+            </text>
+            {/* Scale labels */}
+            <text x="15" y="108" textAnchor="start" fill="rgba(255,255,255,0.2)" fontSize="8">0</text>
+            <text x="185" y="108" textAnchor="end" fill="rgba(255,255,255,0.2)" fontSize="8">100</text>
+            <defs>
+                <linearGradient id="riskGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ff3b3b" />
+                    <stop offset="25%" stopColor="#ff8c00" />
+                    <stop offset="50%" stopColor="#ffa500" />
+                    <stop offset="75%" stopColor="#7ec850" />
+                    <stop offset="100%" stopColor="#00c851" />
+                </linearGradient>
+            </defs>
+        </svg>
+    );
+}
+
 export function SwitchboardContent() {
     const locale = useLocale();
     const t = useTranslations("switchboard");
@@ -105,6 +206,9 @@ export function SwitchboardContent() {
         bearish: switchboardData.filter((a) => a.signal === "bearish").length,
         neutral: switchboardData.filter((a) => a.signal === "neutral").length,
     };
+
+    const riskScore = computeRiskScore(switchboardData);
+    const insight = getRiskInsight(counts);
 
     return (
         <>
@@ -125,6 +229,37 @@ export function SwitchboardContent() {
                             </div>
                         </div>
                         <p className="text-xs text-white/30 mt-4">{t("week")}</p>
+                    </div>
+
+                    {/* TTL Risk Meter */}
+                    <div className="p-6 rounded-2xl bg-cv-elevated border border-gold/10 mb-10">
+                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider mb-4 text-center">
+                            TTL Risk Meter
+                        </h2>
+                        <div className="flex flex-col md:flex-row items-center gap-6">
+                            <div className="flex-shrink-0">
+                                <RiskGauge score={riskScore} />
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex gap-4 mb-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-bullish shadow-[0_0_6px_rgba(0,200,81,0.5)]" />
+                                        <span className="text-sm font-data text-bullish">{counts.bullish} Risk-On</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-bearish shadow-[0_0_6px_rgba(255,59,59,0.5)]" />
+                                        <span className="text-sm font-data text-bearish">{counts.bearish} Risk-Off</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-neutral shadow-[0_0_6px_rgba(255,165,0,0.5)]" />
+                                        <span className="text-sm font-data text-neutral">{counts.neutral} Neutral</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-white/50 leading-relaxed">
+                                    <strong className="text-white/70">Key Insight:</strong> {insight}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Summary Bar */}

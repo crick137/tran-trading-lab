@@ -45,6 +45,8 @@ const config: Config = {
                 "glow-pulse": "glowPulse 2s ease-in-out infinite",
                 "count-up": "countUp 0.5s ease-out",
                 "ticker": "ticker-scroll 30s linear infinite",
+                "shake": "shake 0.5s ease-in-out",
+                "shimmer-slide": "shimmerSlide 2s ease-in-out infinite",
             },
             keyframes: {
                 fadeIn: {
@@ -85,6 +87,15 @@ const config: Config = {
                 "moving-border-spin": {
                     "0%": { "--border-angle": "0deg" },
                     "100%": { "--border-angle": "360deg" },
+                },
+                shake: {
+                    "0%, 100%": { transform: "translateX(0)" },
+                    "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-4px)" },
+                    "20%, 40%, 60%, 80%": { transform: "translateX(4px)" },
+                },
+                shimmerSlide: {
+                    "0%": { transform: "translateX(-100%)" },
+                    "100%": { transform: "translateX(100%)" },
                 },
             },
             borderRadius: {

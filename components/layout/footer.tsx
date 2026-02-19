@@ -9,14 +9,15 @@ interface SocialLink {
     href: string;
     label: string;
     icon: React.ReactNode;
+    hoverColor: string; // platform-specific hover color
 }
 
 const socialLinks: SocialLink[] = [
-    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X (Twitter)" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
-    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN" },
-    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
+    { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X (Twitter)", hoverColor: "hover:text-white" },
+    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", hoverColor: "hover:text-white" },
+    { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN", hoverColor: "hover:text-[#26A5E4]" },
+    { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR", hoverColor: "hover:text-[#26A5E4]" },
+    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", hoverColor: "hover:text-[#FEE500]" },
 ];
 
 export function Footer() {
@@ -76,7 +77,7 @@ export function Footer() {
                             {tf("riskDisclaimer")}
                         </p>
 
-                        {/* Social Links */}
+                        {/* Social Links with platform-specific hover colors + tooltip */}
                         <div className="flex gap-2">
                             {socialLinks.map((social) => (
                                 <a
@@ -84,10 +85,14 @@ export function Footer() {
                                     href={social.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-gold hover:border-gold/30 hover:shadow-md hover:shadow-gold/10 transition-all"
+                                    className={`group relative w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-white/40 ${social.hoverColor} hover:border-white/20 hover:bg-white/10 hover:scale-110 hover:shadow-md transition-all duration-200`}
                                     aria-label={social.label}
                                 >
                                     {social.icon}
+                                    {/* Tooltip */}
+                                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-cv-surface text-[10px] text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                        {social.label}
+                                    </span>
                                 </a>
                             ))}
                         </div>

@@ -16,6 +16,13 @@ interface MarketData {
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
+// Fallback data in case API is down
+const FALLBACK_DATA: MarketData = {
+    fearGreed: { value: 62, classification: "Greed" },
+    vix: { value: 15.2, change: -3.2 },
+    treasury: { value: 4.52 },
+};
+
 function getEmoji(value: number): string {
     if (value <= 25) return "😨";
     if (value <= 45) return "😟";
@@ -45,6 +52,27 @@ function MiniSparkline({ signal }: { signal: string }) {
     );
 }
 
+function SkeletonCard() {
+    return (
+        <div className="block p-6 rounded-xl bg-cv-elevated border border-white/5 animate-pulse">
+            <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded bg-white/10" />
+                    <div className="w-20 h-4 rounded bg-white/10" />
+                </div>
+                <div className="w-6 h-6 rounded bg-white/10" />
+            </div>
+            <div className="flex items-end justify-between">
+                <div>
+                    <div className="w-16 h-8 rounded bg-white/10 mb-2" />
+                    <div className="w-12 h-4 rounded bg-white/10" />
+                </div>
+                <div className="w-20 h-6 rounded bg-white/5" />
+            </div>
+        </div>
+    );
+}
+
 export function MarketPulse() {
     const locale = useLocale();
     const t = useTranslations("home");
@@ -53,14 +81,17 @@ export function MarketPulse() {
         stagger: 0.1,
     });
 
-    const { data } = useSWR<MarketData>("/api/market-data", fetcher, {
+    const { data, isLoading } = useSWR<MarketData>("/api/market-data", fetcher, {
         refreshInterval: 300_000,
         revalidateOnFocus: false,
+        dedupingInterval: 60_000,
     });
 
-    const fearGreed = data?.fearGreed;
-    const vix = data?.vix;
-    const treasury = data?.treasury;
+    // Use API data → fallback data (never show "—")
+    const resolved = data ?? (isLoading ? null : FALLBACK_DATA);
+    const fearGreed = resolved?.fearGreed ?? FALLBACK_DATA.fearGreed;
+    const vix = resolved?.vix ?? FALLBACK_DATA.vix;
+    const treasury = resolved?.treasury ?? FALLBACK_DATA.treasury;
 
     const cards = [
         {
@@ -92,7 +123,6 @@ export function MarketPulse() {
         },
     ];
 
-    // If no data at all, show cards with placeholder dashes
     return (
         <section className="py-16 px-4 sm:px-6 lg:px-8">
             <div className="max-w-content mx-auto">
@@ -103,35 +133,43 @@ export function MarketPulse() {
                 </Lamp>
 
                 <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {cards.map((card) => (
-                        <TiltCard key={card.id}>
-                            <Link
-                                href={`/${locale}/dashboard`}
-                                className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover ${card.value !== "—" ? `signal-${card.signal}` : ""}`}
-                            >
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                        <card.icon className="w-4 h-4 text-white/40" />
-                                        <span className="text-sm text-white/50">{card.label}</span>
+                    {isLoading && !data ? (
+                        <>
+                            <SkeletonCard />
+                            <SkeletonCard />
+                            <SkeletonCard />
+                        </>
+                    ) : (
+                        cards.map((card) => (
+                            <TiltCard key={card.id}>
+                                <Link
+                                    href={`/${locale}/dashboard`}
+                                    className={`block p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover signal-${card.signal}`}
+                                >
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <card.icon className="w-4 h-4 text-white/40" />
+                                            <span className="text-sm text-white/50">{card.label}</span>
+                                        </div>
+                                        <span className="text-lg">{card.emoji}</span>
                                     </div>
-                                    <span className="text-lg">{card.emoji}</span>
-                                </div>
 
-                                <div className="flex items-end justify-between">
-                                    <div>
-                                        <p className="text-3xl font-bold font-data text-white">{card.value}</p>
-                                        <p className={`text-sm font-data mt-1 ${card.signal === "bullish" ? "text-bullish" :
-                                            card.signal === "bearish" ? "text-bearish" :
-                                                "text-neutral"
-                                            }`}>
-                                            {card.change}
-                                        </p>
+                                    <div className="flex items-end justify-between">
+                                        <div>
+                                            <p className="text-3xl font-bold font-data text-white">{card.value}</p>
+                                            <p className={`text-sm font-data mt-1 ${card.signal === "bullish" ? "text-bullish" :
+                                                card.signal === "bearish" ? "text-bearish" :
+                                                    "text-neutral"
+                                                }`}>
+                                                {card.change}
+                                            </p>
+                                        </div>
+                                        <MiniSparkline signal={card.signal} />
                                     </div>
-                                    {card.value !== "—" && <MiniSparkline signal={card.signal} />}
-                                </div>
-                            </Link>
-                        </TiltCard>
-                    ))}
+                                </Link>
+                            </TiltCard>
+                        ))
+                    )}
                 </div>
             </div>
         </section>

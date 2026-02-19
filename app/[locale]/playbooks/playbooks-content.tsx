@@ -46,7 +46,8 @@ export function PlaybooksContent() {
                             const topics = t.raw(module.topicsKey) as string[];
                             return (
                                 <TiltCard key={module.id}>
-                                    <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover border-glow h-full flex flex-col">
+                                    <div className={`p-6 rounded-xl bg-cv-elevated border card-hover border-glow h-full flex flex-col ${module.available ? "border-white/5" : "border-gold/10"
+                                        }`}>
                                         <div className="flex items-start justify-between mb-4">
                                             <h3 className="text-lg font-semibold text-white/90">
                                                 {t(module.titleKey)}
@@ -54,7 +55,7 @@ export function PlaybooksContent() {
                                             {module.available ? (
                                                 <span className="px-2 py-1 rounded text-xs bg-bullish/10 text-bullish shrink-0">{tc("free")}</span>
                                             ) : (
-                                                <span className="px-2 py-1 rounded text-xs bg-white/5 text-white/30 flex items-center gap-1 shrink-0">
+                                                <span className="px-2 py-1 rounded text-xs bg-gold/10 text-gold/70 flex items-center gap-1 shrink-0">
                                                     <Clock className="w-3 h-3" /> {tc("preparing")}
                                                 </span>
                                             )}
@@ -87,8 +88,11 @@ export function PlaybooksContent() {
                                                 <ArrowRight className="w-3 h-3" />
                                             </Link>
                                         ) : (
-                                            <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium bg-white/5 text-white/30 cursor-not-allowed">
+                                            <div className="relative overflow-hidden flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium bg-gold/5 text-gold/40 cursor-not-allowed">
+                                                <Clock className="w-3.5 h-3.5" />
                                                 {tc("contentPreparing")}
+                                                {/* Shimmer overlay */}
+                                                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-gold/10 to-transparent animate-shimmer-slide" />
                                             </div>
                                         )}
                                     </div>

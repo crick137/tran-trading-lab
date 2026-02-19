@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Lamp } from "@/components/ui/aceternity/lamp";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 import { blogPosts } from "@/lib/blog-data";
@@ -16,32 +16,9 @@ export function LatestArticles() {
     const hasBlogPosts = blogPosts.length > 0;
     const hasResearch = researchArticles.length > 0;
 
-    // If no real content at all, show empty state
+    // UX-07: If no real content at all, hide the section entirely
     if (!hasBlogPosts && !hasResearch) {
-        return (
-            <section className="py-16 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-content mx-auto" ref={sectionRef}>
-                    <Lamp className="mb-8">
-                        <h2 className="text-sm font-medium text-white/40 uppercase tracking-wider text-center">
-                            {t("latestArticles")}
-                        </h2>
-                    </Lamp>
-                    <div className="text-center py-12 rounded-xl bg-cv-elevated border border-white/5">
-                        <FileText className="w-10 h-10 text-white/20 mx-auto mb-4" />
-                        <p className="text-white/50 mb-2">{t("emptyStateTitle")}</p>
-                        <p className="text-sm text-white/30 mb-6 max-w-md mx-auto">{t("emptyStateDesc")}</p>
-                        <Link
-                            href={`/${locale}/subscribe`}
-                            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold text-cv-void hover:shadow-lg hover:shadow-gold/20 transition-all"
-                            style={{ background: "var(--gradient-cta)" }}
-                        >
-                            {t("emptyStateCta")}
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                    </div>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     // Show real research articles if available

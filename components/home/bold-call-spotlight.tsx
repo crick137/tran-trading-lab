@@ -30,9 +30,9 @@ export function BoldCallSpotlight() {
                                 <p className="text-xs text-white/40">{t("boldCallSubtitle")}</p>
                             </div>
                         </div>
-                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gold/10 border border-gold/20">
-                            <Trophy className="w-3.5 h-3.5 text-gold" />
-                            <span className="text-xs font-data font-bold text-gold">62%</span>
+                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-bullish/10 border border-bullish/20">
+                            <Trophy className="w-3.5 h-3.5 text-bullish" />
+                            <span className="text-xs font-data font-bold text-bullish">62%</span>
                             <span className="text-xs text-white/40">(29/47)</span>
                         </div>
                     </div>

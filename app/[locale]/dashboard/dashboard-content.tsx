@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
@@ -24,7 +25,7 @@ interface MarketAsset {
     price: string;
     change: string;
     signal: Signal;
-    sparkline: string; // SVG polyline points
+    sparkline: string;
 }
 
 interface KeyLevel {
@@ -73,12 +74,102 @@ function MiniSparkline({ signal, points }: { signal: Signal; points: string }) {
     );
 }
 
+/* SVG semi-circle gauge for Fear & Greed */
+function FearGreedGauge({ value }: { value: number }) {
+    const clampedValue = Math.min(100, Math.max(0, value));
+    const angle = -90 + (clampedValue / 100) * 180; // -90 (left) to 90 (right)
+
+    // Gradient: 0=red, 25=orange, 50=gold, 75=lime, 100=green
+    const getColor = (v: number) => {
+        if (v <= 25) return "#ff3b3b";
+        if (v <= 45) return "#ff8c00";
+        if (v <= 55) return "#ffa500";
+        if (v <= 75) return "#7ec850";
+        return "#00c851";
+    };
+
+    return (
+        <svg viewBox="0 0 120 70" className="w-full max-w-[200px]">
+            {/* Background arc */}
+            <path
+                d="M 10 60 A 50 50 0 0 1 110 60"
+                fill="none"
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="8"
+                strokeLinecap="round"
+            />
+            {/* Colored arc */}
+            <path
+                d="M 10 60 A 50 50 0 0 1 110 60"
+                fill="none"
+                stroke="url(#gaugeGradient)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray="157"
+                strokeDashoffset={157 - (clampedValue / 100) * 157}
+                className="transition-all duration-1000 ease-out"
+            />
+            {/* Needle */}
+            <line
+                x1="60"
+                y1="60"
+                x2={60 + 38 * Math.cos((angle * Math.PI) / 180)}
+                y2={60 + 38 * Math.sin((angle * Math.PI) / 180)}
+                stroke={getColor(value)}
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+            />
+            {/* Center dot */}
+            <circle cx="60" cy="60" r="3" fill={getColor(value)} />
+            {/* Gradient def */}
+            <defs>
+                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#ff3b3b" />
+                    <stop offset="25%" stopColor="#ff8c00" />
+                    <stop offset="50%" stopColor="#ffa500" />
+                    <stop offset="75%" stopColor="#7ec850" />
+                    <stop offset="100%" stopColor="#00c851" />
+                </linearGradient>
+            </defs>
+        </svg>
+    );
+}
+
+/* TradingView widget embed */
+const TV_SYMBOLS: Record<string, string> = {
+    SPX: "OANDA:SPX500USD",
+    NDQ: "NASDAQ:NDX",
+    BTC: "BINANCE:BTCUSDT",
+    ETH: "BINANCE:ETHUSDT",
+    Gold: "TVC:GOLD",
+    VIX: "TVC:VIX",
+};
+
+const tvTabs = Object.keys(TV_SYMBOLS);
+
+function TradingViewChart({ symbol }: { symbol: string }) {
+    const tvSymbol = TV_SYMBOLS[symbol] || "OANDA:SPX500USD";
+    return (
+        <div className="w-full h-[400px] rounded-xl overflow-hidden border border-white/5">
+            <iframe
+                src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=${encodeURIComponent(tvSymbol)}&interval=D&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=0a0e17&studies=[]&theme=dark&style=1&timezone=Etc/UTC&withdateranges=1&hide_top_toolbar=0&hide_legend=0&allow_symbol_change=0&locale=en&colorTheme=dark&width=100%25&height=100%25`}
+                style={{ width: "100%", height: "100%" }}
+                allowTransparency
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+        </div>
+    );
+}
+
 export function DashboardContent() {
     const locale = useLocale();
     const t = useTranslations("dashboard");
     const heroRef = useGsapScroll<HTMLDivElement>();
     const gridRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.08 });
     const levelsRef = useGsapScroll<HTMLDivElement>({ children: true, stagger: 0.1 });
+    const [activeChart, setActiveChart] = useState("SPX");
 
     return (
         <>
@@ -100,14 +191,16 @@ export function DashboardContent() {
                         </div>
                     </div>
 
-                    {/* Fear & Greed + VIX Banner */}
+                    {/* Fear & Greed Gauge + VIX + 10Y in cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral">
-                            <div className="flex items-center gap-2 mb-2">
+                        {/* Fear & Greed — SVG Gauge */}
+                        <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-neutral flex flex-col items-center">
+                            <div className="flex items-center gap-2 mb-3 self-start">
                                 <Activity className="w-4 h-4 text-neutral" />
                                 <span className="text-sm text-white/50">{t("fearGreed")}</span>
                             </div>
-                            <p className="text-4xl font-bold font-data text-white">62</p>
+                            <FearGreedGauge value={62} />
+                            <p className="text-3xl font-bold font-data text-white mt-2">62</p>
                             <p className="text-sm font-data text-neutral mt-1">{t("greed")} 😏</p>
                         </div>
                         <div className="p-5 rounded-xl bg-cv-elevated border border-white/5 signal-bullish">
@@ -126,6 +219,25 @@ export function DashboardContent() {
                             <p className="text-4xl font-bold font-data text-white">4.52%</p>
                             <p className="text-sm font-data text-neutral mt-1">▲ +2bp 📈</p>
                         </div>
+                    </div>
+
+                    {/* TradingView Chart Area */}
+                    <div className="mb-12">
+                        <div className="flex items-center gap-2 mb-4 overflow-x-auto">
+                            {tvTabs.map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveChart(tab)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${activeChart === tab
+                                            ? "bg-gold/20 text-gold border border-gold/30"
+                                            : "bg-white/[0.03] text-white/40 border border-white/5 hover:text-white/60 hover:bg-white/[0.06]"
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                        <TradingViewChart symbol={activeChart} />
                     </div>
 
                     {/* Market Overview Grid */}

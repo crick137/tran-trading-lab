@@ -6,11 +6,12 @@ import { fetchVix, fetchTreasuryYield } from "@/lib/api/alpha-vantage";
 export const revalidate = 300; // 5 minutes
 
 export async function GET() {
+    // Wrap each API call individually so partial failures don't break everything
     const [coins, fearGreed, vix, treasury] = await Promise.all([
-        fetchCoinPrices(),
-        fetchFearGreed(),
-        fetchVix(),
-        fetchTreasuryYield(),
+        fetchCoinPrices().catch(() => null),
+        fetchFearGreed().catch(() => null),
+        fetchVix().catch(() => null),
+        fetchTreasuryYield().catch(() => null),
     ]);
 
     return NextResponse.json(

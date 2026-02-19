@@ -1,18 +1,20 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { BarChart3, Target, Shield, Globe } from "lucide-react";
 import { TiltCard } from "@/components/ui/tilt-card";
 import { useGsapScroll } from "@/hooks/use-gsap-scroll";
 
 const features = [
-    { icon: BarChart3, titleKey: "whatYouGet1Title", descKey: "whatYouGet1Desc" },
-    { icon: Target, titleKey: "whatYouGet2Title", descKey: "whatYouGet2Desc" },
-    { icon: Shield, titleKey: "whatYouGet3Title", descKey: "whatYouGet3Desc" },
-    { icon: Globe, titleKey: "whatYouGet4Title", descKey: "whatYouGet4Desc" },
+    { icon: BarChart3, titleKey: "whatYouGet1Title", descKey: "whatYouGet1Desc", href: "/dashboard" },
+    { icon: Target, titleKey: "whatYouGet2Title", descKey: "whatYouGet2Desc", href: "/bold-calls" },
+    { icon: Shield, titleKey: "whatYouGet3Title", descKey: "whatYouGet3Desc", href: "/dashboard" },
+    { icon: Globe, titleKey: "whatYouGet4Title", descKey: "whatYouGet4Desc", href: null },
 ] as const;
 
 export function WhatYouGet() {
+    const locale = useLocale();
     const t = useTranslations("home");
     const gridRef = useGsapScroll<HTMLDivElement>({
         children: true,
@@ -27,8 +29,8 @@ export function WhatYouGet() {
                 </h2>
 
                 <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {features.map((feature) => (
-                        <TiltCard key={feature.titleKey}>
+                    {features.map((feature) => {
+                        const content = (
                             <div className="p-6 rounded-xl bg-cv-elevated border border-white/5 card-hover h-full">
                                 <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center mb-4">
                                     <feature.icon className="w-5 h-5 text-gold" />
@@ -40,8 +42,20 @@ export function WhatYouGet() {
                                     {t(feature.descKey)}
                                 </p>
                             </div>
-                        </TiltCard>
-                    ))}
+                        );
+
+                        return (
+                            <TiltCard key={feature.titleKey}>
+                                {feature.href ? (
+                                    <Link href={`/${locale}${feature.href}`} className="block h-full">
+                                        {content}
+                                    </Link>
+                                ) : (
+                                    content
+                                )}
+                            </TiltCard>
+                        );
+                    })}
                 </div>
             </div>
         </section>
