@@ -10,7 +10,8 @@ import cron from 'node-cron'
 // ============================================
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TELEGRAM_CHANNEL_ID = process.env.TELEGRAM_CHANNEL_ID || '@TranTradingLabNews'
+const TELEGRAM_CHANNEL_KR = process.env.TELEGRAM_CHANNEL_KR || '@TranTradingLabNewsKR'
+const TELEGRAM_CHANNEL_EN = process.env.TELEGRAM_CHANNEL_EN || '@TranTradingLabNewsEN'
 
 if (!TELEGRAM_BOT_TOKEN) {
     console.error('⚠️ TELEGRAM_BOT_TOKEN environment variable is required')
@@ -43,9 +44,9 @@ const publishedNewsIds = new Set()
 // Telegram API Functions
 // ============================================
 
-async function sendTelegramMessage(text, parseMode = 'HTML') {
-    if (!TELEGRAM_CHANNEL_ID) {
-        console.log('⚠️ TELEGRAM_CHANNEL_ID not set. Message would be:')
+async function sendTelegramMessage(text, channelId, parseMode = 'HTML') {
+    if (!channelId) {
+        console.log('⚠️ Channel ID not set. Message would be:')
         console.log(text)
         return { ok: false, error: 'Channel ID not set' }
     }
@@ -57,7 +58,7 @@ async function sendTelegramMessage(text, parseMode = 'HTML') {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: TELEGRAM_CHANNEL_ID,
+                chat_id: channelId,
                 text: text,
                 parse_mode: parseMode,
                 disable_web_page_preview: false
@@ -66,9 +67,9 @@ async function sendTelegramMessage(text, parseMode = 'HTML') {
 
         const result = await response.json()
         if (result.ok) {
-            console.log('✅ Telegram message sent successfully')
+            console.log(`✅ Telegram message sent to ${channelId}`)
         } else {
-            console.error('❌ Telegram error:', result.description)
+            console.error(`❌ Telegram error (${channelId}):`, result.description)
         }
         return result
     } catch (error) {
@@ -193,7 +194,10 @@ function getCategoryEmoji(category) {
 // Main Publishing Logic
 // ============================================
 
-async function publishNewsToTelegram(count = 5) {
+const KR_CATEGORIES = new Set(['증권', '증시', '경제', '국제', '종합'])
+const EN_CATEGORIES = new Set(['Global', 'Crypto'])
+
+async function publishNewsToTelegram(count = 3) {
     console.log(`\n🚀 [${new Date().toISOString()}] Starting news publishing job...`)
 
     try {
@@ -208,17 +212,32 @@ async function publishNewsToTelegram(count = 5) {
             return
         }
 
-        // 选择前N条
-        const toPublish = freshNews.slice(0, count)
+        // 按语言分组
+        const krNews = freshNews.filter(n => KR_CATEGORIES.has(n.category)).slice(0, count)
+        const enNews = freshNews.filter(n => EN_CATEGORIES.has(n.category)).slice(0, count)
 
-        // 创建聚合消息
-        const message = formatNewsForTelegram(toPublish)
-        const result = await sendTelegramMessage(message)
+        // 发送到韩语频道
+        if (krNews.length > 0) {
+            const krMessage = formatNewsForTelegram(krNews)
+            const krResult = await sendTelegramMessage(krMessage, TELEGRAM_CHANNEL_KR)
+            if (krResult.ok) {
+                krNews.forEach(news => publishedNewsIds.add(news.id))
+                console.log(`✅ Published ${krNews.length} KR news to ${TELEGRAM_CHANNEL_KR}`)
+            }
+        } else {
+            console.log('ℹ️ No new KR articles to publish')
+        }
 
-        if (result.ok || !TELEGRAM_CHANNEL_ID) {
-            // 标记所有已发布的新闻
-            toPublish.forEach(news => publishedNewsIds.add(news.id))
-            console.log(`✅ Published aggregated news (${toPublish.length} items)`)
+        // 发送到英语频道
+        if (enNews.length > 0) {
+            const enMessage = formatNewsForTelegram(enNews)
+            const enResult = await sendTelegramMessage(enMessage, TELEGRAM_CHANNEL_EN)
+            if (enResult.ok) {
+                enNews.forEach(news => publishedNewsIds.add(news.id))
+                console.log(`✅ Published ${enNews.length} EN news to ${TELEGRAM_CHANNEL_EN}`)
+            }
+        } else {
+            console.log('ℹ️ No new EN articles to publish')
         }
 
     } catch (error) {
@@ -233,7 +252,8 @@ async function publishNewsToTelegram(count = 5) {
 function startScheduler() {
     console.log('⏰ Starting Auto News Publisher...')
     console.log(`   Bot Token: ${TELEGRAM_BOT_TOKEN.slice(0, 10)}...`)
-    console.log(`   Channel ID: ${TELEGRAM_CHANNEL_ID || '(NOT SET - will only log)'}`)
+    console.log(`   KR Channel: ${TELEGRAM_CHANNEL_KR}`)
+    console.log(`   EN Channel: ${TELEGRAM_CHANNEL_EN}`)
 
     // 每小时的第0分钟执行
     cron.schedule('0 * * * *', () => {

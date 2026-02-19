@@ -966,6 +966,14 @@ app.post('/api/email/test', async (req, res) => {
     }
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`\n🚀 Server running on http://localhost:${PORT}`)
+
+    // 启动自动新闻发布 scheduler
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+        const { startScheduler } = await import('./telegram-publisher.js')
+        startScheduler()
+    } else {
+        console.warn('⚠️ TELEGRAM_BOT_TOKEN not set, skipping auto news publisher')
+    }
 })
