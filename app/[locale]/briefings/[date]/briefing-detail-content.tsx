@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import {
     ArrowLeft,
     Calendar,
+    CalendarClock,
     Clock,
     Tag,
     TrendingUp,
@@ -21,6 +22,7 @@ import {
     BarChart3,
     Zap,
     AlertTriangle,
+    Radio,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getDailyBriefByDate } from "@/lib/daily-brief-data";
@@ -276,6 +278,47 @@ export function BriefingDetailContent() {
 
                         <SocialShare title={brief.title} />
                     </motion.header>
+
+                    {/* Catalyst & Events */}
+                    {(brief.catalyst || (brief.events && brief.events.length > 0)) && (
+                        <motion.section
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.08 }}
+                            className="mb-12 p-5 rounded-xl bg-cv-elevated border border-[var(--border-default)] flex flex-col sm:flex-row gap-6"
+                        >
+                            {brief.catalyst && (
+                                <div className="flex items-start gap-3">
+                                    <Radio className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                                            {t("catalyst")}
+                                        </p>
+                                        <p className="text-sm font-semibold text-[var(--text-primary)]">
+                                            {brief.catalyst}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                            {brief.events && brief.events.length > 0 && (
+                                <div className="flex items-start gap-3 sm:border-l sm:border-[var(--border-subtle)] sm:pl-6">
+                                    <CalendarClock className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-1">
+                                            {t("events")}
+                                        </p>
+                                        <ul className="space-y-0.5">
+                                            {brief.events.map((event, i) => (
+                                                <li key={i} className="text-sm text-[var(--text-secondary)]">
+                                                    {event}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            )}
+                        </motion.section>
+                    )}
 
                     {/* TL;DR */}
                     <motion.section

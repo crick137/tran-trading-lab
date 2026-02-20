@@ -204,7 +204,9 @@
         "signal": "Signal",
         "support": "Support",
         "resistance": "Resistance",
-        "bias": "Bias"
+        "bias": "Bias",
+        "catalyst": "Catalyst",
+        "events": "Economic Events"
     },
     "playbooks": {
         "title": "Learning Roadmap",

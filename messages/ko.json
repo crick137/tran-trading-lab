@@ -204,7 +204,9 @@
         "signal": "시그널",
         "support": "지지",
         "resistance": "저항",
-        "bias": "방향성"
+        "bias": "방향성",
+        "catalyst": "촉매",
+        "events": "경제 이벤트"
     },
     "playbooks": {
         "title": "학습 로드맵",

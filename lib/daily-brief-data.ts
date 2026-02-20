@@ -25,6 +25,9 @@ export interface DailyBrief {
     description: string;
     tags: string[];
     readingTime: string;
+    marketState?: string; // e.g. "B_DATA_DAY"
+    catalyst?: string; // e.g. "PCE Price Index (Dec)"
+    events?: string[]; // e.g. ["08:30 ET — PCE Price Index (Dec)"]
     tldr: string[];
     marketOverview: MarketOverviewItem[];
     sections: {
@@ -46,6 +49,13 @@ export const dailyBriefsEN: DailyBrief[] = [
             "December PCE data drops today. Here's the 3-step framework to read it — and what it means for SPX, bonds, and your trades.",
         tags: ["PCE", "inflation", "Fed", "KOSPI", "Walmart", "Deere", "10Y yield"],
         readingTime: "4 min",
+        marketState: "B_DATA_DAY",
+        catalyst: "PCE Price Index (Dec)",
+        events: [
+            "08:30 ET — PCE Price Index (Dec)",
+            "08:30 ET — Personal Income (Dec)",
+            "08:30 ET — Personal Spending (Dec)",
+        ],
         tldr: [
             "PCE inflation data (Dec) releases today 08:30 ET — Fed's preferred measure",
             "Watch Core PCE MoM, not headline YoY",
@@ -55,13 +65,14 @@ export const dailyBriefsEN: DailyBrief[] = [
             "Deere beat by 19.8% and raised guidance — manufacturing divergence",
         ],
         marketOverview: [
-            { asset: "SPX", last: "~6,000", change: "-0.5%", signal: "Tech weakness" },
-            { asset: "10Y", last: "4.09%", change: "+5bps", signal: "Hawkish repricing" },
-            { asset: "VIX", last: "20.29", change: "-4.3%", signal: "Declining from peak" },
-            { asset: "BTC", last: "~$60K", change: "-17% YTD", signal: "Bearish" },
-            { asset: "Gold", last: "<$5,000", change: "Off highs", signal: "Retreating" },
-            { asset: "KOSPI", last: "5,677", change: "+3.09%", signal: "Record high" },
-            { asset: "DXY", last: "Elevated", change: "—", signal: "PCE dependent" },
+            { asset: "SPX", last: "~6,000", change: "-0.5%", signal: "Data dependent — PCE reaction" },
+            { asset: "NDX", last: "—", change: "—", signal: "Tech continues to lag" },
+            { asset: "US10Y", last: "4.09%", change: "+5bps", signal: "FOMC hawkish repricing" },
+            { asset: "VIX", last: "20.29", change: "-4.3%", signal: "Down from 22.7 but still elevated" },
+            { asset: "BTC", last: "~$60K", change: "-17% YTD", signal: "-17% YTD, risk-off environment" },
+            { asset: "Gold", last: "<$5,000", change: "Off highs", signal: "Off $5,700 highs" },
+            { asset: "KOSPI", last: "5,677", change: "+3.09%", signal: "Record high but narrow breadth" },
+            { asset: "DXY", last: "Elevated", change: "—", signal: "Hawkish FOMC supports dollar" },
         ],
         sections: [
             {
@@ -139,6 +150,13 @@ export const dailyBriefsKO: DailyBrief[] = [
             "12월 PCE 데이터가 오늘 발표됩니다. 이를 읽는 3단계 프레임워크와 SPX, 채권, 트레이딩에 미치는 영향을 정리합니다.",
         tags: ["PCE", "인플레이션", "Fed", "KOSPI", "월마트", "디어", "10년물 금리"],
         readingTime: "4분",
+        marketState: "B_DATA_DAY",
+        catalyst: "PCE 물가지수 (12월)",
+        events: [
+            "08:30 ET — PCE 물가지수 (12월)",
+            "08:30 ET — 개인소득 (12월)",
+            "08:30 ET — 개인지출 (12월)",
+        ],
         tldr: [
             "12월 PCE 인플레이션 데이터 오늘 08:30 ET 발표 — 연준의 선호 지표",
             "헤드라인 YoY가 아닌 Core PCE MoM을 주목",
@@ -148,13 +166,14 @@ export const dailyBriefsKO: DailyBrief[] = [
             "디어 EPS 19.8% 상회 및 가이던스 상향 — 제조업 디커플링",
         ],
         marketOverview: [
-            { asset: "SPX", last: "~6,000", change: "-0.5%", signal: "기술주 약세" },
-            { asset: "10Y", last: "4.09%", change: "+5bps", signal: "매파적 재평가" },
-            { asset: "VIX", last: "20.29", change: "-4.3%", signal: "고점 대비 하락" },
-            { asset: "BTC", last: "~$60K", change: "-17% YTD", signal: "약세" },
-            { asset: "Gold", last: "<$5,000", change: "고점 대비 하락", signal: "후퇴" },
-            { asset: "KOSPI", last: "5,677", change: "+3.09%", signal: "사상 최고" },
-            { asset: "DXY", last: "상승", change: "—", signal: "PCE에 따라 결정" },
+            { asset: "SPX", last: "~6,000", change: "-0.5%", signal: "데이터 의존 — PCE 반응 대기" },
+            { asset: "NDX", last: "—", change: "—", signal: "기술주 계속 부진" },
+            { asset: "US10Y", last: "4.09%", change: "+5bps", signal: "FOMC 매파적 재평가" },
+            { asset: "VIX", last: "20.29", change: "-4.3%", signal: "22.7에서 하락, 여전히 높음" },
+            { asset: "BTC", last: "~$60K", change: "-17% YTD", signal: "YTD -17%, 리스크오프 환경" },
+            { asset: "Gold", last: "<$5,000", change: "고점 대비 하락", signal: "$5,700 고점 대비 후퇴" },
+            { asset: "KOSPI", last: "5,677", change: "+3.09%", signal: "사상 최고이나 시장 폭 좁음" },
+            { asset: "DXY", last: "상승", change: "—", signal: "매파적 FOMC가 달러 지지" },
         ],
         sections: [
             {
