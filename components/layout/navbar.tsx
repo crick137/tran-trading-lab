@@ -44,6 +44,7 @@ export function Navbar() {
         {
             label: t("content"),
             items: [
+                { href: `/${locale}/briefings`, label: t("briefings") },
                 { href: `/${locale}/blog`, label: t("blog") },
                 { href: `/${locale}/academy`, label: t("learn") },
                 { href: `/${locale}/subscribe`, label: t("newsletter") },
