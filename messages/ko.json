@@ -189,6 +189,23 @@
         "noBriefings": "현재 이용 가능한 브리핑이 없습니다.",
         "telegramCta": "텔레그램에서 실시간 브리핑을 받아보세요."
     },
+    "briefingDetail": {
+        "dailyBrief": "일일 브리핑",
+        "briefingsBreadcrumb": "브리핑",
+        "backToBriefings": "브리핑 목록으로",
+        "marketOverview": "시장 개요",
+        "keyLevels": "주요 레벨",
+        "scenarios": "시나리오",
+        "ttlTake": "TTL 분석",
+        "sharePrompt": "유용하셨나요? 공유해 주세요.",
+        "asset": "자산",
+        "last": "현재가",
+        "change": "변동",
+        "signal": "시그널",
+        "support": "지지",
+        "resistance": "저항",
+        "bias": "방향성"
+    },
     "playbooks": {
         "title": "학습 로드맵",
         "subtitle": "SMC부터 ORB, 리스크 관리까지 — 체계적인 트레이딩 커리큘럼으로 실력을 키우세요.",

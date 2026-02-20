@@ -189,6 +189,23 @@
         "noBriefings": "No briefings available at this time.",
         "telegramCta": "Get real-time briefings on Telegram."
     },
+    "briefingDetail": {
+        "dailyBrief": "Daily Brief",
+        "briefingsBreadcrumb": "Briefings",
+        "backToBriefings": "Back to Briefings",
+        "marketOverview": "Market Overview",
+        "keyLevels": "Key Levels",
+        "scenarios": "Scenarios",
+        "ttlTake": "TTL Take",
+        "sharePrompt": "Found this useful? Share it.",
+        "asset": "Asset",
+        "last": "Last",
+        "change": "Change",
+        "signal": "Signal",
+        "support": "Support",
+        "resistance": "Resistance",
+        "bias": "Bias"
+    },
     "playbooks": {
         "title": "Learning Roadmap",
         "subtitle": "From SMC to ORB to risk management - build your skills with structured trading curriculum.",
