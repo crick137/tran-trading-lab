@@ -43,6 +43,85 @@ export interface DailyBrief {
 // ─── EN Briefs ──────────────────────────────────────────
 export const dailyBriefsEN: DailyBrief[] = [
     {
+        date: "2026-02-21",
+        title: "PCE Day: The Stagflation Math Nobody Wants to Do",
+        description:
+            "Core PCE printed 3.0% YoY while GDP came in at 1.4% — the widest inflation-growth divergence since Q3 2022. The soft landing narrative is under serious pressure.",
+        tags: ["PCE", "inflation", "GDP", "stagflation", "fed-policy"],
+        readingTime: "4 min",
+        marketState: "E",
+        catalyst: "PCE Price Index (Jan) + GDP Miss",
+        events: [
+            "08:30 ET — Core PCE Price Index (Jan): 3.0% YoY, 0.4% MoM",
+            "08:30 ET — GDP Q4 2nd Estimate: 1.4% (missed 2.5% consensus)",
+        ],
+        tldr: [
+            "Core PCE printed 3.0% YoY — back above the psychologically critical 3% threshold",
+            "Core PCE MoM at 0.4% (vs 0.3% expected) — annualized run rate well above Fed's 2% target",
+            "GDP came in at 1.4%, badly missing 2.5% consensus — private sector weakness was the real story",
+            "Widest inflation-growth divergence since Q3 2022 — stagflation warning",
+            "Gold hit ATH at $5,027 — safe haven bid accelerating",
+            "BTC at ~$67K, down 30% from ATH — risk-off macro pressure",
+        ],
+        marketOverview: [
+            { asset: "SPX", last: "~6,950", change: "-0.1%", signal: "Muted reaction — for now" },
+            { asset: "US10Y", last: "4.2%+", change: "+11bp this week", signal: "Higher for longer" },
+            { asset: "Gold", last: "$5,027", change: "ATH", signal: "Safe haven bid" },
+            { asset: "DXY", last: "97.6", change: "Surged", signal: "Dollar strength" },
+            { asset: "BTC", last: "~$67K", change: "-30% from ATH", signal: "Risk-off pressure" },
+        ],
+        sections: [
+            {
+                title: "Two Numbers That Shouldn't Coexist",
+                content: `Friday delivered two numbers that should not coexist in a "soft landing" scenario:
+
+**Inflation accelerating**: Core PCE MoM at 0.4% (vs 0.3% expected) puts the annualized run rate well above the Fed's 2% target. Year-over-year at 3.0% breaks back above the psychologically important threshold.
+
+**Growth decelerating**: GDP at 1.4% badly missed the 2.5% consensus. Government shutdown effects contributed, but private sector weakness was the real story.
+
+This is the widest inflation-growth divergence since Q3 2022. The textbook definition of stagflation risk.`,
+            },
+            {
+                title: "The Fed's Policy Dilemma",
+                content: `The Fed now faces a genuine policy dilemma:
+
+- **Cut into hot inflation?** Core PCE at 3% makes this politically and economically difficult. The market is already repricing rate cuts further out.
+
+- **Hold into weakening growth?** GDP at 1.4% with private sector softening means the real economy is already feeling pressure.
+
+There's no clean answer. The 10Y yield surging +11bp this week to above 4.2% tells you the bond market is pricing "higher for longer" as the base case. Gold's ATH at $5,027 tells you real money is hedging the worst-case scenario.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "SPX", support: "6,900 / 6,850", resistance: "7,000 / 7,050", bias: "Neutral-bearish" },
+            { asset: "US10Y", support: "4.15%", resistance: "4.30%", bias: "Bearish for equities" },
+            { asset: "Gold", support: "$5,000 / $4,950", resistance: "$5,100", bias: "Bullish" },
+            { asset: "BTC", support: "$64,000 / $60,000", resistance: "$70,000 / $76,000", bias: "Bearish" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "55%",
+                condition: "Monday opens with digestion — no follow-through selling",
+                result: "SPX holds 6,900, 10Y stabilizes near 4.20% → range-bound week",
+            },
+            {
+                id: "B",
+                probability: "45%",
+                condition: "Stagflation narrative gains traction over weekend",
+                result: "SPX tests 6,850, 10Y pushes toward 4.30% → risk-off acceleration",
+            },
+        ],
+        ttlTake: `Core PCE at 3.0% and GDP at 1.4% in the same week. The soft landing narrative just took a serious hit.
+
+The market's muted Friday reaction doesn't mean the data has been priced in — it means the weekend gives portfolio managers time to rethink positioning. Monday's open will tell the real story.
+
+**Active Bold Call**: BTC → $56,000 within 30 days (from Feb 20). Currently ~$67K. Macro thesis strengthened by PCE/GDP data. Invalidation: weekly close above $76K.
+
+*Lose less. Last longer.*`,
+        locale: "en",
+    },
+    {
         date: "2026-02-20",
         title: "PCE Day: The Number That Decides Everything",
         description:
@@ -143,6 +222,85 @@ The Walmart-Deere earnings divergence adds another layer. The rotation from cons
 
 // ─── KO Briefs ──────────────────────────────────────────
 export const dailyBriefsKO: DailyBrief[] = [
+    {
+        date: "2026-02-21",
+        title: "PCE 데이: 아무도 하고 싶지 않은 스태그플레이션 계산",
+        description:
+            "Core PCE 3.0% YoY, GDP 1.4% — 2022년 3분기 이후 가장 큰 인플레이션-성장 괴리. 연착륙 내러티브에 심각한 압박.",
+        tags: ["PCE", "인플레이션", "GDP", "스태그플레이션", "연준정책"],
+        readingTime: "4분",
+        marketState: "E",
+        catalyst: "PCE 물가지수 (1월) + GDP 부진",
+        events: [
+            "08:30 ET — Core PCE 물가지수 (1월): 3.0% YoY, 0.4% MoM",
+            "08:30 ET — GDP Q4 2차 추정: 1.4% (컨센서스 2.5% 대폭 하회)",
+        ],
+        tldr: [
+            "Core PCE 3.0% YoY 기록 — 심리적 핵심 임계치 3% 재돌파",
+            "Core PCE MoM 0.4% (예상 0.3%) — 연환산 추세율 연준 목표 2% 크게 상회",
+            "GDP 1.4%, 컨센서스 2.5% 대폭 하회 — 민간부문 약세가 핵심",
+            "2022년 3분기 이후 가장 큰 인플레이션-성장 괴리 — 스태그플레이션 경고",
+            "금 사상 최고 $5,027 — 안전자산 수요 가속",
+            "BTC ~$67K, ATH 대비 -30% — 리스크오프 매크로 압력",
+        ],
+        marketOverview: [
+            { asset: "SPX", last: "~6,950", change: "-0.1%", signal: "일단 반응 억제 — 아직은" },
+            { asset: "US10Y", last: "4.2%+", change: "주간 +11bp", signal: "Higher for longer" },
+            { asset: "Gold", last: "$5,027", change: "ATH", signal: "안전자산 수요" },
+            { asset: "DXY", last: "97.6", change: "급등", signal: "달러 강세" },
+            { asset: "BTC", last: "~$67K", change: "ATH 대비 -30%", signal: "리스크오프 압력" },
+        ],
+        sections: [
+            {
+                title: "공존해서는 안 되는 두 숫자",
+                content: `금요일 "연착륙" 시나리오에서 공존해서는 안 되는 두 숫자가 나왔습니다:
+
+**인플레이션 가속**: Core PCE MoM 0.4% (예상 0.3%)로 연환산 추세율이 연준의 2% 목표를 크게 상회합니다. YoY 3.0%는 심리적으로 중요한 임계치를 재돌파했습니다.
+
+**성장 감속**: GDP 1.4%로 컨센서스 2.5%를 대폭 하회했습니다. 정부 셧다운 효과가 일부 기여했지만, 민간부문 약세가 본질적인 문제입니다.
+
+이는 2022년 3분기 이후 가장 큰 인플레이션-성장 괴리입니다. 교과서적인 스태그플레이션 리스크 정의입니다.`,
+            },
+            {
+                title: "연준의 정책 딜레마",
+                content: `연준이 이제 진정한 정책 딜레마에 직면했습니다:
+
+- **뜨거운 인플레이션에 금리 인하?** Core PCE 3%에서 이는 정치적으로나 경제적으로 어렵습니다. 시장은 이미 금리 인하를 더 먼 미래로 재평가하고 있습니다.
+
+- **약해지는 성장에 금리 동결?** 민간부문 둔화와 함께 GDP 1.4%는 실물경제가 이미 압박을 받고 있다는 의미입니다.
+
+깔끔한 답은 없습니다. 10년물 금리가 이번 주 +11bp 급등하여 4.2%를 넘긴 것은 채권시장이 "higher for longer"를 기본 시나리오로 가격에 반영하고 있음을 보여줍니다. 금의 사상 최고 $5,027은 실질 자금이 최악의 시나리오를 헤지하고 있음을 의미합니다.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "SPX", support: "6,900 / 6,850", resistance: "7,000 / 7,050", bias: "중립-약세" },
+            { asset: "US10Y", support: "4.15%", resistance: "4.30%", bias: "주식에 약세" },
+            { asset: "Gold", support: "$5,000 / $4,950", resistance: "$5,100", bias: "강세" },
+            { asset: "BTC", support: "$64,000 / $60,000", resistance: "$70,000 / $76,000", bias: "약세" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "55%",
+                condition: "월요일 소화 장세로 개장 — 추가 매도 없음",
+                result: "SPX 6,900 유지, 10Y 4.20% 안정 → 박스권 주간",
+            },
+            {
+                id: "B",
+                probability: "45%",
+                condition: "주말 동안 스태그플레이션 내러티브 확산",
+                result: "SPX 6,850 테스트, 10Y 4.30% 향해 상승 → 리스크오프 가속",
+            },
+        ],
+        ttlTake: `Core PCE 3.0%와 GDP 1.4%가 같은 주에. 연착륙 내러티브가 심각한 타격을 받았습니다.
+
+금요일 시장의 억제된 반응이 데이터가 가격에 반영되었다는 의미는 아닙니다 — 주말이 포트폴리오 매니저들에게 포지션 재고의 시간을 준다는 의미입니다. 월요일 개장이 진짜 이야기를 해줄 것입니다.
+
+**활성 Bold Call**: BTC → $56,000 (30일 내, 2월 20일 기준). 현재 ~$67K. PCE/GDP 데이터로 매크로 논리 강화. 무효화: 주간 종가 $76K 상회.
+
+*덜 잃고. 더 오래 버텨라.*`,
+        locale: "ko",
+    },
     {
         date: "2026-02-20",
         title: "PCE 데이: 모든 것을 결정하는 숫자",
