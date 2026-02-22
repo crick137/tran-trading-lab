@@ -43,6 +43,95 @@ export interface DailyBrief {
 // ─── EN Briefs ──────────────────────────────────────────
 export const dailyBriefsEN: DailyBrief[] = [
     {
+        date: "2026-02-22",
+        title: "Stagflation Signals Intensify: GDP 1.4%, Core PCE 3.0%, While KOSPI Hits ATH",
+        description:
+            "US GDP missed at 1.4% while Core PCE rose to 3.0%. Meanwhile, KOSPI hit 5,809 ATH driven by Samsung's HBM4. A stagflation framework for traders.",
+        tags: ["GDP", "PCE", "stagflation", "KOSPI", "Samsung", "HBM4", "Fed"],
+        readingTime: "4 min",
+        marketState: "E",
+        catalyst: "GDP Q4 Miss + Core PCE 3.0% + KOSPI ATH",
+        events: [
+            "08:30 ET — GDP Q4 2025: 1.4% (missed 3.0% consensus)",
+            "08:30 ET — Core PCE: 3.0% YoY (vs 2.9% expected, prior 2.8%)",
+            "KRX — KOSPI: 5,809 ATH (+2.3%)",
+            "KRX — Samsung Electronics: 190,900 KRW ATH",
+        ],
+        tldr: [
+            "GDP Q4 2025 printed 1.4% — sharpest deceleration since the pandemic, missing 3.0% consensus",
+            "Core PCE rose to 3.0% YoY from 2.8%, topping 2.9% consensus — monthly core at 0.4%",
+            "Growth slowing + inflation rising = textbook stagflation signal",
+            "KOSPI hit ATH at 5,809 — up 34% YTD, world's best-performing major index",
+            "Samsung hit ATH on HBM4 chips priced ~$700/unit with 50-60% operating margins",
+            "BTC range-bound at $67,584 — macro headwinds from rising real rates",
+            "Oil (WTI) +2% on Iran geopolitical tensions",
+        ],
+        marketOverview: [
+            { asset: "GDP Q4", last: "1.4%", change: "Missed 3.0%", signal: "Sharpest deceleration since pandemic" },
+            { asset: "Core PCE", last: "3.0% YoY", change: "+0.4% MoM", signal: "Above 3% threshold" },
+            { asset: "KOSPI", last: "5,809", change: "ATH (+34% YTD)", signal: "World's best major index" },
+            { asset: "Samsung", last: "190,900 KRW", change: "ATH", signal: "HBM4 pricing power" },
+            { asset: "BTC", last: "$67,584", change: "Range-bound", signal: "Real rate pressure" },
+            { asset: "Oil (WTI)", last: "+2%", change: "Rising", signal: "Iran tensions" },
+        ],
+        sections: [
+            {
+                title: "The Setup: Two Numbers That Changed the Narrative",
+                content: `Two data points released on February 20 changed the macro narrative:
+
+**GDP Q4 2025 printed 1.4%** — the sharpest deceleration since the pandemic. Wall Street expected 3.0%. The government shutdown subtracted approximately 1.0 percentage points, but even adjusting for that, underlying growth came in around 2.4% — below trend.
+
+**Core PCE rose to 3.0%** from 2.8%, topping the 2.9% consensus. Monthly core PCE increased 0.4%, the strongest gain in months.
+
+Growth slowing. Inflation rising. The textbook definition of stagflation.`,
+            },
+            {
+                title: "The Divergence: KOSPI ATH Amid US Macro Weakness",
+                content: `While US macro deteriorates, KOSPI hit an all-time high at 5,809 — up 34% year-to-date, making it the world's best-performing major index.
+
+The driver: Samsung Electronics hit a record high after HBM4 chips were priced at approximately $700 per unit — a 30% premium over HBM3E. Operating margins are expected at 50-60%.
+
+Samsung and SK Hynix together control roughly 80% of global HBM market share. The AI infrastructure buildout is creating structural demand regardless of US macro conditions.`,
+            },
+            {
+                title: "Stagflation Framework: 3 Phases",
+                content: `**Phase 1 — Data Divergence (Current):** Growth metrics declining while inflation metrics rising simultaneously. GDP at 1.4% vs Core PCE at 3.0% is the clearest signal.
+
+**Phase 2 — Policy Paralysis:** Central bank unable to cut rates (inflation too hot) or hike (growth too weak). This phase typically lasts 6-18 months. The Fed is entering this phase now.
+
+**Phase 3 — Forced Resolution:** A crisis catalyst triggers decisive policy response. History shows this phase is where the biggest dislocations — and opportunities — occur.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "SPX", support: "50-day MA", resistance: "7,000", bias: "Neutral-bearish" },
+            { asset: "KOSPI", support: "5,677", resistance: "6,000", bias: "Overbought — watch RSI divergence" },
+            { asset: "BTC", support: "$66,000", resistance: "$70,000", bias: "Range-bound" },
+            { asset: "USD/KRW", support: "—", resistance: "—", bias: "FX vol = key risk for KR equity" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "50%",
+                condition: "Stagflation narrative digested — market focuses on KOSPI momentum and AI demand",
+                result: "SPX holds 50-day MA, KOSPI tests 6,000 psychological level → rotation into Asia continues",
+            },
+            {
+                id: "B",
+                probability: "50%",
+                condition: "Fed minutes reinforce higher-for-longer — stagflation fears escalate",
+                result: "SPX breaks below 50-day MA, BTC loses $66K support → risk-off deepens",
+            },
+        ],
+        ttlTake: `GDP at 1.4% and Core PCE at 3.0%. The stagflation math is now undeniable.
+
+But the KOSPI divergence tells an important story: structural demand drivers (AI/HBM) can override macro headwinds. Samsung's HBM4 pricing power at $700/unit with 50-60% margins is a genuine paradigm shift.
+
+**Next week's watchlist**: Fed minutes for March rate outlook, KOSPI 6,000 psychological test, BTC $66K support, Iran oil risk premium.
+
+*Markets move on Liquidity + Positioning. Lose less. Last longer.*`,
+        locale: "en",
+    },
+    {
         date: "2026-02-21",
         title: "PCE Day: The Stagflation Math Nobody Wants to Do",
         description:
@@ -222,6 +311,95 @@ The Walmart-Deere earnings divergence adds another layer. The rotation from cons
 
 // ─── KO Briefs ──────────────────────────────────────────
 export const dailyBriefsKO: DailyBrief[] = [
+    {
+        date: "2026-02-22",
+        title: "스태그플레이션 신호 강화: GDP 1.4%, Core PCE 3.0%, KOSPI 사상 최고",
+        description:
+            "미국 GDP 1.4% 부진, Core PCE 3.0% 상승. 한편 KOSPI 5,809 ATH — 삼성 HBM4가 견인. 트레이더를 위한 스태그플레이션 프레임워크.",
+        tags: ["GDP", "PCE", "스태그플레이션", "KOSPI", "삼성", "HBM4", "연준"],
+        readingTime: "4분",
+        marketState: "E",
+        catalyst: "GDP Q4 부진 + Core PCE 3.0% + KOSPI ATH",
+        events: [
+            "08:30 ET — GDP Q4 2025: 1.4% (컨센서스 3.0% 하회)",
+            "08:30 ET — Core PCE: 3.0% YoY (예상 2.9%, 이전 2.8%)",
+            "KRX — KOSPI: 5,809 ATH (+2.3%)",
+            "KRX — 삼성전자: 190,900원 ATH",
+        ],
+        tldr: [
+            "GDP Q4 2025 1.4% — 팬데믹 이후 가장 급격한 감속, 컨센서스 3.0% 대폭 하회",
+            "Core PCE 3.0% YoY (2.8%→3.0%), 컨센서스 2.9% 상회 — 월간 0.4%",
+            "성장 둔화 + 인플레이션 상승 = 교과서적 스태그플레이션 신호",
+            "KOSPI 5,809 ATH — YTD +34%, 세계 주요 지수 중 최고 수익률",
+            "삼성전자 ATH — HBM4 칩 단가 ~$700, 영업이익률 50-60% 전망",
+            "BTC $67,584 박스권 — 실질금리 상승 압박",
+            "원유(WTI) +2% — 이란 지정학적 긴장",
+        ],
+        marketOverview: [
+            { asset: "GDP Q4", last: "1.4%", change: "3.0% 하회", signal: "팬데믹 이후 최대 감속" },
+            { asset: "Core PCE", last: "3.0% YoY", change: "MoM +0.4%", signal: "3% 임계치 돌파" },
+            { asset: "KOSPI", last: "5,809", change: "ATH (YTD +34%)", signal: "세계 최고 주요 지수" },
+            { asset: "삼성전자", last: "190,900원", change: "ATH", signal: "HBM4 가격결정력" },
+            { asset: "BTC", last: "$67,584", change: "박스권", signal: "실질금리 압박" },
+            { asset: "원유(WTI)", last: "+2%", change: "상승", signal: "이란 긴장" },
+        ],
+        sections: [
+            {
+                title: "셋업: 내러티브를 바꾼 두 숫자",
+                content: `2월 20일 발표된 두 데이터가 매크로 내러티브를 바꿨습니다:
+
+**GDP Q4 2025 1.4%** — 팬데믹 이후 가장 급격한 감속. 월가 컨센서스는 3.0%였습니다. 정부 셧다운이 약 1.0%p를 차감했지만, 이를 조정해도 기저 성장률은 약 2.4%로 추세 이하입니다.
+
+**Core PCE 3.0%** — 2.8%에서 상승, 컨센서스 2.9%를 상회. 월간 Core PCE는 0.4% 상승으로 수개월 내 최고치입니다.
+
+성장 둔화. 인플레이션 상승. 스태그플레이션의 교과서적 정의.`,
+            },
+            {
+                title: "디커플링: 미국 매크로 약세 속 KOSPI ATH",
+                content: `미국 매크로가 악화되는 가운데, KOSPI는 5,809에서 사상 최고가를 경신했습니다 — YTD +34%로 세계 주요 지수 중 최고 수익률.
+
+핵심 동력: 삼성전자가 HBM4 칩 단가 약 $700 — HBM3E 대비 30% 프리미엄 — 으로 사상 최고가를 기록했습니다. 영업이익률 50-60% 전망.
+
+삼성과 SK하이닉스가 글로벌 HBM 시장의 약 80%를 점유하고 있습니다. AI 인프라 구축이 미국 매크로 상황과 무관하게 구조적 수요를 창출하고 있습니다.`,
+            },
+            {
+                title: "스태그플레이션 프레임워크: 3단계",
+                content: `**1단계 — 데이터 괴리 (현재):** 성장 지표 하락과 인플레이션 지표 상승이 동시 진행. GDP 1.4% vs Core PCE 3.0%가 가장 명확한 신호.
+
+**2단계 — 정책 마비:** 중앙은행이 금리 인하(인플레이션 과열)도 인상(성장 약세)도 할 수 없는 상태. 통상 6-18개월 지속. 연준이 이 단계에 진입 중.
+
+**3단계 — 강제 해소:** 위기 촉매가 결정적 정책 대응을 유발. 역사적으로 이 단계에서 가장 큰 혼란과 기회가 발생합니다.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "SPX", support: "50일 이평선", resistance: "7,000", bias: "중립-약세" },
+            { asset: "KOSPI", support: "5,677", resistance: "6,000", bias: "과매수 — RSI 다이버전스 주목" },
+            { asset: "BTC", support: "$66,000", resistance: "$70,000", bias: "박스권" },
+            { asset: "USD/KRW", support: "—", resistance: "—", bias: "환율 변동성 = 한국 주식 핵심 리스크" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "50%",
+                condition: "스태그플레이션 내러티브 소화 — 시장이 KOSPI 모멘텀과 AI 수요에 집중",
+                result: "SPX 50일선 유지, KOSPI 6,000 심리적 레벨 테스트 → 아시아 로테이션 지속",
+            },
+            {
+                id: "B",
+                probability: "50%",
+                condition: "연준 의사록이 higher-for-longer 강화 — 스태그플레이션 우려 확대",
+                result: "SPX 50일선 하회, BTC $66K 지지 이탈 → 리스크오프 심화",
+            },
+        ],
+        ttlTake: `GDP 1.4%와 Core PCE 3.0%. 스태그플레이션 계산은 이제 부정할 수 없습니다.
+
+하지만 KOSPI 디커플링은 중요한 이야기를 합니다: 구조적 수요 동력(AI/HBM)이 매크로 역풍을 상쇄할 수 있습니다. 삼성의 HBM4 가격결정력 — 단가 $700, 영업이익률 50-60% — 은 진정한 패러다임 전환입니다.
+
+**다음 주 워치리스트**: 3월 금리 전망을 위한 연준 의사록, KOSPI 6,000 심리적 테스트, BTC $66K 지지, 이란 원유 리스크 프리미엄.
+
+*덜 잃고. 더 오래 버텨라.*`,
+        locale: "ko",
+    },
     {
         date: "2026-02-21",
         title: "PCE 데이: 아무도 하고 싶지 않은 스태그플레이션 계산",

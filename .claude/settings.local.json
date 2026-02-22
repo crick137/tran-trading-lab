@@ -22,7 +22,25 @@
       "Bash(node -e:*)",
       "Bash(python3:*)",
       "Bash(find:*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx next lint)",
+      "Bash(git pull:*)",
+      "Bash(npm run lint:*)",
+      "Bash(git status:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(npx:*)",
+      "Bash(git checkout:*)",
+      "Bash(node test-screenshots.js:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(cat:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(git -C D:/rick/tran-trading-lab status)",
+      "Bash(git -C D:/rick/tran-trading-lab diff --stat)",
+      "Bash(git -C D:/rick/tran-trading-lab log --oneline -5)",
+      "Bash(git -C D:/rick/tran-trading-lab add app/[locale]/briefings/briefings-content.tsx \"app/[locale]/briefings/[date]/\" lib/daily-brief-data.ts messages/en.json messages/ko.json)",
+      "Bash(git -C:*)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
