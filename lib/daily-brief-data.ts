@@ -43,6 +43,106 @@ export interface DailyBrief {
 // ─── EN Briefs ──────────────────────────────────────────
 export const dailyBriefsEN: DailyBrief[] = [
     {
+        date: "2026-02-23",
+        title: "Capital Rotation: Gold Hits $5,100, KOSPI at All-Time Highs While Bitcoin ETFs Bleed $250M Daily",
+        description:
+            "Gold crossed $5,100 with a 74% YoY gain. KOSPI hit all-time highs. Meanwhile, Bitcoin spot ETFs saw 4 consecutive days of outflows totaling $250M per day. Here's what the capital rotation means.",
+        tags: ["capital-rotation", "gold", "KOSPI", "Bitcoin-ETF", "outflows", "HBM4", "SK-Hynix"],
+        readingTime: "4 min",
+        marketState: "E",
+        catalyst: "Capital Rotation — Gold ATH $5,109 + KOSPI ATH + BTC ETF 4-Day Outflows",
+        events: [
+            "Monday — Housing data, consumer confidence",
+            "Tuesday — $8B Treasury injection",
+            "Thursday — Weekly jobless claims, GDP revision",
+            "Friday — PCE (consensus 2.5% YoY — key for June rate cut pricing)",
+        ],
+        tldr: [
+            "Gold at $5,109/oz — up 74% in 12 months, safe haven bid accelerating",
+            "KOSPI at 5,808 near ATH — Korean institutions bought $1B+ while foreigners sold $920M",
+            "Bitcoin spot ETF: 4 consecutive days of outflows at $250M/day",
+            "Ethereum spot ETF: $180M/day outflows",
+            "Fear & Greed Index at 43 — firmly in Fear territory",
+            "SK Hynix at PER 11x vs Micron 29x despite earning 3x more — HBM4 value play",
+            "Gold-to-Bitcoin historical lag: 100-150 days — Bitcoin's move could begin Q3 2026",
+        ],
+        marketOverview: [
+            { asset: "Gold", last: "$5,109", change: "+74% YoY", signal: "ATH — safe haven bid" },
+            { asset: "SPX", last: "6,862", change: "Steady", signal: "Resilient" },
+            { asset: "KOSPI", last: "5,808", change: "Near ATH", signal: "Institutional buying $1B+" },
+            { asset: "BTC", last: "$68,198", change: "Weak", signal: "ETF outflows $250M/day" },
+            { asset: "ETH", last: "$3,097", change: "Weak", signal: "ETF outflows $180M/day" },
+            { asset: "10Y", last: "4.09%", change: "Stable", signal: "PCE Friday key" },
+        ],
+        sections: [
+            {
+                title: "The Divergence That Defines February 2026",
+                content: `The numbers tell a clear story: traditional assets are at all-time highs while crypto struggles.
+
+**Where capital is flowing:**
+- Gold: $5,109/oz, up 74% in 12 months
+- S&P 500: 6,862, steady gains
+- KOSPI: 5,808, near all-time highs with institutional buying of $1B+
+
+**Where capital is leaving:**
+- Bitcoin spot ETF: 4 consecutive days of outflows, $250M/day
+- Ethereum spot ETF: $180M/day outflows
+- Fear & Greed Index: 43 (Fear territory)`,
+            },
+            {
+                title: "The Korean Equity Story",
+                content: `The KOSPI story is particularly interesting. Foreign investors sold $920M, but Korean institutions stepped in with over $1B in net buying. The sectors leading the charge: semiconductors, nuclear, defense, and shipbuilding.
+
+SK Hynix at 544,000 KRW with a PER of 11x versus Micron's 29x — despite earning 3x more. The HBM4 supercycle with chip prices at $700 (up 30% from HBM3E) and operating margins of 50-60% make Korean semis the value play of 2026.`,
+            },
+            {
+                title: "What ETF Outflows Actually Mean",
+                content: `Not all outflows are bearish. The current streak is largely driven by:
+
+- Basis trade unwinding (hedge funds closing arbitrage positions)
+- Quarterly portfolio rebalancing
+- Tax-loss harvesting
+
+The August 2024 precedent: a 7-day outflow streak at $58,000 preceded a rally to $108,000 in four months.`,
+            },
+            {
+                title: "The Gold-to-Bitcoin Lag",
+                content: `Historically, major gold breakouts precede Bitcoin's next leg by 100-150 days. Gold broke out in October 2025. If the pattern holds, Bitcoin's move begins in Q3 2026.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "BTC", support: "$65,000", resistance: "$72,000", bias: "Neutral — ETF flow dependent" },
+            { asset: "ETH", support: "$3,000", resistance: "$3,300", bias: "Bearish until outflows stop" },
+            { asset: "KOSPI", support: "5,500", resistance: "6,000", bias: "Bullish — institutional support" },
+            { asset: "Gold", support: "$4,800", resistance: "$5,300", bias: "Bullish" },
+            { asset: "10Y", support: "4.00%", resistance: "4.15%", bias: "PCE Friday = catalyst" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "55%",
+                condition: "ETF outflows stabilize + gold momentum continues + PCE in-line Friday",
+                result: "BTC reclaims $70K, KOSPI tests 6,000 → rotation narrative shifts to risk-on",
+            },
+            {
+                id: "B",
+                probability: "45%",
+                condition: "ETF outflows accelerate + hot PCE print Friday",
+                result: "BTC loses $65K support, gold extends to $5,300 → capital rotation deepens into safe havens",
+            },
+        ],
+        ttlTake: `Gold at $5,109 and KOSPI near ATH while Bitcoin ETFs bleed $250M daily. The capital rotation is undeniable.
+
+But context matters. The August 2024 precedent showed that a 7-day ETF outflow streak at $58,000 preceded a rally to $108,000. Current outflows are largely mechanical — basis trades, rebalancing, tax harvesting — not panic selling.
+
+The gold-to-Bitcoin lag of 100-150 days suggests patience. Gold broke out in October 2025. If the historical pattern holds, Bitcoin's next major move begins Q3 2026.
+
+**This week's key**: Friday's PCE at consensus 2.5% YoY will determine whether June rate cut pricing holds. That's the macro catalyst that could break the current range.
+
+*Lose less. Last longer. Grow faster.*`,
+        locale: "en",
+    },
+    {
         date: "2026-02-22",
         title: "Stagflation Signals Intensify: GDP 1.4%, Core PCE 3.0%, While KOSPI Hits ATH",
         description:
@@ -311,6 +411,106 @@ The Walmart-Deere earnings divergence adds another layer. The rotation from cons
 
 // ─── KO Briefs ──────────────────────────────────────────
 export const dailyBriefsKO: DailyBrief[] = [
+    {
+        date: "2026-02-23",
+        title: "자본 로테이션: 금 $5,100 돌파, KOSPI 사상 최고 — 비트코인 ETF는 매일 $2.5억 유출",
+        description:
+            "금이 YoY 74% 상승하며 $5,100을 돌파했습니다. KOSPI는 사상 최고. 한편 비트코인 현물 ETF는 4일 연속 일평균 $2.5억 유출. 자본 로테이션의 의미를 분석합니다.",
+        tags: ["자본로테이션", "금", "KOSPI", "비트코인ETF", "유출", "HBM4", "SK하이닉스"],
+        readingTime: "4분",
+        marketState: "E",
+        catalyst: "자본 로테이션 — 금 ATH $5,109 + KOSPI ATH + BTC ETF 4일 연속 유출",
+        events: [
+            "월요일 — 주택 데이터, 소비자 신뢰지수",
+            "화요일 — $80억 국채 투입",
+            "목요일 — 주간 실업수당 청구, GDP 수정치",
+            "금요일 — PCE (컨센서스 2.5% YoY — 6월 금리 인하 가격에 핵심)",
+        ],
+        tldr: [
+            "금 $5,109/oz — 12개월간 74% 상승, 안전자산 수요 가속",
+            "KOSPI 5,808 ATH 근접 — 기관 순매수 $10억+ vs 외국인 $9.2억 순매도",
+            "비트코인 현물 ETF: 4일 연속 유출, 일평균 $2.5억",
+            "이더리움 현물 ETF: 일평균 $1.8억 유출",
+            "Fear & Greed Index 43 — 공포 영역",
+            "SK하이닉스 PER 11배 vs 마이크론 29배 — 수익은 3배 더 많음 — HBM4 밸류 플레이",
+            "금→비트코인 역사적 래그: 100-150일 — BTC 움직임 Q3 2026 시작 가능",
+        ],
+        marketOverview: [
+            { asset: "금", last: "$5,109", change: "YoY +74%", signal: "ATH — 안전자산 수요" },
+            { asset: "SPX", last: "6,862", change: "안정", signal: "회복력 유지" },
+            { asset: "KOSPI", last: "5,808", change: "ATH 근접", signal: "기관 순매수 $10억+" },
+            { asset: "BTC", last: "$68,198", change: "약세", signal: "ETF 유출 $2.5억/일" },
+            { asset: "ETH", last: "$3,097", change: "약세", signal: "ETF 유출 $1.8억/일" },
+            { asset: "10Y", last: "4.09%", change: "안정", signal: "금요일 PCE가 핵심" },
+        ],
+        sections: [
+            {
+                title: "2026년 2월을 정의하는 디커플링",
+                content: `숫자가 명확한 이야기를 합니다: 전통 자산은 사상 최고인 반면 크립토는 고전 중입니다.
+
+**자본이 흘러가는 곳:**
+- 금: $5,109/oz, 12개월간 74% 상승
+- S&P 500: 6,862, 꾸준한 상승
+- KOSPI: 5,808, 기관 순매수 $10억+ 으로 사상 최고 근접
+
+**자본이 빠져나가는 곳:**
+- 비트코인 현물 ETF: 4일 연속 유출, 일평균 $2.5억
+- 이더리움 현물 ETF: 일평균 $1.8억 유출
+- Fear & Greed Index: 43 (공포 영역)`,
+            },
+            {
+                title: "한국 주식 스토리",
+                content: `KOSPI 스토리가 특히 흥미롭습니다. 외국인이 $9.2억을 매도했지만, 한국 기관이 $10억 이상 순매수로 대응했습니다. 주도 업종: 반도체, 원자력, 방산, 조선.
+
+SK하이닉스 544,000원, PER 11배 vs 마이크론 29배 — 수익은 3배 더 많음에도. HBM4 슈퍼사이클 — 칩 단가 $700 (HBM3E 대비 30% 상승), 영업이익률 50-60% — 한국 반도체가 2026년의 밸류 플레이입니다.`,
+            },
+            {
+                title: "ETF 유출이 실제로 의미하는 것",
+                content: `모든 유출이 약세 신호는 아닙니다. 현재 유출은 주로 다음에 의해 발생:
+
+- 베이시스 트레이드 청산 (헤지펀드의 차익거래 포지션 해소)
+- 분기별 포트폴리오 리밸런싱
+- 세금 손실 매도
+
+2024년 8월 선례: $58,000에서 7일간 유출 후 4개월 만에 $108,000까지 상승.`,
+            },
+            {
+                title: "금→비트코인 래그",
+                content: `역사적으로 금의 주요 돌파는 비트코인의 다음 상승을 100-150일 앞섭니다. 금은 2025년 10월에 돌파했습니다. 패턴이 유지된다면 비트코인의 움직임은 2026년 Q3에 시작됩니다.`,
+            },
+        ],
+        keyLevels: [
+            { asset: "BTC", support: "$65,000", resistance: "$72,000", bias: "중립 — ETF 자금 흐름 의존" },
+            { asset: "ETH", support: "$3,000", resistance: "$3,300", bias: "유출 중단 전까지 약세" },
+            { asset: "KOSPI", support: "5,500", resistance: "6,000", bias: "강세 — 기관 지지" },
+            { asset: "금", support: "$4,800", resistance: "$5,300", bias: "강세" },
+            { asset: "10Y", support: "4.00%", resistance: "4.15%", bias: "금요일 PCE = 촉매" },
+        ],
+        scenarios: [
+            {
+                id: "A",
+                probability: "55%",
+                condition: "ETF 유출 안정화 + 금 모멘텀 지속 + 금요일 PCE 컨센서스 부합",
+                result: "BTC $70K 회복, KOSPI 6,000 테스트 → 로테이션 내러티브가 리스크온으로 전환",
+            },
+            {
+                id: "B",
+                probability: "45%",
+                condition: "ETF 유출 가속 + 금요일 PCE 상회",
+                result: "BTC $65K 지지 이탈, 금 $5,300으로 연장 → 안전자산으로 자본 로테이션 심화",
+            },
+        ],
+        ttlTake: `금 $5,109, KOSPI ATH 근접, 비트코인 ETF는 매일 $2.5억 유출. 자본 로테이션은 부인할 수 없습니다.
+
+하지만 맥락이 중요합니다. 2024년 8월 선례는 $58,000에서 7일간 ETF 유출 후 $108,000까지 상승했음을 보여줍니다. 현재 유출은 대부분 기계적 — 베이시스 트레이드, 리밸런싱, 세금 매도 — 이지 패닉 셀링이 아닙니다.
+
+금→비트코인 100-150일 래그가 인내를 요구합니다. 금은 2025년 10월에 돌파했습니다. 역사적 패턴이 유지된다면 비트코인의 다음 주요 움직임은 Q3 2026에 시작됩니다.
+
+**이번 주 핵심**: 금요일 PCE 컨센서스 2.5% YoY가 6월 금리 인하 가격 유지 여부를 결정합니다. 현재 레인지를 깨뜨릴 매크로 촉매입니다.
+
+*덜 잃고. 더 오래 버텨라.*`,
+        locale: "ko",
+    },
     {
         date: "2026-02-22",
         title: "스태그플레이션 신호 강화: GDP 1.4%, Core PCE 3.0%, KOSPI 사상 최고",
