@@ -3,135 +3,50 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { SectionReveal } from "@/components/ui/section-reveal";
-import Link from "next/link";
-import {
-    FileText,
-    Send,
-    ArrowRight,
-    Calendar,
-    Clock,
-    Tag,
-    TrendingUp,
-    TrendingDown,
-    Minus,
-} from "lucide-react";
-import { getDailyBriefs } from "@/lib/daily-brief-data";
-import type { DailyBrief } from "@/lib/daily-brief-data";
+import { ContentCard } from "@/components/content/content-card";
+import { PopularRanking } from "@/components/home/popular-ranking";
+import { SubscribeCTA } from "@/components/home/subscribe-cta";
+import { TrendingUp, Send, ArrowRight } from "lucide-react";
+import type { UnifiedContentItem } from "@/lib/content-utils";
 
-function BiasIcon({ bias }: { bias: string }) {
-    const lower = bias.toLowerCase();
-    if (lower.includes("bullish") || lower.includes("강세") || lower.includes("rising") || lower.includes("상승")) {
-        return <TrendingUp className="w-4 h-4 text-green-400" />;
-    }
-    if (lower.includes("bearish") || lower.includes("약세")) {
-        return <TrendingDown className="w-4 h-4 text-red-400" />;
-    }
-    return <Minus className="w-4 h-4 text-[var(--text-tertiary)]" />;
+interface BriefingsContentProps {
+    items: UnifiedContentItem[];
 }
 
-function BriefCard({ brief, locale }: { brief: DailyBrief; locale: string }) {
-    return (
-        <Link
-            href={`/${locale}/briefings/${brief.date}`}
-            className="block p-6 rounded-xl bg-cv-elevated border border-[var(--border-default)] hover:border-accent/50 transition-all group card-hover"
-        >
-            <div className="flex items-center gap-2 mb-3">
-                <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent/20 text-accent">
-                    Daily Brief
-                </span>
-                <span className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {brief.date}
-                </span>
-                <span className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
-                    <Clock className="w-3.5 h-3.5" />
-                    {brief.readingTime}
-                </span>
-            </div>
-
-            <h2 className="text-xl font-bold text-[var(--text-primary)] group-hover:text-accent transition-colors mb-2">
-                {brief.title}
-            </h2>
-
-            <p className="text-sm text-[var(--text-tertiary)] mb-4 line-clamp-2">
-                {brief.description}
-            </p>
-
-            {/* Key levels preview */}
-            <div className="flex flex-wrap gap-2 mb-4">
-                {brief.keyLevels.slice(0, 3).map((level) => (
-                    <div
-                        key={level.asset}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--bg-wash)] border border-[var(--border-subtle)] text-xs"
-                    >
-                        <BiasIcon bias={level.bias} />
-                        <span className="font-medium text-[var(--text-primary)]">{level.asset}</span>
-                        <span className="text-[var(--text-tertiary)]">
-                            {level.support} – {level.resistance}
-                        </span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Tags */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-                <Tag className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
-                {brief.tags.slice(0, 5).map((tag) => (
-                    <span
-                        key={tag}
-                        className="px-2 py-0.5 text-xs rounded bg-cv-elevated border border-[var(--border-subtle)] text-[var(--text-tertiary)]"
-                    >
-                        {tag}
-                    </span>
-                ))}
-            </div>
-        </Link>
-    );
-}
-
-export function BriefingsContent() {
-    const locale = useLocale();
+export function BriefingsContent({ items }: BriefingsContentProps) {
+    const locale = useLocale() as "en" | "ko";
     const t = useTranslations("briefings");
     const tc = useTranslations("common");
-    const briefs = getDailyBriefs(locale as "en" | "ko");
+
+    const allBriefings = items;
 
     // Empty state
-    if (!briefs || briefs.length === 0) {
+    if (!allBriefings || allBriefings.length === 0) {
         return (
             <>
                 <Navbar />
-                <main className="pt-24 pb-16 min-h-screen">
-                    <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
-                        <div>
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
-                                <FileText className="w-8 h-8 text-accent" />
-                            </div>
-                            <h1 className="text-display text-[var(--text-primary)] mb-4">
-                                {t("title")}
-                            </h1>
-                            <p className="text-[var(--text-tertiary)] mb-12 max-w-2xl mx-auto">
-                                {t("subtitle")}
-                            </p>
+                <main className="pt-16 min-h-screen">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-24">
+                        <div className="w-16 h-16 mx-auto rounded-2xl bg-green-400/10 flex items-center justify-center mb-6">
+                            <TrendingUp className="w-8 h-8 text-green-400" />
                         </div>
-                        <div className="bg-cv-elevated/50 border border-[var(--border-subtle)] rounded-2xl p-12 max-w-2xl mx-auto">
-                            <p className="text-[var(--text-tertiary)] text-lg mb-6">
-                                {t("noBriefings")}
-                                <br />
-                                {t("telegramCta")}
-                            </p>
-                            <a
-                                href="https://t.me/TranTradingLabEN"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg text-[#0a0a0f] font-bold transition-all hover:shadow-lg hover:shadow-accent/20"
-                                style={{ background: "var(--gradient-cta)" }}
-                            >
-                                <Send className="w-4 h-4" />
-                                {tc("joinTelegramChannel")}
-                                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                            </a>
-                        </div>
+                        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
+                            {t("title")}
+                        </h1>
+                        <p className="text-[var(--text-tertiary)] mb-8 max-w-lg mx-auto">
+                            {t("noBriefings")}
+                        </p>
+                        <a
+                            href="https://t.me/TranTradingLabEN"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-[#0a0a0f] font-semibold transition-all hover:brightness-110"
+                            style={{ background: "var(--gradient-cta)" }}
+                        >
+                            <Send className="w-4 h-4" />
+                            {tc("joinTelegramChannel")}
+                            <ArrowRight className="w-4 h-4" />
+                        </a>
                     </div>
                 </main>
                 <Footer />
@@ -139,38 +54,55 @@ export function BriefingsContent() {
         );
     }
 
+    const [latestBriefing, ...olderBriefings] = allBriefings;
+
     return (
         <>
             <Navbar />
-            <main className="pt-24 pb-16 min-h-screen">
-                {/* Hero */}
-                <section className="max-w-5xl mx-auto px-6 text-center py-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-8">
-                        <FileText className="w-4 h-4" />
-                        {t("title")}
+            <main className="pt-16 min-h-screen">
+                {/* Compact header */}
+                <section className="border-b border-[var(--border-subtle)]">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 rounded-xl bg-green-400/10 flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5 text-green-400" />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold text-[var(--text-primary)]">{t("title")}</h1>
+                                <p className="text-sm text-[var(--text-secondary)]">{t("subtitle")}</p>
+                            </div>
+                        </div>
                     </div>
-                    <h1 className="text-display text-[var(--text-primary)] mb-6">
-                        {t("title")}
-                    </h1>
-                    <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
-                        {t("subtitle")}
-                    </p>
                 </section>
 
-                {/* Briefs List */}
-                <SectionReveal>
-                    <section className="max-w-4xl mx-auto px-6">
-                        <div className="space-y-4">
-                            {briefs.map((brief) => (
-                                <BriefCard
-                                    key={brief.date}
-                                    brief={brief}
-                                    locale={locale}
-                                />
-                            ))}
+                {/* Main content with sidebar */}
+                <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 space-y-6">
+                            {/* Latest briefing — featured */}
+                            <ContentCard item={latestBriefing} variant="featured" />
+
+                            {/* Older briefings */}
+                            {olderBriefings.length > 0 && (
+                                <div className="space-y-4">
+                                    <h2 className="text-sm font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                                        {locale === "ko" ? "이전 브리핑" : "Previous Briefings"}
+                                    </h2>
+                                    {olderBriefings.map((item) => (
+                                        <ContentCard key={item.id} item={item} variant="horizontal" />
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                    </section>
-                </SectionReveal>
+
+                        {/* Sidebar */}
+                        <aside className="w-full lg:w-[320px] flex-shrink-0 space-y-6">
+                            <PopularRanking items={items} />
+                            <SubscribeCTA variant="compact" />
+                        </aside>
+                    </div>
+                </section>
             </main>
             <Footer />
         </>

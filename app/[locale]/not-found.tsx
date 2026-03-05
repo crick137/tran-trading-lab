@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
-import { BarChart3, Home, LayoutDashboard } from "lucide-react";
+import { TrendingUp, Home, LayoutDashboard } from "lucide-react";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
 export default function NotFound() {
@@ -35,7 +35,7 @@ export default function NotFound() {
                     {/* Brand logo */}
                     <div className="flex items-center justify-center gap-2 mb-6">
                         <div className="w-6 h-6 rounded-md bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                            <BarChart3 className="w-3.5 h-3.5 text-[#0a0a0f]" />
+                            <TrendingUp className="w-3.5 h-3.5 text-[#0a0a0f]" />
                         </div>
                         <span className="text-sm font-semibold text-[var(--text-tertiary)]">TRAN TRADING LAB</span>
                     </div>

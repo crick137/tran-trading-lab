@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { BarChart3, Send, ArrowRight } from "lucide-react";
+import { TrendingUp, Send, ArrowRight } from "lucide-react";
 
 export function ReportsContent() {
     const t = useTranslations("reports");
@@ -15,7 +15,7 @@ export function ReportsContent() {
                 <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">
                     <div>
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mb-6">
-                            <BarChart3 className="w-8 h-8 text-accent" />
+                            <TrendingUp className="w-8 h-8 text-accent" />
                         </div>
                         <h1 className="text-display text-[var(--text-primary)] mb-4">{t("title")}</h1>
                         <p className="text-[var(--text-tertiary)] mb-12 max-w-2xl mx-auto">

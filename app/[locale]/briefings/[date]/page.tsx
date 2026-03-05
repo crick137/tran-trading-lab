@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createPageMetadata } from "@/lib/metadata";
-import { getDailyBriefByDate, getAllBriefDates } from "@/lib/daily-brief-data";
+import { getDailyBriefByDate, getAllBriefDates } from "@/lib/content-reader.server";
 import { breadcrumbJsonLd, articleJsonLd } from "@/lib/json-ld";
 import { BriefingDetailContent } from "./briefing-detail-content";
 
@@ -101,7 +101,7 @@ export default function BriefingDetailPage({
                     dangerouslySetInnerHTML={{ __html: JSON.stringify(articleLd) }}
                 />
             )}
-            <BriefingDetailContent />
+            <BriefingDetailContent brief={brief || null} />
         </>
     );
 }

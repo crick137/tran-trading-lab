@@ -27,24 +27,26 @@ export function AcademyContent() {
     return (
         <>
             <Navbar />
-            <main className="pt-24 pb-16 min-h-screen">
-                <div className="max-w-content mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Header */}
-                    <div className="text-center mb-16">
+            <main className="pt-16 pb-16 min-h-screen">
+                {/* Compact header */}
+                <section className="border-b border-[var(--border-subtle)]">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-6">
                             <GraduationCap className="w-4 h-4" />
                             {t("badge")}
                         </div>
-                        <h1 className="text-display text-[var(--text-primary)] mb-4">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4">
                             {t("title")}
                         </h1>
-                        <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
+                        <p className="text-base text-[var(--text-tertiary)] max-w-[600px] mx-auto leading-relaxed">
                             {t("subtitle")}
                         </p>
                     </div>
+                </section>
 
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Learning Path */}
-                    <section className="mb-16">
+                    <section className="py-12">
                         <h2 className="text-section text-[var(--text-primary)] mb-8 flex items-center gap-2">
                             <BookOpen className="w-6 h-6 text-accent" />
                             {t("learningPath")}
@@ -55,12 +57,12 @@ export function AcademyContent() {
                                 const topics: string[] = t.raw(mod.topicsKey) as string[];
                                 return (
                                     <TiltCard key={mod.id}>
-                                        <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] card-hover border-glow h-full">
+                                        <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] h-full">
                                             <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-[#0a0a0f] font-bold flex items-center justify-center text-sm">
                                                 {index + 1}
                                             </div>
                                             <Icon className="w-10 h-10 text-accent mb-4" />
-                                            <h3 className="text-xl font-bold text-[var(--text-primary)] mb-2">{t(mod.titleKey)}</h3>
+                                            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">{t(mod.titleKey)}</h3>
                                             <p className="text-[var(--text-tertiary)] text-sm mb-4">{t(mod.descKey)}</p>
                                             <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-4">
                                                 <span className="flex items-center gap-1">
@@ -88,14 +90,14 @@ export function AcademyContent() {
                     </section>
 
                     {/* Quick Links */}
-                    <section className="mb-16">
+                    <section className="py-12">
                         <h2 className="text-section text-[var(--text-primary)] mb-8">{t("quickLinks")}</h2>
                         <div className="grid md:grid-cols-3 gap-4">
                             {quickLinks.map((link) => (
                                 <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="p-4 rounded-lg bg-cv-elevated border border-[var(--border-subtle)] hover:border-accent/30 transition-all group flex items-center justify-between"
+                                    className="p-4 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] hover:border-[var(--accent)]/30 transition-all group flex items-center justify-between"
                                 >
                                     <div>
                                         <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors">
@@ -110,7 +112,7 @@ export function AcademyContent() {
                     </section>
 
                     {/* CTA */}
-                    <section className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8">
+                    <section className="text-center bg-cv-elevated border border-[var(--border-subtle)] rounded-2xl p-8 mb-12">
                         <h2 className="text-section text-[var(--text-primary)] mb-4">
                             {t("ctaTitle")}
                         </h2>
@@ -121,7 +123,7 @@ export function AcademyContent() {
                             href="https://t.me/TranTradingLabEN"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-lg text-[#0a0a0f] font-semibold transition-all hover:shadow-xl hover:shadow-accent/30"
+                            className="group inline-flex items-center gap-2 px-8 py-4 rounded-xl text-[#0a0a0f] font-semibold transition-all hover:brightness-110 hover:-translate-y-px hover:shadow-lg hover:shadow-accent/25"
                             style={{ background: "var(--gradient-cta)" }}
                         >
                             {t("ctaButton")}

@@ -6,7 +6,7 @@ import { useCallback, useTransition } from "react";
 
 const locales = [
     { code: "en", label: "EN" },
-    { code: "ko", label: "한국어" },
+    { code: "ko", label: "KO" },
 ] as const;
 
 export function LanguageSwitcher() {
@@ -43,7 +43,7 @@ export function LanguageSwitcher() {
                     disabled={isPending}
                     role="radio"
                     aria-checked={locale === l.code}
-                    className={`relative z-10 px-3 py-1.5 transition-colors duration-200 ${locale === l.code
+                    className={`relative z-10 px-3 py-1.5 whitespace-nowrap transition-colors duration-200 ${locale === l.code
                             ? "text-accent font-semibold"
                             : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                         }`}

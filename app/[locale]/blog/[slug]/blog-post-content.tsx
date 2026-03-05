@@ -10,7 +10,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, Calendar, Clock, Tag } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, ArrowRight, Calendar, Clock, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { blogPosts, categoryLabels } from "@/lib/blog-data";
 import { ArticleCTA } from "@/components/blog/article-cta";
@@ -19,25 +20,21 @@ import { ArticleCTA } from "@/components/blog/article-cta";
 function parseMarkdownToHtml(content: string): string {
     let html = content;
 
-    // Parse images first - ![alt](src) - with premium styling
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
         '<figure class="my-8 rounded-xl overflow-hidden border border-[var(--border-subtle)] shadow-lg shadow-black/20">' +
         '<img src="$2" alt="$1" class="w-full" />' +
         '<figcaption class="bg-cv-elevated/80 px-4 py-3 text-center text-sm text-[var(--text-secondary)] border-t border-[var(--border-subtle)]">$1</figcaption>' +
         '</figure>');
 
-    // Parse tables with premium styling
     html = html.replace(/(\|.+\|\r?\n)+/g, (tableBlock) => {
         const rows = tableBlock.trim().split(/\r?\n/);
         if (rows.length < 2) return tableBlock;
-
         let tableHtml = '<div class="my-8 overflow-hidden rounded-xl border border-[var(--border-default)]"><table class="w-full border-collapse"><thead><tr>';
         const headerCells = rows[0].split('|').filter(cell => cell.trim());
         headerCells.forEach(cell => {
             tableHtml += `<th class="border-b border-[var(--border-default)] px-4 py-3 bg-accent/10 text-accent text-left font-semibold">${cell.trim()}</th>`;
         });
         tableHtml += '</tr></thead><tbody>';
-
         for (let i = 2; i < rows.length; i++) {
             const cells = rows[i].split('|').filter(cell => cell.trim());
             tableHtml += `<tr class="${i % 2 === 0 ? 'bg-[var(--bg-wash)]' : 'bg-[var(--bg-wash)]'}">`;
@@ -50,13 +47,11 @@ function parseMarkdownToHtml(content: string): string {
         return tableHtml;
     });
 
-    // Parse H1 with special title styling (emoji support)
     html = html.replace(/^# (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
         return `<h1 id="${id}" class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent mb-6">${text}</h1>`;
     });
 
-    // Parse H2 as major section headers with decorative styling
     html = html.replace(/^## (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
         const firstChar = text.codePointAt(0) || 0;
@@ -75,26 +70,21 @@ function parseMarkdownToHtml(content: string): string {
         return `<h2 id="${id}" class="mt-12 mb-6 text-2xl font-bold text-[var(--text-primary)] border-l-4 border-accent pl-4">${text}</h2>`;
     });
 
-    // Parse H3 as subsection headers
     html = html.replace(/^### (.+)$/gm, (match, text) => {
         const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
         return `<h3 id="${id}" class="mt-8 mb-4 text-xl font-semibold text-accent/90">${text}</h3>`;
     });
 
-    // Bold and italic
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>');
     html = html.replace(/\*(.+?)\*/g, '<em class="text-accent/80">$1</em>');
 
-    // Lists - wrap consecutive list items in ul with premium styling
     html = html.replace(/((?:^- .+$\r?\n?)+)/gm, (match) => {
         const items = match.replace(/^- (.+)$/gm, '<li class="relative pl-2 before:absolute before:left-[-1rem] before:top-[0.6rem] before:w-1.5 before:h-1.5 before:bg-accent before:rounded-full">$1</li>');
         return `<ul class="my-6 ml-4 space-y-2 border-l-2 border-[var(--border-subtle)] pl-6">${items}</ul>`;
     });
 
-    // Horizontal rule as decorative divider
     html = html.replace(/^---$/gm, '<div class="my-12 flex items-center justify-center gap-4"><span class="w-2 h-2 bg-accent/50 rounded-full"></span><span class="w-16 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent"></span><span class="w-2 h-2 bg-accent/50 rounded-full"></span></div>');
 
-    // Paragraphs - split by double newlines but preserve block elements
     const blocks = html.split(/\n\n+/);
     html = blocks.map(block => {
         const trimmed = block.trim();
@@ -116,21 +106,24 @@ export function BlogPostContent() {
     const locale = useLocale();
     const t = useTranslations("blogPost");
     const slug = params.slug as string;
-    const article = blogPosts.find((p) => p.slug === slug);
+    const currentIndex = blogPosts.findIndex((p) => p.slug === slug);
+    const article = blogPosts[currentIndex];
 
     if (!article) {
         notFound();
     }
 
+    const prevArticle = currentIndex > 0 ? blogPosts[currentIndex - 1] : null;
+    const nextArticle = currentIndex < blogPosts.length - 1 ? blogPosts[currentIndex + 1] : null;
+
     return (
         <>
             <ReadingProgress />
             <Navbar />
-            <main className="pt-24 pb-16 min-h-screen">
-                {/* TOC Sidebar */}
+            <main className="pt-16 min-h-screen">
                 <TableOfContents content={article.content} />
 
-                <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
                     {/* Breadcrumb */}
                     <Breadcrumb
                         items={[
@@ -143,7 +136,7 @@ export function BlogPostContent() {
                     {/* Back Link */}
                     <Link
                         href={`/${locale}/blog`}
-                        className="inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
+                        className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-8"
                     >
                         <ArrowLeft className="w-4 h-4" />
                         {t("backToBlog")}
@@ -156,18 +149,15 @@ export function BlogPostContent() {
                         transition={{ duration: 0.5 }}
                         className="mb-12"
                     >
-                        {/* Category */}
                         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-accent/20 text-accent mb-4">
                             {categoryLabels[article.category] || article.category}
                         </span>
 
-                        {/* Title */}
                         <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[var(--text-primary)] mb-6 leading-tight">
                             {article.title}
                         </h1>
 
-                        {/* Meta */}
-                        <div className="flex flex-wrap items-center gap-4 text-[var(--text-secondary)] mb-6">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-secondary)] mb-6">
                             <span className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
                                 {article.date}
@@ -178,14 +168,13 @@ export function BlogPostContent() {
                             </span>
                         </div>
 
-                        {/* Tags */}
                         {article.tags && article.tags.length > 0 && (
                             <div className="flex items-center gap-2 flex-wrap mb-6">
                                 <Tag className="w-4 h-4 text-[var(--text-secondary)]" />
                                 {article.tags.map((tag: string) => (
                                     <span
                                         key={tag}
-                                        className="px-2 py-1 text-xs rounded-md bg-cv-elevated border border-[var(--border-default)] text-[var(--text-secondary)] hover:border-accent/50 hover:text-accent transition-colors cursor-pointer"
+                                        className="px-2 py-1 text-xs rounded-md bg-cv-elevated border border-[var(--border-default)] text-[var(--text-secondary)]"
                                     >
                                         #{tag}
                                     </span>
@@ -193,9 +182,27 @@ export function BlogPostContent() {
                             </div>
                         )}
 
-                        {/* Social Share */}
                         <SocialShare title={article.title} />
                     </motion.header>
+
+                    {/* Author card */}
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] mb-10">
+                        <div className="w-10 h-10 rounded-full bg-[#111] flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <Image
+                                src="/tiger-logo.png"
+                                alt="TTL"
+                                width={40}
+                                height={40}
+                                className="object-cover"
+                            />
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-[var(--text-primary)]">Tran Trading Lab</p>
+                            <p className="text-xs text-[var(--text-tertiary)]">
+                                {locale === "ko" ? "시장 분석 & 트레이딩 인사이트" : "Market Analysis & Trading Insights"}
+                            </p>
+                        </div>
+                    </div>
 
                     {/* Content */}
                     <motion.div
@@ -206,7 +213,7 @@ export function BlogPostContent() {
                         dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(article.content) }}
                     />
 
-                    {/* CTA */}
+                    {/* Inline subscribe CTA */}
                     <ArticleCTA />
 
                     {/* Bottom Share */}
@@ -217,7 +224,34 @@ export function BlogPostContent() {
                         </div>
                     </div>
 
-                    {/* Divider */}
+                    {/* Article Navigation — Prev / Next */}
+                    <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {prevArticle ? (
+                            <Link
+                                href={`/${locale}/blog/${prevArticle.slug}`}
+                                className="group flex items-center gap-3 p-4 rounded-xl border border-[var(--border-subtle)] bg-cv-elevated hover:border-[var(--accent)]/30 transition-colors"
+                            >
+                                <ArrowLeft className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors flex-shrink-0" />
+                                <div className="min-w-0">
+                                    <p className="text-xs text-[var(--text-muted)]">{locale === "ko" ? "이전 글" : "Previous"}</p>
+                                    <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--accent)] transition-colors">{prevArticle.title}</p>
+                                </div>
+                            </Link>
+                        ) : <div />}
+                        {nextArticle ? (
+                            <Link
+                                href={`/${locale}/blog/${nextArticle.slug}`}
+                                className="group flex items-center justify-end gap-3 p-4 rounded-xl border border-[var(--border-subtle)] bg-cv-elevated hover:border-[var(--accent)]/30 transition-colors text-right"
+                            >
+                                <div className="min-w-0">
+                                    <p className="text-xs text-[var(--text-muted)]">{locale === "ko" ? "다음 글" : "Next"}</p>
+                                    <p className="text-sm font-medium text-[var(--text-primary)] line-clamp-1 group-hover:text-[var(--accent)] transition-colors">{nextArticle.title}</p>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors flex-shrink-0" />
+                            </Link>
+                        ) : <div />}
+                    </div>
+
                     <hr className="my-12 border-[var(--border-default)]" />
 
                     {/* Related Articles */}
@@ -231,12 +265,12 @@ export function BlogPostContent() {
                                     <Link
                                         key={art.slug}
                                         href={`/${locale}/blog/${art.slug}`}
-                                        className="p-4 rounded-lg bg-cv-elevated border border-[var(--border-default)] hover:border-accent/50 transition-all group card-hover"
+                                        className="p-4 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] hover:border-[var(--accent)]/30 transition-all group"
                                     >
-                                        <span className="text-xs text-accent mb-2 block">
+                                        <span className="text-xs text-[var(--accent)] mb-2 block">
                                             {categoryLabels[art.category] || art.category}
                                         </span>
-                                        <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-accent transition-colors line-clamp-2">
+                                        <h3 className="font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors line-clamp-2">
                                             {art.title}
                                         </h3>
                                         {art.tags && (

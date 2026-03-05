@@ -10,7 +10,6 @@ import {
     Activity,
     TrendingDown,
     TrendingUp,
-    BarChart3,
     Target,
     ArrowRight,
     AlertTriangle,
@@ -167,7 +166,7 @@ export function DashboardContent() {
                     <div className="mb-12">
                         <div className="flex items-center gap-3 mb-3">
                             <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                                <BarChart3 className="w-5 h-5 text-accent" />
+                                <TrendingUp className="w-5 h-5 text-accent" />
                             </div>
                             <div>
                                 <h1 className="text-display text-[var(--text-primary)]">

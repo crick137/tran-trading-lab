@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { BarChart3 } from "lucide-react";
+import Image from "next/image";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
 interface SocialLink {
@@ -27,19 +27,18 @@ export function Footer() {
 
     const footerLinks = [
         {
-            title: t("products"),
+            title: t("content"),
             links: [
-                { href: `/${locale}/dashboard`, label: t("dashboard") },
-                { href: `/${locale}/switchboard`, label: t("switchboard") },
-                { href: `/${locale}/bold-calls`, label: t("boldCalls") },
+                { href: `/${locale}/briefings`, label: locale === "ko" ? "브리핑" : "Briefings" },
+                { href: `/${locale}/subscribe`, label: t("newsletter") },
             ],
         },
         {
-            title: t("content"),
+            title: locale === "ko" ? "학습" : "Learn",
             links: [
-                { href: `/${locale}/blog`, label: t("blog") },
                 { href: `/${locale}/academy`, label: t("learn") },
-                { href: `/${locale}/subscribe`, label: t("newsletter") },
+                { href: `/${locale}/glossary`, label: locale === "ko" ? "용어사전" : "Glossary" },
+                { href: `/${locale}/playbooks`, label: locale === "ko" ? "플레이북" : "Playbooks" },
             ],
         },
         {
@@ -53,14 +52,20 @@ export function Footer() {
     ];
 
     return (
-        <footer className="relative bg-cv-primary border-t border-[var(--border-subtle)]">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <footer className="relative bg-cv-primary border-t border-[var(--border-subtle)] footer-glow-transition">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                     {/* Brand */}
                     <div className="col-span-2">
                         <Link href={`/${locale}`} className="flex items-center gap-2.5 mb-4">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                                <BarChart3 className="w-5 h-5 text-[#0a0a0f]" />
+                            <div className="w-8 h-8 rounded-lg bg-[#111] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <Image
+                                    src="/tiger-logo.png"
+                                    alt="TTL"
+                                    width={32}
+                                    height={32}
+                                    className="object-cover"
+                                />
                             </div>
                             <span className="font-bold text-lg tracking-tight">
                                 <span className="text-gradient-gold">TRAN</span>

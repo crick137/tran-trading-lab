@@ -7,7 +7,6 @@ import { SocialShare } from "@/components/blog/social-share";
 import { ArticleCTA } from "@/components/blog/article-cta";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
     ArrowLeft,
@@ -19,14 +18,12 @@ import {
     TrendingDown,
     Minus,
     Target,
-    BarChart3,
     Zap,
     AlertTriangle,
     Radio,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { getDailyBriefByDate } from "@/lib/daily-brief-data";
-import type { MarketOverviewItem, KeyLevel, Scenario } from "@/lib/daily-brief-data";
+import type { DailyBrief, MarketOverviewItem, KeyLevel, Scenario } from "@/lib/daily-brief-data";
 
 function parseMarkdownInline(text: string): string {
     let html = text;
@@ -75,8 +72,8 @@ function parseMarkdownToHtml(content: string): string {
 
 function MarketOverviewTable({ items, t }: { items: MarketOverviewItem[]; t: (key: string) => string }) {
     return (
-        <div className="overflow-hidden rounded-xl border border-[var(--border-default)]">
-            <table className="w-full border-collapse text-sm">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
+            <table className="w-full border-collapse text-sm min-w-[500px]">
                 <thead>
                     <tr>
                         <th className="border-b border-[var(--border-default)] px-4 py-3 bg-accent/10 text-accent text-left font-semibold">
@@ -128,8 +125,8 @@ function MarketOverviewTable({ items, t }: { items: MarketOverviewItem[]; t: (ke
 
 function KeyLevelsTable({ levels, t }: { levels: KeyLevel[]; t: (key: string) => string }) {
     return (
-        <div className="overflow-hidden rounded-xl border border-[var(--border-default)]">
-            <table className="w-full border-collapse text-sm">
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-default)]">
+            <table className="w-full border-collapse text-sm min-w-[500px]">
                 <thead>
                     <tr>
                         <th className="border-b border-[var(--border-default)] px-4 py-3 bg-accent/10 text-accent text-left font-semibold">
@@ -199,12 +196,13 @@ function ScenarioCard({ scenario }: { scenario: Scenario }) {
     );
 }
 
-export function BriefingDetailContent() {
-    const params = useParams();
+interface BriefingDetailContentProps {
+    brief: DailyBrief | null;
+}
+
+export function BriefingDetailContent({ brief }: BriefingDetailContentProps) {
     const locale = useLocale();
     const t = useTranslations("briefingDetail");
-    const date = params.date as string;
-    const brief = getDailyBriefByDate(date, locale as "en" | "ko");
 
     if (!brief) {
         notFound();
@@ -352,7 +350,7 @@ export function BriefingDetailContent() {
                         className="mb-12"
                     >
                         <div className="flex items-center gap-2 mb-6">
-                            <BarChart3 className="w-5 h-5 text-accent" />
+                            <TrendingUp className="w-5 h-5 text-accent" />
                             <h2 className="text-2xl font-bold text-[var(--text-primary)]">
                                 {t("marketOverview")}
                             </h2>

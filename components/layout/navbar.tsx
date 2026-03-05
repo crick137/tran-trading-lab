@@ -5,58 +5,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, BarChart3, ChevronDown } from "lucide-react";
+import Image from "next/image";
+import { Menu, X } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-
-interface NavDropdown {
-    label: string;
-    items: { href: string; label: string }[];
-}
-
-type NavEntry = { href: string; label: string } | NavDropdown;
-
-function isDropdown(entry: NavEntry): entry is NavDropdown {
-    return "items" in entry;
-}
 
 export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isHidden, setIsHidden] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const lastScrollY = useRef(0);
     const locale = useLocale();
     const pathname = usePathname();
     const t = useTranslations("common");
-    const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const navEntries: NavEntry[] = [
+    const navItems = [
         { href: `/${locale}`, label: t("home") },
-        {
-            label: t("products"),
-            items: [
-                { href: `/${locale}/dashboard`, label: t("dashboard") },
-                { href: `/${locale}/switchboard`, label: t("switchboard") },
-                { href: `/${locale}/bold-calls`, label: t("boldCalls") },
-            ],
-        },
-        {
-            label: t("content"),
-            items: [
-                { href: `/${locale}/briefings`, label: t("briefings") },
-                { href: `/${locale}/blog`, label: t("blog") },
-                { href: `/${locale}/academy`, label: t("learn") },
-                { href: `/${locale}/subscribe`, label: t("newsletter") },
-            ],
-        },
+        { href: `/${locale}/briefings`, label: t("briefings") },
+        { href: `/${locale}/academy`, label: t("learn") },
         { href: `/${locale}/about`, label: t("about") },
-        { href: `/${locale}/community`, label: t("community") },
     ];
-
-    const mobileItems = navEntries.flatMap((entry) =>
-        isDropdown(entry) ? entry.items : [entry]
-    );
 
     const isActive = useCallback(
         (href: string) => {
@@ -64,11 +32,6 @@ export function Navbar() {
             return pathname.startsWith(href);
         },
         [locale, pathname]
-    );
-
-    const isDropdownActive = useCallback(
-        (items: { href: string }[]) => items.some((item) => isActive(item.href)),
-        [isActive]
     );
 
     useEffect(() => {
@@ -95,14 +58,11 @@ export function Navbar() {
 
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
-                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-                if (openDropdown) setOpenDropdown(null);
-            }
+            if (e.key === "Escape" && isMobileMenuOpen) setIsMobileMenuOpen(false);
         };
         document.addEventListener("keydown", handleEscape);
         return () => document.removeEventListener("keydown", handleEscape);
-    }, [isMobileMenuOpen, openDropdown]);
+    }, [isMobileMenuOpen]);
 
     useEffect(() => {
         if (isMobileMenuOpen) {
@@ -112,15 +72,6 @@ export function Navbar() {
         }
         return () => { document.body.style.overflow = ""; };
     }, [isMobileMenuOpen]);
-
-    const handleDropdownEnter = (label: string) => {
-        if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
-        setOpenDropdown(label);
-    };
-
-    const handleDropdownLeave = () => {
-        dropdownTimeoutRef.current = setTimeout(() => setOpenDropdown(null), 150);
-    };
 
     return (
         <>
@@ -133,84 +84,43 @@ export function Navbar() {
                     : "bg-transparent"
                     }`}
             >
-                <nav className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
-                        <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-accent-hover flex items-center justify-center">
-                                <BarChart3 className="w-5 h-5 text-[#0a0a0f]" />
+                        <Link href={`/${locale}`} className="flex items-center gap-2 group">
+                            <div className="w-9 h-9 rounded-lg bg-[#111] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <Image
+                                    src="/tiger-logo.png"
+                                    alt="TTL"
+                                    width={36}
+                                    height={36}
+                                    className="object-cover"
+                                />
                             </div>
-                            <span className="font-bold text-lg tracking-tight">
+                            <span className="font-bold text-lg tracking-tight whitespace-nowrap">
                                 <span className="text-gradient-gold">TRAN</span>
-                                <span className="text-[var(--text-primary)]"> TRADING LAB</span>
+                                <span className="text-[var(--text-primary)] hidden sm:inline"> TRADING LAB</span>
+                                <span className="text-[var(--text-primary)] sm:hidden"> TL</span>
                             </span>
                         </Link>
 
-                        {/* Desktop Navigation */}
+                        {/* Desktop Navigation — flat links */}
                         <div className="hidden lg:flex items-center gap-0.5">
-                            {navEntries.map((entry) =>
-                                isDropdown(entry) ? (
-                                    <div
-                                        key={entry.label}
-                                        className="relative"
-                                        onMouseEnter={() => handleDropdownEnter(entry.label)}
-                                        onMouseLeave={handleDropdownLeave}
-                                    >
-                                        <button
-                                            className={`flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors relative rounded-md hover:bg-[var(--bg-wash)] ${isDropdownActive(entry.items) ? "text-accent" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                                }`}
-                                        >
-                                            {entry.label}
-                                            <ChevronDown className={`w-3 h-3 transition-transform ${openDropdown === entry.label ? "rotate-180" : ""}`} />
-                                            {isDropdownActive(entry.items) && (
-                                                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
-                                            )}
-                                        </button>
-
-                                        <AnimatePresence>
-                                            {openDropdown === entry.label && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, y: 4 }}
-                                                    animate={{ opacity: 1, y: 0 }}
-                                                    exit={{ opacity: 0, y: 4 }}
-                                                    transition={{ duration: 0.15 }}
-                                                    className="absolute top-full left-0 mt-1 py-1.5 min-w-[180px] rounded-xl bg-[var(--bg-overlay)] border border-[var(--border-default)] shadow-lg"
-                                                >
-                                                    {entry.items.map((item) => (
-                                                        <Link
-                                                            key={item.href}
-                                                            href={item.href}
-                                                            className={`group/dd block px-4 py-2 text-sm transition-colors relative ${isActive(item.href)
-                                                                ? "text-accent bg-accent/5"
-                                                                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-wash)]"
-                                                                }`}
-                                                        >
-                                                            {item.label}
-                                                            {!isActive(item.href) && (
-                                                                <span className="absolute bottom-1 left-4 right-4 h-px bg-accent/40 scale-x-0 group-hover/dd:scale-x-100 transition-transform duration-200 origin-left" />
-                                                            )}
-                                                        </Link>
-                                                    ))}
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                ) : (
-                                    <Link
-                                        key={entry.href}
-                                        href={entry.href}
-                                        className={`px-3 py-2 text-sm font-medium transition-colors relative group rounded-md hover:bg-[var(--bg-wash)] ${isActive(entry.href) ? "text-accent" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                                            }`}
-                                    >
-                                        {entry.label}
-                                        {isActive(entry.href) ? (
-                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
-                                        ) : (
-                                            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-3/4 rounded-full" />
-                                        )}
-                                    </Link>
-                                )
-                            )}
+                            {navItems.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`px-3 py-2 text-sm font-medium transition-colors relative group rounded-md hover:bg-[var(--bg-wash)] ${isActive(item.href) ? "text-accent" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                                        }`}
+                                >
+                                    {item.label}
+                                    {isActive(item.href) ? (
+                                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-accent rounded-full" />
+                                    ) : (
+                                        <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-3/4 rounded-full" />
+                                    )}
+                                </Link>
+                            ))}
                         </div>
 
                         {/* Right side: Theme + Lang + CTA */}
@@ -276,7 +186,7 @@ export function Navbar() {
                             </div>
 
                             <div className="flex flex-col gap-1 p-4">
-                                {mobileItems.map((item) => (
+                                {navItems.map((item) => (
                                     <Link
                                         key={item.href}
                                         href={item.href}

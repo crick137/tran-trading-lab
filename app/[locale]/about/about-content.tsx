@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
-import { BarChart3, Target, Newspaper, Users, ArrowRight } from "lucide-react";
+import { TrendingUp, Target, Newspaper, Users, ArrowRight, Shield, LineChart, Globe } from "lucide-react";
 import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
 
 const socialLinksEn = [
@@ -30,7 +30,7 @@ export function AboutContent() {
     const socialLinks = locale === "ko" ? socialLinksKo : socialLinksEn;
 
     const services = [
-        { icon: BarChart3, titleKey: "serviceAnalysis" as const, descKey: "serviceAnalysisDesc" as const },
+        { icon: TrendingUp, titleKey: "serviceAnalysis" as const, descKey: "serviceAnalysisDesc" as const },
         { icon: Target, titleKey: "serviceStrategy" as const, descKey: "serviceStrategyDesc" as const },
         { icon: Newspaper, titleKey: "serviceNews" as const, descKey: "serviceNewsDesc" as const },
     ];
@@ -41,36 +41,57 @@ export function AboutContent() {
         { valueKey: "statYears" as const, labelKey: "statYearsLabel" as const },
     ];
 
+    const values = [
+        { icon: Shield, title: locale === "ko" ? "리스크 우선" : "Risk-First", desc: locale === "ko" ? "수익보다 자본 보전. 모든 분석의 시작은 리스크." : "Capital preservation over returns. Every analysis starts with risk." },
+        { icon: LineChart, title: locale === "ko" ? "데이터 기반" : "Data-Driven", desc: locale === "ko" ? "감정이 아닌 데이터. 편향을 인식하고 극복." : "Data over emotions. Recognize biases and overcome them." },
+        { icon: Globe, title: locale === "ko" ? "이중 언어" : "Bilingual", desc: locale === "ko" ? "영어와 한국어로 글로벌 시장 인사이트 전달." : "Global market insights delivered in English and Korean." },
+    ];
+
     return (
         <>
             <Navbar />
-            <main className="pt-24 pb-16">
-                {/* Hero */}
-                <section className="max-w-5xl mx-auto px-6 text-center py-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-8">
-                        <Users className="w-4 h-4" />
-                        {t("badge")}
+            <main className="pt-16 pb-16">
+                {/* Compact header */}
+                <section className="border-b border-[var(--border-subtle)]">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-6">
+                            <Users className="w-4 h-4" />
+                            {t("badge")}
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4">
+                            {t("heroLine1")}
+                            <br />
+                            <span className="text-gradient-gold">{t("heroLine2")}</span>
+                        </h1>
+                        <p className="text-base text-[var(--text-tertiary)] max-w-[600px] mx-auto leading-relaxed">
+                            {t("heroDescription")}
+                        </p>
                     </div>
-                    <h1 className="text-display text-[var(--text-primary)] mb-6">
-                        {t("heroLine1")}
-                        <br />
-                        <span className="text-gradient-gold">{t("heroLine2")}</span>
-                    </h1>
-                    <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
-                        {t("heroDescription")}
-                    </p>
                 </section>
 
                 {/* Stats */}
+                <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                    <div className="grid grid-cols-3 gap-8">
+                        {stats.map((stat) => (
+                            <div key={stat.valueKey} className="text-center">
+                                <p className="text-3xl sm:text-4xl font-bold text-gradient-gold tabular-nums font-data mb-2">
+                                    {t(stat.valueKey)}
+                                </p>
+                                <p className="text-sm text-[var(--text-tertiary)]">{t(stat.labelKey)}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* Core Values */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-12">
-                        <div className="grid grid-cols-3 gap-8">
-                            {stats.map((stat) => (
-                                <div key={stat.valueKey} className="text-center">
-                                    <p className="text-3xl sm:text-4xl font-bold text-gradient-gold tabular-nums font-data mb-2">
-                                        {t(stat.valueKey)}
-                                    </p>
-                                    <p className="text-sm text-[var(--text-tertiary)]">{t(stat.labelKey)}</p>
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {values.map((value) => (
+                                <div key={value.title} className="p-6 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] transition-all hover:-translate-y-0.5 hover:border-[var(--accent)]/20">
+                                    <value.icon className="w-8 h-8 text-[var(--accent)] mb-4" />
+                                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-2">{value.title}</h3>
+                                    <p className="text-sm text-[var(--text-tertiary)] leading-relaxed">{value.desc}</p>
                                 </div>
                             ))}
                         </div>
@@ -79,15 +100,15 @@ export function AboutContent() {
 
                 {/* Philosophy */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-24">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                         <div className="text-center">
-                            <h2 className="text-overline text-[var(--text-muted)] mb-8">
+                            <h2 className="text-overline text-[var(--text-muted)] mb-6">
                                 {t("philosophyTitle")}
                             </h2>
-                            <p className="text-display text-gradient-gold mb-8">
+                            <p className="text-2xl sm:text-3xl font-bold text-gradient-gold mb-6">
                                 {t("philosophyQuote")}
                             </p>
-                            <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
+                            <p className="text-base text-[var(--text-tertiary)] max-w-[600px] mx-auto leading-relaxed">
                                 {t("philosophyDesc")}
                             </p>
                         </div>
@@ -96,17 +117,17 @@ export function AboutContent() {
 
                 {/* Services */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-16">
-                        <h2 className="text-section text-[var(--text-primary)] text-center mb-16">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                        <h2 className="text-section text-[var(--text-primary)] text-center mb-12">
                             {t("servicesTitle")}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {services.map((service) => (
-                                <div key={service.titleKey} className="p-6 md:p-8 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] text-center transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-[var(--border-default)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)]">
+                                <div key={service.titleKey} className="p-6 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] text-center transition-all hover:-translate-y-0.5 hover:border-[var(--border-default)]">
                                     <div className="w-12 h-12 mx-auto rounded-xl bg-accent/10 flex items-center justify-center mb-5">
                                         <service.icon className="w-6 h-6 text-accent" />
                                     </div>
-                                    <h3 className="text-card-title text-[var(--text-primary)] mb-3">
+                                    <h3 className="text-base font-bold text-[var(--text-primary)] mb-3">
                                         {t(service.titleKey)}
                                     </h3>
                                     <p className="text-sm text-[var(--text-tertiary)] leading-relaxed">
@@ -120,7 +141,7 @@ export function AboutContent() {
 
                 {/* Mission */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-16">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <div className="p-8 md:p-12 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] border-l-4 border-l-accent/40">
                             <h2 className="text-section text-[var(--text-primary)] mb-6">
                                 {t("missionTitle")}
@@ -137,7 +158,7 @@ export function AboutContent() {
 
                 {/* Social Links */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-12 text-center">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
                         <h2 className="text-overline text-[var(--text-muted)] mb-8">
                             {t("connectTitle")}
                         </h2>
@@ -163,11 +184,11 @@ export function AboutContent() {
 
                 {/* CTA */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-16 text-center">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
                         <h2 className="text-section text-[var(--text-primary)] mb-4">
                             {t("ctaTitle")}
                         </h2>
-                        <p className="text-[var(--text-tertiary)] mb-10">
+                        <p className="text-[var(--text-tertiary)] mb-8">
                             {t("ctaDescription")}
                         </p>
                         <Link

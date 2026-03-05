@@ -1,11 +1,47 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Mail } from "lucide-react";
+import { Mail, Zap } from "lucide-react";
 import { KitForm } from "@/components/ui/kit-form";
 
-export function SubscribeCTA() {
+interface SubscribeCTAProps {
+    variant?: "default" | "compact";
+}
+
+export function SubscribeCTA({ variant = "default" }: SubscribeCTAProps) {
     const t = useTranslations("home");
+
+    if (variant === "compact") {
+        return (
+            <div className="rounded-2xl border border-[var(--border-default)] bg-cv-elevated overflow-hidden">
+                {/* Accent top line */}
+                <div className="h-[2px] bg-gradient-to-r from-[var(--accent)]/60 via-[var(--accent)] to-[var(--accent)]/60" />
+                <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center">
+                            <Mail className="w-4 h-4 text-[var(--accent)]" />
+                        </div>
+                        <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                            {t("subscribeCta")}
+                        </h3>
+                    </div>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                        {t("subscribeDescription")}
+                    </p>
+                    <KitForm />
+                    <div className="flex items-center justify-center gap-1.5">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">
+                            <Zap className="w-2.5 h-2.5" />
+                            FREE
+                        </span>
+                        <span className="text-[10px] text-[var(--text-muted)]">
+                            {t("subscribeDisclaimer")}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <section className="py-24 lg:py-40 px-4 sm:px-6 lg:px-8">

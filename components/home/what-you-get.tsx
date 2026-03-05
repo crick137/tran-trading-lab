@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { BarChart3, Target, Shield, Globe } from "lucide-react";
+import { TrendingUp, Target, Shield, Globe } from "lucide-react";
 
 const features = [
-    { icon: BarChart3, titleKey: "whatYouGet1Title", descKey: "whatYouGet1Desc", href: "/dashboard" },
+    { icon: TrendingUp, titleKey: "whatYouGet1Title", descKey: "whatYouGet1Desc", href: "/dashboard" },
     { icon: Target, titleKey: "whatYouGet2Title", descKey: "whatYouGet2Desc", href: "/bold-calls" },
     { icon: Shield, titleKey: "whatYouGet3Title", descKey: "whatYouGet3Desc", href: "/dashboard" },
     { icon: Globe, titleKey: "whatYouGet4Title", descKey: "whatYouGet4Desc", href: null },

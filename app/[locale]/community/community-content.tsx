@@ -91,7 +91,6 @@ export function CommunityContent() {
         },
     ];
 
-    // Reorder for Korean locale: KR platforms first
     const orderedPlatforms = locale === "ko"
         ? [...platforms].sort((a, b) => {
             if (a.lang === "KR" && b.lang !== "KR") return -1;
@@ -103,27 +102,29 @@ export function CommunityContent() {
     return (
         <>
             <Navbar />
-            <main className="pt-24 pb-16">
-                {/* Hero */}
-                <section className="max-w-5xl mx-auto px-6 text-center py-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-8">
-                        <Users className="w-4 h-4" />
-                        {t("title")}
+            <main className="pt-16 pb-16">
+                {/* Compact header */}
+                <section className="border-b border-[var(--border-subtle)]">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cv-elevated border border-[var(--border-default)] text-sm text-[var(--text-secondary)] mb-6">
+                            <Users className="w-4 h-4" />
+                            {t("title")}
+                        </div>
+                        <h1 className="text-3xl sm:text-4xl font-bold text-[var(--text-primary)] mb-4">
+                            {locale === "ko" ? "800+ 트레이더와 함께" : "Join 800+ Traders"}<br />
+                            <span className="text-gradient-gold">{locale === "ko" ? "글로벌 커뮤니티" : "Worldwide"}</span>
+                        </h1>
+                        <p className="text-base text-[var(--text-tertiary)] max-w-[600px] mx-auto leading-relaxed">
+                            {locale === "ko"
+                                ? "5개 플랫폼. 2개 언어. 하나의 미션."
+                                : "Five platforms. Two languages. One mission."}
+                        </p>
                     </div>
-                    <h1 className="text-display text-[var(--text-primary)] mb-6">
-                        {locale === "ko" ? "800+ 트레이더와 함께" : "Join 800+ Traders"}<br />
-                        <span className="text-gradient-gold">{locale === "ko" ? "글로벌 커뮤니티" : "Worldwide"}</span>
-                    </h1>
-                    <p className="text-lg text-[var(--text-tertiary)] max-w-[680px] mx-auto leading-relaxed">
-                        {locale === "ko"
-                            ? "5개 플랫폼. 2개 언어. 하나의 미션."
-                            : "Five platforms. Two languages. One mission."}
-                    </p>
                 </section>
 
                 {/* Email Subscription */}
                 <SectionReveal>
-                    <section className="max-w-xl mx-auto px-6 pb-8 text-center">
+                    <section className="max-w-xl mx-auto px-6 py-8 text-center">
                         <p className="text-sm text-[var(--text-tertiary)] mb-4">
                             {locale === "ko"
                                 ? "매주 무료 시장 분석을 이메일로 받아보세요"
@@ -135,7 +136,7 @@ export function CommunityContent() {
 
                 {/* Platform Cards */}
                 <SectionReveal>
-                    <section className="max-w-5xl mx-auto px-6 py-16">
+                    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {orderedPlatforms.map((platform) => (
                                 <a
@@ -143,7 +144,7 @@ export function CommunityContent() {
                                     href={platform.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`block p-6 md:p-8 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] ${platform.borderHover} transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.25)] group h-full`}
+                                    className={`block p-6 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)] ${platform.borderHover} transition-all duration-300 hover:-translate-y-0.5 group h-full`}
                                 >
                                     <div className="flex items-center justify-between mb-5">
                                         <div className="text-[var(--text-primary)]">
@@ -154,7 +155,7 @@ export function CommunityContent() {
                                         </span>
                                     </div>
 
-                                    <h2 className="text-card-title text-[var(--text-primary)] mb-4">
+                                    <h2 className="text-base font-bold text-[var(--text-primary)] mb-4">
                                         {platform.name}
                                     </h2>
 

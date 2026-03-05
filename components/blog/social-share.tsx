@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import { Twitter, Send, Link2, Check } from "lucide-react";
@@ -12,8 +12,14 @@ interface SocialShareProps {
 
 export function SocialShare({ title, url }: SocialShareProps) {
     const [copied, setCopied] = useState(false);
+    const [shareUrl, setShareUrl] = useState(url || "");
     const t = useTranslations("blogPost");
-    const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
+
+    useEffect(() => {
+        if (!url) {
+            setShareUrl(window.location.href);
+        }
+    }, [url]);
 
     const shareLinks = [
         {

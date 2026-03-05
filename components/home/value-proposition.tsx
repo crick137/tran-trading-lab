@@ -1,11 +1,11 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Shield, BarChart3, Globe } from "lucide-react";
+import { Shield, TrendingUp, Globe } from "lucide-react";
 
 const propositions = [
     { icon: Shield, labelKey: "vpRiskFirst" },
-    { icon: BarChart3, labelKey: "vpDataDriven" },
+    { icon: TrendingUp, labelKey: "vpDataDriven" },
     { icon: Globe, labelKey: "vpBilingual" },
 ] as const;
 
