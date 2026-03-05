@@ -24,51 +24,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { DailyBrief, MarketOverviewItem, KeyLevel, Scenario } from "@/lib/daily-brief-data";
-
-function parseMarkdownInline(text: string): string {
-    let html = text;
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>');
-    html = html.replace(/\*(.+?)\*/g, '<em class="text-accent/80 italic">$1</em>');
-    return html;
-}
-
-function parseMarkdownToHtml(content: string): string {
-    let html = content;
-
-    html = html.replace(/^### (.+)$/gm, (_match, text) => {
-        const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h3 id="${id}" class="mt-8 mb-4 text-xl font-semibold text-accent/90">${text}</h3>`;
-    });
-
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>');
-    html = html.replace(/\*(.+?)\*/g, '<em class="text-accent/80 italic">$1</em>');
-
-    html = html.replace(/((?:^- .+$\r?\n?)+)/gm, (match) => {
-        const items = match.replace(
-            /^- (.+)$/gm,
-            '<li class="relative pl-2 before:absolute before:left-[-1rem] before:top-[0.6rem] before:w-1.5 before:h-1.5 before:bg-accent before:rounded-full">$1</li>'
-        );
-        return `<ul class="my-4 ml-4 space-y-2 border-l-2 border-[var(--border-subtle)] pl-6">${items}</ul>`;
-    });
-
-    const blocks = html.split(/\n\n+/);
-    html = blocks
-        .map((block) => {
-            const trimmed = block.trim();
-            if (!trimmed) return "";
-            if (
-                trimmed.startsWith("<h") ||
-                trimmed.startsWith("<ul") ||
-                trimmed.startsWith("<div")
-            ) {
-                return trimmed;
-            }
-            return `<p class="my-4 leading-relaxed">${trimmed}</p>`;
-        })
-        .join("\n");
-
-    return html;
-}
+import { MarkdownRenderer, MarkdownInline } from "@/components/content/markdown-renderer";
 
 function MarketOverviewTable({ items, t }: { items: MarketOverviewItem[]; t: (key: string) => string }) {
     return (
@@ -336,7 +292,7 @@ export function BriefingDetailContent({ brief }: BriefingDetailContentProps) {
                                     className="flex items-start gap-3 text-[var(--text-secondary)]"
                                 >
                                     <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
-                                    <span dangerouslySetInnerHTML={{ __html: parseMarkdownInline(item) }} />
+                                    <MarkdownInline content={item} />
                                 </li>
                             ))}
                         </ul>
@@ -370,10 +326,7 @@ export function BriefingDetailContent({ brief }: BriefingDetailContentProps) {
                             <h2 className="text-2xl font-bold text-[var(--text-primary)] border-l-4 border-accent pl-4 mb-6">
                                 {section.title}
                             </h2>
-                            <div
-                                className="prose prose-invert prose-lg max-w-none prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-li:text-[var(--text-secondary)]"
-                                dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(section.content) }}
-                            />
+                            <MarkdownRenderer content={section.content} />
                         </motion.section>
                     ))}
 
@@ -421,10 +374,7 @@ export function BriefingDetailContent({ brief }: BriefingDetailContentProps) {
                         className="mb-12 p-6 rounded-xl bg-cv-elevated border border-[var(--border-default)]"
                     >
                         <h2 className="text-2xl font-bold text-accent mb-4">{t("ttlTake")}</h2>
-                        <div
-                            className="prose prose-invert prose-lg max-w-none prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-em:text-accent/80"
-                            dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(brief.ttlTake) }}
-                        />
+                        <MarkdownRenderer content={brief.ttlTake} />
                     </motion.section>
 
                     {/* CTA */}

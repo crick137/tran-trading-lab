@@ -15,90 +15,7 @@ import { ArrowLeft, ArrowRight, Calendar, Clock, Tag } from "lucide-react";
 import { motion } from "framer-motion";
 import { blogPosts, categoryLabels } from "@/lib/blog-data";
 import { ArticleCTA } from "@/components/blog/article-cta";
-
-// Helper to parse simple markdown with premium styling
-function parseMarkdownToHtml(content: string): string {
-    let html = content;
-
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
-        '<figure class="my-8 rounded-xl overflow-hidden border border-[var(--border-subtle)] shadow-lg shadow-black/20">' +
-        '<img src="$2" alt="$1" class="w-full" />' +
-        '<figcaption class="bg-cv-elevated/80 px-4 py-3 text-center text-sm text-[var(--text-secondary)] border-t border-[var(--border-subtle)]">$1</figcaption>' +
-        '</figure>');
-
-    html = html.replace(/(\|.+\|\r?\n)+/g, (tableBlock) => {
-        const rows = tableBlock.trim().split(/\r?\n/);
-        if (rows.length < 2) return tableBlock;
-        let tableHtml = '<div class="my-8 overflow-hidden rounded-xl border border-[var(--border-default)]"><table class="w-full border-collapse"><thead><tr>';
-        const headerCells = rows[0].split('|').filter(cell => cell.trim());
-        headerCells.forEach(cell => {
-            tableHtml += `<th class="border-b border-[var(--border-default)] px-4 py-3 bg-accent/10 text-accent text-left font-semibold">${cell.trim()}</th>`;
-        });
-        tableHtml += '</tr></thead><tbody>';
-        for (let i = 2; i < rows.length; i++) {
-            const cells = rows[i].split('|').filter(cell => cell.trim());
-            tableHtml += `<tr class="${i % 2 === 0 ? 'bg-[var(--bg-wash)]' : 'bg-[var(--bg-wash)]'}">`;
-            cells.forEach(cell => {
-                tableHtml += `<td class="border-b border-[var(--border-subtle)] px-4 py-3">${cell.trim()}</td>`;
-            });
-            tableHtml += '</tr>';
-        }
-        tableHtml += '</tbody></table></div>';
-        return tableHtml;
-    });
-
-    html = html.replace(/^# (.+)$/gm, (match, text) => {
-        const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h1 id="${id}" class="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-accent to-accent-hover bg-clip-text text-transparent mb-6">${text}</h1>`;
-    });
-
-    html = html.replace(/^## (.+)$/gm, (match, text) => {
-        const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        const firstChar = text.codePointAt(0) || 0;
-        const isEmoji = (firstChar >= 0x1F300 && firstChar <= 0x1F9FF) ||
-            (firstChar >= 0x2600 && firstChar <= 0x26FF) ||
-            (firstChar >= 0x2700 && firstChar <= 0x27BF);
-        if (isEmoji) {
-            const emojiEnd = text.codePointAt(0)! > 0xFFFF ? 2 : 1;
-            const emoji = text.slice(0, emojiEnd);
-            const title = text.slice(emojiEnd).trim();
-            return `<div class="mt-12 mb-6 flex items-center gap-3" id="${id}">
-                <span class="text-3xl">${emoji}</span>
-                <h2 class="text-2xl font-bold text-[var(--text-primary)] m-0">${title}</h2>
-            </div>`;
-        }
-        return `<h2 id="${id}" class="mt-12 mb-6 text-2xl font-bold text-[var(--text-primary)] border-l-4 border-accent pl-4">${text}</h2>`;
-    });
-
-    html = html.replace(/^### (.+)$/gm, (match, text) => {
-        const id = text.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/(^-|-$)/g, "");
-        return `<h3 id="${id}" class="mt-8 mb-4 text-xl font-semibold text-accent/90">${text}</h3>`;
-    });
-
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong class="text-[var(--text-primary)] font-semibold">$1</strong>');
-    html = html.replace(/\*(.+?)\*/g, '<em class="text-accent/80">$1</em>');
-
-    html = html.replace(/((?:^- .+$\r?\n?)+)/gm, (match) => {
-        const items = match.replace(/^- (.+)$/gm, '<li class="relative pl-2 before:absolute before:left-[-1rem] before:top-[0.6rem] before:w-1.5 before:h-1.5 before:bg-accent before:rounded-full">$1</li>');
-        return `<ul class="my-6 ml-4 space-y-2 border-l-2 border-[var(--border-subtle)] pl-6">${items}</ul>`;
-    });
-
-    html = html.replace(/^---$/gm, '<div class="my-12 flex items-center justify-center gap-4"><span class="w-2 h-2 bg-accent/50 rounded-full"></span><span class="w-16 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent"></span><span class="w-2 h-2 bg-accent/50 rounded-full"></span></div>');
-
-    const blocks = html.split(/\n\n+/);
-    html = blocks.map(block => {
-        const trimmed = block.trim();
-        if (!trimmed) return '';
-        if (trimmed.startsWith('<h') || trimmed.startsWith('<ul') ||
-            trimmed.startsWith('<div') || trimmed.startsWith('<table') ||
-            trimmed.startsWith('<figure')) {
-            return trimmed;
-        }
-        return `<p class="my-4 leading-relaxed">${trimmed}</p>`;
-    }).join('\n');
-
-    return html;
-}
+import { MarkdownRenderer } from "@/components/content/markdown-renderer";
 
 
 export function BlogPostContent() {
@@ -209,9 +126,9 @@ export function BlogPostContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="prose prose-invert prose-lg max-w-none prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-strong:text-[var(--text-primary)] prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-code:text-accent prose-code:bg-cv-elevated prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-cv-elevated prose-pre:border prose-pre:border-[var(--border-default)] prose-li:text-[var(--text-secondary)] prose-blockquote:border-accent prose-blockquote:text-[var(--text-secondary)] prose-hr:border-[var(--border-default)]"
-                        dangerouslySetInnerHTML={{ __html: parseMarkdownToHtml(article.content) }}
-                    />
+                    >
+                        <MarkdownRenderer content={article.content} />
+                    </motion.div>
 
                     {/* Inline subscribe CTA */}
                     <ArticleCTA />
