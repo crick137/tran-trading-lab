@@ -22,6 +22,10 @@ export function Navbar() {
     const navItems = [
         { href: `/${locale}`, label: t("home") },
         { href: `/${locale}/briefings`, label: t("briefings") },
+        { href: `/${locale}/blog`, label: t("blog") },
+        { href: `/${locale}/research`, label: t("research") },
+        { href: `/${locale}/switchboard`, label: t("switchboard") },
+        { href: `/${locale}/bold-calls`, label: t("boldCalls") },
         { href: `/${locale}/academy`, label: t("learn") },
         { href: `/${locale}/about`, label: t("about") },
     ];

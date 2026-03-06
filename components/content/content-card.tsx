@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Calendar, Clock, TrendingUp, BookOpen, FileText, ArrowUpRight } from "lucide-react";
 import type { UnifiedContentItem } from "@/lib/content-utils";
@@ -68,16 +69,27 @@ export function ContentCard({ item, variant = "horizontal", showExcerpt = true, 
             >
                 {/* Top accent line */}
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--accent)]/60 via-[var(--accent)] to-[var(--accent)]/60" />
-                {/* Decorative background pattern */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-                    {/* Corner accent glow */}
-                    <div className="absolute -top-20 -right-20 w-48 h-48 bg-[var(--accent)]/[0.06] rounded-full blur-3xl" />
-                    <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-[var(--accent)]/[0.04] rounded-full blur-3xl" />
-                    {/* Grid lines */}
-                    <div className="absolute top-0 right-0 w-1/2 h-full opacity-[0.03]"
-                        style={{ backgroundImage: "linear-gradient(rgba(var(--accent-rgb),0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--accent-rgb),0.5) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-                    />
-                </div>
+                {/* Background: image or decorative pattern */}
+                {item.image && !item.image.startsWith('/api/') ? (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                        <Image
+                            src={item.image}
+                            alt=""
+                            fill
+                            className="object-cover opacity-20 group-hover:opacity-30 transition-opacity duration-500"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-cv-elevated via-cv-elevated/80 to-transparent" />
+                    </div>
+                ) : (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+                        <div className="absolute -top-20 -right-20 w-48 h-48 bg-[var(--accent)]/[0.06] rounded-full blur-3xl" />
+                        <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-[var(--accent)]/[0.04] rounded-full blur-3xl" />
+                        <div className="absolute top-0 right-0 w-1/2 h-full opacity-[0.03]"
+                            style={{ backgroundImage: "linear-gradient(rgba(var(--accent-rgb),0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--accent-rgb),0.5) 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+                        />
+                    </div>
+                )}
                 {/* Hover glow */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-40 bg-[var(--accent)]/[0.06] blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
@@ -191,13 +203,24 @@ export function ContentCard({ item, variant = "horizontal", showExcerpt = true, 
                     </span>
                 </div>
             </div>
-            {/* Thumbnail visual block */}
-            <div className={`hidden sm:flex flex-shrink-0 w-16 h-16 rounded-xl ${config.bg} items-center justify-center self-center relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>
-                <Icon className={`w-6 h-6 ${config.color} opacity-60`} />
-                {/* Subtle grid pattern */}
-                <div className="absolute inset-0 opacity-10"
-                    style={{ backgroundImage: "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)", backgroundSize: "8px 8px" }}
-                />
+            {/* Thumbnail */}
+            <div className={`hidden sm:flex flex-shrink-0 w-20 h-20 rounded-xl ${item.image ? '' : config.bg} items-center justify-center self-center relative overflow-hidden group-hover:scale-105 transition-transform duration-300`}>
+                {item.image && !item.image.startsWith('/api/') ? (
+                    <Image
+                        src={item.image}
+                        alt={item.title}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                    />
+                ) : (
+                    <>
+                        <Icon className={`w-6 h-6 ${config.color} opacity-60`} />
+                        <div className="absolute inset-0 opacity-10"
+                            style={{ backgroundImage: "linear-gradient(currentColor 1px, transparent 1px), linear-gradient(90deg, currentColor 1px, transparent 1px)", backgroundSize: "8px 8px" }}
+                        />
+                    </>
+                )}
             </div>
         </Link>
     );

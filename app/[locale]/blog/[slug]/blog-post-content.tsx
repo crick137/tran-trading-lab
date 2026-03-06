@@ -102,6 +102,26 @@ export function BlogPostContent() {
                         <SocialShare title={article.title} />
                     </motion.header>
 
+                    {/* Hero image */}
+                    {article.image && !article.image.startsWith('/api/') && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="relative w-full aspect-[2/1] rounded-xl overflow-hidden mb-8 border border-[var(--border-subtle)]"
+                        >
+                            <Image
+                                src={article.image}
+                                alt={article.title}
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 720px"
+                                priority
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        </motion.div>
+                    )}
+
                     {/* Author card */}
                     <div className="flex items-center gap-3 p-4 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] mb-10">
                         <div className="w-10 h-10 rounded-full bg-[#111] flex items-center justify-center overflow-hidden flex-shrink-0">

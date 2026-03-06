@@ -16,6 +16,7 @@ export interface UnifiedContentItem {
     href: string;
     isFeatured?: boolean;
     bias?: 'long' | 'short' | 'neutral';
+    image?: string;
 }
 
 // ─── Categories ─────────────────────────────────────────
@@ -60,6 +61,7 @@ function blogToContentItem(post: BlogPost, locale: string): UnifiedContentItem {
         tags: post.tags,
         href: `/${locale}/blog/${post.slug}`,
         isFeatured: post.isFeatured,
+        image: post.image,
     };
 }
 
@@ -76,14 +78,19 @@ function researchToContentItem(article: ResearchArticle, locale: string): Unifie
         tags: article.tags,
         href: `/${locale}/research/${article.slug}`,
         bias: article.bias,
+        image: article.image,
     };
 }
 
 // ─── Public API ─────────────────────────────────────────
 export function getAllContent(locale: 'en' | 'ko'): UnifiedContentItem[] {
     const briefs = getDailyBriefs(locale).map(b => briefToContentItem(b, locale));
-    const blogs = blogPosts.map(p => blogToContentItem(p, locale));
-    const research = researchArticles.map(a => researchToContentItem(a, locale));
+    const blogs = blogPosts
+        .filter(p => p.locale === locale)
+        .map(p => blogToContentItem(p, locale));
+    const research = researchArticles
+        .filter(a => a.locale === locale)
+        .map(a => researchToContentItem(a, locale));
 
     return [...briefs, ...blogs, ...research].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
