@@ -9,6 +9,8 @@
 
 import { getDailyBriefs } from "./content-reader.server";
 import type { DailyBrief } from "./daily-brief-data";
+import { blogPosts, type BlogPost } from "./blog-data";
+import { researchArticles, type ResearchArticle } from "./research-data";
 import type { UnifiedContentItem, ContentCategory } from "./content-utils";
 export type { UnifiedContentItem, ContentCategory } from "./content-utils";
 export { CONTENT_CATEGORIES } from "./content-utils";
@@ -29,11 +31,51 @@ function briefToContentItem(brief: DailyBrief, locale: string): UnifiedContentIt
     };
 }
 
+function blogToContentItem(post: BlogPost, locale: string): UnifiedContentItem {
+    return {
+        id: `blog-${post.slug}`,
+        type: "blog",
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.excerpt || post.description,
+        date: post.date,
+        readTime: post.readingTime,
+        category: post.category || "market-analysis",
+        tags: post.tags,
+        href: `/${locale}/blog/${post.slug}`,
+        isFeatured: post.isFeatured,
+        image: post.image,
+    };
+}
+
+function researchToContentItem(article: ResearchArticle, locale: string): UnifiedContentItem {
+    return {
+        id: `research-${article.slug}`,
+        type: "research",
+        slug: article.slug,
+        title: article.title,
+        excerpt: article.description,
+        date: article.date,
+        readTime: article.readingTime,
+        category: article.articleType === "education" ? "education" : "market-analysis",
+        tags: article.tags,
+        href: `/${locale}/research/${article.slug}`,
+        bias: article.bias,
+        image: article.image,
+    };
+}
+
 // ─── Public API ─────────────────────────────────────────
 export function getAllContent(locale: "en" | "ko"): UnifiedContentItem[] {
     const briefs = getDailyBriefs(locale).map((b) => briefToContentItem(b, locale));
-    // Blog and research are empty for now — add when MDX content is created
-    return briefs.sort(
+    const blogs = blogPosts
+        .filter((p) => p.locale === locale)
+        .map((p) => blogToContentItem(p, locale));
+    const research = researchArticles
+        .filter((a) => a.locale === locale)
+        .map((a) => researchToContentItem(a, locale));
+
+    return [...briefs, ...blogs, ...research].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 }
