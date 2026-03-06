@@ -13,6 +13,8 @@ const MAX_ITEMS = 5;
 const tabHrefMap: Record<ContentTab, string> = {
     all: "",
     briefings: "/briefings",
+    blog: "/blog",
+    research: "/research",
 };
 
 interface ContentFeedProps {
@@ -25,7 +27,7 @@ export function ContentFeed({ activeTab, allContent }: ContentFeedProps) {
 
     const allItems = useMemo(() => {
         if (activeTab === "all") return allContent;
-        const typeMap = { briefings: "briefing" } as const;
+        const typeMap: Record<string, string> = { briefings: "briefing", blog: "blog", research: "research" };
         return allContent.filter((item) => item.type === typeMap[activeTab]);
     }, [allContent, activeTab]);
 

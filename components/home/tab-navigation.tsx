@@ -2,13 +2,15 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-import { LayoutGrid, TrendingUp } from "lucide-react";
+import { LayoutGrid, TrendingUp, BookOpen, FileText } from "lucide-react";
 
-export type ContentTab = "all" | "briefings";
+export type ContentTab = "all" | "briefings" | "blog" | "research";
 
 const tabs: { id: ContentTab; icon: typeof LayoutGrid; labelKey: string }[] = [
     { id: "all", icon: LayoutGrid, labelKey: "tabAll" },
     { id: "briefings", icon: TrendingUp, labelKey: "tabBriefings" },
+    { id: "blog", icon: BookOpen, labelKey: "tabBlog" },
+    { id: "research", icon: FileText, labelKey: "tabResearch" },
 ];
 
 interface TabNavigationProps {
