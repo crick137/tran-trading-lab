@@ -832,7 +832,7 @@ Cognitive biases cannot be eliminated. They're hardwired into the human brain. B
         title: "사회초년생을 위한 투자 원칙 8가지 — 적금만 하던 내가 배운 것들",
         description: "월급 받기 시작한 사회초년생이 꼭 알아야 할 투자 원칙 8가지. ETF 정기매수, 자산배분, 비상금 확보까지.",
         excerpt: "적금만 하다 3년 날린 내가 직접 부딪히며 배운 투자 원칙 8가지. 월급날마다 꺼내서 대조하라.",
-        image: "/images/blog/spy-monthly.png",
+        image: "/images/blog/spy-monthly.jpg",
         category: "education",
         date: "2026-03-13",
         readingTime: "7분",
