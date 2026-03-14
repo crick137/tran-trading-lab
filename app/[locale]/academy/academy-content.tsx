@@ -59,7 +59,7 @@ export function AcademyContent() {
                                     <TiltCard key={mod.id}>
                                         <Link href={`/${locale}/academy/${mod.id}`} className="block h-full">
                                             <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] h-full group hover:border-[var(--accent)]/30 transition-all">
-                                                <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-[#0a0a0f] font-bold flex items-center justify-center text-sm">
+                                                <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full text-[#0a0a0f] font-bold flex items-center justify-center text-sm shadow-lg shadow-accent/30" style={{ background: "var(--gradient-cta)" }}>
                                                     {index + 1}
                                                 </div>
                                                 <Icon className="w-10 h-10 text-accent mb-4" />

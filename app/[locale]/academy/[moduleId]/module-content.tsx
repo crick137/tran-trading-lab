@@ -63,7 +63,7 @@ export function ModuleContent() {
                                 href={`/${locale}/academy/${moduleId}/${lesson.slug}`}
                                 className="group flex items-center gap-4 p-4 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] hover:border-[var(--accent)]/30 transition-all"
                             >
-                                <div className="w-8 h-8 rounded-full bg-accent/10 text-accent font-bold flex items-center justify-center text-sm flex-shrink-0">
+                                <div className="w-8 h-8 rounded-full font-bold flex items-center justify-center text-sm flex-shrink-0 text-[#0a0a0f]" style={{ background: "var(--gradient-cta)" }}>
                                     {index + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
