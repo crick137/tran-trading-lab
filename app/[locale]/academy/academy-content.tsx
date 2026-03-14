@@ -57,32 +57,37 @@ export function AcademyContent() {
                                 const topics: string[] = t.raw(mod.topicsKey) as string[];
                                 return (
                                     <TiltCard key={mod.id}>
-                                        <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] h-full">
-                                            <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-[#0a0a0f] font-bold flex items-center justify-center text-sm">
-                                                {index + 1}
+                                        <Link href={`/${locale}/academy/${mod.id}`} className="block h-full">
+                                            <div className="relative p-6 rounded-xl bg-cv-elevated border border-[var(--border-subtle)] h-full group hover:border-[var(--accent)]/30 transition-all">
+                                                <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-accent text-[#0a0a0f] font-bold flex items-center justify-center text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <Icon className="w-10 h-10 text-accent mb-4" />
+                                                <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 group-hover:text-accent transition-colors">{t(mod.titleKey)}</h3>
+                                                <p className="text-[var(--text-tertiary)] text-sm mb-4">{t(mod.descKey)}</p>
+                                                <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-4">
+                                                    <span className="flex items-center gap-1">
+                                                        <BookOpen className="w-3 h-3" />
+                                                        {mod.lessons} {t("lessonsLabel")}
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <Clock className="w-3 h-3" />
+                                                        {t(mod.durationKey)}
+                                                    </span>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {topics.map((topic: string) => (
+                                                        <div key={topic} className="text-sm text-[var(--text-tertiary)] flex items-center gap-2">
+                                                            <div className="w-1 h-1 rounded-full bg-accent/50" />
+                                                            {topic}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="mt-4 flex items-center gap-1 text-sm text-accent font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    학습 시작하기 <ArrowRight className="w-4 h-4" />
+                                                </div>
                                             </div>
-                                            <Icon className="w-10 h-10 text-accent mb-4" />
-                                            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2">{t(mod.titleKey)}</h3>
-                                            <p className="text-[var(--text-tertiary)] text-sm mb-4">{t(mod.descKey)}</p>
-                                            <div className="flex items-center gap-4 text-xs text-[var(--text-muted)] mb-4">
-                                                <span className="flex items-center gap-1">
-                                                    <BookOpen className="w-3 h-3" />
-                                                    {mod.lessons} {t("lessonsLabel")}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-3 h-3" />
-                                                    {t(mod.durationKey)}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-1">
-                                                {topics.map((topic: string) => (
-                                                    <div key={topic} className="text-sm text-[var(--text-tertiary)] flex items-center gap-2">
-                                                        <div className="w-1 h-1 rounded-full bg-accent/50" />
-                                                        {topic}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        </Link>
                                     </TiltCard>
                                 );
                             })}
