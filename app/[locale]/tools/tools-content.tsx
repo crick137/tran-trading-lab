@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { Wrench, Calculator, FileSpreadsheet, ArrowRight } from "lucide-react";
+import { Wrench, Calculator, FileSpreadsheet, ClipboardCheck, ArrowRight } from "lucide-react";
 
 export function ToolsContent() {
     const locale = useLocale();
@@ -24,6 +24,13 @@ export function ToolsContent() {
             descKey: "rrCalculatorDesc" as const,
             icon: Calculator,
             href: `/${locale}/tools/rr-calculator`,
+        },
+        {
+            id: "trading-checklist",
+            titleKey: "tradingChecklist" as const,
+            descKey: "tradingChecklistDesc" as const,
+            icon: ClipboardCheck,
+            href: `/${locale}/tools/trading-checklist`,
         },
         {
             id: "templates",

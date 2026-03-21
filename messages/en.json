@@ -441,7 +441,9 @@
         "rrCalculator": "R:R Calculator",
         "rrCalculatorDesc": "Calculate the risk-to-reward ratio from entry, stop loss, and take profit prices.",
         "templates": "Trading Templates",
-        "templatesDesc": "Download trading journal, weekly review, and checklist templates."
+        "templatesDesc": "Download trading journal, weekly review, and checklist templates.",
+        "tradingChecklist": "10-Step Trading Checklist",
+        "tradingChecklistDesc": "10 steps to check before every trade. Skip one, skip the trade."
     },
     "newsletter": {
         "emailPlaceholder": "Enter your email",

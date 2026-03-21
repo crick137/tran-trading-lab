@@ -441,7 +441,9 @@
         "rrCalculator": "R:R 계산기",
         "rrCalculatorDesc": "진입가, 손절가, 목표가로 리스크 리워드 비율을 계산합니다.",
         "templates": "트레이딩 템플릿",
-        "templatesDesc": "트레이딩 저널, 주간 리뷰, 체크리스트 템플릿을 다운로드하세요."
+        "templatesDesc": "트레이딩 저널, 주간 리뷰, 체크리스트 템플릿을 다운로드하세요.",
+        "tradingChecklist": "매매 10단계 체크리스트",
+        "tradingChecklistDesc": "매매 전 반드시 확인하는 10단계. 하나라도 빠지면 진입하지 않습니다."
     },
     "newsletter": {
         "emailPlaceholder": "이메일 입력",
