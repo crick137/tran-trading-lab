@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
 interface SocialLink {
     href: string;
@@ -14,10 +14,8 @@ interface SocialLink {
 
 const socialLinks: SocialLink[] = [
     { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X", hoverColor: "hover:text-[var(--text-primary)]" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads", hoverColor: "hover:text-[var(--text-primary)]" },
     { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "TG EN", hoverColor: "hover:text-[#26A5E4]" },
     { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "TG KR", hoverColor: "hover:text-[#26A5E4]" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk", hoverColor: "hover:text-[#FEE500]" },
 ];
 
 export function Footer() {

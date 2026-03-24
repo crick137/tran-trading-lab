@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
 import { KitForm } from "@/components/ui/kit-form";
 import { ArrowRight, Users } from "lucide-react";
-import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
 interface Platform {
     key: string;
@@ -38,19 +38,6 @@ export function CommunityContent() {
             borderHover: "hover:border-[var(--border-strong)]",
         },
         {
-            key: "threads",
-            icon: <ThreadsIcon className="w-8 h-8" />,
-            name: "Threads",
-            lang: "EN",
-            href: "https://www.threads.com/@_trantradinglab_",
-            bullets: [
-                "Market discussions & polls",
-                "Community debates",
-                "Quick takes on price action",
-            ],
-            borderHover: "hover:border-[var(--border-strong)]",
-        },
-        {
             key: "tgEn",
             icon: <TelegramIcon className="w-8 h-8" />,
             name: "Telegram EN",
@@ -75,19 +62,6 @@ export function CommunityContent() {
                 "한국 투자자 맞춤 콘텐츠",
             ],
             borderHover: "hover:border-[#26A5E4]/30",
-        },
-        {
-            key: "kakao",
-            icon: <KakaoIcon className="w-8 h-8" />,
-            name: "KakaoTalk",
-            lang: "KR",
-            href: "https://invite.kakao.com/tc/luxHFht3xL",
-            bullets: [
-                "한국 커뮤니티 오픈챗",
-                "실시간 소통 & 토론",
-                "한국어 전용 채널",
-            ],
-            borderHover: "hover:border-[#FEE500]/30",
         },
     ];
 

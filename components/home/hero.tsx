@@ -6,14 +6,12 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowRight, Shield } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aceternity/aurora-background";
-import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
 const socialLinks = [
     { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
     { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "TG EN" },
     { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "TG KR" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
 ];
 
 const stats = [

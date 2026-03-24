@@ -6,21 +6,17 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
 import { TrendingUp, Target, Newspaper, Users, ArrowRight, Shield, LineChart, Globe } from "lucide-react";
-import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
 const socialLinksEn = [
     { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
     { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN" },
     { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR" },
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
 ];
 
 const socialLinksKo = [
-    { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
     { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR" },
     { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
-    { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
     { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN" },
 ];
 

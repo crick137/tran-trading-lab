@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { TrendingUp, Home, LayoutDashboard } from "lucide-react";
-import { XIcon, ThreadsIcon, TelegramIcon, KakaoIcon } from "@/lib/social-icons";
+import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
 export default function NotFound() {
     const locale = useLocale();
@@ -12,13 +12,11 @@ export default function NotFound() {
 
     const socialLinks = locale === "ko"
         ? [
-            { href: "https://invite.kakao.com/tc/luxHFht3xL", icon: <KakaoIcon />, label: "KakaoTalk" },
             { href: "https://t.me/TranTradingLabKR", icon: <TelegramIcon />, label: "Telegram KR" },
             { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
         ]
         : [
             { href: "https://x.com/TranTradingLab", icon: <XIcon />, label: "X" },
-            { href: "https://www.threads.com/@_trantradinglab_", icon: <ThreadsIcon />, label: "Threads" },
             { href: "https://t.me/TranTradingLabEN", icon: <TelegramIcon />, label: "Telegram EN" },
         ];
 

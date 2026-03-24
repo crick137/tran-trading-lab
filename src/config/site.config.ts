@@ -24,21 +24,17 @@ export const siteConfig = {
         primary: { label: "구독하기", href: "/subscribe" },
         secondary: { label: "샘플 리포트", href: "/research/sample-report" },
         telegram: { label: "Telegram", href: "https://t.me/TranTradingLab" },
-        kakaotalk: { label: "KakaoTalk", href: "https://invite.kakao.com/tc/luxHFht3xL" },
     },
 
     social: {
         telegram: "https://t.me/TranTradingLab",
-        kakao: "https://invite.kakao.com/tc/luxHFht3xL",
         twitter: "https://x.com/TranTradingLab",
-        youtube: "https://youtube.com/@TranTradingLab",
         email: "contact@trantradinglab.com",
     },
 
     stats: {
-        subscribers: "1,200+",
-        reports: "150+",
-        experience: "5년+",
+        followers: "2,700+",
+        briefings: "29",
     },
 
     tradingview: {
