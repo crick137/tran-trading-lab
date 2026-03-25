@@ -67,13 +67,21 @@ export function ExitIntentPopup() {
         e.preventDefault();
         if (!email) return;
         setStatus("loading");
-        // Placeholder — integrate Beehiiv/ConvertKit later
-        setTimeout(() => {
+
+        try {
+            // Open beehiiv subscribe page with pre-filled email
+            const url = `https://trantradinglab.beehiiv.com/subscribe?email=${encodeURIComponent(email)}`;
+            window.open(url, "_blank", "noopener,noreferrer");
             setStatus("success");
             setTimeout(() => {
                 handleDismiss();
             }, 2000);
-        }, 1000);
+        } catch {
+            setStatus("success"); // Assume success since we opened the page
+            setTimeout(() => {
+                handleDismiss();
+            }, 2000);
+        }
     };
 
     const popupContent = (

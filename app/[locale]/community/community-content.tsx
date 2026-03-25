@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
-import { KitForm } from "@/components/ui/kit-form";
+import { BeehiivForm } from "@/components/ui/beehiiv-form";
 import { ArrowRight, Users } from "lucide-react";
 import { XIcon, TelegramIcon } from "@/lib/social-icons";
 
@@ -104,7 +104,7 @@ export function CommunityContent() {
                                 ? "매주 무료 시장 분석을 이메일로 받아보세요"
                                 : "Get our free weekly analysis by email"}
                         </p>
-                        <KitForm />
+                        <BeehiivForm />
                     </section>
                 </SectionReveal>
 

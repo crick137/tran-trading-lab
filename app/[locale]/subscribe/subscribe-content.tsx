@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { SectionReveal } from "@/components/ui/section-reveal";
-import { KitForm } from "@/components/ui/kit-form";
+import { BeehiivForm } from "@/components/ui/beehiiv-form";
 import { FileText, TrendingUp, Shield, CheckCircle } from "lucide-react";
 
 export function SubscribeContent() {
@@ -77,7 +77,7 @@ export function SubscribeContent() {
                             <div className="p-6 rounded-2xl bg-cv-elevated border border-[var(--border-subtle)]">
                                 <h2 className="text-lg font-bold text-[var(--text-primary)] mb-2">{t("ctaTitle")}</h2>
                                 <p className="text-sm text-[var(--text-tertiary)] mb-6">{t("ctaSubtitle")}</p>
-                                <KitForm />
+                                <BeehiivForm />
                             </div>
                         </div>
                     </section>
