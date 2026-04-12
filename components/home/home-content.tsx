@@ -54,7 +54,7 @@ export function HomeContent({ allContent, stats }: HomeContentProps) {
                     </div>
                 </section>
                 {/* Full-width Subscribe CTA — fills the gap before footer */}
-                <SubscribeCTA variant="full" />
+                <SubscribeCTA />
             </main>
             <Footer />
         </>
