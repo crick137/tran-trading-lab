@@ -65,10 +65,10 @@ export function ContentCard({ item, variant = "horizontal", showExcerpt = true, 
         return (
             <Link
                 href={item.href}
-                className="group relative flex flex-col justify-end rounded-2xl overflow-hidden border border-[var(--border-default)] bg-cv-elevated transition-all duration-500 hover:-translate-y-1 hover:border-[var(--accent)]/40 hover:shadow-2xl hover:shadow-[var(--accent)]/8"
+                className="group relative flex flex-col justify-end rounded-2xl overflow-hidden border border-[var(--border-default)] bg-cv-elevated card-premium"
             >
                 {/* Top accent line */}
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[var(--accent)]/60 via-[var(--accent)] to-[var(--accent)]/60" />
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[var(--accent)]/60 via-[var(--accent)] to-[var(--accent)]/60" style={{ boxShadow: '0 0 12px rgba(212, 168, 67, 0.3)' }} />
                 {/* Background: image or decorative pattern */}
                 {item.image && !item.image.startsWith('/api/') ? (
                     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">

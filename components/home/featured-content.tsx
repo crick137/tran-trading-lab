@@ -22,22 +22,26 @@ export function FeaturedContent({ items }: FeaturedContentProps) {
     if (featured.length === 0) return null;
 
     return (
-        <section>
-            <div className="flex items-center gap-2 mb-5">
-                <Sparkles className="w-4 h-4 text-[var(--accent)]" />
-                <h2 className="text-sm font-semibold text-[var(--accent)] uppercase tracking-wider">
-                    {t("featuredTitle")}
-                </h2>
-            </div>
+        <section className="relative">
+            {/* Ambient glow behind featured section */}
+            <div className="ambient-glow ambient-glow-gold absolute top-1/2 left-1/4 -translate-y-1/2 z-0 opacity-30" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Main featured card (large) */}
-                <div className="md:row-span-2 [&>a]:h-full">
-                    <ContentCard
-                        item={featured[0]}
-                        variant="featured"
-                    />
+            <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-5">
+                    <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+                    <h2 className="text-sm font-semibold text-[var(--accent)] uppercase tracking-wider animated-underline active">
+                        {t("featuredTitle")}
+                    </h2>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Main featured card (large) — with gradient border */}
+                    <div className="md:row-span-2 [&>a]:h-full gradient-border-animated rounded-2xl">
+                        <ContentCard
+                            item={featured[0]}
+                            variant="featured"
+                        />
+                    </div>
 
                 {/* Side featured cards (stacked) */}
                 {featured.slice(1, 3).map((item) => (
@@ -47,6 +51,7 @@ export function FeaturedContent({ items }: FeaturedContentProps) {
                         variant="vertical"
                     />
                 ))}
+                </div>
             </div>
         </section>
     );

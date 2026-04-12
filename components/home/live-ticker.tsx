@@ -58,7 +58,13 @@ export function LiveTicker() {
                 WebkitMaskImage: "linear-gradient(to right, transparent, black 5%, black 95%, transparent)",
             }}
         >
-            <div className="animate-ticker flex">
+            {/* LIVE pulse indicator */}
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center gap-1.5">
+                <span className="pulse-live" />
+                <span className="text-[9px] font-bold tracking-widest text-[var(--bullish)] uppercase opacity-70">LIVE</span>
+            </div>
+
+            <div className="animate-ticker flex pl-16">
                 {[...items, ...items, ...items].map((item, index) => (
                     <TickerItemDisplay key={`${item.symbol}-${index}`} {...item} />
                 ))}

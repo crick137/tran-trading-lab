@@ -54,7 +54,11 @@ export function ChannelHeader({ stats }: ChannelHeaderProps) {
 
             {/* ── Profile Card (overlaps banner) ── */}
             <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-14 pb-6">
-                <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                {/* Ambient glow behind profile */}
+                <div className="ambient-glow ambient-glow-gold absolute -top-10 left-[20%] z-0" />
+                <div className="ambient-glow ambient-glow-green absolute -top-5 right-[30%] z-0" />
+
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-end gap-4">
                     {/* Avatar */}
                     <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-[#111] border-[3px] border-[var(--bg-primary)] shadow-xl ring-1 ring-[var(--border-subtle)]">
                         <Image
@@ -69,7 +73,7 @@ export function ChannelHeader({ stats }: ChannelHeaderProps) {
                     {/* Info */}
                     <div className="flex-1 min-w-0 space-y-2 pb-1">
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+                            <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)] tracking-tight text-glow-gold">
                                 Tran Trading Lab
                             </h1>
                             {/* Social links inline */}

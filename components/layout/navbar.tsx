@@ -102,7 +102,7 @@ export function Navbar() {
                                 />
                             </div>
                             <span className="font-bold text-lg tracking-tight whitespace-nowrap">
-                                <span className="text-gradient-gold">TRAN</span>
+                                <span className="text-gradient-gold text-glow-gold">TRAN</span>
                                 <span className="text-[var(--text-primary)] hidden sm:inline"> TRADING LAB</span>
                                 <span className="text-[var(--text-primary)] sm:hidden"> TL</span>
                             </span>
@@ -133,7 +133,7 @@ export function Navbar() {
                             <LanguageSwitcher />
                             <Link
                                 href={`/${locale}/subscribe`}
-                                className="h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-[#0a0a0f] hover:brightness-110 hover:-translate-y-px hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98] flex items-center"
+                                className="h-9 px-4 rounded-xl text-sm font-semibold transition-all duration-200 text-[#0a0a0f] hover:brightness-110 hover:-translate-y-px hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98] flex items-center cta-pulse"
                                 style={{ background: "var(--gradient-cta)" }}
                             >
                                 {t("subscribeFree")}
